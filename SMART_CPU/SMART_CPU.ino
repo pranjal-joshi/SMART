@@ -14,8 +14,6 @@
 #include <VirtualWire.h>
 #include "EEPROM_CONFIG.h"
 
-#define SSID "WIFI_NAME"
-#define PASS "WIFI_PASS"
 #define PORT 80
 #define AT24C1024_ADDR 0x50
 #define ESP_BAUD 38400
@@ -23,7 +21,7 @@
 #define RX_PIN 4
 #define RF_ADDR 0x00
 #define RX_BAUD 2000
-#define HTML_TERM_CHAR 0x7F
+#define STR_TERM_CHAR 0x7F
 
 SoftwareSerial esp(6,5);  //Rx,TX
 LiquidCrystal lcd(7,8,9,10,11,12); // RS E D4-D7
@@ -33,6 +31,8 @@ SimpleTimer timer;
 boolean rtc_fail = false;
 byte DateTimeArray[7];
 char espConnID = -1;
+String SSID;
+String PASS;
 
 void setup()
 {
@@ -113,6 +113,8 @@ void initEsp()
 
 void connectEsp()
 {
+  SSID = eepromToString(E_SSID);
+  PASS = eepromToString(E_PASS);
   esp.print("AT+CWJAP");
   esp.print("\"");
   esp.print(SSID);
@@ -167,7 +169,7 @@ void eepromToEsp(unsigned long eeprom_addr, byte terminationChar)
   byte temp = eepromRead(adr_cnt);
   espGetConnID();
   
-  while(temp != HTML_TERM_CHAR)
+  while(temp != STR_TERM_CHAR)
   {
     length++;
     adr_cnt++;
@@ -182,11 +184,25 @@ void eepromToEsp(unsigned long eeprom_addr, byte terminationChar)
   delay(100);
   if(esp.find(">"))
   {
-    while(temp != HTML_TERM_CHAR && (adr_cnt + length) > eeprom_addr)
+    while(temp != STR_TERM_CHAR && (adr_cnt + length) > eeprom_addr)
     {
       esp.print(temp);
     }
   }
+}
+
+String eepromToString(unsigned long eeprom_addr)
+{
+  String str="";
+  unsigned long addr = eeprom_addr;
+  byte c = eepromRead(addr);
+  while(c != STR_TERM_CHAR)
+  {
+    str += c;
+    addr++;
+    c = eepromRead(addr);
+  }
+  return str;
 }
 
 void authenticationFailed()
@@ -208,7 +224,7 @@ void authenticationFailed()
       espConnID = esp.read() - 48;
       if(esp.find("?authenticationFailed"))
       {
-        eepromToEsp(E_WIFI_RESET_PAGE ,HTML_TERM_CHAR);
+        eepromToEsp(E_WIFI_RESET_PAGE ,STR_TERM_CHAR);
       }
     }
   }
