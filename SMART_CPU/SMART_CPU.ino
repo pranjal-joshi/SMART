@@ -3,6 +3,8 @@
 // Author: Pranjal Joshi
 // Date: 20/03/2015
 // Info: The central system that integrates every module.
+//copyright 2015. All rights reserved.
+
 
 #include <Wire.h>
 #include <RTClib.h>
@@ -10,6 +12,7 @@
 #include <LiquidCrystal.h>
 #include <SoftwareSerial.h>
 #include <VirtualWire.h>
+#include "EEPROM_CONFIG.h"
 
 #define SSID "WIFI_NAME"
 #define PASS "WIFI_PASS"
@@ -18,7 +21,9 @@
 #define ESP_BAUD 38400
 #define SERIAL_BAUD 38400
 #define RX_PIN 4
+#define RF_ADDR 0x00
 #define RX_BAUD 2000
+#define HTML_TERM_CHAR 0x7F
 
 SoftwareSerial esp(6,5);  //Rx,TX
 LiquidCrystal lcd(7,8,9,10,11,12); // RS E D4-D7
@@ -26,6 +31,8 @@ RTC_DS1307 rtc;
 SimpleTimer timer;
 
 boolean rtc_fail = false;
+byte DateTimeArray[7];
+char espConnID = -1;
 
 void setup()
 {
@@ -45,6 +52,7 @@ void setup()
   lcd.print("Checking modules");
   initRF();
   initRTC();
+  getDateTime();
 }
 
 void loop()
@@ -97,7 +105,7 @@ void initEsp()
 {
   esp.begin(ESP_BAUD);
   espWrite("AT+RST",5000);
-  espWrite("AT+CWMODE=1",4000);
+  espWrite("AT+CWMODE=3",4000);
   connectEsp();
   espWrite("AT+CIPMUX=1",2000);
   espWrite("AT+CIPSERVER=1,80",1500);
@@ -114,8 +122,18 @@ void connectEsp()
   delay(6500);
   if(!esp.find("OK") || !esp.find("ok"))
   {
-    espWrite("AT+RST",5000);
-    connectEsp();
+    byte wifiRetry = eepromRead(E_WIFI_RETRY_COUNT);
+    if(wifiRetry > 5)
+    {
+      authenticationFailed();
+    }
+    else
+    {
+      espWrite("AT+RST",5000);
+      wifiRetry++;
+      eepromWrite(wifiRetry,E_WIFI_RETRY_COUNT);
+      connectEsp();
+    }
   }
 }
 
@@ -130,9 +148,70 @@ String getIP()
   return ip;
 }
 
-void eepromToEsp(unsigned long addr, byte terminationChar)
+void espGetConnID()
 {
-  // Write code to transfer HTML from eeprom to esp8266.
+  if(esp.available())
+  {
+    if(esp.find("+IPD,"))
+    {
+      espConnID = esp.read() - 48;
+    }
+  }
+}
+
+void eepromToEsp(unsigned long eeprom_addr, byte terminationChar)
+{
+  // code to transfer HTML from eeprom to esp8266.
+  unsigned long adr_cnt = eeprom_addr;
+  unsigned long length = 0;
+  byte temp = eepromRead(adr_cnt);
+  espGetConnID();
+  
+  while(temp != HTML_TERM_CHAR)
+  {
+    length++;
+    adr_cnt++;
+    temp = eepromRead(adr_cnt);
+  }
+  adr_cnt = eeprom_addr;
+  temp = eepromRead(adr_cnt);
+  esp.print("AT+CIPSEND=");
+  esp.print(espConnID);
+  esp.print(",");
+  esp.println(length);
+  delay(100);
+  if(esp.find(">"))
+  {
+    while(temp != HTML_TERM_CHAR && (adr_cnt + length) > eeprom_addr)
+    {
+      esp.print(temp);
+    }
+  }
+}
+
+void authenticationFailed()
+{
+  lcd.clear();
+  lcd.setCursor(0,0);
+  lcd.print("Cant conect wifi");
+  lcd.setCursor(1,0);
+  lcd.print("Connect to wifi:");
+  lcd.setCursor(2,0);
+  lcd.print("ESP_xxxx & visit");
+  lcd.setCursor(3,0);
+  lcd.print("IP:192.168.4.1");
+  
+  if(esp.available())
+  {
+    if(esp.find("+IPD,"))
+    {
+      espConnID = esp.read() - 48;
+      if(esp.find("?authenticationFailed"))
+      {
+        eepromToEsp(E_WIFI_RESET_PAGE ,HTML_TERM_CHAR);
+      }
+    }
+  }
 }
 
 void initRF()
@@ -150,5 +229,26 @@ void initRTC()
     rtc.adjust(DateTime(__DATE__,__TIME__));
   }
   DateTime now = rtc.now();
+}
+
+void getDateTime()
+{
+  DateTime now = rtc.now();
+  DateTimeArray[0] = now.day();
+  DateTimeArray[1] = now.month();
+  DateTimeArray[2] = now.year() - 2000;
+  DateTimeArray[3] = now.hour();
+  DateTimeArray[4] = now.minute();
+  DateTimeArray[5] = now.second();
+  if(DateTimeArray[3] > 12)
+  {
+    DateTimeArray[3] -= 12;
+    DateTimeArray[6] = 'P';
+  }
+  else if(DateTimeArray[3] == 12)
+    DateTimeArray[6] = 'P';
+  else
+    DateTimeArray[6] = 'A';
+
 }
 
