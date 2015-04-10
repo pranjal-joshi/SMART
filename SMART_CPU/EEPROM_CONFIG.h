@@ -9,4 +9,5 @@
 #define E_SECOND 0x07
 #define E_SSID 0x10
 #define E_PASS 0x20
+#define E_CONTROL_STATE 0x40
 #define E_WIFI_RESET_PAGE 0x100

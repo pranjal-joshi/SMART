@@ -5,11 +5,12 @@
 
 #include <NewPing.h>
 #include <VirtualWire.h>
+#include <SimpleTimer.h>
 
 //---------------- DEBUGGER --------------
 #define DEBUG 1
 //----------------------------------------
-#define addr 0x01      // address of each node
+#define ADDR 0x01      // ADDRess of each node
 #define DOOR_DIST 70
 #define TIMEOUT 300
 #define TX_PIN 6
@@ -22,6 +23,7 @@ void (*autoreset)(void) = 0;    // call this for software reset
 
 NewPing inner(2,3,DOOR_DIST);
 NewPing outer(4,5,DOOR_DIST);
+SimpleTimer timer;
 
 unsigned int innerRead, outerRead;
 unsigned int tym,old_tym;
@@ -34,13 +36,14 @@ void setup()
 {
   vw_set_tx_pin(TX_PIN);
   vw_setup(BAUD);
+  timer.setInterval(60000, sendUnconditionally);
   pinMode(RST_PIN,INPUT);
   #if DEBUG
     Serial.begin(9600);
     Serial.println("S.M.A.R.T Room monitor debugger module.\nCopyright 2015. All rights reserved.");
     Serial.println("Module Specifications: ");
-    Serial.print("Wireless network Address: 0x0");
-    Serial.println(addr,HEX);
+    Serial.print("Wireless network ADDRess: 0x0");
+    Serial.println(ADDR,HEX);
     Serial.print("Wireless baudrate: ");
     Serial.println(BAUD);
     Serial.print("SONAR ping timeout: ");
@@ -118,6 +121,7 @@ void loop()
     pplCount++;
     Serial.print("Entry detected!  ");
     Serial.println((int)pplCount);
+    updated = true;
     delay(1500);
   }
   if(innerRead != 0)
@@ -126,9 +130,21 @@ void loop()
       pplCount--;
     Serial.print("Exit Detected!  ");
     Serial.println((int)pplCount);
+    updated = true;
     delay(1500);
   }
-    
+    if(digitalRead(RST_PIN) == 1)
+    {
+      autoreset();
+    }
+    temp = readTemp();
+    if(updated)
+    {
+      sendFrame();
+      updated = false;
+    }
+    timer.run();
+    delay(15);
 }
 
 void pingScan()
@@ -150,7 +166,7 @@ void pingScan()
 
 void sendFrame()
 {
-  frame[0] = addr;
+  frame[0] = ADDR;
   frame[1] = (unsigned char)pplCount;
   frame[2] = (unsigned char)temp;
   frame[3] = '\n';
@@ -181,6 +197,11 @@ byte readTemp()
     Serial.println((int)temp);*/
   #endif
   return temp;
+}
+
+void sendUnconditionally()
+{
+  sendFrame();
 }
 
 

@@ -22,6 +22,10 @@
 #define RF_ADDR 0x00
 #define RX_BAUD 2000
 #define STR_TERM_CHAR 0x7F
+#define PCF8575 0x20
+
+#define ROOMS 4
+#define DEVICES 4
 
 SoftwareSerial esp(6,5);  //Rx,TX
 LiquidCrystal lcd(7,8,9,10,11,12); // RS E D4-D7
@@ -33,6 +37,9 @@ byte DateTimeArray[7];
 char espConnID = -1;
 String SSID;
 String PASS;
+byte controlArray[ROOMS][DEVICES];
+byte controlBits[2];
+byte selectRoom, selectDevice,setValue;
 
 void setup()
 {
@@ -57,6 +64,7 @@ void setup()
 
 void loop()
 {
+  httpHandler();
 }
 
 void eepromWrite(byte data, uint16_t addr)
@@ -216,18 +224,6 @@ void authenticationFailed()
   lcd.print("ESP_xxxx & visit");
   lcd.setCursor(3,0);
   lcd.print("IP:192.168.4.1");
-  
-  if(esp.available())
-  {
-    if(esp.find("+IPD,"))
-    {
-      espConnID = esp.read() - 48;
-      if(esp.find("?authenticationFailed"))
-      {
-        eepromToEsp(E_WIFI_RESET_PAGE ,STR_TERM_CHAR);
-      }
-    }
-  }
 }
 
 void initRF()
@@ -266,5 +262,68 @@ void getDateTime()
   else
     DateTimeArray[6] = 'A';
 
+}
+
+void httpHandler()
+{
+  if(esp.available())
+  {
+    if(esp.find("+IPD,"))
+    {
+      espConnID = esp.read() - 48;
+      if(esp.find("?authenticationFailed"))
+      {
+        eepromToEsp(E_WIFI_RESET_PAGE ,STR_TERM_CHAR);
+      }
+      if(esp.find("room="))
+        selectRoom = esp.read() - 48;
+      if(esp.find("device="))
+        selectDevice = esp.read() - 48;
+      if(esp.find("state="))
+        setValue = esp.read() - 48;
+        
+      controlArray[selectRoom][selectDevice] = setValue;
+      updateControlState(controlArray);
+    }
+  }
+}
+
+void updateControlState(byte a[ROOMS][DEVICES])
+{
+  byte i,j;
+  unsigned long addr = E_CONTROL_STATE;
+  for(i=0;i<ROOMS;i++)
+  {
+    for(j=0;j<DEVICES;j++)
+    {
+      eepromWrite(a[i][j], addr);
+      addr++;
+    }
+  }
+}
+
+void retriveControlState(byte a[ROOMS][DEVICES])
+{
+  byte i,j;
+  unsigned long addr = E_CONTROL_STATE;
+  for(i=0;i<ROOMS;i++)
+  {
+    for(j=0;j<DEVICES;j++)
+    {
+      a[i][j] = eepromRead(addr);
+      addr++;
+    }
+  }
+}
+
+void writeToPCF(byte data[2])
+{
+  
+}
+
+void convertByteToBits(byte a[ROOMS][DEVICES])
+{
+  // change controlBits[] array size according to ROOMS * DEVICES
+  
 }
 
