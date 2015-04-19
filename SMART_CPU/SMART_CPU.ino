@@ -22,10 +22,14 @@
 #define RF_ADDR 0x00
 #define RX_BAUD 2000
 #define STR_TERM_CHAR 0x7F
-#define PCF8575 0x20
 
 #define ROOMS 4
 #define DEVICES 4
+
+// 74HC595 I/O expansion pins
+#define latchPin A0
+#define clkPin A1
+#define dataPin A2
 
 SoftwareSerial esp(6,5);  //Rx,TX
 LiquidCrystal lcd(7,8,9,10,11,12); // RS E D4-D7
@@ -316,14 +320,20 @@ void retriveControlState(byte a[ROOMS][DEVICES])
   }
 }
 
-void writeToPCF(byte data[2])
+void writeReg(byte data)
 {
-  
+  // write data to 74HC595 reg for output expansion.
+  digitalWrite(latchPin,0);
+  shiftOut(dataPin, clkPin, MSBFIRST, data);
+  digitalWrite(latchPin,1);
 }
 
-void convertByteToBits(byte a[ROOMS][DEVICES])
+byte readReg()
 {
-  // change controlBits[] array size according to ROOMS * DEVICES
-  
+  // read data from 74HC595 reg for input expansion.
+  digitalWrite(latchPin,1);
+  delayMicroseconds(20);
+  digitalWrite(latchPin,0);
+  byte data = shiftIn(dataPin, clkPin, MSBFIRST);
+  return data;
 }
-
