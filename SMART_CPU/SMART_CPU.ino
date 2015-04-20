@@ -30,6 +30,7 @@
 #define latchPin A0
 #define clkPin A1
 #define dataPin A2
+#define OEpin 3
 
 SoftwareSerial esp(6,5);  //Rx,TX
 LiquidCrystal lcd(7,8,9,10,11,12); // RS E D4-D7
@@ -59,8 +60,6 @@ void setup()
   lcd.setCursor(0,2);
   lcd.print("Connecting WiFi");
   initEsp();
-  lcd.setCursor(0,3);
-  lcd.print("Checking modules");
   initRF();
   initRTC();
   getDateTime();
@@ -69,6 +68,11 @@ void setup()
 void loop()
 {
   httpHandler();
+  for(byte i=0;i<256;i++)
+  {
+    writeReg(i);
+    delay(5);
+  }
 }
 
 void eepromWrite(byte data, uint16_t addr)
@@ -127,7 +131,7 @@ void connectEsp()
 {
   SSID = eepromToString(E_SSID);
   PASS = eepromToString(E_PASS);
-  esp.print("AT+CWJAP");
+  esp.print("AT+CWJAP=");
   esp.print("\"");
   esp.print(SSID);
   esp.print("\",\"");
@@ -222,11 +226,11 @@ void authenticationFailed()
   lcd.clear();
   lcd.setCursor(0,0);
   lcd.print("Cant conect wifi");
-  lcd.setCursor(1,0);
+  lcd.setCursor(0,1);
   lcd.print("Connect to wifi:");
-  lcd.setCursor(2,0);
+  lcd.setCursor(0,2);
   lcd.print("ESP_xxxx & visit");
-  lcd.setCursor(3,0);
+  lcd.setCursor(0,3);
   lcd.print("IP:192.168.4.1");
 }
 
@@ -265,6 +269,10 @@ void getDateTime()
     DateTimeArray[6] = 'P';
   else
     DateTimeArray[6] = 'A';
+    
+  for(int k=0;k<6;k++)
+    Serial.println(DateTimeArray[k]);
+  Serial.println((char)DateTimeArray[6]);
 
 }
 
@@ -323,6 +331,9 @@ void retriveControlState(byte a[ROOMS][DEVICES])
 void writeReg(byte data)
 {
   // write data to 74HC595 reg for output expansion.
+  pinMode(latchPin,OUTPUT);
+  pinMode(clkPin,OUTPUT);
+  pinMode(dataPin,OUTPUT);
   digitalWrite(latchPin,0);
   shiftOut(dataPin, clkPin, MSBFIRST, data);
   digitalWrite(latchPin,1);
@@ -331,6 +342,9 @@ void writeReg(byte data)
 byte readReg()
 {
   // read data from 74HC595 reg for input expansion.
+  pinMode(latchPin,OUTPUT);
+  pinMode(clkPin,OUTPUT);
+  pinMode(dataPin,INPUT);
   digitalWrite(latchPin,1);
   delayMicroseconds(20);
   digitalWrite(latchPin,0);
