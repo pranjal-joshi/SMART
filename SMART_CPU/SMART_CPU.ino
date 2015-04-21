@@ -202,7 +202,9 @@ void eepromToEsp(unsigned long eeprom_addr, byte terminationChar)
   {
     while(temp != STR_TERM_CHAR && (adr_cnt + length) > eeprom_addr)
     {
+      temp = eepromRead(adr_cnt);
       esp.print(temp);
+      adr_cnt++;
     }
   }
 }
