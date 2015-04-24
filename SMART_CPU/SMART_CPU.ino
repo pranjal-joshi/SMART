@@ -26,13 +26,15 @@
 #define ROOMS 4
 #define DEVICES 4
 
+#define esp Serial
+
 // 74HC595 I/O expansion pins
 #define latchPin A0
 #define clkPin A1
 #define dataPin A2
 #define OEpin 3
 
-SoftwareSerial esp(6,5);  //Rx,TX
+SoftwareSerial dbg(6,5);  //Rx,TX
 LiquidCrystal lcd(7,8,9,10,11,12); // RS E D4-D7
 RTC_DS1307 rtc;
 SimpleTimer timer;
@@ -43,12 +45,15 @@ char espConnID = -1;
 String SSID;
 String PASS;
 byte controlArray[ROOMS][DEVICES];
+byte radioFrame[4];
+byte pplCount[ROOMS+1];
+byte temperature[ROOMS+1];
 byte controlBits[2];
 byte selectRoom, selectDevice,setValue;
 
 void setup()
 {
-  Serial.begin(SERIAL_BAUD);
+  dbg.begin(SERIAL_BAUD);
   lcd.begin(16,4);
   lcd.clear();
   lcd.noCursor();
@@ -111,7 +116,7 @@ String espWrite(String command, uint16_t timeout)
       resp += c;
     }
     resp.toCharArray(_resp,sizeof(resp));
-    if(strstr(_resp,"OK") || strstr(_resp,"ERROR"))
+    if(strstr(_resp,"OK") || strstr(_resp,"ERROR") || strstr(_resp,"ok") || strstr(_resp,"error"))
         break;
   }
   return resp;
@@ -125,20 +130,30 @@ void initEsp()
   connectEsp();
   espWrite("AT+CIPMUX=1",2000);
   espWrite("AT+CIPSERVER=1,80",1500);
+  lcd.setCursor(0,4);
+  lcd.print("IP:");
+  lcd.print(getIP());
 }
 
 void connectEsp()
 {
-  SSID = eepromToString(E_SSID);
-  PASS = eepromToString(E_PASS);
-  esp.print("AT+CWJAP=");
-  esp.print("\"");
-  esp.print(SSID);
-  esp.print("\",\"");
-  esp.print(PASS);
-  esp.println("\"");
-  delay(6500);
-  if(!esp.find("OK") || !esp.find("ok"))
+  //SSID = eepromToString(E_SSID);
+  //PASS = eepromToString(E_PASS);
+  SSID = "WIFI_NAME";
+  PASS = "WIFI_PASS";
+  String cmd,conStatus;
+  cmd = "AT+CWJAP=";
+  cmd += "\"";
+  cmd += SSID;
+  cmd += "\",\"";
+  cmd += PASS;
+  cmd += "\"";
+  conStatus = espWrite(cmd,6500);
+  byte len = conStatus.length()+1;
+  char _conStatus[len];
+  conStatus.toCharArray(_conStatus,sizeof(_conStatus));
+  dbg.println(_conStatus);
+  if((strstr(_conStatus,"ERROR")) || (strstr(_conStatus,"error")))
   {
     byte wifiRetry = eepromRead(E_WIFI_RETRY_COUNT);
     if(wifiRetry > 5)
@@ -159,9 +174,11 @@ String getIP()
 {
   String ip="";
   espWrite("AT+CIFSR",800);
+  while(!esp.available());
+  delay(200);
   while(esp.available())
   {
-    ip += esp.read();
+    ip += (char)esp.read();
   }
   return ip;
 }
@@ -273,9 +290,33 @@ void getDateTime()
     DateTimeArray[6] = 'A';
     
   for(int k=0;k<6;k++)
-    Serial.println(DateTimeArray[k]);
-  Serial.println((char)DateTimeArray[6]);
+    dbg.println(DateTimeArray[k]);
+  dbg.println((char)DateTimeArray[6]);
 
+}
+
+void httpResponse(int connectionID, String content)
+{
+  String httpHeader, httpResp;
+  
+  httpHeader = "HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=UTF-8\r\n";
+  httpHeader += "Content-Length: ";
+  httpHeader += content.length();
+  httpHeader += "\r\n";
+  httpHeader += "Connection: close\r\n\r\n";
+  httpResp = httpHeader + content;
+  espCIPsend(connectionID, httpResp);
+}
+
+void espCIPsend(int connectionID, String data)
+{
+  String cipSend = "AT+CIPSEND=";
+  cipSend += connectionID;
+  cipSend += ",";
+  cipSend += data.length();
+  espWrite(cipSend, 1000);
+  delay(10);
+  esp.print(data);
 }
 
 void httpHandler()
@@ -336,8 +377,9 @@ void writeReg(byte data)
   pinMode(latchPin,OUTPUT);
   pinMode(clkPin,OUTPUT);
   pinMode(dataPin,OUTPUT);
-  digitalWrite(latchPin,0);
   shiftOut(dataPin, clkPin, MSBFIRST, data);
+  digitalWrite(latchPin,0);
+  delayMicroseconds(10);
   digitalWrite(latchPin,1);
 }
 
@@ -352,4 +394,18 @@ byte readReg()
   digitalWrite(latchPin,0);
   byte data = shiftIn(dataPin, clkPin, MSBFIRST);
   return data;
+}
+
+void decodeRadioData()
+{
+  byte radioFrameLen = 4;
+  if(vw_get_message(radioFrame, &radioFrameLen))
+  {
+    if(radioFrame[3] == '\n')
+    {
+      selectRoom = radioFrame[0];
+      pplCount[selectRoom] = radioFrame[1];
+      temperature[selectRoom] = radioFrame[2];
+    }
+  }
 }
