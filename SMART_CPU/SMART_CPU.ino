@@ -12,6 +12,7 @@
 #include <LiquidCrystal.h>
 #include <SoftwareSerial.h>
 #include <VirtualWire.h>
+#include <EEPROM.h>
 #include "EEPROM_CONFIG.h"
 
 #define PORT 80
@@ -26,6 +27,8 @@
 #define ROOMS 4
 #define DEVICES 4
 
+// Serial port is renamed to 'esp' for programmer's convinience.
+// You can use Serial.anyFunction(); instead of esp.anyFunction();
 #define esp Serial
 
 // 74HC595 I/O expansion pins
@@ -44,12 +47,13 @@ byte DateTimeArray[7];
 char espConnID = -1;
 String SSID;
 String PASS;
-byte controlArray[ROOMS][DEVICES];
+byte outputArray[ROOMS+1];
+byte inputArray[ROOMS+1];
 byte radioFrame[4];
 byte pplCount[ROOMS+1];
 byte temperature[ROOMS+1];
-byte controlBits[2];
 byte selectRoom, selectDevice,setValue;
+byte globalCnt;
 
 void setup()
 {
@@ -72,6 +76,7 @@ void setup()
 
 void loop()
 {
+  inputHandler();
   httpHandler();
   for(byte i=0;i<256;i++)
   {
@@ -325,48 +330,33 @@ void httpHandler()
   {
     if(esp.find("+IPD,"))
     {
+      
       espConnID = esp.read() - 48;
-      if(esp.find("?authenticationFailed"))
+ 
+      if(esp.find("toggle="))
       {
-        eepromToEsp(E_WIFI_RESET_PAGE ,STR_TERM_CHAR);
+        selectRoom = esp.parseInt();
+        esp.read();
+        selectDevice = esp.parseInt();
+        esp.read();
+        setValue = esp.parseInt();
+        updateOutputArray();
       }
-      if(esp.find("room="))
-        selectRoom = esp.read() - 48;
-      if(esp.find("device="))
-        selectDevice = esp.read() - 48;
-      if(esp.find("state="))
-        setValue = esp.read() - 48;
-        
-      controlArray[selectRoom][selectDevice] = setValue;
-      updateControlState(controlArray);
-    }
-  }
-}
-
-void updateControlState(byte a[ROOMS][DEVICES])
-{
-  byte i,j;
-  unsigned long addr = E_CONTROL_STATE;
-  for(i=0;i<ROOMS;i++)
-  {
-    for(j=0;j<DEVICES;j++)
-    {
-      eepromWrite(a[i][j], addr);
-      addr++;
-    }
-  }
-}
-
-void retriveControlState(byte a[ROOMS][DEVICES])
-{
-  byte i,j;
-  unsigned long addr = E_CONTROL_STATE;
-  for(i=0;i<ROOMS;i++)
-  {
-    for(j=0;j<DEVICES;j++)
-    {
-      a[i][j] = eepromRead(addr);
-      addr++;
+      if(esp.find("clk="))
+      {
+        DateTimeArray[2] = esp.parseInt();
+        esp.read();
+        DateTimeArray[1] = esp.parseInt();
+        esp.read();
+        DateTimeArray[0] = esp.parseInt();
+        esp.read();
+        DateTimeArray[3] = esp.parseInt();
+        esp.read();
+        DateTimeArray[4] = esp.parseInt();
+        esp.read();
+        DateTimeArray[5] = esp.parseInt();
+        rtc.adjust(DateTime(DateTimeArray[2],DateTimeArray[1],DateTimeArray[0],DateTimeArray[3],DateTimeArray[4],DateTimeArray[5]));
+      }
     }
   }
 }
@@ -394,6 +384,24 @@ byte readReg()
   digitalWrite(latchPin,0);
   byte data = shiftIn(dataPin, clkPin, MSBFIRST);
   return data;
+}
+
+void updateOutputArray()
+{
+  bitWrite(outputArray[selectRoom],(selectDevice-1),setValue);
+  for(globalCnt=0;globalCnt<ROOMS;globalCnt++)
+  {
+    writeReg(outputArray[globalCnt]);
+    EEPROM.write((I_STATE + globalCnt),outputArray[globalCnt]);
+  }
+}
+
+void inputHandler()
+{
+  for(globalCnt=0;globalCnt<ROOMS;globalCnt++)
+  {
+    inputArray[globalCnt] = readReg();
+  }
 }
 
 void decodeRadioData()
