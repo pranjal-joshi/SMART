@@ -47,13 +47,16 @@ byte DateTimeArray[7];
 char espConnID = -1;
 String SSID;
 String PASS;
+String espResp = "";
 byte outputArray[ROOMS+1];
 byte inputArray[ROOMS+1];
 byte radioFrame[4];
 byte pplCount[ROOMS+1];
 byte temperature[ROOMS+1];
 byte selectRoom, selectDevice,setValue;
-byte globalCnt;
+byte thumbValue;
+int globalCnt;
+unsigned int oldMillis;
 
 void setup()
 {
@@ -72,16 +75,18 @@ void setup()
   initRF();
   initRTC();
   getDateTime();
+  httpResponse(espConnID, "TEST_response 200");
+  dbg.println(freeRam());
 }
 
 void loop()
 {
   inputHandler();
-  httpHandler();
-  for(byte i=0;i<256;i++)
+  //httpHandler();
+  requestParser();
+  for(byte i=0;i<100;i++)
   {
     writeReg(i);
-    delay(5);
   }
 }
 
@@ -112,6 +117,7 @@ String espWrite(String command, uint16_t timeout)
   String resp = "";
   char _resp[15];
   esp.println(command);
+  esp.flush();
   unsigned long t = millis();
   while((t+timeout) > millis())
   {
@@ -324,26 +330,32 @@ void espCIPsend(int connectionID, String data)
   esp.print(data);
 }
 
-void httpHandler()
+/*void httpHandler()
 {
-  if(esp.available())
+  if(millis() > oldMillis + 200)
   {
-    if(esp.find("+IPD,"))
+  while(esp.available())
+  {
+    //esp.backup();
+    if(esp.peekfind("+IPD,"))
     {
-      
+      dbg.println("got IPD");
+      while(!esp.available());
+      esp.read();        // verify if there is comma in ESP's response before conn ID.
       espConnID = esp.read() - 48;
- 
-      if(esp.find("toggle="))
+      while(!esp.available());
+      dbg.println("got conn id");
+      
+     /* espResp = esp.readString();
+    byte len = espResp.length()+1;
+    char _espResp[len];
+    espResp.toCharArray(_espResp,len);
+    dbg.write(_espResp);*/
+    /*
+    dbg.println(esp.backup());
+      while(esp.peekfind("clk="))
       {
-        selectRoom = esp.parseInt();
-        esp.read();
-        selectDevice = esp.parseInt();
-        esp.read();
-        setValue = esp.parseInt();
-        updateOutputArray();
-      }
-      if(esp.find("clk="))
-      {
+        dbg.println("got clk");
         DateTimeArray[2] = esp.parseInt();
         esp.read();
         DateTimeArray[1] = esp.parseInt();
@@ -357,9 +369,56 @@ void httpHandler()
         DateTimeArray[5] = esp.parseInt();
         rtc.adjust(DateTime(DateTimeArray[2],DateTimeArray[1],DateTimeArray[0],DateTimeArray[3],DateTimeArray[4],DateTimeArray[5]));
       }
+      esp.restore();
+      while(esp.peekfind("pass="))
+      {
+        dbg.println("got pass");
+        byte tmp;
+        globalCnt = esp.parseInt();
+        esp.read();
+        for(tmp = 0; tmp < globalCnt; tmp++)
+        {
+          EEPROM.write((I_PASS+tmp),esp.read());
+          dbg.print((char)EEPROM.read(I_PASS+tmp));
+        }
+      }
+      while(esp.peekfind("toggle="))
+      {
+        dbg.println("got toggle");
+        selectRoom = esp.parseInt();
+        esp.read();
+        selectDevice = esp.parseInt();
+        esp.read();
+        setValue = esp.parseInt();
+        updateOutputArray();
+        break;
+      }
+      
+      while(esp.peekfind("ssid="))
+      {
+        dbg.println("got ssid");
+        byte tmp;
+        globalCnt = esp.parseInt();
+        esp.read();
+        for(tmp = 0;tmp < globalCnt;tmp++)
+        {
+          EEPROM.write((I_SSID+tmp),esp.read());
+          dbg.println(I_SSID + tmp);
+        }
+      }
+      
+      while(esp.peekfind("slider="))
+      {
+        selectRoom = esp.parseInt();
+        esp.read();
+        thumbValue = esp.parseInt();
+        pwmGenerator(selectRoom, thumbValue);
+      }
     }
+    }
+    oldMillis = millis();
   }
-}
+}*/
 
 void writeReg(byte data)
 {
@@ -384,6 +443,12 @@ byte readReg()
   digitalWrite(latchPin,0);
   byte data = shiftIn(dataPin, clkPin, MSBFIRST);
   return data;
+}
+
+void pwmGenerator(byte room, byte val)
+{
+  // Write code to transfer this data to another 328p 
+  // via i2c which act as PWM generator. (using software PWM)
 }
 
 void updateOutputArray()
@@ -417,3 +482,97 @@ void decodeRadioData()
     }
   }
 }
+
+void serialEvent()
+{
+  while(esp.available())
+    espResp += (char)esp.read();
+  dbg.println(espResp);
+}
+
+int freeRam () {
+  extern int __heap_start, *__brkval; 
+  int v; 
+  return (int) &v - (__brkval == 0 ? (int) &__heap_start : (int) __brkval); 
+}
+
+void espBufClear()
+{
+  while(esp.available())
+    esp.read();
+}
+
+
+// PERFECTLY WORKING
+
+void requestParser()
+{
+  if(millis() > oldMillis + 200)
+  {
+  int offset;
+  String t;
+  espResp.trim();
+  offset = espResp.indexOf("IPD,");
+  offset += espResp.indexOf(',');
+  espConnID = espResp.charAt(offset) - 48;
+  offset = espResp.indexOf("clk=");
+  if(offset >= 0)
+  {
+    offset += 4;
+    t = espResp.substring(offset, offset + 4);
+    DateTimeArray[2] = t.toInt();
+    dbg.println(DateTimeArray[2]);
+    
+    offset = espResp.indexOf('&') + 1;
+    t = espResp.substring(offset, offset + 2);
+    DateTimeArray[1] = t.toInt();
+    dbg.println(DateTimeArray[1]);
+    
+    offset = espResp.indexOf('&',offset) + 1;
+    t = espResp.substring(offset, offset + 2);
+    DateTimeArray[0] = t.toInt();
+    dbg.println(DateTimeArray[0]);
+    
+    offset = espResp.indexOf('&',offset) + 1;
+    t = espResp.substring(offset, offset + 2);
+    DateTimeArray[3] = t.toInt();
+    dbg.println(DateTimeArray[3]);
+    
+    offset = espResp.indexOf('&',offset) + 1;
+    t = espResp.substring(offset, offset + 2);
+    DateTimeArray[4] = t.toInt();
+    dbg.println(DateTimeArray[4]);
+    
+    offset = espResp.indexOf('&',offset) + 1;
+    t = espResp.substring(offset, offset + 2);
+    DateTimeArray[5] = t.toInt();
+    dbg.println(DateTimeArray[2]);
+    
+    espResp = "";
+   
+  }
+  offset = espResp.indexOf("toggle=");
+  if(offset >= 0)
+  {
+    offset += 7;
+    
+    t = espResp.substring(offset, offset+1);
+    selectRoom = t.toInt();
+    dbg.println(selectRoom);
+    
+    offset = espResp.indexOf('&') + 1;
+    t = espResp.substring(offset, offset+1);
+    selectDevice = t.toInt();
+    dbg.println(selectDevice);
+    
+    offset = espResp.indexOf('&',offset) + 1;
+    t = espResp.substring(offset, offset+1);
+    setValue = t.toInt();
+    dbg.println(setValue);
+    
+    espResp = "";
+  }
+  oldMillis = millis();
+  }
+}
+
