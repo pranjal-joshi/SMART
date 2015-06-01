@@ -1,4 +1,4 @@
-#/usr/bin/python
+#!/usr/bin/python
 
 from SimpleHTTPServer import *
 import SocketServer
@@ -10,6 +10,7 @@ import MySQLdb as mdb
 import base64 as security
 
 PORT = 80
+BAUD = 9600
 
 # hardware configuration pins
 clkPin = 1
@@ -18,6 +19,8 @@ dataPin = 5
 enable = 6
 
 io = wiringpi.GPIO(wiringpi.GPIO.WPI_MODE_PINS)
+serial = wiringpi.Serial('/dev/ttyAMA0',BAUD)
+
 con = mdb.connect("localhost","root","linux")
 db = con.cursor()
 
@@ -69,6 +72,25 @@ class handler(SimpleHTTPRequestHandler):
 			self.send_response(200)
                         self.end_headers()
                         self.wfile.write("slider ok")
+		if(url.find("requestUpdate") > 0):
+			room = url.split("&")
+			room = room[1]
+			db.execute("use smart")
+			db.execute("select d1,d2,d3,d4,d5,d6,d7,d8,slider from map where room_no=%s" % (room))
+			result = db.fetchone()
+			result = str(result[0]) + str(result[1]) + str(result[2]) + str(result[3]) + str(result[4]) + str(result[5]) + str(result[6]) + str(result[7]) + str(result[8])
+			self.send_response(200)
+			self.end_headers()
+			self.wfile.write(str(result) + "updateResponse")
+			print "requestUpdate executed."
+		if(url.find("shutDown") > 0):
+			key = url.split("&")
+			key = key[1]
+			if(key == str(loginKey())):
+				self.send_response(200)
+				self.end_headers()
+				self.wfile.write("SMART SHUTDOWN commencing.")
+				shutDown()
 
 	        else:
 	                print "Invalid URL."
@@ -138,7 +160,7 @@ def updateRegisters(dataPin, clkPin, latchPin, enable):
 	io.digitalWrite(enable,0)
 	io.digitalWrite(latchPin,0)
 	for i in range(0,regNo):
-		print "roomsAvail[i] = ", roomsAvail[i]
+		print "For Room No. = ", roomsAvail[i]
 		db.execute("select d1,d2,d3,d4,d5,d6,d7,d8 from map where room_no=%s" %(roomsAvail[i]))
 		result = db.fetchone()
 		result = str(result[0]) + str(result[1]) + str(result[2]) + str(result[3]) + str(result[4]) + str(result[5]) + str(result[6]) + str(result[7])
@@ -148,7 +170,12 @@ def updateRegisters(dataPin, clkPin, latchPin, enable):
 		io.shiftOut(dataPin, clkPin, 1, data)
 	io.digitalWrite(latchPin,1)
 	
-
+def shutDown():
+	db.close()
+	con.close()	
+	print "*** System is going to SHUTDOWN in 5 seconds!!!"
+	time.sleep(5)
+	os.system("sudo shutdown -h now")
 
 httpd = SocketServer.TCPServer(("",PORT),handler)
 print "\n\r[ Self Monitoring Analysing & Reporting Technology ] (S.M.A.R.T)"
