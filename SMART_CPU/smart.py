@@ -38,11 +38,13 @@ class handler(SimpleHTTPRequestHandler):
 	                        self.wfile.write("grant")
 				print "LOGIN SUCCESSFUL."
 				print "Logged in at : " +  time.strftime("%d/%m/%y  %I:%M:%S %p")
+				return
 	                else:
         	                self.send_response(200)
 	                        self.end_headers()
 	                        self.wfile.write("denied")
 				print "LOGIN UNSUCCESSFUL."
+				return
 		if(url.find("toggle") > 0):
 			decode = url.split("&")
 			room = decode[1]
@@ -59,6 +61,7 @@ class handler(SimpleHTTPRequestHandler):
 			self.send_response(200)
 			self.end_headers()
 			self.wfile.write("toggle ok")
+			return
 		if(url.find("slider") > 0):
 			decode = url.split("&")
 			room = decode[1]
@@ -72,6 +75,7 @@ class handler(SimpleHTTPRequestHandler):
 			self.send_response(200)
                         self.end_headers()
                         self.wfile.write("slider ok")
+			return
 		if(url.find("requestUpdate") > 0):
 			room = url.split("&")
 			room = room[1]
@@ -83,6 +87,7 @@ class handler(SimpleHTTPRequestHandler):
 			self.end_headers()
 			self.wfile.write(str(result) + "updateResponse")
 			print "requestUpdate executed."
+			return
 		if(url.find("shutDown") > 0):
 			key = url.split("&")
 			key = key[1]
@@ -91,9 +96,16 @@ class handler(SimpleHTTPRequestHandler):
 				self.end_headers()
 				self.wfile.write("SMART SHUTDOWN commencing.")
 				shutDown()
+				return
 
 	        else:
 	                print "Invalid URL."
+			f = open("index.html",'r')
+			resp = f.read()
+			f.close()
+			self.send_response(200)
+			self.end_headers()
+			self.wfile.write(resp)
 
 		return
 
