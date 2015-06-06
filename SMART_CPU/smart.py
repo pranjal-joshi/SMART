@@ -19,6 +19,7 @@ latchPin = 4
 dataPin = 5
 enable = 6
 
+ioRead = []
 NoOfRooms = []
 
 io = wiringpi.GPIO(wiringpi.GPIO.WPI_MODE_PINS)
@@ -103,7 +104,7 @@ class handler(SimpleHTTPRequestHandler):
 				self.send_response(200)
 				self.end_headers()
 				self.wfile.write("SMART SHUTDOWN commencing.")
-				sysLog("SHUT_DOWN")
+				sysLog("SHUT_DOWN\t")
 				shutDown()
 				return
 
@@ -198,7 +199,10 @@ def updateRegisters(dataPin, clkPin, latchPin, enable):
 def readRegisters():
 	regNo = len(NoOfRooms)
 	io.digitalWrite(enable, 1)
+	global ioRead
 	ioRead = []
+	io.pinMode(dataPin, io.INPUT)
+	io.pullUpDnControl(dataPin, 2)
 	for i in range(0,regNo):
 		io.digitalWrite(latchPin, 1)
 		io.delayMicroseconds(30)
@@ -206,6 +210,8 @@ def readRegisters():
 		data =  io.shiftIn(dataPin, clkPin, 1)
 		ioRead.append(data)
 	io.digitalWrite(enable, 0)
+	io.pullUpDnControl(dataPin, 0)
+	io.pinMode(dataPin, io.OUTPUT)
 	threading.Timer(0.05, readRegisters).start()
 	
 def NumOfRooms():
