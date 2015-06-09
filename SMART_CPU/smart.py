@@ -97,6 +97,21 @@ class handler(SimpleHTTPRequestHandler):
 			self.wfile.write(str(result) + "updateResponse")
 			print "requestUpdate executed."
 			return
+		if(url.find("activeRooms") > 0):
+			rooms = url.split("&")
+			rooms = rooms[1:]
+			db.execute("use smart")
+			for i in range(1,9):
+				db.execute("update map set active=0 where room_no=%s" % (i))
+			con.commit()
+			for i in range(0,len(rooms)):
+				db.execute("update map set active=1 where room_no=%s" % (rooms[i]))
+			con.commit()
+			print "Room configuration updated."
+			self.send_response(200)
+			self.end_headers()
+			self.wfile.write("OK")
+			return
 		if(url.find("shutDown") > 0):
 			key = url.split("&")
 			key = key[1]
@@ -116,7 +131,7 @@ class handler(SimpleHTTPRequestHandler):
 			self.send_response(200)
 			self.end_headers()
 			self.wfile.write(resp)
-			sysLog("INVALID URL")
+			sysLog("INVALID URL\t")
 
 		return
 
@@ -186,13 +201,13 @@ def updateRegisters(dataPin, clkPin, latchPin, enable):
 	io.digitalWrite(enable,0)
 	io.digitalWrite(latchPin,0)
 	for i in range(0,regNo):
-		print "For Room No. = ", roomsAvail[i]
+		#print "For Room No. = ", roomsAvail[i]
 		db.execute("select d1,d2,d3,d4,d5,d6,d7,d8 from map where room_no=%s" %(roomsAvail[i]))
 		result = db.fetchone()
 		result = str(result[0]) + str(result[1]) + str(result[2]) + str(result[3]) + str(result[4]) + str(result[5]) + str(result[6]) + str(result[7])
 		data = int(result, 2)
-		print "result = " ,result
-		print "data = ", data
+		#print "result = " ,result
+		#print "data = ", data
 		io.shiftOut(dataPin, clkPin, 1, data)
 	io.digitalWrite(latchPin,1)
 
