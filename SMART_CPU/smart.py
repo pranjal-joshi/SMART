@@ -9,6 +9,8 @@ import sys
 import MySQLdb as mdb
 import base64 as security
 import threading
+import wikipedia as wiki
+import urllib2
 
 PORT = 80
 BAUD = 9600
@@ -111,6 +113,18 @@ class handler(SimpleHTTPRequestHandler):
 			self.send_response(200)
 			self.end_headers()
 			self.wfile.write("OK")
+			return
+		if(url.find("voiceQuery") > 0):
+			query = url.split("=");
+			query = query[1]
+			query = urllib2.unquote(query.encode("utf8"))
+			ans = wiki.summary(query, sentences=3)
+			print "QUERY = ", query
+			print "ANSWER= ",ans
+			self.send_response(200)
+			self.end_headers()
+			self.wfile.write(ans + "tts_ok")
+			sysLog("QUERY: %s" % query)
 			return
 		if(url.find("shutDown") > 0):
 			key = url.split("&")
@@ -249,7 +263,7 @@ def shutDown():
 
 def sysLog(string):
 	f = open("sys.log","a")
-	data = str(string + "\t" + time.strftime("%d/%m/%y %I:%M:%S %p") + "\n")
+	data = str(time.strftime("%d/%m/%y %I:%M:%S %p") + "\t" + string + "\n")
 	f.write(data)
 	f.close()
 
