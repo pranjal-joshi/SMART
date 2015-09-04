@@ -23,6 +23,7 @@ enable = 6
 
 ioRead = []
 NoOfRooms = []
+loginAttempt = 0
 
 io = wiringpi.GPIO(wiringpi.GPIO.WPI_MODE_PINS)
 serial = wiringpi.Serial('/dev/ttyAMA0',BAUD)
@@ -38,22 +39,37 @@ class handler(SimpleHTTPRequestHandler):
                 	offset = url.find("Pass")
 	                offset = offset + 5
 	                substr = url[offset:offset+5]
-	                if(substr == str(loginKey())):
+			global loginAttempt
+	                if(substr == str(loginKey()) and loginControl()):
 	                        self.send_response(200)
 	                        self.end_headers()
 	                        self.wfile.write("grant")
 				print "LOGIN SUCCESSFUL."
 				print "Logged in at : " +  time.strftime("%d/%m/%y  %I:%M:%S %p")
 				sysLog("LOGGED IN.\t")
+				loginAttempt = 0
 				return
 	                else:
+				loginAttempt = loginAttempt + 1
         	                self.send_response(200)
 	                        self.end_headers()
-	                        self.wfile.write("denied")
-				print "LOGIN UNSUCCESSFUL."
-				sysLog("LOGIN DENIED.\t")
-				return
-		if(url.find("toggle") > 0):
+
+				if(loginAttempt < 5):
+	        	                self.wfile.write("denied")
+					print "LOGIN UNSUCCESSFUL."
+					sysLog("LOGIN DENIED.\t")
+					return
+				else:
+					lc = open("lc.time","w")
+					timeout = time.time() + 60
+					lc.write(str(timeout))
+					lc.close()
+					self.wfile.write("locked")
+					print "*** LOGIN LOCKED FOR SECURITY REASONS. ENTER CORRECT KEY TO UNLOCK!!!"
+					sysLog("LOGIN LOCKED!\t")
+					return
+
+		elif(url.find("toggle") > 0):
 			decode = url.split("&")
 			room = decode[1]
 			device = decode[2]
@@ -72,7 +88,7 @@ class handler(SimpleHTTPRequestHandler):
 			self.wfile.write("toggle ok")
 			sysLog("TOGGLE - R:%s D:%s V:%s" % (room, device, setValue))
 			return
-		if(url.find("slider") > 0):
+		elif(url.find("slider") > 0):
 			decode = url.split("&")
 			room = decode[1]
 			thumbValue = decode[2]
@@ -87,7 +103,7 @@ class handler(SimpleHTTPRequestHandler):
                         self.end_headers()
                         self.wfile.write("slider ok")
 			return
-		if(url.find("requestUpdate") > 0):
+		elif(url.find("requestUpdate") > 0):
 			room = url.split("&")
 			room = room[1]
 			db.execute("use smart")
@@ -99,7 +115,7 @@ class handler(SimpleHTTPRequestHandler):
 			self.wfile.write(str(result) + "updateResponse")
 			print "requestUpdate executed."
 			return
-		if(url.find("activeRooms") > 0):
+		elif(url.find("activeRooms") > 0):
 			rooms = url.split("&")
 			rooms = rooms[1:]
 			db.execute("use smart")
@@ -114,10 +130,11 @@ class handler(SimpleHTTPRequestHandler):
 			self.end_headers()
 			self.wfile.write("OK")
 			return
-		if(url.find("voiceQuery") > 0):
+		elif(url.find("voiceQuery") > 0):
 			query = url.split("=");
 			query = query[1]
 			query = urllib2.unquote(query.encode("utf8"))
+			query = query.replace('+',' ')
 			ans = wiki.summary(query, sentences=3)
 			print "QUERY = ", query
 			print "ANSWER= ",ans
@@ -126,7 +143,7 @@ class handler(SimpleHTTPRequestHandler):
 			self.wfile.write(ans + "tts_ok")
 			sysLog("QUERY: %s" % query)
 			return
-		if(url.find("shutDown") > 0):
+		elif(url.find("shutDown") > 0):
 			key = url.split("&")
 			key = key[1]
 			if(key == str(loginKey())):
@@ -163,10 +180,10 @@ def initDB():
 	a = db.fetchall()
 	a = str(a)
 	if(a.find("smart") > 0):
-		print "database found."
+		print "---> Database found."
 		sysLog("DB OK\t\t")
 	else:
-		print "database not found. creating..."
+		print "---> Database not found. creating..."
 		db.execute("create database smart")
 		db.execute("use smart")
 		db.execute("create table map(room_no INT, d1 INT not null default 0, d2 INT not null default 0, d3 INT not null default 0, d4 INT not null default 0, d5 INT not null default 0, d6 INT not null default 0, d7 INT not null default 0, d8 INT not null default 0, slider INT not null default 0, active INT not null default 0)")
@@ -183,12 +200,12 @@ def initDB():
 		a = db.fetchall()
 		a = str(a)
 		if(a.find("smart") > 0):
-			print "Database created successfully."
+			print "---> Database created successfully."
 			sysLog("DB CREATED\t")
 		else:
-			print "Error creating database!!"
+			print "---> Error creating database!!"
 			sysLog("DB ERROR\t")
-			sys.exit("Aborting due to database failure!")
+			sys.exit("*** Aborting due to database failure! ***")
 
 def loginKey():
 	f = open("smart.key","r")
@@ -212,6 +229,8 @@ def updateRegisters(dataPin, clkPin, latchPin, enable):
 	print "roomsAvail ", roomsAvail
 	regNo = len(roomsAvail)
 	print "regNo ", regNo
+	print NoOfRooms
+	print max(NoOfRooms)
 	io.digitalWrite(enable,0)
 	io.digitalWrite(latchPin,0)
 	for i in range(0,regNo):
@@ -267,8 +286,21 @@ def sysLog(string):
 	f.write(data)
 	f.close()
 
+def loginControl():
+	lc = open("lc.time","r")
+	data = lc.readline()
+	lc.close()
+	currentTime = time.time()
+	if(currentTime >= float(data)):
+		return True
+	else:
+		return False
+
+# Main program begins here...
+
+os.system("clear")
 httpd = SocketServer.TCPServer(("",PORT),handler)
-print "\n\r[ Self Monitoring Analysing & Reporting Technology ] (S.M.A.R.T)"
+print "\n\r[ Self Monitoring Analysing & Reporting Technology ] (S.M.A.R.T)\n\r"
 print "Started at: " +  time.strftime("%d/%m/%y  %I:%M:%S %p")
 sysLog("SMART INITIALIZED.")
 print "Initializing with SU access..."
