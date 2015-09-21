@@ -233,35 +233,17 @@ def updateRegisters(dataPin, clkPin, latchPin, enable):
 	print max(NoOfRooms)
 	io.digitalWrite(enable,0)
 	io.digitalWrite(latchPin,0)
-	for i in range(0,regNo):
+	for i in range(0,regNo):		
 		#print "For Room No. = ", roomsAvail[i]
 		db.execute("select d1,d2,d3,d4,d5,d6,d7,d8 from map where room_no=%s" %(roomsAvail[i]))
 		result = db.fetchone()
 		result = str(result[0]) + str(result[1]) + str(result[2]) + str(result[3]) + str(result[4]) + str(result[5]) + str(result[6]) + str(result[7])
 		data = int(result, 2)
-		#print "result = " ,result
-		#print "data = ", data
+		print "UPDATE REG: result = " ,result
+		print "UPDATE REG: data = ", data
 		io.shiftOut(dataPin, clkPin, 1, data)
 	io.digitalWrite(latchPin,1)
 
-def readRegisters():
-	regNo = len(NoOfRooms)
-	io.digitalWrite(enable, 1)
-	global ioRead
-	ioRead = []
-	io.pinMode(dataPin, io.INPUT)
-	io.pullUpDnControl(dataPin, 2)
-	for i in range(0,regNo):
-		io.digitalWrite(latchPin, 1)
-		io.delayMicroseconds(30)
-		io.digitalWrite(latchPin, 0)
-		data =  io.shiftIn(dataPin, clkPin, 1)
-		ioRead.append(data)
-	io.digitalWrite(enable, 0)
-	io.pullUpDnControl(dataPin, 0)
-	io.pinMode(dataPin, io.OUTPUT)
-	threading.Timer(0.05, readRegisters).start()
-	
 def NumOfRooms():
 	db.execute("use smart")
         db.execute("select room_no from map where active=1")
@@ -309,5 +291,4 @@ initDB()
 print "Attempting to start localhost HTTP server on port ", PORT,"..."
 print "Started listening to S.M.A.R.T app  with security key: " + loginKey()
 NumOfRooms()
-readRegisters()
 httpd.serve_forever()
