@@ -1,6 +1,8 @@
 #!/usr/bin/python
 
 from SimpleHTTPServer import *
+import collections
+import serial
 import SocketServer
 import time
 import wiringpi
@@ -21,12 +23,13 @@ latchPin = 4
 dataPin = 5
 enable = 6
 
+bridgeFrame = [0,0,0]
 ioRead = []
 NoOfRooms = []
 loginAttempt = 0
 
 io = wiringpi.GPIO(wiringpi.GPIO.WPI_MODE_PINS)
-serial = wiringpi.Serial('/dev/ttyAMA0',BAUD)
+ser = serial.Serial(port='/dev/ttyAMA0',baudrate=BAUD)
 
 con = mdb.connect("localhost","root","linux")
 db = con.cursor()
@@ -87,6 +90,7 @@ class handler(SimpleHTTPRequestHandler):
 			self.end_headers()
 			self.wfile.write("toggle ok")
 			sysLog("TOGGLE - R:%s D:%s V:%s" % (room, device, setValue))
+			updateFromApp(room, device, setValue)
 			return
 		elif(url.find("slider") > 0):
 			decode = url.split("&")
@@ -186,7 +190,7 @@ def initDB():
 		print "---> Database not found. creating..."
 		db.execute("create database smart")
 		db.execute("use smart")
-		db.execute("create table map(room_no INT, d1 INT not null default 0, d2 INT not null default 0, d3 INT not null default 0, d4 INT not null default 0, d5 INT not null default 0, d6 INT not null default 0, d7 INT not null default 0, d8 INT not null default 0, slider INT not null default 0, active INT not null default 0)")
+		db.execute("create table map(room_no INT, d1 INT not null default 0, d2 INT not null default 0, d3 INT not null default 0, d4 INT not null default 0, d5 INT not null default 0, d6 INT not null default 0, d7 INT not null default 0, d8 INT not null default 0, slider INT not null default 0, octal INT not null default 0, active INT not null default 0)")
 		db.execute("insert into map (room_no) values (1)")
 		db.execute("insert into map (room_no) values (2)")
                 db.execute("insert into map (room_no) values (3)")
@@ -278,12 +282,43 @@ def loginControl():
 	else:
 		return False
 
+def readSerial():
+	global bridgeFrame
+	bridgeFrame = [0,0,0]
+	changed = False
+	if(ser.isOpen() == False):
+		ser.open()
+	while(ser.inWaiting() > 0):
+		bridgeFrame = ser.readline()
+		print bridgeFrame
+		changed = True
+	if(changed):
+		changed = False
+		roomAddr = bridgeFrame[0]
+		device = bridgeFrame[1]
+		query = "d" + str(device)
+		val = bridgeFrame[2]
+		print query + " " + val + " " + addr
+		db.execute("use smart")
+		db.execute("update map set %s=%s where room_no=%s" % (query, val, roomAddr))
+		con.commit()
+		ser.write("1\r\n")
+	threading.Timer(0.5, readSerial).start()
+	return 0
+
+def updateFromApp(room,dev,val):
+	dev = dev[1:]
+	ser.write(room + dev + val + "\r\n")
+	return 0
+
 # Main program begins here...
 
 os.system("clear")
 httpd = SocketServer.TCPServer(("",PORT),handler)
 print "\n\r[ Self Monitoring Analysing & Reporting Technology ] (S.M.A.R.T)\n\r"
 print "Started at: " +  time.strftime("%d/%m/%y  %I:%M:%S %p")
+print "IP Address: "
+os.system("hostname -I")
 sysLog("SMART INITIALIZED.")
 print "Initializing with SU access..."
 initGPIO(dataPin, clkPin, latchPin, enable)
@@ -291,4 +326,5 @@ initDB()
 print "Attempting to start localhost HTTP server on port ", PORT,"..."
 print "Started listening to S.M.A.R.T app  with security key: " + loginKey()
 NumOfRooms()
+readSerial()
 httpd.serve_forever()
