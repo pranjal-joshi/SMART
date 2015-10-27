@@ -1,33 +1,36 @@
 /*
-  SMART_NODE  :  USES RF24 MESH TOPOLOGY FOR SENSOR NETWORK COMMUNICATION.
-  AUTHOR      :  PRANJAL JOSHI
+  SMART_NODE    :  RF24 BASED ROOM CONTROLLING NODE.
+  AUTHOR        :  PRANJAL JOSHI
+  ORGANISATION  :  S.M.A.R.T
   ALL RIGHTS RESERVED.
 */
 
-#define DEBUG 1      // set 0 to stop serial debuging.
-
-// import libraries
 #include <SPI.h>
 #include <RF24.h>
 #include <RF24Network.h>
-#include <RF24Mesh.h>
 #include <EEPROM.h>
 #include <IRremote.h>
 #include "printf.h"
+
+/*
+  ------------ NODE CONFIGURATION ---------------
+    --> UID must match with router & bridge.
+    --> MY_MASTER will be the address of bridge.
+    --> MY_ROUTER is the parent router address. Will be same as MY_MASTER if directly connected to bridge.
+    --> MY_ADDR is the physical address of node for radio communication.
+    --> LOGICAL_ADDR is the decimal room number assigned in Server's database.
+*/
+
+#define UID 123
+#define LOGICAL_ADDR 1
+const uint16_t MY_MASTER = 00;
+const uint16_t MY_ROUTER = 01;
+const uint16_t MY_ADDR = 011;
 
 // RF24 configuration
 RF24 radio(9,10);
 RF24Network network(radio);
 IRsend blaster;
-
-// Unique ID for each SMART home. MUST BE IN RANGE OF 0-127.
-#define UID 123
-
-// Room HALL_ADDRess mapping
-// NEED TO CHANGE ON FIELD
-const uint16_t MY_MASTER = 00;
-const uint16_t MY_ROUTER = 01;
-const uint16_t MY_ADDR = 011;
 
 struct payload_struct
 {
@@ -84,8 +87,10 @@ void setup()
   pinMode(en_rd, OUTPUT);
   pinMode(shld_rd, OUTPUT);
   pinMode(en_rw, OUTPUT);
+  digitalWrite(en_rw,0);
   shiftOut(reg_rw,clk_rw,MSBFIRST,0x00);
-  randomSeed(analogRead(A7));
+  digitalWrite(en_rw,0);
+  //randomSeed(analogRead(A7));
 }
 
 void loop()
@@ -115,12 +120,11 @@ void loop()
     RF24NetworkHeader rxHead;
     network.read(rxHead,&payload,sizeof(payload));
     //payload = networkDecrypt(payload);
-    if(rxHead.from_node == MY_ROUTER && payload.ack == 1 && payload.uniqueID == UID)
-    // payload.destaddr == MY_ADDR && 
+    if(payload.destaddr == LOGICAL_ADDR && rxHead.from_node == MY_ROUTER && payload.ack == 1 && payload.uniqueID == UID) 
     {
       //////////////
       digitalWrite(en_rw,0);
-      shiftOut(reg_rw,clk_rw,MSBFIRST,payload.val);
+      shiftOut(reg_rw,clk_rw,LSBFIRST,payload.val);
       digitalWrite(en_rw,1);
       controlFan(payload.blaster);
     }

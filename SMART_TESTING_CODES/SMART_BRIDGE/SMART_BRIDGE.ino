@@ -1,7 +1,8 @@
 
 /*
   SMART_BRIDGE  :  USES RF24 MESH TOPOLOGY FOR SENSOR NETWORK COMMUNICATION.
-  AUTHOR      :  PRANJAL JOSHI
+  AUTHOR        :  PRANJAL JOSHI
+  ORGANISATION  :  S.M.A.R.T
   ALL RIGHTS RESERVED.
 */
 
@@ -13,17 +14,24 @@
 #include <EEPROM.h>
 #include "printf.h"
 
-// RF24 configuration
-RF24 radio(9,10);
-RF24Network network(radio);
+/*
+  --------------- BRIDGE CONFIGURATION -------------------
+    --> Change UID so it will match with every other node & router in the perimeter.
+    --> UID = NRF 2.4GHz comm. channel!!!
+    --> MY_ADDR = Address of bridge or base station.
+    --> Add number of nodes & router in CHILDREN array which are directly connected to bridge.
+    --> Network map of worksite will be available in maintainance manual for further details & troubleshooting.
+*/
 
 // Unique ID for each SMART home. MUST BE IN RANGE OF 0-127.
 #define UID 123
 
-// Room HALL_ADDRess mapping
-// NEED TO CHANGE ON FIELD
 const uint16_t CHILDREN[] = {01, 02, 03};
 const uint16_t MY_ADDR = 00;
+
+// RF24 configuration
+RF24 radio(9,10);
+RF24Network network(radio);
 
 struct payload_struct
 {
@@ -40,12 +48,12 @@ struct payload_struct
 
 payload_struct payload = {UID, MY_ADDR, 0, 0, 0, 0, 0, 0};
 byte serialPayload[3];
-char serialBuf[5];
 
 
 void setup()
 {
   Serial.begin(9600);
+  Serial.setTimeout(200);
   printf_begin();
   SPI.begin();
   radio.begin();
@@ -67,7 +75,7 @@ void loop()
     //payload = networkDecrypt(payload);
     if(payload.destaddr == MY_ADDR && payload.ack == 0 && payload.uniqueID == UID)
     {
-      sendPayloadToPi();
+      sendPayloadToServer();
     }
   }   
   delayMicroseconds(100);
@@ -101,7 +109,7 @@ struct payload_struct networkDecrypt(payload_struct p)
     return payload;
 }
 
-void sendPayloadToPi()
+void sendPayloadToServer()
 {
   serialPayload[0] = payload.myaddr;
   serialPayload[1] = payload.device;
