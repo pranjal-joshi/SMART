@@ -84,13 +84,12 @@ class handler(SimpleHTTPRequestHandler):
 			con.commit()
 			print room, " ", device, " ", setValue
 			print "TOGGLE ACCEPTED."
-			updateRegisters(dataPin, clkPin, latchPin, enable)
 			NumOfRooms()
 			self.send_response(200)
 			self.end_headers()
 			self.wfile.write("toggle ok")
 			sysLog("TOGGLE - R:%s D:%s V:%s" % (room, device, setValue))
-			updateFromApp(room, device, setValue)
+			updateFromApp(room)
 			return
 		elif(url.find("slider") > 0):
 			decode = url.split("&")
@@ -171,13 +170,6 @@ class handler(SimpleHTTPRequestHandler):
 		return
 
 
-def initGPIO(dataPin, clkPin, latchPin, enable):
-	print "Initializing wiringpi..."
-	io.pinMode(dataPin,1)
-	io.pinMode(clkPin,1)
-	io.pinMode(latchPin,1)
-	io.pinMode(enable,1)
-	
 def initDB():
 	print "Initializing MySQL database."
 	db.execute("show databases")
@@ -220,33 +212,6 @@ def loginKey():
 	key = key[:index]
 	key = security.b16decode(key)
 	return key
-
-def updateRegisters(dataPin, clkPin, latchPin, enable):
-	db.execute("use smart")
-	db.execute("select room_no from map where active=1")
-	x = db.fetchall()
-	x = str(x)
-	roomsAvail = []
-	for i in range(1,9):
-		if (x.find(str(i)) > 0):
-			roomsAvail.append(int(i))
-	print "roomsAvail ", roomsAvail
-	regNo = len(roomsAvail)
-	print "regNo ", regNo
-	print NoOfRooms
-	print max(NoOfRooms)
-	io.digitalWrite(enable,0)
-	io.digitalWrite(latchPin,0)
-	for i in range(0,regNo):		
-		#print "For Room No. = ", roomsAvail[i]
-		db.execute("select d1,d2,d3,d4,d5,d6,d7,d8 from map where room_no=%s" %(roomsAvail[i]))
-		result = db.fetchone()
-		result = str(result[0]) + str(result[1]) + str(result[2]) + str(result[3]) + str(result[4]) + str(result[5]) + str(result[6]) + str(result[7])
-		data = int(result, 2)
-		print "UPDATE REG: result = " ,result
-		print "UPDATE REG: data = ", data
-		io.shiftOut(dataPin, clkPin, 1, data)
-	io.digitalWrite(latchPin,1)
 
 def NumOfRooms():
 	db.execute("use smart")
@@ -302,13 +267,18 @@ def readSerial():
 		db.execute("use smart")
 		db.execute("update map set %s=%s where room_no=%s" % (query, val, roomAddr))
 		con.commit()
-		ser.write("1\r\n")
-	threading.Timer(0.5, readSerial).start()
+	threading.Timer(0.1, readSerial).start()
 	return 0
 
-def updateFromApp(room,dev,val):
-	dev = dev[1:]
-	ser.write(room + dev + val + "\r\n")
+def updateFromApp(room):
+	db.execute("use smart")
+	db.execute("select d1,d2,d3,d4,d5,d6,d7,d8 from map where room_no=%s" % room)
+	result = db.fetchone()
+	result = str(result[0]) + str(result[1]) + str(result[2]) + str(result[3]) + str(result[4]) + str(result[5]) + str(result[6]) + str(result[7])
+	result = int(result,2)
+	result = str(result)
+	ser.write("r:" + room + "v:" + result)
+	print "UPDATE------------------------------ " + result
 	return 0
 
 # Main program begins here...
@@ -321,7 +291,6 @@ print "IP Address: "
 os.system("hostname -I")
 sysLog("SMART INITIALIZED.")
 print "Initializing with SU access..."
-initGPIO(dataPin, clkPin, latchPin, enable)
 initDB()
 print "Attempting to start localhost HTTP server on port ", PORT,"..."
 print "Started listening to S.M.A.R.T app  with security key: " + loginKey()
