@@ -2,6 +2,7 @@
 
 from SimpleHTTPServer import *
 import collections
+import schedule
 import serial
 import SocketServer
 import time
@@ -156,6 +157,14 @@ class handler(SimpleHTTPRequestHandler):
 				sysLog("SHUT_DOWN\t")
 				shutDown()
 				return
+		elif(url.find("reboot") > 0):
+			print "Rebooting S.M.A.R.T in 5 seconds."
+			sysLog("REBOOT\t")
+			self.send_response(200)
+			self.end_headers()
+			self.wfile.write("rebooting")
+			time.sleep(5)
+			os.system("reboot")
 
 	        else:
 	                print "Invalid URL."
@@ -263,11 +272,26 @@ def readSerial():
 		device = bridgeFrame[1]
 		query = "d" + str(device)
 		val = bridgeFrame[2]
-		print query + " " + val + " " + addr
 		db.execute("use smart")
+		print "IN READ SERIAL ***************"
+		print query
+		print roomAddr
+		print "select %s from map where room_no=%s" % (query, roomAddr)
+		db.execute("select %s from map where room_no=%s" % (query, roomAddr))
+		val = db.fetchone()
+		val = str(val[0])
+		if(val == "1"):
+			val = "0"
+		elif(val == "0"):
+			val = "1"
+		print "update map set %s=%s where room_no=%s" % (query, val, roomAddr)
 		db.execute("update map set %s=%s where room_no=%s" % (query, val, roomAddr))
 		con.commit()
-	threading.Timer(0.1, readSerial).start()
+		print "SWITCH TOOGLED ------ ROOM: %s DEVICE: %s VALUE: %s" % (roomAddr, query, val)
+		sysLog("SWITCH TOGGLE: R: %s D: %s V: %s" % (roomAddr, query, val))
+		ser.write("r:" + roomAddr + "v:" + val)
+	schedule.run_pending()
+	threading.Timer(0.5, readSerial).start()
 	return 0
 
 def updateFromApp(room):
@@ -277,8 +301,20 @@ def updateFromApp(room):
 	result = str(result[0]) + str(result[1]) + str(result[2]) + str(result[3]) + str(result[4]) + str(result[5]) + str(result[6]) + str(result[7])
 	result = int(result,2)
 	result = str(result)
-	ser.write("r:" + room + "v:" + result)
-	print "UPDATE------------------------------ " + result
+	db.execute("select slider from map where room_no=%s" % room)
+	fan = db.fetchone()
+	fan = str(fan[0])
+	ser.write("r:" + room + "v:" + result + "f:" + fan)
+	print "UPDATE------------------------------ " + result + "  FAN: " + fan
+	return 0
+
+def systemUpdate():
+	print "Running Periodic System update... Please wait.."
+	sysLog("SYSTEM_UPDATE_INIT\t")
+	os.system("apt-get update -y")
+	os.system("apt-get dist-upgrade -y")
+	print "\n\n System Update completed. Resuming S.M.A.R.T services..."
+	sysLog("SYSTEM_UPDATE_COMPLETE\t")
 	return 0
 
 # Main program begins here...
@@ -294,6 +330,8 @@ print "Initializing with SU access..."
 initDB()
 print "Attempting to start localhost HTTP server on port ", PORT,"..."
 print "Started listening to S.M.A.R.T app  with security key: " + loginKey()
+schedule.every().day.at("3:30").do(systemUpdate)
+print "Daily System Updater scheduled to 3:30 AM."
 NumOfRooms()
 readSerial()
 httpd.serve_forever()
