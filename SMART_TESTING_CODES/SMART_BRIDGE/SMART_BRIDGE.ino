@@ -26,7 +26,7 @@
 // Unique ID for each SMART home. MUST BE IN RANGE OF 0-127.
 #define UID 123
 
-const uint16_t CHILDREN[] = {01, 02, 03};
+const uint16_t CHILDREN[] = {01, 02, 03, 0};
 const uint16_t MY_ADDR = 00;
 
 // RF24 configuration
@@ -73,7 +73,7 @@ void loop()
     RF24NetworkHeader rxHead;
     network.read(rxHead,&payload,sizeof(payload));
     //payload = networkDecrypt(payload);
-    if(payload.destaddr == MY_ADDR && payload.ack == 0 && payload.uniqueID == UID)
+    if(payload.ack == 0 && payload.uniqueID == UID)
     {
       sendPayloadToServer();
     }
@@ -126,6 +126,7 @@ void serialEvent()
   {
     payload.destaddr = Serial.parseInt();
     payload.val = Serial.parseInt();
+    payload.blaster = Serial.parseInt();
     payload.ack = 1;
     byte temp = payload.myaddr;
     payload.myaddr = payload.destaddr;
@@ -137,11 +138,13 @@ void serialEvent()
 
 void broadcastChildren(const uint16_t *c)
 {
-  for(byte k=0;k<sizeof(c);k++)
+  byte k=0;
+  while(c[k]!=0)
   {
+    Serial.println(c[k]);
     RF24NetworkHeader retransmit(c[k]);
     bool ok = network.write(retransmit,&payload,sizeof(payload));
     delayMicroseconds(500);
+    k++;
   }
 }
-
