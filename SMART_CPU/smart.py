@@ -6,7 +6,6 @@ import schedule
 import serial
 import SocketServer
 import time
-import wiringpi
 import os
 import sys
 import MySQLdb as mdb
@@ -15,21 +14,14 @@ import threading
 import wikipedia as wiki
 import urllib2
 
-PORT = 80
+PORT = 98
 BAUD = 9600
-
-# hardware configuration pins
-clkPin = 1
-latchPin = 4
-dataPin = 5
-enable = 6
 
 bridgeFrame = [0,0,0]
 ioRead = []
 NoOfRooms = []
 loginAttempt = 0
 
-io = wiringpi.GPIO(wiringpi.GPIO.WPI_MODE_PINS)
 ser = serial.Serial(port='/dev/ttyAMA0',baudrate=BAUD)
 
 con = mdb.connect("localhost","root","linux")
@@ -106,6 +98,7 @@ class handler(SimpleHTTPRequestHandler):
 			self.send_response(200)
                         self.end_headers()
                         self.wfile.write("slider ok")
+			updateFromApp(room)
 			return
 		elif(url.find("requestUpdate") > 0):
 			room = url.split("&")
@@ -191,7 +184,7 @@ def initDB():
 		print "---> Database not found. creating..."
 		db.execute("create database smart")
 		db.execute("use smart")
-		db.execute("create table map(room_no INT, d1 INT not null default 0, d2 INT not null default 0, d3 INT not null default 0, d4 INT not null default 0, d5 INT not null default 0, d6 INT not null default 0, d7 INT not null default 0, d8 INT not null default 0, slider INT not null default 0, octal INT not null default 0, active INT not null default 0)")
+		db.execute("create table map(room_no INT, d1 INT not null default 0, d2 INT not null default 0, d3 INT not null default 0, d4 INT not null default 0, d5 INT not null default 0, d6 INT not null default 0, d7 INT not null default 0, d8 INT not null default 0, slider INT not null default 0, timer_active INT not null default 0, active INT not null default 0)")
 		db.execute("insert into map (room_no) values (1)")
 		db.execute("insert into map (room_no) values (2)")
                 db.execute("insert into map (room_no) values (3)")
@@ -264,18 +257,22 @@ def readSerial():
 		ser.open()
 	while(ser.inWaiting() > 0):
 		bridgeFrame = ser.readline()
-		print bridgeFrame
+		print "serial in waiting.."
+		print "byte1: " + bridgeFrame[0]
+		print "byte2: " + bridgeFrame[1]
+		print "byte3: " + bridgeFrame[2]
 		changed = True
 	if(changed):
 		changed = False
 		roomAddr = bridgeFrame[0]
 		device = bridgeFrame[1]
-		query = "d" + str(device)
+		query ="d" + str(device)
 		val = bridgeFrame[2]
 		db.execute("use smart")
 		print "IN READ SERIAL ***************"
 		print query
 		print roomAddr
+		print val
 		print "select %s from map where room_no=%s" % (query, roomAddr)
 		db.execute("select %s from map where room_no=%s" % (query, roomAddr))
 		val = db.fetchone()
@@ -289,9 +286,14 @@ def readSerial():
 		con.commit()
 		print "SWITCH TOOGLED ------ ROOM: %s DEVICE: %s VALUE: %s" % (roomAddr, query, val)
 		sysLog("SWITCH TOGGLE: R: %s D: %s V: %s" % (roomAddr, query, val))
-		ser.write("r:" + roomAddr + "v:" + val)
+		db.execute("select slider from map where room_no=%s" % roomAddr)
+	        fan = db.fetchone()
+	        fan = str(fan[0])
+		updateFromApp(roomAddr)
+		#ser.write("r:" + roomAddr + "v:" + val + "f:" + fan)
+		print "Sent to BRIDGE: r:" + roomAddr + "v:" + val + "f:" + fan
 	schedule.run_pending()
-	threading.Timer(0.5, readSerial).start()
+	threading.Timer(1.5, readSerial).start() ########
 	return 0
 
 def updateFromApp(room):
@@ -315,6 +317,9 @@ def systemUpdate():
 	os.system("apt-get dist-upgrade -y")
 	print "\n\n System Update completed. Resuming S.M.A.R.T services..."
 	sysLog("SYSTEM_UPDATE_COMPLETE\t")
+	return 0
+
+def timerScheduler():
 	return 0
 
 # Main program begins here...
