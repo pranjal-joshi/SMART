@@ -84,6 +84,7 @@ class handler(SimpleHTTPRequestHandler):
 			sysLog("TOGGLE - R:%s D:%s V:%s" % (room, device, setValue))
 			updateFromApp(room)
 			return
+
 		elif(url.find("slider") > 0):
 			decode = url.split("&")
 			room = decode[1]
@@ -100,6 +101,7 @@ class handler(SimpleHTTPRequestHandler):
                         self.wfile.write("slider ok")
 			updateFromApp(room)
 			return
+
 		elif(url.find("requestUpdate") > 0):
 			room = url.split("&")
 			room = room[1]
@@ -112,6 +114,7 @@ class handler(SimpleHTTPRequestHandler):
 			self.wfile.write(str(result) + "updateResponse")
 			print "requestUpdate executed."
 			return
+
 		elif(url.find("activeRooms") > 0):
 			rooms = url.split("&")
 			rooms = rooms[1:]
@@ -127,6 +130,7 @@ class handler(SimpleHTTPRequestHandler):
 			self.end_headers()
 			self.wfile.write("OK")
 			return
+
 		elif(url.find("voiceQuery") > 0):
 			query = url.split("=");
 			query = query[1]
@@ -140,6 +144,7 @@ class handler(SimpleHTTPRequestHandler):
 			self.wfile.write(ans + "tts_ok")
 			sysLog("QUERY: %s" % query)
 			return
+
 		elif(url.find("shutDown") > 0):
 			key = url.split("&")
 			key = key[1]
@@ -159,15 +164,15 @@ class handler(SimpleHTTPRequestHandler):
 			time.sleep(5)
 			os.system("reboot")
 
-	        else:
-	                print "Invalid URL."
-			f = open("index.html",'r')
-			resp = f.read()
-			f.close()
-			self.send_response(200)
-			self.end_headers()
-			self.wfile.write(resp)
-			sysLog("INVALID URL\t")
+	    else:
+	        print "Invalid URL."
+		f = open("index.html",'r')
+		resp = f.read()
+		f.close()
+		self.send_response(200)
+		self.end_headers()
+		self.wfile.write(resp)
+		sysLog("INVALID URL\t")
 
 		return
 
@@ -187,12 +192,12 @@ def initDB():
 		db.execute("create table map(room_no INT, d1 INT not null default 0, d2 INT not null default 0, d3 INT not null default 0, d4 INT not null default 0, d5 INT not null default 0, d6 INT not null default 0, d7 INT not null default 0, d8 INT not null default 0, slider INT not null default 0, timer_active INT not null default 0, active INT not null default 0)")
 		db.execute("insert into map (room_no) values (1)")
 		db.execute("insert into map (room_no) values (2)")
-                db.execute("insert into map (room_no) values (3)")
-                db.execute("insert into map (room_no) values (4)")
-                db.execute("insert into map (room_no) values (5)")
-                db.execute("insert into map (room_no) values (6)")
-                db.execute("insert into map (room_no) values (7)")
-                db.execute("insert into map (room_no) values (8)")
+        db.execute("insert into map (room_no) values (3)")
+        db.execute("insert into map (room_no) values (4)")
+        db.execute("insert into map (room_no) values (5)")
+        db.execute("insert into map (room_no) values (6)")
+        db.execute("insert into map (room_no) values (7)")
+        db.execute("insert into map (room_no) values (8)")
 		con.commit()
 		db.execute("show databases")
 		a = db.fetchall()
@@ -217,14 +222,14 @@ def loginKey():
 
 def NumOfRooms():
 	db.execute("use smart")
-        db.execute("select room_no from map where active=1")
-        x = db.fetchall()
-        x = str(x)
+    db.execute("select room_no from map where active=1")
+    x = db.fetchall()
+    x = str(x)
 	global NoOfRooms
-        NoOfRooms = []
-        for i in range(1,9):
-                if (x.find(str(i)) > 0):
-                        NoOfRooms.append(int(i))
+    NoOfRooms = []
+    for i in range(1,9):
+    	if (x.find(str(i)) > 0):
+        	NoOfRooms.append(int(i))
 
 def shutDown():
 	db.close()
