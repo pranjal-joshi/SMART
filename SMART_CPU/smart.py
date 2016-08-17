@@ -32,26 +32,26 @@ class handler(SimpleHTTPRequestHandler):
 	def do_GET(self):
 		url = self.path
 		if(url.find("Pass") > 0):
-                	offset = url.find("Pass")
-	                offset = offset + 5
-	                substr = url[offset:offset+5]
+			offset = url.find("Pass")
+			offset = offset + 5
+			substr = url[offset:offset+5]
 			global loginAttempt
-	                if(substr == str(loginKey()) and loginControl()):
-	                        self.send_response(200)
-	                        self.end_headers()
-	                        self.wfile.write("grant")
+			if(substr == str(loginKey()) and loginControl()):
+				self.send_response(200)
+				self.end_headers()
+				self.wfile.write("grant")
 				print "LOGIN SUCCESSFUL."
 				print "Logged in at : " +  time.strftime("%d/%m/%y  %I:%M:%S %p")
 				sysLog("LOGGED IN.\t")
 				loginAttempt = 0
 				return
-	                else:
+			else:
 				loginAttempt = loginAttempt + 1
-        	                self.send_response(200)
-	                        self.end_headers()
+				self.send_response(200)
+				self.end_headers()
 
 				if(loginAttempt < 5):
-	        	                self.wfile.write("denied")
+					self.wfile.write("denied")
 					print "LOGIN UNSUCCESSFUL."
 					sysLog("LOGIN DENIED.\t")
 					return
@@ -92,13 +92,13 @@ class handler(SimpleHTTPRequestHandler):
 			print "SLIDER ACCEPTED."
 			print room, " ", thumbValue
 			db.execute("use smart")
-                        db.execute("update map set slider=%s where room_no=%s" % (thumbValue, room))
+			db.execute("update map set slider=%s where room_no=%s" % (thumbValue, room))
 			db.execute("update map set active=1 where room_no=%s" % (room))
-                        con.commit()
+			con.commit()
 			NumOfRooms()
 			self.send_response(200)
-                        self.end_headers()
-                        self.wfile.write("slider ok")
+			self.end_headers()
+			self.wfile.write("slider ok")
 			updateFromApp(room)
 			return
 
@@ -155,6 +155,7 @@ class handler(SimpleHTTPRequestHandler):
 				sysLog("SHUT_DOWN\t")
 				shutDown()
 				return
+
 		elif(url.find("reboot") > 0):
 			print "Rebooting S.M.A.R.T in 5 seconds."
 			sysLog("REBOOT\t")
@@ -164,15 +165,15 @@ class handler(SimpleHTTPRequestHandler):
 			time.sleep(5)
 			os.system("reboot")
 
-	    else:
-	        print "Invalid URL."
-		f = open("index.html",'r')
-		resp = f.read()
-		f.close()
-		self.send_response(200)
-		self.end_headers()
-		self.wfile.write(resp)
-		sysLog("INVALID URL\t")
+		else:
+			print "Invalid URL."
+			f = open("index.html",'r')
+			resp = f.read()
+			f.close()
+			self.send_response(200)
+			self.end_headers()
+			self.wfile.write(resp)
+			sysLog("INVALID URL\t")
 
 		return
 
@@ -189,15 +190,15 @@ def initDB():
 		print "---> Database not found. creating..."
 		db.execute("create database smart")
 		db.execute("use smart")
-		db.execute("create table map(room_no INT, d1 INT not null default 0, d2 INT not null default 0, d3 INT not null default 0, d4 INT not null default 0, d5 INT not null default 0, d6 INT not null default 0, d7 INT not null default 0, d8 INT not null default 0, slider INT not null default 0, timer_active INT not null default 0, active INT not null default 0)")
+		db.execute("create table map(room_no INT, d1 INT not null default 0, d2 INT not null default 0, d3 INT not null default 0, d4 INT not null default 0, d5 INT not null default 0, d6 INT not null default 0, d7 INT not null default 0, d8 INT not null default 0, slider INT not null default 0, timer_active INT not null default 0, active INT not null default 0, address VARCHAR(25), is_server INT not null default 0)")
 		db.execute("insert into map (room_no) values (1)")
 		db.execute("insert into map (room_no) values (2)")
-        db.execute("insert into map (room_no) values (3)")
-        db.execute("insert into map (room_no) values (4)")
-        db.execute("insert into map (room_no) values (5)")
-        db.execute("insert into map (room_no) values (6)")
-        db.execute("insert into map (room_no) values (7)")
-        db.execute("insert into map (room_no) values (8)")
+		db.execute("insert into map (room_no) values (3)")
+		db.execute("insert into map (room_no) values (4)")
+		db.execute("insert into map (room_no) values (5)")
+		db.execute("insert into map (room_no) values (6)")
+		db.execute("insert into map (room_no) values (7)")
+		db.execute("insert into map (room_no) values (8)")
 		con.commit()
 		db.execute("show databases")
 		a = db.fetchall()
@@ -222,14 +223,14 @@ def loginKey():
 
 def NumOfRooms():
 	db.execute("use smart")
-    db.execute("select room_no from map where active=1")
-    x = db.fetchall()
-    x = str(x)
+	db.execute("select room_no from map where active=1")
+	x = db.fetchall()
+	x = str(x)
 	global NoOfRooms
-    NoOfRooms = []
-    for i in range(1,9):
-    	if (x.find(str(i)) > 0):
-        	NoOfRooms.append(int(i))
+	NoOfRooms = []
+	for i in range(1,9):
+		if (x.find(str(i)) > 0):
+			NoOfRooms.append(int(i))
 
 def shutDown():
 	db.close()
@@ -292,8 +293,8 @@ def readSerial():
 		print "SWITCH TOOGLED ------ ROOM: %s DEVICE: %s VALUE: %s" % (roomAddr, query, val)
 		sysLog("SWITCH TOGGLE: R: %s D: %s V: %s" % (roomAddr, query, val))
 		db.execute("select slider from map where room_no=%s" % roomAddr)
-	        fan = db.fetchone()
-	        fan = str(fan[0])
+		fan = db.fetchone()
+		fan = str(fan[0])
 		updateFromApp(roomAddr)
 		#ser.write("r:" + roomAddr + "v:" + val + "f:" + fan)
 		print "Sent to BRIDGE: r:" + roomAddr + "v:" + val + "f:" + fan
@@ -342,6 +343,4 @@ print "Attempting to start localhost HTTP server on port ", PORT,"..."
 print "Started listening to S.M.A.R.T app  with security key: " + loginKey()
 schedule.every().day.at("3:30").do(systemUpdate)
 print "Daily System Updater scheduled to 3:30 AM."
-NumOfRooms()
-readSerial()
 httpd.serve_forever()
