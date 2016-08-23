@@ -38,6 +38,9 @@ RESPONSE = 0
 SPEED = 0
 OLD_SPEED = 0
 
+PRESENT_STATE = [0,0,0,0,0,0,0,0,0]		# requestUpdate from server after appActivity
+PRESENT_STATE_RESPONSE = 0
+
 class handler(SimpleHTTPRequestHandler):
 	def do_GET(self):
 		url = self.path
@@ -45,10 +48,18 @@ class handler(SimpleHTTPRequestHandler):
 		if(url.find("appActivity") > 0):
 			if DEBUG:
 				print "App activity request received."
+			### get data from main server database and apply to GPIO
+			url = "http://" + str(SERVER_IP) + ":" + str(SERVER_PORT) + "/?requestUpdate=&" + str(ROOM_NO)
+			PRESENT_STATE_RESPONSE = urllib2.urlopen(url).read()
+			PRESENT_STATE_RESPONSE = PRESENT_STATE_RESPONSE[1:9]
+			if DEBUG:
+				print str(PRESENT_STATE_RESPONSE)
+			#########################################################
 			self.send_response(200)
 			self.end_headers()
 			self.wfile.write("activityAccepted")
-			### get data from main server database and apply to GPIO
+			return
+			
 
 
 ### triggers on ZCD interrupt for triac sync

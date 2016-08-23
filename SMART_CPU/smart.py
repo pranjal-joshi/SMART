@@ -22,6 +22,9 @@ ioRead = []
 NoOfRooms = []
 loginAttempt = 0
 
+REQUEST_ROOM = 0
+APP_ACTIVITY = False
+
 ser = serial.Serial(port='/dev/ttyAMA0',baudrate=BAUD)
 
 con = mdb.connect("localhost","root","linux")
@@ -30,6 +33,8 @@ db = con.cursor()
 # HTTP handler for GET request
 class handler(SimpleHTTPRequestHandler):
 	def do_GET(self):
+		global APP_ACTIVITY
+		global REQUEST_ROOM
 		url = self.path
 		if(url.find("Pass") > 0):
 			offset = url.find("Pass")
@@ -83,6 +88,8 @@ class handler(SimpleHTTPRequestHandler):
 			self.wfile.write("toggle ok")
 			sysLog("TOGGLE - R:%s D:%s V:%s" % (room, device, setValue))
 			updateFromApp(room)
+			REQUEST_ROOM = room
+			APP_ACTIVITY = True
 			return
 
 		elif(url.find("slider") > 0):
@@ -100,6 +107,8 @@ class handler(SimpleHTTPRequestHandler):
 			self.end_headers()
 			self.wfile.write("slider ok")
 			updateFromApp(room)
+			REQUEST_ROOM = room
+			APP_ACTIVITY = True
 			return
 
 		elif(url.find("requestUpdate") > 0):
@@ -328,6 +337,24 @@ def systemUpdate():
 def timerScheduler():
 	return 0
 
+def getNodeIP(roomNo):
+	db.execute("use smart")
+	query = "select address from map where room_no=" + str(roomNo)
+	db.execute(query)
+	result = db.fetchone()
+	return str(result[0])
+
+def appActivity():
+	global APP_ACTIVITY
+	global REQUEST_ROOM
+	if APP_ACTIVITY:
+		APP_ACTIVITY = False
+		urlToSend = "http://"+str(getNodeIP(REQUEST_ROOM))+":"+str(PORT-1)+"/?appActivity"
+		print urlToSend
+		resp = urllib2.urlopen(urlToSend).read()
+	threading.Timer(0.1, appActivity).start()
+
+
 # Main program begins here...
 
 os.system("clear")
@@ -341,6 +368,6 @@ print "Initializing with SU access..."
 initDB()
 print "Attempting to start localhost HTTP server on port ", PORT,"..."
 print "Started listening to S.M.A.R.T app  with security key: " + loginKey()
-schedule.every().day.at("3:30").do(systemUpdate)
 print "Daily System Updater scheduled to 3:30 AM."
+appActivity()
 httpd.serve_forever()
