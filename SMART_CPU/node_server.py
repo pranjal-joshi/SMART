@@ -15,9 +15,12 @@ import os
 import RPi.GPIO as io
 import time
 import threading
+import sys
 
 ### CONFIGURATION ###
 DEBUG = True
+
+VERSION = 1.0
 
 SERVER_IP = "192.168.0.160"				#change later
 SERVER_PORT = "98"
@@ -26,6 +29,8 @@ PORT = int(SERVER_PORT) - 1
 SYNCPIN = 14
 
 SWITCHPINS = [0,1,7,8,11,9,10,24]		# DON'T CHANGE SEQUENCE
+
+RELAYPINS = [12,16,20,21,26,19,13,6]	# DON'T CHANGE SEQUENCE
 
 CHARGE = 17
 DISCHARGE = 27
@@ -51,9 +56,11 @@ class handler(SimpleHTTPRequestHandler):
 			### get data from main server database and apply to GPIO
 			url = "http://" + str(SERVER_IP) + ":" + str(SERVER_PORT) + "/?requestUpdate=&" + str(ROOM_NO)
 			PRESENT_STATE_RESPONSE = urllib2.urlopen(url).read()
-			PRESENT_STATE_RESPONSE = PRESENT_STATE_RESPONSE[1:9]
+			PRESENT_STATE_RESPONSE = PRESENT_STATE_RESPONSE[0:8]
+			PRESENT_STATE_RESPONSE = map(int, str(PRESENT_STATE_RESPONSE))
 			if DEBUG:
 				print str(PRESENT_STATE_RESPONSE)
+			applyToRelay(PRESENT_STATE_RESPONSE)					# actually apply data to relay
 			#########################################################
 			self.send_response(200)
 			self.end_headers()
@@ -77,9 +84,11 @@ def initSync():
 	io.setup(SYNCPIN, io.IN, pull_up_down=io.PUD_UP)
 	io.add_event_detect(SYNCPIN, io.FALLING, callback=syncMains, bouncetime=200)
 
-def initSwitchPins(array):
+def initSwitchPins(array,relArray):
 	for i in range(0,len(array)):
 		io.setup(array[i], io.IN, pull_up_down=io.PUD_UP)
+	for i in range(0,len(relArray)):
+		io.setup(relArray[i], io.OUT)
 	io.add_event_detect(array[0], io.BOTH, callback=swInt1, bouncetime=250)
 	io.add_event_detect(array[1], io.BOTH, callback=swInt2, bouncetime=250)
 	io.add_event_detect(array[2], io.BOTH, callback=swInt3, bouncetime=250)
@@ -90,6 +99,7 @@ def initSwitchPins(array):
 	io.add_event_detect(array[7], io.BOTH, callback=swInt8, bouncetime=250)
 	if DEBUG:
 		print "Interrupts enabled on BCM pins: " + str(SWITCHPINS)
+		print "Set as relay output (BCM Pins): " + str(relArray)
 	return 0
 
 ### interrupt callback functions for every switch
@@ -219,8 +229,12 @@ def chargeCap():
 	io.output(CHARGE, True)
 	start = time.time()
 	while not (io.input(DISCHARGE)):
-		if(time.time() - start > 1.0):
-			break
+		try:
+			if(time.time() - start > 1.0):
+				break
+		except(KeyboardInterrupt):
+			io.cleanup()
+			return
 	end = time.time()
 	if DEBUG:
 		z = (end-start)/1e-3
@@ -229,11 +243,18 @@ def chargeCap():
 
 
 def analogRead():
-	global ANALOG_VAL
-	dischargeCap()
-	ANALOG_VAL = chargeCap()
-	fanSpeedController(ANALOG_VAL)
-	threading.Timer(0.5, analogRead).start()
+	try:
+		global ANALOG_VAL
+		dischargeCap()
+		ANALOG_VAL = chargeCap()
+		fanSpeedController(ANALOG_VAL)
+		capThread = threading.Timer(0.5, analogRead)
+		capThread.daemon = True
+		capThread.start()
+	except:
+		io.cleanup()
+		sys.exit()
+		return
 
 def fanSpeedController(value):
 	global SPEED
@@ -253,8 +274,91 @@ def fanSpeedController(value):
 		pass
 	else:
 		url = "http://" + str(SERVER_IP) + ":" + str(SERVER_PORT) + "/?slider=&" + str(ROOM_NO) + "&" + str(SPEED)
+		if DEBUG:
+			print "FanSpeedURL: " + url
 		sliderResp = urllib2.urlopen(url).read()
 		OLD_SPEED = SPEED
+
+def applyToRelay(relayArray):
+	global RELAYPINS
+	for i in range(0,len(relayArray)):
+		if(int(relayArray[i]) == 1):
+			io.output(RELAYPINS[i], True)
+		elif(int(relayArray[i]) == 0):
+			io.output(RELAYPINS[i], False)
+	return
+
+'''
+def initNodeDatabase():
+	try:
+		if DEBUG:
+			print "Initializing Database conncetion. @_@"
+		db.execute("show databases")
+		result = str(db.fetchall())
+		if(result.find("samrat2") < 0):
+			print "Creating new database..."
+			db.execute("create database samrat2")
+			db.execute("use samrat2")
+			db.execute("create table node(room_no VARCHAR(1) not null default 0, value INT)")
+			db.execute("insert into node (value) values (1)")
+			db.execute("insert into node (room_no) values (0)")
+		con.commit()
+		db.execute("use samrat2")
+		db.execute("show tables")
+		result = str(db.fetchall())
+		if(result.find("node") < 0):
+			db.execute("use samrat2")
+			db.execute("create table node(room_no VARCHAR(1) not null default 0, value INT)")
+			db.execute("insert into node (value) values (1)")
+			db.execute("insert into node (room_no) values (0)")
+		con.commit()
+		db.execute("select room_no from node where value=1")
+		room = db.fetchall()
+		room = str(room[0][0])
+		print "Room: " + room
+		if((room == 0) or (room == str(0))):
+			assignRoomNumber()
+		else:
+			global ROOM_NO
+			ROOM_NO = room
+			return room
+	except(mdb.Error):
+		print "**Database connection failed, Something went wrong! T_T"
+
+
+def assignRoomNumber():
+	global ROOM_NO
+	ip = os.popen("hostname -I")
+	ip = ip.read()
+	ip = ip.split(' ')
+	ip = ip[0]
+	ip = ip.replace(".","&")
+	url = "http://" + str(SERVER_IP) + ":" + str(SERVER_PORT) + "/?nodeIP=&" + str(ip)
+	if DEBUG:
+		print "assignRoomURL: " + url
+	resp = urllib2.urlopen(url).read()
+	db.execute("use samrat2")
+	db.execute("update node set room_no=%s where value=1" % (str(resp)))
+	con.commit()
+	if DEBUG:
+		print "ROOM_NO assigned -> " + str(resp)
+'''
+
+def updateNodeIP():
+	global ROOM_NO
+	ip = os.popen("hostname -I")
+	ip = ip.read()
+	ip = ip.split(' ')
+	ip = ip[0]
+	ip = ip.replace(".","&")
+	url = "http://" + str(SERVER_IP) + ":" + str(SERVER_PORT) + "/?updateNode=&" + str(ROOM_NO) + "&" + str(ip)
+	urllib2.urlopen(url).read()
+	if DEBUG:
+		print "IP updated -> " + str(url)
+	updateNodeThread = threading.Timer(15*60, updateNodeIP)
+	updateNodeThread.daemon = True
+	updateNodeThread.start()
+
 
 ### main program starts here
 try:
@@ -262,10 +366,12 @@ try:
 	print "\nS.M.A.R.T Room control node"
 	print "Node server engine initialized."
 	httpd = SocketServer.TCPServer(("",PORT),handler)
+	updateNodeIP()
 	initSync()
-	initSwitchPins(SWITCHPINS)
+	initSwitchPins(SWITCHPINS, RELAYPINS)
 	analogRead()
 	httpd.serve_forever()
 except(KeyboardInterrupt):
 	print "\nKeyboardInterrupt -> cleaning up GPIO..."
 	io.cleanup()
+	sys.exit(0)
