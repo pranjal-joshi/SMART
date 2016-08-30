@@ -2,8 +2,6 @@
 
 from SimpleHTTPServer import *
 import collections
-import schedule
-import serial
 import SocketServer
 import time
 import os
@@ -14,21 +12,18 @@ import threading
 import wikipedia as wiki
 import urllib2
 
-PORT = 98
-BAUD = 9600
+VERSION = 1.0
 
-bridgeFrame = [0,0,0]
-ioRead = []
-NoOfRooms = []
+PORT = 98
+
 loginAttempt = 0
 
 REQUEST_ROOM = 0
 APP_ACTIVITY = False
 
-ser = serial.Serial(port='/dev/ttyAMA0',baudrate=BAUD)
-
 con = mdb.connect("localhost","root","linux")
 db = con.cursor()
+dbThread = con.cursor()
 
 # HTTP handler for GET request
 class handler(SimpleHTTPRequestHandler):
@@ -82,7 +77,6 @@ class handler(SimpleHTTPRequestHandler):
 			con.commit()
 			print room, " ", device, " ", setValue
 			print "TOGGLE ACCEPTED."
-			NumOfRooms()
 			self.send_response(200)
 			self.end_headers()
 			self.wfile.write("toggle ok")
@@ -165,6 +159,19 @@ class handler(SimpleHTTPRequestHandler):
 				shutDown()
 				return
 
+		elif(url.find("updateNode") > 0):
+			z = url.split("&")
+			room = str(z[1])
+			ip = str(z[2]) + "." + str(z[3]) + "." + str(z[4]) + "." + str(z[5])
+			strIP = '"' + ip + '"'
+			db.execute("use smart")
+			db.execute("update map set address=%s where room_no=%s" % (strIP,str(room)))
+			print "update map set address=%s where room_no=%s" % (strIP,str(room))
+			self.send_response(200)
+			self.end_headers()
+			self.wfile.write("IP updated.")
+			return
+
 		elif(url.find("reboot") > 0):
 			print "Rebooting S.M.A.R.T in 5 seconds."
 			sysLog("REBOOT\t")
@@ -199,7 +206,7 @@ def initDB():
 		print "---> Database not found. creating..."
 		db.execute("create database smart")
 		db.execute("use smart")
-		db.execute("create table map(room_no INT, d1 INT not null default 0, d2 INT not null default 0, d3 INT not null default 0, d4 INT not null default 0, d5 INT not null default 0, d6 INT not null default 0, d7 INT not null default 0, d8 INT not null default 0, slider INT not null default 0, timer_active INT not null default 0, active INT not null default 0, address VARCHAR(25), is_server INT not null default 0)")
+		db.execute("create table map(room_no INT, d1 INT not null default 0, d2 INT not null default 0, d3 INT not null default 0, d4 INT not null default 0, d5 INT not null default 0, d6 INT not null default 0, d7 INT not null default 0, d8 INT not null default 0, slider INT not null default 0, timer_active INT not null default 0, active INT not null default 0, address VARCHAR(25), is_server INT not null default 0, assigned_no INT not null default 0)")
 		db.execute("insert into map (room_no) values (1)")
 		db.execute("insert into map (room_no) values (2)")
 		db.execute("insert into map (room_no) values (3)")
@@ -230,17 +237,6 @@ def loginKey():
 	key = security.b16decode(key)
 	return key
 
-def NumOfRooms():
-	db.execute("use smart")
-	db.execute("select room_no from map where active=1")
-	x = db.fetchall()
-	x = str(x)
-	global NoOfRooms
-	NoOfRooms = []
-	for i in range(1,9):
-		if (x.find(str(i)) > 0):
-			NoOfRooms.append(int(i))
-
 def shutDown():
 	db.close()
 	con.close()	
@@ -264,84 +260,21 @@ def loginControl():
 	else:
 		return False
 
-def readSerial():
-	global bridgeFrame
-	bridgeFrame = [0,0,0]
-	changed = False
-	if(ser.isOpen() == False):
-		ser.open()
-	while(ser.inWaiting() > 0):
-		bridgeFrame = ser.readline()
-		print "serial in waiting.."
-		print "byte1: " + bridgeFrame[0]
-		print "byte2: " + bridgeFrame[1]
-		print "byte3: " + bridgeFrame[2]
-		changed = True
-	if(changed):
-		changed = False
-		roomAddr = bridgeFrame[0]
-		device = bridgeFrame[1]
-		query ="d" + str(device)
-		val = bridgeFrame[2]
-		db.execute("use smart")
-		print "IN READ SERIAL ***************"
-		print query
-		print roomAddr
-		print val
-		print "select %s from map where room_no=%s" % (query, roomAddr)
-		db.execute("select %s from map where room_no=%s" % (query, roomAddr))
-		val = db.fetchone()
-		val = str(val[0])
-		if(val == "1"):
-			val = "0"
-		elif(val == "0"):
-			val = "1"
-		print "update map set %s=%s where room_no=%s" % (query, val, roomAddr)
-		db.execute("update map set %s=%s where room_no=%s" % (query, val, roomAddr))
-		con.commit()
-		print "SWITCH TOOGLED ------ ROOM: %s DEVICE: %s VALUE: %s" % (roomAddr, query, val)
-		sysLog("SWITCH TOGGLE: R: %s D: %s V: %s" % (roomAddr, query, val))
-		db.execute("select slider from map where room_no=%s" % roomAddr)
-		fan = db.fetchone()
-		fan = str(fan[0])
-		updateFromApp(roomAddr)
-		#ser.write("r:" + roomAddr + "v:" + val + "f:" + fan)
-		print "Sent to BRIDGE: r:" + roomAddr + "v:" + val + "f:" + fan
-	schedule.run_pending()
-	threading.Timer(1.5, readSerial).start() ########
-	return 0
-
-def updateFromApp(room):
-	db.execute("use smart")
-	db.execute("select d1,d2,d3,d4,d5,d6,d7,d8 from map where room_no=%s" % room)
-	result = db.fetchone()
-	result = str(result[0]) + str(result[1]) + str(result[2]) + str(result[3]) + str(result[4]) + str(result[5]) + str(result[6]) + str(result[7])
-	result = int(result,2)
-	result = str(result)
-	db.execute("select slider from map where room_no=%s" % room)
-	fan = db.fetchone()
-	fan = str(fan[0])
-	ser.write("r:" + room + "v:" + result + "f:" + fan)
-	print "UPDATE------------------------------ " + result + "  FAN: " + fan
-	return 0
-
 def systemUpdate():
 	print "Running Periodic System update... Please wait.."
-	sysLog("SYSTEM_UPDATE_INIT\t")
-	os.system("apt-get update -y")
-	os.system("apt-get dist-upgrade -y")
-	print "\n\n System Update completed. Resuming S.M.A.R.T services..."
-	sysLog("SYSTEM_UPDATE_COMPLETE\t")
+	'''
+			TO-DO --> Write OTA system update logic here!
+	'''
 	return 0
 
 def timerScheduler():
 	return 0
 
-def getNodeIP(roomNo):
-	db.execute("use smart")
+def getNodeIP(roomNo):							# New connection cursor for diffrent thread
+	dbThread.execute("use smart")
 	query = "select address from map where room_no=" + str(roomNo)
-	db.execute(query)
-	result = db.fetchone()
+	dbThread.execute(query)
+	result = dbThread.fetchone()
 	return str(result[0])
 
 def appActivity():
@@ -352,6 +285,7 @@ def appActivity():
 		urlToSend = "http://"+str(getNodeIP(REQUEST_ROOM))+":"+str(PORT-1)+"/?appActivity"
 		print urlToSend
 		resp = urllib2.urlopen(urlToSend).read()
+	sysLog("APP ACTIVITY: R=%s" % (REQUEST_ROOM))
 	threading.Timer(0.1, appActivity).start()
 
 
@@ -368,6 +302,5 @@ print "Initializing with SU access..."
 initDB()
 print "Attempting to start localhost HTTP server on port ", PORT,"..."
 print "Started listening to S.M.A.R.T app  with security key: " + loginKey()
-print "Daily System Updater scheduled to 3:30 AM."
 appActivity()
 httpd.serve_forever()
