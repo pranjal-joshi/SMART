@@ -66,6 +66,29 @@ class handler(SimpleHTTPRequestHandler):
 			self.end_headers()
 			self.wfile.write("activityAccepted")
 			return
+
+		if(url.find("nodeReboot") > 0):
+			self.send_response(200)
+			self.end_headers()
+			self.wfile.write("node rebooting")
+			os.system("sudo reboot")
+			return
+
+		if(url.find("nodeShutdown") > 0):
+			self.send_response(200)
+			self.end_headers()
+			self.wfile.write("node shutting down")
+			os.system("sudo shutdown -h now")
+			return
+
+		if(url.find("downloadOTA") > 0):
+			print "Node OTA updating.."
+			downloadOTA()
+			self.send_response(200)
+			self.end_headers()
+			self.wfile.write("node OTA downloaded")
+			print "Update completed. New features will take effect after restart."
+			return
 			
 
 
@@ -288,62 +311,6 @@ def applyToRelay(relayArray):
 			io.output(RELAYPINS[i], False)
 	return
 
-'''
-def initNodeDatabase():
-	try:
-		if DEBUG:
-			print "Initializing Database conncetion. @_@"
-		db.execute("show databases")
-		result = str(db.fetchall())
-		if(result.find("samrat2") < 0):
-			print "Creating new database..."
-			db.execute("create database samrat2")
-			db.execute("use samrat2")
-			db.execute("create table node(room_no VARCHAR(1) not null default 0, value INT)")
-			db.execute("insert into node (value) values (1)")
-			db.execute("insert into node (room_no) values (0)")
-		con.commit()
-		db.execute("use samrat2")
-		db.execute("show tables")
-		result = str(db.fetchall())
-		if(result.find("node") < 0):
-			db.execute("use samrat2")
-			db.execute("create table node(room_no VARCHAR(1) not null default 0, value INT)")
-			db.execute("insert into node (value) values (1)")
-			db.execute("insert into node (room_no) values (0)")
-		con.commit()
-		db.execute("select room_no from node where value=1")
-		room = db.fetchall()
-		room = str(room[0][0])
-		print "Room: " + room
-		if((room == 0) or (room == str(0))):
-			assignRoomNumber()
-		else:
-			global ROOM_NO
-			ROOM_NO = room
-			return room
-	except(mdb.Error):
-		print "**Database connection failed, Something went wrong! T_T"
-
-
-def assignRoomNumber():
-	global ROOM_NO
-	ip = os.popen("hostname -I")
-	ip = ip.read()
-	ip = ip.split(' ')
-	ip = ip[0]
-	ip = ip.replace(".","&")
-	url = "http://" + str(SERVER_IP) + ":" + str(SERVER_PORT) + "/?nodeIP=&" + str(ip)
-	if DEBUG:
-		print "assignRoomURL: " + url
-	resp = urllib2.urlopen(url).read()
-	db.execute("use samrat2")
-	db.execute("update node set room_no=%s where value=1" % (str(resp)))
-	con.commit()
-	if DEBUG:
-		print "ROOM_NO assigned -> " + str(resp)
-'''
-
 def updateNodeIP():
 	global ROOM_NO
 	ip = os.popen("hostname -I")
@@ -358,6 +325,12 @@ def updateNodeIP():
 	updateNodeThread = threading.Timer(15*60, updateNodeIP)
 	updateNodeThread.daemon = True
 	updateNodeThread.start()
+
+def downloadOTA():
+	url = "Enter .tar.gz OTA url"
+	os.system("wget " + url + " -P " + os.getcwd() + "/")
+	os.system("tar -xvzf *.tar.gz")
+	os.system("rm *.tar.gz")
 
 
 ### main program starts here

@@ -12,9 +12,14 @@ import threading
 import wikipedia as wiki
 import urllib2
 
+############### Script versions ################
 VERSION = 1.0
+VERSION_NODE = 1.0
+VERSION_WEB = 1.0
+################################################
 
 PORT = 98
+NODE_PORT = PORT-1
 
 loginAttempt = 0
 
@@ -81,7 +86,6 @@ class handler(SimpleHTTPRequestHandler):
 			self.end_headers()
 			self.wfile.write("toggle ok")
 			sysLog("TOGGLE - R:%s D:%s V:%s" % (room, device, setValue))
-			updateFromApp(room)
 			REQUEST_ROOM = room
 			APP_ACTIVITY = True
 			return
@@ -100,7 +104,6 @@ class handler(SimpleHTTPRequestHandler):
 			self.send_response(200)
 			self.end_headers()
 			self.wfile.write("slider ok")
-			updateFromApp(room)
 			REQUEST_ROOM = room
 			APP_ACTIVITY = True
 			return
@@ -156,6 +159,7 @@ class handler(SimpleHTTPRequestHandler):
 				self.end_headers()
 				self.wfile.write("SMART SHUTDOWN commencing.")
 				sysLog("SHUT_DOWN\t")
+				nodeBroadcast("nodeShutdown")
 				shutDown()
 				return
 
@@ -178,8 +182,33 @@ class handler(SimpleHTTPRequestHandler):
 			self.send_response(200)
 			self.end_headers()
 			self.wfile.write("rebooting")
+			nodeBroadcast("nodeReboot")
 			time.sleep(5)
 			os.system("reboot")
+
+		elif(url.find("otaUpdate") > 0):
+			print "OTA update checking.."
+			otaVersionURL = "Enter valid ota url here!!"
+			os.system("wget " + otaVersionURL + " -P " + os.getcwd() + "/")
+			otaVers = open("version.txt","r")
+			versionCheck = otaVers.read()
+			otaVers.close()
+			versionCheck = versionCheck.split("\n")
+			versionCheck = float(versionCheck[0])
+			if(VERSION < versionCheck):
+				nodeBroadcast("downloadOTA")
+				downloadOTA()
+				sysLog("OTA complete\t")
+				print "System Update complete. New features will take effect after restart!"
+				self.send_response(200)
+				self.end_headers()
+				self.wfile.write("ota complete")
+			else:
+				print "Your software is up-to-date!"
+				self.send_response(200)
+				self.end_headers()
+				self.wfile.write("ota unavailable")
+
 
 		else:
 			print "Invalid URL."
@@ -260,13 +289,6 @@ def loginControl():
 	else:
 		return False
 
-def systemUpdate():
-	print "Running Periodic System update... Please wait.."
-	'''
-			TO-DO --> Write OTA system update logic here!
-	'''
-	return 0
-
 def timerScheduler():
 	return 0
 
@@ -285,8 +307,29 @@ def appActivity():
 		urlToSend = "http://"+str(getNodeIP(REQUEST_ROOM))+":"+str(PORT-1)+"/?appActivity"
 		print urlToSend
 		resp = urllib2.urlopen(urlToSend).read()
-	sysLog("APP ACTIVITY: R=%s" % (REQUEST_ROOM))
-	threading.Timer(0.1, appActivity).start()
+		sysLog("APP ACTIVITY: R=%s" % (REQUEST_ROOM))
+	AppActivityThread = threading.Timer(0.1, appActivity)
+	AppActivityThread.daemon = True
+	AppActivityThread.start()
+
+def nodeBroadcast(string):
+	db.execute("use smart")
+	for i in range(1,9):
+		db.execute("select active from map where room_no=%s" % str(i))
+		active = db.fetchone()
+		active = active[0]
+		if(active):
+			ip = getNodeIP(i)
+			url = "http://" + ip + ":" + str(NODE_PORT) + "/?" + str(string)
+			urllib2.urlopen(url).read()
+		else:
+			pass
+
+def downloadOTA():
+	url = "Enter .tar.gz OTA url"
+	os.system("wget " + url + " -P " + os.getcwd() + "/")
+	os.system("tar -xvzf *.tar.gz")
+	os.system("rm *.tar.gz")
 
 
 # Main program begins here...
@@ -295,8 +338,7 @@ os.system("clear")
 httpd = SocketServer.TCPServer(("",PORT),handler)
 print "\n\r[ Self Monitoring Analysing & Reporting Technology ] (S.M.A.R.T)\n\r"
 print "Started at: " +  time.strftime("%d/%m/%y  %I:%M:%S %p")
-print "IP Address: "
-os.system("hostname -I")
+print "IP Address: " + str(os.system("hostname -I"))
 sysLog("SMART INITIALIZED.")
 print "Initializing with SU access..."
 initDB()
