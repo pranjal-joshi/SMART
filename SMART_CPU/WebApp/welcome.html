@@ -1,0 +1,117 @@
+<!--
+  Author  : Pranjal P. Joshi
+  Date    : 03/09/2016
+  All rights reserved.
+  SMART Welcome & login page.
+-->
+
+<html>
+    <head>
+      <style type="text/css">
+      .welcomeBody {
+        display: flex;
+        min-height: 100vh;
+        flex-direction: column;
+      }
+
+      .contents {
+        flex: 1;
+      }
+      </style>
+      <!--Import Google Icon Font-->
+      <link href="http://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+      <!--Import materialize.css-->
+      <link type="text/css" rel="stylesheet" href="css/materialize.css"  media="screen,projection"/>
+
+      <!--Let browser know website is optimized for mobile-->
+      <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+      <title>S.M.A.R.T</title>
+    </head>
+
+    <body class="welcomeBody">
+    <main class="contents">
+    <nav>
+      <div class="nav-wrapper teal lighten-2" id="welcomeNavBar">
+         <a href="#!" class="brand-logo center">S.M.A.R.T Login</a>
+      </div>
+    </nav>
+
+    <div class="row">
+    <div class="col m4"></div>
+    <div class="col s12 m4">
+    <br></br>
+    <div class="card-panel grey lighten-4" id="welcomCard">
+      
+      <center>
+        <i class="large material-icons">home</i>
+        <br></br>
+        <br></br>
+          <div class="row">
+            <div class="col s2"></div>
+              <div class="col s8">
+                <div class="input-field">
+                  <i class="small material-icons prefix">vpn_key</i>
+                  <label for="loginBox">Login key</label>
+                  <input id="loginBox" type="password" class="validate">
+                </div>
+              </div>
+          </div>
+
+          <p>
+            <input type="checkbox" class="filled-in" id="showPassword"/>
+            <label for="showPassword">Show Password</label>
+          </p>
+
+          <button class="btn waves-effect waves-light tooltipped" type="submit" name="action" onclick="Materialize.toast('Logging in..', 3000, 'rounded')" data-position="bottom" data-delay="700" data-tooltip="Click here to login">
+            Login
+            <i class="material-icons right">lock_open</i>
+          </button>
+        
+      </center>
+      
+    </div>
+    </div>
+    </div>
+
+    </main>
+
+    <footer class="page-footer teal lighten-2">
+      <div class="footer-copyright">
+        <div class="container">
+         <center>© 2016 S.M.A.R.T, All rights reserved.</center>
+        </div>
+      </div>
+    </footer>
+
+      <!--Import jQuery before materialize.js-->
+      <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+      <script type="text/javascript" src="js/materialize.min.js"></script>
+      <script>
+        (function ($) {
+          $.toggleShowPassword = function (options) {
+            var settings = $.extend({
+            field: "#password",
+            control: "#toggle_show_password",
+          }, options);
+
+          var control = $(settings.control);
+          var field = $(settings.field)
+
+          control.bind('click', function () {
+              if (control.is(':checked')) {
+                  field.attr('type', 'text');
+              } else {
+                  field.attr('type', 'password');
+          }
+        })
+      };
+      }(jQuery));
+
+      $.toggleShowPassword({
+        field: '#loginBox',
+        control: '#showPassword'
+      });
+      </script>
+
+    </body>
+  </html>
