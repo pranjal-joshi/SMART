@@ -1,0 +1,186 @@
+<html>
+    <head>
+      <style type="text/css">
+      .configBody {
+        display: flex;
+        min-height: 100vh;
+        flex-direction: column;
+      }
+
+      .contents {
+        flex: 1;
+      }
+      </style>
+      <!--Import Google Icon Font-->
+      <link href="http://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+      <!--Import materialize.css-->
+      <link type="text/css" rel="stylesheet" href="css/materialize.css"  media="screen,projection"/>
+
+      <!--Let browser know website is optimized for mobile-->
+      <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+      <title>Configure</title>
+    </head>
+
+    <body class="configBody" style="font-family: monaco">
+    <main class="contents">
+    <nav>
+      <div class="nav-wrapper teal lighten-2" id="welcomeNavBar">
+         <a href="#!" class="brand-logo center">Configure</a>
+      </div>
+    </nav>
+
+    <div class="row">
+    <div class="col m4"></div>
+    <div class="col s12 m4">
+    <br></br>
+    <div class="card-panel grey lighten-4" id="configCard">
+      
+      <center>
+      <span class="teal-text text-darken"><h5>Set room configuration</h5></span>
+      <div class="divider"></div>
+      <br>
+
+      <!--
+          **** Add php code for checkbox check property to retrive applied settings by fetching active flag from db and set checkboxes according while loading the webpage.
+      -->
+        <form action="#">
+            <p>
+              <div class="row">
+
+              <div class="input-field col s8">
+                <input id="roomName1" type="text" class="validate">
+                <label for="roomName1">Room 1</label>
+              </div>
+
+              <input type="checkbox" class="filled-in" id="room1" checked="checked" />
+              <label for="room1">Check to enable</label>
+
+
+              </div>
+            </p>
+
+            <p>
+              <div class="row">
+
+              <div class="input-field col s8">
+                <input id="roomName2" type="text" class="validate">
+                <label for="roomName2">Room 2</label>
+              </div>
+
+              <input type="checkbox" class="filled-in" id="room2" checked="checked" />
+              <label for="room2">Check to enable</label>
+              
+              </div>
+            </p>
+
+            <p>
+              <div class="row">
+
+              <div class="input-field col s8">
+                <input id="roomName3" type="text" class="validate">
+                <label for="roomName3">Room 3</label>
+              </div>
+
+              <input type="checkbox" class="filled-in" id="room3" checked="checked" />
+              <label for="room3">Check to enable</label>
+              
+              </div>
+            </p>
+
+            <p>
+              <div class="row">
+
+              <div class="input-field col s8">
+                <input id="roomName4" type="text" class="validate">
+                <label for="roomName4">Room 4</label>
+              </div>
+
+              <input type="checkbox" class="filled-in" id="room4" checked="checked" />
+              <label for="room4">Check to enable</label>
+              
+              </div>
+            </p>
+
+            <p>
+              <div class="row">
+
+              <div class="input-field col s8">
+                <input id="roomName5" type="text" class="validate">
+                <label for="roomName5">Room 5</label>
+              </div>
+
+              <input type="checkbox" class="filled-in" id="room5" />
+              <label for="room5">Check to enable</label>
+              
+              </div>
+            </p>
+
+            <p>
+              <div class="row">
+
+              <div class="input-field col s8">
+                <input id="roomName6" type="text" class="validate">
+                <label for="roomName6">Room 6</label>
+              </div>
+
+              <input type="checkbox" class="filled-in" id="room6" />
+              <label for="room6">Check to enable</label>
+              
+              </div>
+            </p>
+
+            <p>
+              <div class="row">
+
+              <div class="input-field col s8">
+                <input id="roomName7" type="text" class="validate">
+                <label for="roomName7">Room 7</label>
+              </div>
+
+              <input type="checkbox" class="filled-in" id="room7" />
+              <label for="room7">Check to enable</label>
+              
+              </div>
+            </p>
+
+            <p>
+              <div class="row">
+
+              <div class="input-field col s8">
+                <input id="roomName8" type="text" class="validate">
+                <label for="roomName8">Room 8</label>
+              </div>
+
+              <input type="checkbox" class="filled-in" id="room8" />
+              <label for="room8">Check to enable</label>
+              
+              </div>
+            </p>
+
+            <button class="btn waves-effect waves-light" type="submit" name="action">Apply
+              <i class="material-icons right">settings</i>
+            </button>
+
+        </form>
+      </center>
+      
+    </div>
+    </div>
+    </div>
+
+    </main>
+
+    <footer class="page-footer teal lighten-2">
+      <div class="footer-copyright">
+        <div class="container">
+         <center>© 2016 S.M.A.R.T, All rights reserved.</center>
+        </div>
+      </div>
+    </footer>
+
+      <!--Import jQuery before materialize.js-->
+      <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+      <script type="text/javascript" src="js/materialize.min.js"></script>
+
+    </body>
+  </html>
