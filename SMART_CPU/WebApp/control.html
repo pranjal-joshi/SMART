@@ -1,0 +1,137 @@
+<!--
+  Author  : Pranjal P. Joshi
+  Date    : 03/09/2016
+  All rights reserved.
+  SMART timer page.
+-->
+
+<html>
+    <head>
+      <style type="text/css">
+      .controlBody {
+        display: flex;
+        min-height: 100vh;
+        flex-direction: column;
+      }
+
+      .contents {
+        flex: 1;
+      }
+      </style>
+      <!--Import Google Icon Font-->
+      <link href="http://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+      <!--Import materialize.css-->
+      <link type="text/css" rel="stylesheet" href="css/materialize.min.css"  media="screen,projection"/>
+
+      <!--Let browser know website is optimized for mobile-->
+      <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+      <title>Control Panel</title>
+    </head>
+
+    <body class="controlBody" style="font-family: ubuntu">
+
+    <main class="contents">
+      <nav>                                                                       <!-- Navbar starts from here -->
+      <div class="nav-wrapper teal lighten-2" id="welcomeNavBar">
+         <a href="#!" class="brand-logo center">Control Panel</a>
+
+        <ul class="right hide-off-med-and-down">                                 <!-- settings button STARTS-->
+          <li>
+            <a class="dropdown-button" href="#!" data-activates="settingsDropdown"><i class="material-icons right">settings</i>
+            </a>
+          </li>
+        </ul>
+
+
+        <ul id="settingsDropdown" class="dropdown-content collection" style="min-width: 350px;">
+            <li><a href="config.html">Configure<i class="material-icons right">build</i>
+            </a></a></li>
+            <li class="divider"></li>
+            <li><a href="#!">Check for updates<i class="material-icons right">system_update</i></a></li>
+            <li class="divider"></li>
+            <li><a href="#!">Restart<i class="material-icons right">autorenew</i></a></li>
+            <li class="divider"></li>
+            <li><a href="#!">Shutdown<i class="material-icons right">power_settings_new</i></a></li>
+            <li class="divider"></li>
+            <li><a href="#!">Help<i class="material-icons right">help_outline</i></a></li>
+        </ul>                                                                     <!-- settings button ENDS-->
+
+        <a class="button-collapse" href="#!" data-activates="slide-out"><i class="material-icons">menu</i></a>
+
+        <ul id="slide-out" class="side-nav fixed grey lighten-4" style="font-family: ubuntu"><!--fixed: for showing in mobile mode-->
+          <li class="no-padding">
+              <ul class="collapsible collapsible-accordion">
+                      <li><a href="#!"class="waves-effect waves-light" href="control.html"><span class="teal-text text-darken-2" style="font-size:20px"><center>Room 1</center></span></a></li>
+                      <li class="divider"></li>
+                      <li><a href="#!"class="waves-effect waves-light" href="control.html" style="font-size:20px"><span class="teal-text text-darken-2"><center>Room 2</center></span></a></li>
+                      <li class="divider"></li>
+                      <li><a href="#!"class="waves-effect waves-light" href="control.html" style="font-size:20px"><span class="teal-text text-darken-2"><center>Room 3</center></span></a></li>
+                      <li class="divider"></li>
+                      <li><a href="#!"class="waves-effect waves-light" href="control.html" style="font-size:20px"><span class="teal-text text-darken-2"><center>Room 4</center></span></a></li>
+                      <li class="divider"></li>
+                      <li><a href="#!"class="waves-effect waves-light" href="control.html" style="font-size:20px"><span class="teal-text text-darken-2"><center>Room 5</center></span></a></li>
+                      <li class="divider"></li>
+                      <li><a href="#!"class="waves-effect waves-light" href="control.html" style="font-size:20px"><span class="teal-text text-darken-2"><center>Room 6</center></span></a></li>
+                      <li class="divider"></li>
+                      <li><a href="#!"class="waves-effect waves-light" href="control.html" style="font-size:20px"><span class="teal-text text-darken-2"><center>Room 7</center></span></a></li>
+                      <li class="divider"></li>
+                      <li><a href="#!"class="waves-effect waves-light" href="control.html" style="font-size:20px"><span class="teal-text text-darken-2"><center>Room 8</center></span></a></li>
+                      <li class="divider"></li>
+              </ul>
+            </li>
+          </ul>
+
+      </div>
+      </nav>
+      <!-- Navbar ends here -->
+
+      <br>
+
+      <!-- control card begins -->
+      <div class="row">
+        <div class="col m4"></div>
+         <div class="col s12 m4">
+          <div class="card-panel grey lighten-4" id="controlCard">
+
+          </div>
+         </div>
+      </div>
+      <!-- card ends -->
+
+    </main>
+
+
+
+
+    <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+    <script type="text/javascript" src="js/materialize.min.js"></script>
+    <script>
+      $(".dropdown-button").dropdown({
+          inDuration: 300,
+          outDuration: 225,
+          constrain_width: true, // Does not change width of dropdown to that of the activator
+          hover: true, // Activate on hover
+          gutter: 0, // Spacing from edge
+          belowOrigin: false, // Displays dropdown below the button
+          alignment: 'left' // Displays dropdown with edge aligned to the left of button
+        }
+      );
+
+      $(document).ready(function(){
+        $('.modal-trigger').leanModal();
+      });   
+
+      $(document).ready(function() {
+        $('select').material_select();
+      });
+
+      $('.button-collapse').sideNav({
+          menuWidth: 300, // Default is 240
+          closeOnClick: false // Closes side-nav on <a> clicks, useful for Angular/Meteor
+        }
+      );
+
+  </script>
+
+    </body>
+</html>
