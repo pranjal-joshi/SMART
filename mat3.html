@@ -1,0 +1,1307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+      <style type="text/css">
+      .mat3Body {
+        display: flex;
+        min-height: 100vh;
+        flex-direction: column;
+      }
+
+      .contents {
+        flex: 1;
+      }
+      </style>
+    <title>Material test</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="http://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <!-- Compiled and minified CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.7/css/materialize.min.css">
+    <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.3.min.js"></script>  
+    <!-- Compiled and minified JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.6/js/materialize.min.js"></script>
+    <!-- use 0.97.6 js and 0.97.7 css for DROPDOWN and SIDENAV together!!!!!!!!-->
+    
+    <!-- Ubuntu Font-->
+    <link rel="stylesheet" type="text/css" href="http://fonts.googleapis.com/css?family=Ubuntu:regular,bold&subset=Latin,Cyrillic">
+  
+  
+</head>
+
+<body class="mat3Body" style="font-family: ubuntu" onload="getRoomNames()">
+    <main class="contents">
+    <ul id="dropdown" class="dropdown-content" style="min-width: 250px;">
+        <li><a href="config.html">Configure<i class="material-icons right">build</i></a></a></li>
+        <li class="divider"></li>
+        <li href="#otaModal" class="modal-trigger"><a href="#!">Check for updates<i class="material-icons right">system_update</i></a></li>
+        <li class="divider"></li>
+        <li href="#restartModal" class="modal-trigger"><a href="#!">Restart<i class="material-icons right">autorenew</i></a></li>
+        <li class="divider"></li>
+        <li href="#shutdownModal" class="modal-trigger"><a>Shutdown<i class="material-icons right">power_settings_new</i></a></li>
+        <li class="divider"></li>
+        <li>
+            <table>
+                <tbody>
+                    <tr>
+                        <td><a href="#!"><span class="teal-text" style="font-size:16px">Motion Sensor</span></a></td> 
+                        <!--CHECK FONT OF AUTO-->
+                        <td>
+                          <div class="switch"><label><input type="checkbox" id="manualSwitch"><span class="lever"></span></label></div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </li>
+        <li class="divider"></li>
+        <li><a href="#!">Help<i class="material-icons right">help_outline</i></a></li> 
+    </ul>
+    
+  
+    <div class="row">
+        <nav>
+            <div class="nav-wrapper teal lighten-2">
+                <a href="#" class="brand-logo center" id="navbarTitle"></a>
+                <ul class="right hide-off-med-and-down"><!--hide-off!! very imp for showing in mobile mode-->
+                    <a class="dropdown-button" href="#" data-activates="dropdown"><i class="material-icons right">more_vert</i></a>    
+                </ul>
+        
+                <ul id="slide-out" class="side-nav fixed grey lighten-4"><!--fixed: for showing in mobile mode-->      
+                    <li><a href="#!" class="waves-effect"><span class="teal-text text-darken-2"><center style="font-size:18px" onclick="getRoom(this)" id="r1">Room 1</center></span></a></li>
+                    <li><a href="#!" class="waves-effect"><span class="teal-text text-darken-2"><center style="font-size:18px" onclick="getRoom(this)" id="r2">Room 2</center></span></a></li>
+                    <li><a href="#!" class="waves-effect"><span class="teal-text text-darken-2"><center style="font-size:18px" onclick="getRoom(this)" id="r3">Room 3</center></span></a></li>
+                    <li><a href="#!" class="waves-effect"><span class="teal-text text-darken-2"><center style="font-size:18px" onclick="getRoom(this)" id="r4">Room 4</center></span></a></li>
+                    <li><a href="#!" class="waves-effect"><span class="teal-text text-darken-2"><center style="font-size:18px" onclick="getRoom(this)" id="r5">Room 5</center></span></a></li>
+                    <li><a href="#!" class="waves-effect"><span class="teal-text text-darken-2"><center style="font-size:18px" onclick="getRoom(this)" id="r6">Room 6</center></span></a></li>
+                    <li><a href="#!" class="waves-effect"><span class="teal-text text-darken-2"><center style="font-size:18px" onclick="getRoom(this)" id="r7">Room 7</center></span></a></li>
+                    <li><a href="#!" class="waves-effect"><span class="teal-text text-darken-2"><center style="font-size:18px" onclick="getRoom(this)" id="r8">Room 8</center></span></a></li>
+                </ul>
+        
+            <a href="#" data-activates="slide-out" class="button-collapse"><i class="material-icons">menu</i></a>
+            </div>
+        </nav>
+    </div>
+    
+  
+
+<div class="row">
+    <div class="col m2 l3"></div>
+    <div class="col s12 m8 l8">   
+        <div class="card-panel color grey lighten-4">
+        <table>
+                <tbody>
+                    <tr>
+                        <td><input placeholder="Device 1" id="device1" type="text" class="validate" onblur="lostFocus()"></td>
+                        <td><div class="switch"><label><input type="checkbox" id="1" onchange="switchToggle(this)" ><span class="lever"></span></label></div></td>
+                        <td><a class="waves-effect waves-light waves-red btn modal-trigger red lighten-1" href="#timerModal1"><i class="material-icons center">access_time</i></a></td>
+                    </tr>
+                    <tr>
+                        <td><input placeholder="Device 2" id="device2" type="text" class="validate"></td> 
+                        <td><div class="switch"><label><input type="checkbox" id="2" onchange="switchToggle(this)"><span class="lever"></span></label></div></td></td>
+                        <td><a class="waves-effect waves-light waves-teal btn modal-trigger" href="#timerModal2"><i class="material-icons center">access_time</i></a></td>
+                    </tr>
+                    <tr>
+                        <td><input placeholder="Device 3" id="device3" type="text" class="validate"></td> 
+                        <td><div class="switch"><label><input type="checkbox" id="3" onchange="switchToggle(this)"><span class="lever"></span></label></div></td></td>
+                        <td><a class="waves-effect waves-light waves-teal btn modal-trigger" href="#timerModal3"><i class="material-icons center">access_time</i></a></td>
+                    </tr>
+                    <tr>
+                        <td><input placeholder="Device 4" id="device4" type="text" class="validate"></td> 
+                        <td><div class="switch"><label><input type="checkbox" id="4" onchange="switchToggle(this)"><span class="lever"></span></label></div></td></td>
+                        <td><a class="waves-effect waves-light waves-teal btn modal-trigger" href="#timerModal4"><i class="material-icons center">access_time</i></a></td>
+                    </tr>
+                    <tr>
+                        <td><input placeholder="Device 5" id="device5" type="text" class="validate"></td> 
+                        <td><div class="switch"><label><input type="checkbox" id="5" onchange="switchToggle(this)"><span class="lever"></span></label></div></td></td>
+                        <td><a class="waves-effect waves-light waves-teal btn modal-trigger" href="#timerModal5"><i class="material-icons center">access_time</i></a></td>
+                    </tr>
+                    <tr>
+                        <td><input placeholder="Device 6" id="device6" type="text" class="validate"></td> 
+                        <td><div class="switch"><label><input type="checkbox" id="6" onchange="switchToggle(this)"><span class="lever"></span></label></div></td></td>
+                        <td><a class="waves-effect waves-light waves-teal btn modal-trigger" href="#timerModal6"><i class="material-icons center">access_time</i></a></td>
+                    </tr>
+                    <tr>
+                        <td><input placeholder="Device 7" id="device7" type="text" class="validate"></td> 
+                        <td><div class="switch"><label><input type="checkbox" id="7" onchange="switchToggle(this)"><span class="lever"></span></label></div></td></td>
+                        <td><a class="waves-effect waves-light waves-teal btn modal-trigger" href="#timerModal7"><i class="material-icons center">access_time</i></a></td>
+                    </tr>
+                    <tr>
+                        <td><input placeholder="Device 8" id="device8" type="text" class="validate"></td> 
+                        <td><div class="switch"><label><input type="checkbox" id="8" onchange="switchToggle(this)"><span class="lever"></span></label></div></td></td>
+                        <td><a class="waves-effect waves-light waves-teal btn modal-trigger" href="#timerModal8"><i class="material-icons center">access_time</i></a></td>
+                    </tr>
+                </tbody>
+            </table>    
+        
+        
+                  
+        <div class="row">
+            <span class="teal-text text-darken-2"><center style="font-size:16px">Fan</center></span>
+        </div> 
+        <div class="row">
+            <p class="range-field">
+                <input type="range" id="fan_slider" min="0" max="5" onchange="range123()"/>
+            </p>
+        </div> 
+        
+        
+        <div class="fixed-action-btn" id="voice" style="bottom: 15px; left: 14px;">
+            <a class="btn-floating btn-large red modal-trigger" onclick="startDictation()" href="#modal1"><i class="material-icons center">mic</i></a>
+        </div>    
+            
+        <div id="modal1" class="modal">
+            <div class="modal-content">
+                
+                <p>
+                    <form id="labnol" method="get" action="https://www.google.com/search">
+                    <input type="text" name="q" id="transcript" placeholder="Speak" />              
+                    </form>
+                Listening...
+                </p>
+            </div>
+            <div class="row">
+                <a href="#!" class=" modal-action modal-close waves-effect waves-green btn-flat"><center>Cancel</center></a>
+            </div>
+        </div>
+        
+        
+        
+
+        
+        
+        </div>        
+    </div>
+</div>
+
+    <!--
+          Shutdown modal STARTS
+        -->
+        <div id="shutdownModal" class="modal modal-fixed-footer">
+          <div class="modal-content">
+           <h4 style="color: red">Alert!</h4>
+           <div class="divider"></div>
+           <p style="color: black">This will shutdown S.M.A.R.T system completely and all appliances connected to it. This will turn OFF all electrical appliances in your home which may cause undesirable situation. To restart the system you need to manually power-reset every S.M.A.R.T node in all your rooms. Shutdown the system, only if you know what you're doing!
+           </p>
+          </div>
+          <div class="modal-footer">
+            <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat">Abort</a>
+            <a href="#shutdownPreloadModal" class="modal-action modal-close waves-effect waves-red btn red darken-3 modal-trigger" onclick="setTimeout(closeTab, 7000)">Shutdown anyway</a>
+          </div>
+        </div>
+        <!--
+          Shutdown modal ENDS
+        -->
+
+        <!-- system update modal START -->
+          <div id="otaModal" class="modal">
+            <div class="modal-content">
+              <h5 style="color: teal">Checking for system updates...</h5>
+               <div class="progress">
+                <div class="indeterminate"></div>
+              </div>
+            </div>
+          </div>
+        <!-- system update modal ENDS  -->
+
+        <!-- RESTART modal STARTS-->
+        <div id="restartModal" class="modal modal-fixed-footer">
+          <div class="modal-content">
+           <h4 style="color: teal">Restart?</h4>
+           <div class="divider"></div>
+           <p style="color: black">This will restart the automation system. It may take a minute or two. All appliances connceted to system will be turned OFF and non-operational untill system starts again. 
+           </p>
+          </div>
+          <div class="modal-footer">
+            <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat">Abort</a>
+            <a href="#restartPreloadModal" class="modal-action modal-close waves-effect waves-teal btn modal-trigger" onclick="setTimeout(reloadWindow, 60*1000)">Restart</a>
+          </div>
+        </div>
+        <!-- RESTART modal ENDS  -->
+
+        <!-- Restart preloader STARTS -->
+        <div id="restartPreloadModal" class="modal">
+            <div class="modal-content">
+              <h5 style="color: teal">S.M.A.R.T is restarting...</h5>
+               <div class="progress">
+                <div class="indeterminate"></div>
+              </div>
+              <p style="color: black">This page will refresh in a minute.</p>
+            </div>
+          </div>
+        <!-- Restart preloader ENDS   -->
+
+        <!-- shutdown preloader ENDS   -->
+        <div id="shutdownPreloadModal" class="modal">
+            <div class="modal-content">
+              <h5 style="color: red">S.M.A.R.T is shutting down...</h5>
+               <div class="progress red lighten-5">
+                <div class="indeterminate red lighten-1"></div>
+              </div>
+              <p style="color: black">You will be logged out soon.</p>
+            </div>
+          </div>
+          <!-- shutdown preloader ENDS   -->
+           
+  <!-- TimerModal start -->          
+    <div id="timerModal1" class="modal">
+      <div class="modal-content">
+        
+        <h4>Schedule manager</h4>
+        <hr>
+        <p>
+        <form action="#">
+        <div class="row">
+          <div class="col s12 m6 l3"><span class="teal-text text-darken-2"><center>Schedule ON time: </center></span></div>
+          
+          <div class="input-field col s12 m6 l3">
+            <select>
+              <option value="" disabled selected>Choose Hour</option>
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+              <option value="5">5</option>
+              <option value="6">6</option>
+              <option value="7">7</option>
+              <option value="8">8</option>
+              <option value="9">9</option>
+              <option value="10">10</option>
+              <option value="11">11</option>
+              <option value="12">12</option>
+            </select>
+          <label>ON Hour Select</label>
+          </div>     
+                    
+          
+          <div class="input-field col s12 m6 l3 offset-m6">
+            <select>
+              <option value="" disabled selected>Choose Minute</option>
+              <option value="00">00</option>
+              <option value="10">10</option>
+              <option value="20">20</option>
+              <option value="30">30</option>
+              <option value="40">40</option>
+              <option value="50">50</option>
+            </select>
+          <label>ON Minute Select</label>
+          </div>
+                            
+          
+          <div class="input-field col s12 m6 l3 offset-m6">
+            <select>
+              <option value="" disabled selected>AM/PM</option>
+              <option value="AM">AM</option>
+              <option value="PM">PM</option>
+            </select>
+          <label>AM/PM</label>
+          </div>
+          
+          
+        </div>
+
+        <div class="row">
+          <div class="col s12 m6 l3"><span class="teal-text text-darken-2"><center>Schedule OFF time: </center></span></div>
+          <div class="input-field col s12 m6 l3">
+            <select>
+              <option value="" disabled selected>Choose Hour</option>
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+              <option value="5">5</option>
+              <option value="6">6</option>
+              <option value="7">7</option>
+              <option value="8">8</option>
+              <option value="9">9</option>
+              <option value="10">10</option>
+              <option value="11">11</option>
+              <option value="12">12</option>
+            </select>
+          <label>OFF Hour Select</label>
+          </div>
+
+          
+          <div class="input-field col s12 m6 l3 offset-m6">
+            <select>
+              <option value="" disabled selected>Choose Minute</option>
+              <option value="00">00</option>
+              <option value="10">10</option>
+              <option value="20">20</option>
+              <option value="30">30</option>
+              <option value="40">40</option>
+              <option value="50">50</option>
+            </select>
+          <label>OFF Minute Select</label>
+          </div>
+          
+
+
+          <div class="input-field col s12 m6 l3 offset-m6">
+            <select>
+              <option value="" disabled selected>AM/PM</option>
+              <option value="AM">AM</option>
+              <option value="PM">PM</option>
+            </select>
+          <label>AM/PM</label>
+          </div>
+          
+
+        </div>
+
+        <center>
+        <div class="switch">
+          <label>
+            Once
+            <input type="checkbox">
+            <span class="lever"></span>
+            Daily
+         </label>
+        </div>
+        </center>
+
+        </form>
+        </p>
+      </div>
+
+      <div class="modal-footer">
+        <a href="#!" class=" modal-action modal-close waves-effect waves-teal btn" type="submit">Apply</a>
+        <a href="#!" class=" modal-action modal-close waves-effect waves-teal btn-flat">Disable scheduler</a>
+      </div>
+    </div>
+
+
+    <div id="timerModal2" class="modal">
+      <div class="modal-content">
+        
+        <h4>Schedule manager</h4>
+        <hr>
+        <p>
+        <form action="#">
+        <div class="row">
+          <div class="col s12 m6 l3"><span class="teal-text text-darken-2"><center>Schedule ON time: </center></span></div>
+          
+          <div class="input-field col s12 m6 l3">
+            <select>
+              <option value="" disabled selected>Choose Hour</option>
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+              <option value="5">5</option>
+              <option value="6">6</option>
+              <option value="7">7</option>
+              <option value="8">8</option>
+              <option value="9">9</option>
+              <option value="10">10</option>
+              <option value="11">11</option>
+              <option value="12">12</option>
+            </select>
+          <label>ON Hour Select</label>
+          </div>
+          
+           
+          
+          
+          <div class="input-field col s12 m6 l3 offset-m6">
+            <select>
+              <option value="" disabled selected>Choose Minute</option>
+              <option value="00">00</option>
+              <option value="10">10</option>
+              <option value="20">20</option>
+              <option value="30">30</option>
+              <option value="40">40</option>
+              <option value="50">50</option>
+            </select>
+          <label>ON Minute Select</label>
+          </div>
+            
+          
+          
+          
+          <div class="input-field col s12 m6 l3 offset-m6">
+            <select>
+              <option value="" disabled selected>AM/PM</option>
+              <option value="AM">AM</option>
+              <option value="PM">PM</option>
+            </select>
+          <label>AM/PM</label>
+          </div>
+            
+          
+        </div>
+
+        <div class="row">
+          <div class="col s12 m6 l3"><span class="teal-text text-darken-2"><center>Schedule OFF time: </center></span></div>
+          <div class="input-field col s12 m6 l3">
+            <select>
+              <option value="" disabled selected>Choose Hour</option>
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+              <option value="5">5</option>
+              <option value="6">6</option>
+              <option value="7">7</option>
+              <option value="8">8</option>
+              <option value="9">9</option>
+              <option value="10">10</option>
+              <option value="11">11</option>
+              <option value="12">12</option>
+            </select>
+          <label>OFF Hour Select</label>
+          </div>
+
+          
+          <div class="input-field col s12 m6 l3 offset-m6">
+            <select>
+              <option value="" disabled selected>Choose Minute</option>
+              <option value="00">00</option>
+              <option value="10">10</option>
+              <option value="20">20</option>
+              <option value="30">30</option>
+              <option value="40">40</option>
+              <option value="50">50</option>
+            </select>
+          <label>OFF Minute Select</label>
+          </div>
+          
+
+
+          <div class="input-field col s12 m6 l3 offset-m6">
+            <select>
+              <option value="" disabled selected>AM/PM</option>
+              <option value="AM">AM</option>
+              <option value="PM">PM</option>
+            </select>
+          <label>AM/PM</label>
+          </div>
+          
+
+        </div>
+
+        <center>
+        <div class="switch">
+          <label>
+            Once
+            <input type="checkbox">
+            <span class="lever"></span>
+            Daily
+         </label>
+        </div>
+        </center>
+
+        </form>
+        </p>
+      </div>
+
+      <div class="modal-footer">
+        <a href="#!" class=" modal-action modal-close waves-effect waves-teal btn" type="submit">Apply</a>
+        <a href="#!" class=" modal-action modal-close waves-effect waves-teal btn-flat">Disable scheduler</a>
+      </div>
+    </div>
+
+
+
+    <div id="timerModal3" class="modal">
+      <div class="modal-content">
+        
+        <h4>Schedule manager</h4>
+        <hr>
+        <p>
+        <form action="#">
+        <div class="row">
+          <div class="col s12 m6 l3"><span class="teal-text text-darken-2"><center>Schedule ON time: </center></span></div>
+          
+          <div class="input-field col s12 m6 l3">
+            <select>
+              <option value="" disabled selected>Choose Hour</option>
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+              <option value="5">5</option>
+              <option value="6">6</option>
+              <option value="7">7</option>
+              <option value="8">8</option>
+              <option value="9">9</option>
+              <option value="10">10</option>
+              <option value="11">11</option>
+              <option value="12">12</option>
+            </select>
+          <label>ON Hour Select</label>
+          </div>
+          
+           
+          
+          
+          <div class="input-field col s12 m6 l3 offset-m6">
+            <select>
+              <option value="" disabled selected>Choose Minute</option>
+              <option value="00">00</option>
+              <option value="10">10</option>
+              <option value="20">20</option>
+              <option value="30">30</option>
+              <option value="40">40</option>
+              <option value="50">50</option>
+            </select>
+          <label>ON Minute Select</label>
+          </div>
+            
+          
+          
+          
+          <div class="input-field col s12 m6 l3 offset-m6">
+            <select>
+              <option value="" disabled selected>AM/PM</option>
+              <option value="AM">AM</option>
+              <option value="PM">PM</option>
+            </select>
+          <label>AM/PM</label>
+          </div>
+            
+          
+        </div>
+
+        <div class="row">
+          <div class="col s12 m6 l3"><span class="teal-text text-darken-2"><center>Schedule OFF time: </center></span></div>
+          <div class="input-field col s12 m6 l3">
+            <select>
+              <option value="" disabled selected>Choose Hour</option>
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+              <option value="5">5</option>
+              <option value="6">6</option>
+              <option value="7">7</option>
+              <option value="8">8</option>
+              <option value="9">9</option>
+              <option value="10">10</option>
+              <option value="11">11</option>
+              <option value="12">12</option>
+            </select>
+          <label>OFF Hour Select</label>
+          </div>
+
+          
+          <div class="input-field col s12 m6 l3 offset-m6">
+            <select>
+              <option value="" disabled selected>Choose Minute</option>
+              <option value="00">00</option>
+              <option value="10">10</option>
+              <option value="20">20</option>
+              <option value="30">30</option>
+              <option value="40">40</option>
+              <option value="50">50</option>
+            </select>
+          <label>OFF Minute Select</label>
+          </div>
+          
+
+
+          <div class="input-field col s12 m6 l3 offset-m6">
+            <select>
+              <option value="" disabled selected>AM/PM</option>
+              <option value="AM">AM</option>
+              <option value="PM">PM</option>
+            </select>
+          <label>AM/PM</label>
+          </div>
+          
+
+        </div>
+
+        <center>
+        <div class="switch">
+          <label>
+            Once
+            <input type="checkbox">
+            <span class="lever"></span>
+            Daily
+         </label>
+        </div>
+        </center>
+
+        </form>
+        </p>
+      </div>
+
+      <div class="modal-footer">
+        <a href="#!" class=" modal-action modal-close waves-effect waves-teal btn" type="submit">Apply</a>
+        <a href="#!" class=" modal-action modal-close waves-effect waves-teal btn-flat">Disable scheduler</a>
+      </div>
+    </div>
+    
+
+
+    <div id="timerModal4" class="modal">
+      <div class="modal-content">
+        
+        <h4>Schedule manager</h4>
+        <hr>
+        <p>
+        <form action="#">
+        <div class="row">
+          <div class="col s12 m6 l3"><span class="teal-text text-darken-2"><center>Schedule ON time: </center></span></div>
+          
+          <div class="input-field col s12 m6 l3">
+            <select>
+              <option value="" disabled selected>Choose Hour</option>
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+              <option value="5">5</option>
+              <option value="6">6</option>
+              <option value="7">7</option>
+              <option value="8">8</option>
+              <option value="9">9</option>
+              <option value="10">10</option>
+              <option value="11">11</option>
+              <option value="12">12</option>
+            </select>
+          <label>ON Hour Select</label>
+          </div>
+          
+           
+          
+          
+          <div class="input-field col s12 m6 l3 offset-m6">
+            <select>
+              <option value="" disabled selected>Choose Minute</option>
+              <option value="00">00</option>
+              <option value="10">10</option>
+              <option value="20">20</option>
+              <option value="30">30</option>
+              <option value="40">40</option>
+              <option value="50">50</option>
+            </select>
+          <label>ON Minute Select</label>
+          </div>
+            
+          
+          
+          
+          <div class="input-field col s12 m6 l3 offset-m6">
+            <select>
+              <option value="" disabled selected>AM/PM</option>
+              <option value="AM">AM</option>
+              <option value="PM">PM</option>
+            </select>
+          <label>AM/PM</label>
+          </div>
+            
+          
+        </div>
+
+        <div class="row">
+          <div class="col s12 m6 l3"><span class="teal-text text-darken-2"><center>Schedule OFF time: </center></span></div>
+          <div class="input-field col s12 m6 l3">
+            <select>
+              <option value="" disabled selected>Choose Hour</option>
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+              <option value="5">5</option>
+              <option value="6">6</option>
+              <option value="7">7</option>
+              <option value="8">8</option>
+              <option value="9">9</option>
+              <option value="10">10</option>
+              <option value="11">11</option>
+              <option value="12">12</option>
+            </select>
+          <label>OFF Hour Select</label>
+          </div>
+
+          
+          <div class="input-field col s12 m6 l3 offset-m6">
+            <select>
+              <option value="" disabled selected>Choose Minute</option>
+              <option value="00">00</option>
+              <option value="10">10</option>
+              <option value="20">20</option>
+              <option value="30">30</option>
+              <option value="40">40</option>
+              <option value="50">50</option>
+            </select>
+          <label>OFF Minute Select</label>
+          </div>
+          
+
+
+          <div class="input-field col s12 m6 l3 offset-m6">
+            <select>
+              <option value="" disabled selected>AM/PM</option>
+              <option value="AM">AM</option>
+              <option value="PM">PM</option>
+            </select>
+          <label>AM/PM</label>
+          </div>
+          
+
+        </div>
+
+        <center>
+        <div class="switch">
+          <label>
+            Once
+            <input type="checkbox">
+            <span class="lever"></span>
+            Daily
+         </label>
+        </div>
+        </center>
+
+        </form>
+        </p>
+      </div>
+
+      <div class="modal-footer">
+        <a href="#!" class=" modal-action modal-close waves-effect waves-teal btn" type="submit">Apply</a>
+        <a href="#!" class=" modal-action modal-close waves-effect waves-teal btn-flat">Disable scheduler</a>
+      </div>
+    </div>
+
+
+
+    <div id="timerModal5" class="modal">
+      <div class="modal-content">
+        
+        <h4>Schedule manager</h4>
+        <hr>
+        <p>
+        <form action="#">
+        <div class="row">
+          <div class="col s12 m6 l3"><span class="teal-text text-darken-2"><center>Schedule ON time: </center></span></div>
+          
+          <div class="input-field col s12 m6 l3">
+            <select>
+              <option value="" disabled selected>Choose Hour</option>
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+              <option value="5">5</option>
+              <option value="6">6</option>
+              <option value="7">7</option>
+              <option value="8">8</option>
+              <option value="9">9</option>
+              <option value="10">10</option>
+              <option value="11">11</option>
+              <option value="12">12</option>
+            </select>
+          <label>ON Hour Select</label>
+          </div>
+          
+           
+          
+          
+          <div class="input-field col s12 m6 l3 offset-m6">
+            <select>
+              <option value="" disabled selected>Choose Minute</option>
+              <option value="00">00</option>
+              <option value="10">10</option>
+              <option value="20">20</option>
+              <option value="30">30</option>
+              <option value="40">40</option>
+              <option value="50">50</option>
+            </select>
+          <label>ON Minute Select</label>
+          </div>
+            
+          
+          
+          
+          <div class="input-field col s12 m6 l3 offset-m6">
+            <select>
+              <option value="" disabled selected>AM/PM</option>
+              <option value="AM">AM</option>
+              <option value="PM">PM</option>
+            </select>
+          <label>AM/PM</label>
+          </div>
+            
+          
+        </div>
+
+        <div class="row">
+          <div class="col s12 m6 l3"><span class="teal-text text-darken-2"><center>Schedule OFF time: </center></span></div>
+          <div class="input-field col s12 m6 l3">
+            <select>
+              <option value="" disabled selected>Choose Hour</option>
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+              <option value="5">5</option>
+              <option value="6">6</option>
+              <option value="7">7</option>
+              <option value="8">8</option>
+              <option value="9">9</option>
+              <option value="10">10</option>
+              <option value="11">11</option>
+              <option value="12">12</option>
+            </select>
+          <label>OFF Hour Select</label>
+          </div>
+
+          
+          <div class="input-field col s12 m6 l3 offset-m6">
+            <select>
+              <option value="" disabled selected>Choose Minute</option>
+              <option value="00">00</option>
+              <option value="10">10</option>
+              <option value="20">20</option>
+              <option value="30">30</option>
+              <option value="40">40</option>
+              <option value="50">50</option>
+            </select>
+          <label>OFF Minute Select</label>
+          </div>
+          
+
+
+          <div class="input-field col s12 m6 l3 offset-m6">
+            <select>
+              <option value="" disabled selected>AM/PM</option>
+              <option value="AM">AM</option>
+              <option value="PM">PM</option>
+            </select>
+          <label>AM/PM</label>
+          </div>
+          
+
+        </div>
+
+        <center>
+        <div class="switch">
+          <label>
+            Once
+            <input type="checkbox">
+            <span class="lever"></span>
+            Daily
+         </label>
+        </div>
+        </center>
+
+        </form>
+        </p>
+      </div>
+
+      <div class="modal-footer">
+        <a href="#!" class=" modal-action modal-close waves-effect waves-teal btn" type="submit">Apply</a>
+        <a href="#!" class=" modal-action modal-close waves-effect waves-teal btn-flat">Disable scheduler</a>
+      </div>
+    </div>
+
+        
+    <div id="timerModal6" class="modal">
+      <div class="modal-content">
+        
+        <h4>Schedule manager</h4>
+        <hr>
+        <p>
+        <form action="#">
+        <div class="row">
+          <div class="col s12 m6 l3"><span class="teal-text text-darken-2"><center>Schedule ON time: </center></span></div>
+          
+          <div class="input-field col s12 m6 l3">
+            <select>
+              <option value="" disabled selected>Choose Hour</option>
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+              <option value="5">5</option>
+              <option value="6">6</option>
+              <option value="7">7</option>
+              <option value="8">8</option>
+              <option value="9">9</option>
+              <option value="10">10</option>
+              <option value="11">11</option>
+              <option value="12">12</option>
+            </select>
+          <label>ON Hour Select</label>
+          </div>
+          
+           
+          
+          
+          <div class="input-field col s12 m6 l3 offset-m6">
+            <select>
+              <option value="" disabled selected>Choose Minute</option>
+              <option value="00">00</option>
+              <option value="10">10</option>
+              <option value="20">20</option>
+              <option value="30">30</option>
+              <option value="40">40</option>
+              <option value="50">50</option>
+            </select>
+          <label>ON Minute Select</label>
+          </div>
+            
+          
+          
+          
+          <div class="input-field col s12 m6 l3 offset-m6">
+            <select>
+              <option value="" disabled selected>AM/PM</option>
+              <option value="AM">AM</option>
+              <option value="PM">PM</option>
+            </select>
+          <label>AM/PM</label>
+          </div>
+            
+          
+        </div>
+
+        <div class="row">
+          <div class="col s12 m6 l3"><span class="teal-text text-darken-2"><center>Schedule OFF time: </center></span></div>
+          <div class="input-field col s12 m6 l3">
+            <select>
+              <option value="" disabled selected>Choose Hour</option>
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+              <option value="5">5</option>
+              <option value="6">6</option>
+              <option value="7">7</option>
+              <option value="8">8</option>
+              <option value="9">9</option>
+              <option value="10">10</option>
+              <option value="11">11</option>
+              <option value="12">12</option>
+            </select>
+          <label>OFF Hour Select</label>
+          </div>
+
+          
+          <div class="input-field col s12 m6 l3 offset-m6">
+            <select>
+              <option value="" disabled selected>Choose Minute</option>
+              <option value="00">00</option>
+              <option value="10">10</option>
+              <option value="20">20</option>
+              <option value="30">30</option>
+              <option value="40">40</option>
+              <option value="50">50</option>
+            </select>
+          <label>OFF Minute Select</label>
+          </div>
+          
+
+
+          <div class="input-field col s12 m6 l3 offset-m6">
+            <select>
+              <option value="" disabled selected>AM/PM</option>
+              <option value="AM">AM</option>
+              <option value="PM">PM</option>
+            </select>
+          <label>AM/PM</label>
+          </div>
+          
+
+        </div>
+
+        <center>
+        <div class="switch">
+          <label>
+            Once
+            <input type="checkbox">
+            <span class="lever"></span>
+            Daily
+         </label>
+        </div>
+        </center>
+
+        </form>
+        </p>
+      </div>
+
+      <div class="modal-footer">
+        <a href="#!" class=" modal-action modal-close waves-effect waves-teal btn" type="submit">Apply</a>
+        <a href="#!" class=" modal-action modal-close waves-effect waves-teal btn-flat">Disable scheduler</a>
+      </div>
+    </div>
+
+    
+
+    <div id="timerModal7" class="modal">
+      <div class="modal-content">
+        
+        <h4>Schedule manager</h4>
+        <hr>
+        <p>
+        <form action="#">
+        <div class="row">
+          <div class="col s12 m6 l3"><span class="teal-text text-darken-2"><center>Schedule ON time: </center></span></div>
+          
+          <div class="input-field col s12 m6 l3">
+            <select>
+              <option value="" disabled selected>Choose Hour</option>
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+              <option value="5">5</option>
+              <option value="6">6</option>
+              <option value="7">7</option>
+              <option value="8">8</option>
+              <option value="9">9</option>
+              <option value="10">10</option>
+              <option value="11">11</option>
+              <option value="12">12</option>
+            </select>
+          <label>ON Hour Select</label>
+          </div>
+          
+           
+          
+          
+          <div class="input-field col s12 m6 l3 offset-m6">
+            <select>
+              <option value="" disabled selected>Choose Minute</option>
+              <option value="00">00</option>
+              <option value="10">10</option>
+              <option value="20">20</option>
+              <option value="30">30</option>
+              <option value="40">40</option>
+              <option value="50">50</option>
+            </select>
+          <label>ON Minute Select</label>
+          </div>
+            
+          
+          
+          
+          <div class="input-field col s12 m6 l3 offset-m6">
+            <select>
+              <option value="" disabled selected>AM/PM</option>
+              <option value="AM">AM</option>
+              <option value="PM">PM</option>
+            </select>
+          <label>AM/PM</label>
+          </div>
+            
+          
+        </div>
+
+        <div class="row">
+          <div class="col s12 m6 l3"><span class="teal-text text-darken-2"><center>Schedule OFF time: </center></span></div>
+          <div class="input-field col s12 m6 l3">
+            <select>
+              <option value="" disabled selected>Choose Hour</option>
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+              <option value="5">5</option>
+              <option value="6">6</option>
+              <option value="7">7</option>
+              <option value="8">8</option>
+              <option value="9">9</option>
+              <option value="10">10</option>
+              <option value="11">11</option>
+              <option value="12">12</option>
+            </select>
+          <label>OFF Hour Select</label>
+          </div>
+
+          
+          <div class="input-field col s12 m6 l3 offset-m6">
+            <select>
+              <option value="" disabled selected>Choose Minute</option>
+              <option value="00">00</option>
+              <option value="10">10</option>
+              <option value="20">20</option>
+              <option value="30">30</option>
+              <option value="40">40</option>
+              <option value="50">50</option>
+            </select>
+          <label>OFF Minute Select</label>
+          </div>
+          
+
+
+          <div class="input-field col s12 m6 l3 offset-m6">
+            <select>
+              <option value="" disabled selected>AM/PM</option>
+              <option value="AM">AM</option>
+              <option value="PM">PM</option>
+            </select>
+          <label>AM/PM</label>
+          </div>
+          
+
+        </div>
+
+        <center>
+        <div class="switch">
+          <label>
+            Once
+            <input type="checkbox">
+            <span class="lever"></span>
+            Daily
+         </label>
+        </div>
+        </center>
+
+        </form>
+        </p>
+      </div>
+
+      <div class="modal-footer">
+        <a href="#!" class=" modal-action modal-close waves-effect waves-teal btn" type="submit">Apply</a>
+        <a href="#!" class=" modal-action modal-close waves-effect waves-teal btn-flat">Disable scheduler</a>
+      </div>
+    </div>    
+    
+    
+    
+    <div id="timerModal8" class="modal">
+      <div class="modal-content">
+        
+        <h4>Schedule manager</h4>
+        <hr>
+        <p>
+        <form action="#">
+        <div class="row">
+          <div class="col s12 m6 l3"><span class="teal-text text-darken-2"><center>Schedule ON time: </center></span></div>
+          
+          <div class="input-field col s12 m6 l3">
+            <select>
+              <option value="" disabled selected>Choose Hour</option>
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+              <option value="5">5</option>
+              <option value="6">6</option>
+              <option value="7">7</option>
+              <option value="8">8</option>
+              <option value="9">9</option>
+              <option value="10">10</option>
+              <option value="11">11</option>
+              <option value="12">12</option>
+            </select>
+          <label>ON Hour Select</label>
+          </div>
+          
+           
+          
+          
+          <div class="input-field col s12 m6 l3 offset-m6">
+            <select>
+              <option value="" disabled selected>Choose Minute</option>
+              <option value="00">00</option>
+              <option value="10">10</option>
+              <option value="20">20</option>
+              <option value="30">30</option>
+              <option value="40">40</option>
+              <option value="50">50</option>
+            </select>
+          <label>ON Minute Select</label>
+          </div>
+            
+          
+          
+          
+          <div class="input-field col s12 m6 l3 offset-m6">
+            <select>
+              <option value="" disabled selected>AM/PM</option>
+              <option value="AM">AM</option>
+              <option value="PM">PM</option>
+            </select>
+          <label>AM/PM</label>
+          </div>
+            
+          
+        </div>
+
+        <div class="row">
+          <div class="col s12 m6 l3"><span class="teal-text text-darken-2"><center>Schedule OFF time: </center></span></div>
+          <div class="input-field col s12 m6 l3">
+            <select>
+              <option value="" disabled selected>Choose Hour</option>
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+              <option value="5">5</option>
+              <option value="6">6</option>
+              <option value="7">7</option>
+              <option value="8">8</option>
+              <option value="9">9</option>
+              <option value="10">10</option>
+              <option value="11">11</option>
+              <option value="12">12</option>
+            </select>
+          <label>OFF Hour Select</label>
+          </div>
+
+          
+          <div class="input-field col s12 m6 l3 offset-m6">
+            <select>
+              <option value="" disabled selected>Choose Minute</option>
+              <option value="00">00</option>
+              <option value="10">10</option>
+              <option value="20">20</option>
+              <option value="30">30</option>
+              <option value="40">40</option>
+              <option value="50">50</option>
+            </select>
+          <label>OFF Minute Select</label>
+          </div>
+          
+
+
+          <div class="input-field col s12 m6 l3 offset-m6">
+            <select>
+              <option value="" disabled selected>AM/PM</option>
+              <option value="AM">AM</option>
+              <option value="PM">PM</option>
+            </select>
+          <label>AM/PM</label>
+          </div>
+          
+
+        </div>
+
+        <center>
+        <div class="switch">
+          <label>
+            Once
+            <input type="checkbox">
+            <span class="lever"></span>
+            Daily
+         </label>
+        </div>
+        </center>
+
+        </form>
+        </p>
+      </div>
+
+      <div class="modal-footer">
+        <a href="#!" class=" modal-action modal-close waves-effect waves-teal btn" type="submit">Apply</a>
+        <a href="#!" class=" modal-action modal-close waves-effect waves-teal btn-flat">Disable scheduler</a>
+      </div>
+    </div>
+    </main>
+
+    <footer class="page-footer teal lighten-2">
+      <div class="footer-copyright">
+        <div class="container">
+         <center>© 2016 S.M.A.R.T, All rights reserved.</center>
+        </div>
+      </div>
+    </footer>
+    
+  <!-- TimerModal end -->  
+    ---
+<script src="smart.js"></script>
+
+  
+</body>
