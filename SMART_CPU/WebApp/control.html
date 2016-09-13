@@ -22,10 +22,13 @@
       <link href="http://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
       <!--Import materialize.css-->
       <link type="text/css" rel="stylesheet" href="css/materialize.min.css"  media="screen,projection"/>
+      <!-- link ubuntu font -->
+      <link href='http://fonts.googleapis.com/css?family=Ubuntu&subset=cyrillic,latin' rel='stylesheet' type='text/css' />
 
       <!--Let browser know website is optimized for mobile-->
       <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
       <title>Control Panel</title>
+      <link rel="icon" href="control.ico" type="image/x-icon" />
     </head>
 
     <body class="controlBody" style="font-family: ubuntu">
@@ -33,7 +36,7 @@
     <main class="contents">
       <nav>                                                                       <!-- Navbar starts from here -->
       <div class="nav-wrapper teal lighten-2" id="welcomeNavBar">
-         <a href="#!" class="brand-logo center">Control Panel</a>
+         <a href="control.html" class="brand-logo center">Control Panel</a>
 
         <ul class="right hide-off-med-and-down">                                 <!-- settings button STARTS-->
           <li>
@@ -43,39 +46,110 @@
         </ul>
 
 
-        <ul id="settingsDropdown" class="dropdown-content collection" style="min-width: 350px;">
+        <ul id="settingsDropdown" class="dropdown-content collection" style="min-width: 220px;">
             <li><a href="config.html">Configure<i class="material-icons right">build</i>
             </a></a></li>
             <li class="divider"></li>
-            <li><a href="#!">Check for updates<i class="material-icons right">system_update</i></a></li>
+            <li href="#otaModal" class="modal-trigger"><a href="#!">Check for updates<i class="material-icons right">system_update</i></a></li>
             <li class="divider"></li>
-            <li><a href="#!">Restart<i class="material-icons right">autorenew</i></a></li>
+            <li href="#restartModal" class="modal-trigger"><a href="#!">Restart<i class="material-icons right">autorenew</i></a></li>
             <li class="divider"></li>
-            <li><a href="#!">Shutdown<i class="material-icons right">power_settings_new</i></a></li>
+            <li href="#shutdownModal" class="modal-trigger"><a>Shutdown<i class="material-icons right">power_settings_new</i></a></li>
             <li class="divider"></li>
             <li><a href="#!">Help<i class="material-icons right">help_outline</i></a></li>
+            <li class="divider"></li>
+            <li><a href="welcome.html">Logout<i class="material-icons right">not_interested</i></a></li>
         </ul>                                                                     <!-- settings button ENDS-->
+
+        <!--
+          Shutdown modal STARTS
+        -->
+        <div id="shutdownModal" class="modal modal-fixed-footer">
+          <div class="modal-content">
+           <h4 style="color: red">Alert!</h4>
+           <div class="divider"></div>
+           <p style="color: black">This will shutdown S.M.A.R.T system completely and all appliances connected to it. This will turn OFF all electrical appliances in your home which may cause undesirable situation. To restart the system you need to manually power-reset every S.M.A.R.T node in all your rooms. Shutdown the system, only if you know what you're doing!
+           </p>
+          </div>
+          <div class="modal-footer">
+            <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat">Abort</a>
+            <a href="#shutdownPreloadModal" class="modal-action modal-close waves-effect waves-red btn red darken-3 modal-trigger" onclick="setTimeout(closeTab, 7000)">Shutdown anyway</a>
+          </div>
+        </div>
+        <!--
+          Shutdown modal ENDS
+        -->
+
+        <!-- system update modal START -->
+          <div id="otaModal" class="modal">
+            <div class="modal-content">
+              <h5 style="color: teal">Checking for system updates...</h5>
+               <div class="progress">
+                <div class="indeterminate"></div>
+              </div>
+            </div>
+          </div>
+        <!-- system update modal ENDS  -->
+
+        <!-- RESTART modal STARTS-->
+        <div id="restartModal" class="modal modal-fixed-footer">
+          <div class="modal-content">
+           <h4 style="color: teal">Restart?</h4>
+           <div class="divider"></div>
+           <p style="color: black">This will restart the automation system. It may take a minute or two. All appliances connceted to system will be turned OFF and non-operational untill system starts again. 
+           </p>
+          </div>
+          <div class="modal-footer">
+            <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat">Abort</a>
+            <a href="#restartPreloadModal" class="modal-action modal-close waves-effect waves-teal btn modal-trigger" onclick="setTimeout(reloadWindow, 60*1000)">Restart</a>
+          </div>
+        </div>
+        <!-- RESTART modal ENDS  -->
+
+        <!-- Restart preloader STARTS -->
+        <div id="restartPreloadModal" class="modal">
+            <div class="modal-content">
+              <h5 style="color: teal">S.M.A.R.T is restarting...</h5>
+               <div class="progress">
+                <div class="indeterminate"></div>
+              </div>
+              <p style="color: black">This page will refresh in a minute.</p>
+            </div>
+          </div>
+        <!-- Restart preloader ENDS   -->
+
+        <!-- shutdown preloader ENDS   -->
+        <div id="shutdownPreloadModal" class="modal">
+            <div class="modal-content">
+              <h5 style="color: red">S.M.A.R.T is shutting down...</h5>
+               <div class="progress red lighten-5">
+                <div class="indeterminate red lighten-1"></div>
+              </div>
+              <p style="color: black">You will be logged out soon.</p>
+            </div>
+          </div>
+          <!-- shutdown preloader ENDS   -->
 
         <a class="button-collapse" href="#!" data-activates="slide-out"><i class="material-icons">menu</i></a>
 
         <ul id="slide-out" class="side-nav fixed grey lighten-4" style="font-family: ubuntu"><!--fixed: for showing in mobile mode-->
           <li class="no-padding">
               <ul class="collapsible collapsible-accordion">
-                      <li><a href="#!"class="waves-effect waves-light" href="control.html"><span class="teal-text text-darken-2" style="font-size:20px"><center>Room 1</center></span></a></li>
+                      <li><a href="#!"class="waves-effect waves-light" href="control.html"><span class="teal-text text-darken-2" style="font-size:18px"><center>Room 1</center></span></a></li>
                       <li class="divider"></li>
-                      <li><a href="#!"class="waves-effect waves-light" href="control.html" style="font-size:20px"><span class="teal-text text-darken-2"><center>Room 2</center></span></a></li>
+                      <li><a href="#!"class="waves-effect waves-light" href="control.html" style="font-size:18px"><span class="teal-text text-darken-2"><center>Room 2</center></span></a></li>
                       <li class="divider"></li>
-                      <li><a href="#!"class="waves-effect waves-light" href="control.html" style="font-size:20px"><span class="teal-text text-darken-2"><center>Room 3</center></span></a></li>
+                      <li><a href="#!"class="waves-effect waves-light" href="control.html" style="font-size:18px"><span class="teal-text text-darken-2"><center>Room 3</center></span></a></li>
                       <li class="divider"></li>
-                      <li><a href="#!"class="waves-effect waves-light" href="control.html" style="font-size:20px"><span class="teal-text text-darken-2"><center>Room 4</center></span></a></li>
+                      <li><a href="#!"class="waves-effect waves-light" href="control.html" style="font-size:18px"><span class="teal-text text-darken-2"><center>Room 4</center></span></a></li>
                       <li class="divider"></li>
-                      <li><a href="#!"class="waves-effect waves-light" href="control.html" style="font-size:20px"><span class="teal-text text-darken-2"><center>Room 5</center></span></a></li>
+                      <li><a href="#!"class="waves-effect waves-light" href="control.html" style="font-size:18px"><span class="teal-text text-darken-2"><center>Room 5</center></span></a></li>
                       <li class="divider"></li>
-                      <li><a href="#!"class="waves-effect waves-light" href="control.html" style="font-size:20px"><span class="teal-text text-darken-2"><center>Room 6</center></span></a></li>
+                      <li><a href="#!"class="waves-effect waves-light" href="control.html" style="font-size:18px"><span class="teal-text text-darken-2"><center>Room 6</center></span></a></li>
                       <li class="divider"></li>
-                      <li><a href="#!"class="waves-effect waves-light" href="control.html" style="font-size:20px"><span class="teal-text text-darken-2"><center>Room 7</center></span></a></li>
+                      <li><a href="#!"class="waves-effect waves-light" href="control.html" style="font-size:18px"><span class="teal-text text-darken-2"><center>Room 7</center></span></a></li>
                       <li class="divider"></li>
-                      <li><a href="#!"class="waves-effect waves-light" href="control.html" style="font-size:20px"><span class="teal-text text-darken-2"><center>Room 8</center></span></a></li>
+                      <li><a href="#!"class="waves-effect waves-light" href="control.html" style="font-size:18px"><span class="teal-text text-darken-2"><center>Room 8</center></span></a></li>
                       <li class="divider"></li>
               </ul>
             </li>
@@ -100,7 +174,13 @@
 
     </main>
 
-
+    <footer class="page-footer teal lighten-2">
+      <div class="footer-copyright">
+        <div class="container">
+         <center>© 2016 S.M.A.R.T, All rights reserved.</center>
+        </div>
+      </div>
+    </footer>
 
 
     <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
@@ -110,7 +190,7 @@
           inDuration: 300,
           outDuration: 225,
           constrain_width: true, // Does not change width of dropdown to that of the activator
-          hover: true, // Activate on hover
+          hover: false, // Activate on hover
           gutter: 0, // Spacing from edge
           belowOrigin: false, // Displays dropdown below the button
           alignment: 'left' // Displays dropdown with edge aligned to the left of button
@@ -126,10 +206,25 @@
       });
 
       $('.button-collapse').sideNav({
-          menuWidth: 300, // Default is 240
+          menuWidth: 230, // Default is 240
           closeOnClick: false // Closes side-nav on <a> clicks, useful for Angular/Meteor
         }
       );
+
+      $(document).ready(function(){
+        $('.modal-trigger').leanModal();
+      });
+
+      function reloadWindow()
+      {
+        location.reload(true);
+      }
+
+      function closeTab()
+      {
+        location.href="welcome.html";
+      }
+
 
   </script>
 
