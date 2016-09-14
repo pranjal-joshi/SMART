@@ -15,24 +15,44 @@
       <link href="http://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
       <!--Import materialize.css-->
       <link type="text/css" rel="stylesheet" href="css/materialize.css"  media="screen,projection"/>
+      <!-- link ubuntu font -->
+      <link href='http://fonts.googleapis.com/css?family=Ubuntu&subset=cyrillic,latin' rel='stylesheet' type='text/css' />
 
       <!--Let browser know website is optimized for mobile-->
       <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
       <title>Configure</title>
+      <link rel="icon" href="config.ico" type="image/x-icon" />
     </head>
 
-    <body class="configBody" style="font-family: monaco">
+    <body class="configBody" style="font-family: ubuntu">
     <main class="contents">
     <nav>
       <div class="nav-wrapper teal lighten-2" id="welcomeNavBar">
          <a href="#!" class="brand-logo center">Configure</a>
+         <ul class="left med-and-down">
+          <a href="#!" class="waves-effect" onclick="goBack()"><i class="material-icons center">arrow_back</i></a>
+         </ul>
       </div>
+
+      <a class="right"><i class="material-icons right">arrow_back</i></a>
     </nav>
+
+    <!-- error modal -->
+      <div id="errorModal" class="modal grey lighten-4">
+        <div class="modal-contnet">
+          <center><h5 style="color: red">Oops!</h5>
+          <div class="divider"></div>
+          <p style="color: black">Something went wrong. S.M.A.R.T server is out of reach!</p></center>
+        </div>
+        <div class="modal-footer grey lighten-4">
+          <a href="#!" class="modal-action modal-close waves-effect waves-red btn-flat">Done</a>
+      </div>
+      </div>
 
     <div class="row">
     <div class="col m4"></div>
     <div class="col s12 m4">
-    <br></br>
+    
     <div class="card-panel grey lighten-4" id="configCard">
       
       <center>
@@ -52,8 +72,8 @@
                 <label for="roomName1">Room 1</label>
               </div>
 
-              <input type="checkbox" class="filled-in" id="room1" checked="checked" />
-              <label for="room1">Check to enable</label>
+              <input type="checkbox" class="filled-in" id="room1" checked="checked" onchange="disableTextbox(this)"/>
+              <label for="room1"></label>
 
 
               </div>
@@ -67,8 +87,8 @@
                 <label for="roomName2">Room 2</label>
               </div>
 
-              <input type="checkbox" class="filled-in" id="room2" checked="checked" />
-              <label for="room2">Check to enable</label>
+              <input type="checkbox" class="filled-in" id="room2" checked="checked" onchange="disableTextbox(this)"/>
+              <label for="room2"></label>
               
               </div>
             </p>
@@ -81,8 +101,8 @@
                 <label for="roomName3">Room 3</label>
               </div>
 
-              <input type="checkbox" class="filled-in" id="room3" checked="checked" />
-              <label for="room3">Check to enable</label>
+              <input type="checkbox" class="filled-in" id="room3" checked="checked" onchange="disableTextbox(this)"/>
+              <label for="room3"></label>
               
               </div>
             </p>
@@ -95,8 +115,8 @@
                 <label for="roomName4">Room 4</label>
               </div>
 
-              <input type="checkbox" class="filled-in" id="room4" checked="checked" />
-              <label for="room4">Check to enable</label>
+              <input type="checkbox" class="filled-in" id="room4" checked="checked" onchange="disableTextbox(this)"/>
+              <label for="room4"></label>
               
               </div>
             </p>
@@ -109,8 +129,8 @@
                 <label for="roomName5">Room 5</label>
               </div>
 
-              <input type="checkbox" class="filled-in" id="room5" />
-              <label for="room5">Check to enable</label>
+              <input type="checkbox" class="filled-in" id="room5" onchange="disableTextbox(this)"/>
+              <label for="room5"></label>
               
               </div>
             </p>
@@ -123,8 +143,8 @@
                 <label for="roomName6">Room 6</label>
               </div>
 
-              <input type="checkbox" class="filled-in" id="room6" />
-              <label for="room6">Check to enable</label>
+              <input type="checkbox" class="filled-in" id="room6" onchange="disableTextbox(this)"/>
+              <label for="room6"></label>
               
               </div>
             </p>
@@ -137,8 +157,8 @@
                 <label for="roomName7">Room 7</label>
               </div>
 
-              <input type="checkbox" class="filled-in" id="room7" />
-              <label for="room7">Check to enable</label>
+              <input type="checkbox" class="filled-in" id="room7" onchange="disableTextbox(this)"/>
+              <label for="room7"></label>
               
               </div>
             </p>
@@ -151,15 +171,20 @@
                 <label for="roomName8">Room 8</label>
               </div>
 
-              <input type="checkbox" class="filled-in" id="room8" />
-              <label for="room8">Check to enable</label>
+              <input type="checkbox" class="filled-in" id="room8" onchange="disableTextbox(this)"/>
+              <label for="room8"></label>
               
               </div>
             </p>
 
-            <button class="btn waves-effect waves-light" type="submit" name="action">Apply
+            <div class="row">
+            <button class="btn waves-effect waves-light col s4 offset-s2" type="submit" name="action" onclick="setRoomNames()">Apply
               <i class="material-icons right">settings</i>
             </button>
+            <button class="btn-flat waves-effect waves-light col s4" onclick="goBack()">Cancel
+              <i class="material-icons right">arrow_back</i>
+            </button>
+            </div>
 
         </form>
       </center>
@@ -181,6 +206,7 @@
       <!--Import jQuery before materialize.js-->
       <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
       <script type="text/javascript" src="js/materialize.min.js"></script>
+      <script src="smart.js"></script>
 
     </body>
   </html>

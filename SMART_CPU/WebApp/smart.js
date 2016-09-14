@@ -1,6 +1,6 @@
 // smart javascript file
 
-var SERVER = "192.168.0.150";
+var SERVER = "192.168.0.160";
 var PORT = "98";
 var ROOM = 1;
 var ROOM_NAMES = ["Room 1","Room 2","Room 3","Room 4","Room 5","Room 6","Room 7","Room 8"];
@@ -95,11 +95,15 @@ function httpGet(theUrl)
 {
     var xmlHttp = new XMLHttpRequest();
     xmlHttp.open( "GET", theUrl, true ); // false for synchronous request
-    xmlHttp.send( null );
-    xmlHttp.ontimeout = function(){
-  		alert("Something went wrong. S.M.A.R.T is unreachable!");
-	}
-    return xmlHttp.responseText;
+    xmlHttp.send(null);
+    xmlHttp.onreadystatechange = processRequest;
+    function processRequest(e)
+    {
+    	if(xmlHttp.readyState == 4)
+    	{
+    		return xmlHttp.responseText;
+    	}
+    }
 }
 
 function switchToggle(btn)
@@ -113,7 +117,9 @@ function switchToggle(btn)
 	var url = "http://" + SERVER + ":" + PORT + "/?toggle=&" + ROOM.toString() + "&" + btn.id + "&" + state;
 	var resp = httpGet(url);
 	if(!(resp.includes("toggle ok")))
-		alert("Something went wrong. S.M.A.R.T is unreachable!\nResponse: " + resp);
+	{
+		$('#errorModal').openModal();
+	}
 
 }
 
@@ -161,6 +167,7 @@ function getRoomNames()											// call this onLoad
 {
 	url = "http://" + SERVER + ":" + PORT + "/?getRoomNames";
 	var list = httpGet(url);
+	alert(list);
 	if(!(list.includes(NULL)))
 	{
 		list = list.split("&");
@@ -173,4 +180,75 @@ function getRoomNames()											// call this onLoad
 		}
 	}
 	document.getElementById("navbarTitle").innerHTML = ROOM_NAMES[ROOM - 1];
+}
+
+function setDeviceName(roomBox)
+{
+	var name = document.getElementById(roomBox.id).value;
+	var deviceNo = roomBox.id.split('');
+	deviceNo = deviceNo[1];
+	url = "http://" + SERVER + ":" + PORT + "/?setDeviceName=&" + ROOM.toString() + "&" + deviceNo + "&" + name;
+	var resp = httpGet(url);
+	if(DEBUG)
+		alert(url);
+	if(!(resp.includes("ok")))
+		$('#errorModal').openModal();
+}
+
+function setRoomNames()
+{
+	var activeRoomUrl = "http://" + SERVER + ":" + PORT + "/?activeRooms=";
+	var url = "http://" + SERVER + ":" + PORT + "/?setRoomNames=";
+	for(i=1;i<9;i++)
+	{
+		var boxId = "room" + i.toString();
+		if(document.getElementById(boxId).checked)
+		{
+			activeRoomUrl = activeRoomUrl + "&" + i.toString();
+		}
+	}
+	for(i=1;i<9;i++)
+	{
+		var textId = "roomName" + i.toString();
+		url = url + "&" + document.getElementById(textId).value;
+	}
+	var resp = httpGet(activeRoomUrl);
+	setTimeout(function () {}, 200);
+	var updateRes = httpGet(url);
+	if(DEBUG)
+		alert(url + "\n" + activeRoomUrl);
+	if(!(updateRes.includes("OK")))
+		$('#errorModal').openModal();
+	url = "";
+	activeRoomUrl = "";
+	location.href = "mat3.html";
+}
+
+function login()
+{
+	Materialize.toast('Logging in..', 1000);
+	url = "http://" + SERVER + ":" + PORT + "/?loginPass=" + (document.getElementById("loginBox").value);
+	var resp = httpGet(url);
+	if(DEBUG)
+		alert(url + "\n" + resp);
+	if(resp.includes("grant"))
+		location.href = "mat3.html";
+	if(resp.includes("denied"))
+		Materialize.toast('Wronge password!', 2000);
+	if(resp.includes("locked"))
+		Materialize.toast('Locked due to security reasons. Try again after few minutes.', 3000);
+	//if(resp == 0)
+	//	$('#errorModal').openModal();
+}
+
+function disableTextbox(chk)
+{
+	var idNo = chk.id.split('');
+	idNo = idNo[4];
+	var txtId = "roomName" + idNo;
+	if(chk.checked)
+		document.getElementById(txtId).disabled = false;
+	else
+		document.getElementById(txtId).disabled = true;
+
 }
