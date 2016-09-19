@@ -1,11 +1,12 @@
 // smart javascript file
 
 var SERVER = "192.168.0.160";
-var PORT = "98";
+var PORT = "80";
 var ROOM = 1;
 var ROOM_NAMES = ["Room 1","Room 2","Room 3","Room 4","Room 5","Room 6","Room 7","Room 8"];
 
 var DEBUG = 1;
+var global_resp = "";
 
 function startDictation() {
  
@@ -36,12 +37,12 @@ function startDictation() {
   function checkAddress(roomName1)
     {
       var x = "id: " + roomName1.id + "\nValue: " + roomName1.checked;
-      alert(x);
+      console.log(x);
     }
 
     function lostFocus()
     {
-      alert("focus lost");
+      console.log("focus lost");
     }
 
     function range123()
@@ -91,19 +92,24 @@ function closeTab()
     location.href="welcome.html";
 }
 
-function httpGet(theUrl)
+function httpGet(theUrl, callback)
 {
     var xmlHttp = new XMLHttpRequest();
-    xmlHttp.open( "GET", theUrl, true ); // false for synchronous request
-    xmlHttp.send(null);
     xmlHttp.onreadystatechange = processRequest;
     function processRequest(e)
     {
     	if(xmlHttp.readyState == 4)
     	{
-    		return xmlHttp.responseText;
+    		callback(xmlHttp.responseText);
     	}
     }
+    xmlHttp.timeout = 3000;
+    xmlHttp.ontimeout = function(e)
+    {
+    	$('#errorModal').openModal();
+    }
+    xmlHttp.open( "GET", theUrl, true ); // false for synchronous request
+    xmlHttp.send(null);
 }
 
 function switchToggle(btn)
@@ -115,11 +121,12 @@ function switchToggle(btn)
 		state = "0";
 
 	var url = "http://" + SERVER + ":" + PORT + "/?toggle=&" + ROOM.toString() + "&" + btn.id + "&" + state;
-	var resp = httpGet(url);
-	if(!(resp.includes("toggle ok")))
-	{
-		$('#errorModal').openModal();
-	}
+	httpGet(url,function(resp){
+		if(!(resp.indexOf("toggle ok")>=0))
+		{
+			$('#errorModal').openModal();
+		}
+	});
 
 }
 
@@ -131,17 +138,23 @@ function getRoom(room)
 
 	// get device names
 	url = "http://" + SERVER + ":" + PORT + "/?getDeviceNames=&" + ROOM.toString();
-	var deviceList = httpGet(url);
-	if(deviceList != null)
-	{
-		deviceList = deviceList.split("&");
-		var loopId;
-		for(i=1;i<9;i++)
+	console.log("getDeviceURL: " + url);
+	httpGet(url,function(deviceList){
+		if(deviceList[0] != "&")
 		{
-			loopId = "device" + i.toString();
-			document.getElementById(loopId).innerHTML = deviceList[i-1];
+			deviceList = deviceList.split("&");
+			console.log("splitted deviceList = " + deviceList);
+			var loopId;
+			for(i=1;i<9;i++)
+			{
+				loopId = "d" + i.toString();
+				if(!(deviceList[i-1] == "None"))
+					document.getElementById(loopId).value = decodeURI(deviceList[i-1]);
+				else
+					document.getElementById(loopId).value = "";
+			}
 		}
-	}
+	});
 
 	// get switch states
 	getSwitches();
@@ -152,33 +165,36 @@ function getRoom(room)
 function getSwitches()
 {
 	url = "http://" + SERVER + ":" + PORT + "/?updateResponse=&" + ROOM.toString();
-	var resp = httpGet(url);
-	resp = resp.split('');
-	for(i=1;i<9;i++)
-	{
-		if(resp[i-1] == '1')
-			document.getElementById(i.toString()).checked = true;
-		else
-			document.getElementById(i.toString()).checked = false;
-	}
+	httpGet(url,function(resp){
+		resp = resp.split('');
+		for(i=1;i<9;i++)
+		{
+			if(resp[i-1] == '1')
+				document.getElementById(i.toString()).checked = true;
+			else
+				document.getElementById(i.toString()).checked = false;
+		}
+	});
 }
 
 function getRoomNames()											// call this onLoad
 {
 	url = "http://" + SERVER + ":" + PORT + "/?getRoomNames";
-	var list = httpGet(url);
-	alert(list);
-	if(!(list.includes(NULL)))
-	{
-		list = list.split("&");
-		var loopId;
-		for(i=1;i<9;i++)
+	httpGet(url,function(list){
+		if(DEBUG)
+			console.log(list);
+		if(list[0] != "&")
 		{
-			loopId = "r" + i.toString();
-			document.getElementById(loopId).innerHTML = list[i-1];
-			ROOM_NAMES[i-1] = list[i-1];
+			list = list.split("&");
+			var loopId;
+			for(i=1;i<9;i++)
+			{
+				loopId = "r" + i.toString();
+				document.getElementById(loopId).innerHTML = list[i-1];
+				ROOM_NAMES[i-1] = list[i-1];
+			}
 		}
-	}
+	});
 	document.getElementById("navbarTitle").innerHTML = ROOM_NAMES[ROOM - 1];
 }
 
@@ -188,11 +204,12 @@ function setDeviceName(roomBox)
 	var deviceNo = roomBox.id.split('');
 	deviceNo = deviceNo[1];
 	url = "http://" + SERVER + ":" + PORT + "/?setDeviceName=&" + ROOM.toString() + "&" + deviceNo + "&" + name;
-	var resp = httpGet(url);
 	if(DEBUG)
-		alert(url);
-	if(!(resp.includes("ok")))
-		$('#errorModal').openModal();
+		console.log(url);
+	httpGet(url, function(resp){
+		if(!(resp.indexOf("ok")>=0))
+			$('#errorModal').openModal();
+	});
 }
 
 function setRoomNames()
@@ -212,33 +229,32 @@ function setRoomNames()
 		var textId = "roomName" + i.toString();
 		url = url + "&" + document.getElementById(textId).value;
 	}
-	var resp = httpGet(activeRoomUrl);
-	setTimeout(function () {}, 200);
-	var updateRes = httpGet(url);
-	if(DEBUG)
-		alert(url + "\n" + activeRoomUrl);
-	if(!(updateRes.includes("OK")))
-		$('#errorModal').openModal();
-	url = "";
-	activeRoomUrl = "";
-	location.href = "mat3.html";
+	httpGet(activeRoomUrl,function (updateRes){
+		if(!(updateRes.indexOf("OK")>=0))
+			$('#errorModal').openModal();
+		url = "";
+		activeRoomUrl = "";
+		location.href = "control.html";
+	});
+	httpGet(url,function(nothing){});
 }
 
 function login()
 {
 	Materialize.toast('Logging in..', 1000);
 	url = "http://" + SERVER + ":" + PORT + "/?loginPass=" + (document.getElementById("loginBox").value);
-	var resp = httpGet(url);
-	if(DEBUG)
-		alert(url + "\n" + resp);
-	if(resp.includes("grant"))
-		location.href = "mat3.html";
-	if(resp.includes("denied"))
-		Materialize.toast('Wronge password!', 2000);
-	if(resp.includes("locked"))
-		Materialize.toast('Locked due to security reasons. Try again after few minutes.', 3000);
-	//if(resp == 0)
-	//	$('#errorModal').openModal();
+	httpGet(url,function (response){
+		if(DEBUG)
+			console.log(url + "\n" + response);
+		if(response.indexOf("grant")>=0)
+			location.href = "control.html";
+		if(response.indexOf("denied")>=0)
+			Materialize.toast('Wronge password!', 2000);
+		if(response.indexOf("locked")>=0)
+			Materialize.toast('Locked due to security reasons. Try again after few minutes.', 3000);
+		if(response == 0)
+			$('#errorModal').openModal();
+	});
 }
 
 function disableTextbox(chk)
