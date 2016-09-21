@@ -6,7 +6,7 @@ var ROOM = 1;
 var ROOM_NAMES = ["Room 1","Room 2","Room 3","Room 4","Room 5","Room 6","Room 7","Room 8"];
 
 var DEBUG = 1;
-var global_resp = "";
+var updateTimer;
 
 function startDictation() {
  
@@ -100,7 +100,7 @@ function httpGet(theUrl, callback)
     {
     	if(xmlHttp.readyState == 4)
     	{
-    		callback(xmlHttp.responseText);
+    		callback(decodeURI(xmlHttp.responseText));
     	}
     }
     xmlHttp.timeout = 3000;
@@ -157,16 +157,17 @@ function getRoom(room)
 	});
 
 	// get switch states
-	getSwitches();
-
-
+	getSwitches(ROOM);
+	updateTimer = setInterval(getSwitches,1500,ROOM);
 }
 
-function getSwitches()
+function getSwitches(r)
 {
-	url = "http://" + SERVER + ":" + PORT + "/?updateResponse=&" + ROOM.toString();
+	url = "http://" + SERVER + ":" + PORT + "/?requestUpdate=&" + r.toString();
+	console.log(url);
 	httpGet(url,function(resp){
 		resp = resp.split('');
+		console.log(resp);
 		for(i=1;i<9;i++)
 		{
 			if(resp[i-1] == '1')
@@ -190,12 +191,17 @@ function getRoomNames()											// call this onLoad
 			for(i=1;i<9;i++)
 			{
 				loopId = "r" + i.toString();
-				document.getElementById(loopId).innerHTML = list[i-1];
+				document.getElementById(loopId).innerHTML = decodeURI(list[i-1]);
 				ROOM_NAMES[i-1] = list[i-1];
 			}
+			document.getElementById("navbarTitle").innerHTML = ROOM_NAMES[ROOM - 1];
 		}
+		else if((list[0] == undefined) || (list[0] == 0))
+		{
+			document.getElementById("navbarTitle").innerHTML = ROOM_NAMES[ROOM - 1];
+		}
+
 	});
-	document.getElementById("navbarTitle").innerHTML = ROOM_NAMES[ROOM - 1];
 }
 
 function setDeviceName(roomBox)
@@ -257,6 +263,13 @@ function login()
 	});
 }
 
+// login on pressing enter on welcome page
+$("#loginBox").keyup(function(event){
+    if(event.keyCode == 13){
+        $("#loginButton").click();
+    }
+});
+
 function disableTextbox(chk)
 {
 	var idNo = chk.id.split('');
@@ -267,4 +280,36 @@ function disableTextbox(chk)
 	else
 		document.getElementById(txtId).disabled = true;
 
+}
+
+function shutdown()
+{
+	url = "http://" + SERVER + ":" + PORT + "/?shutDown";
+	httpGet(url,function(doNothing){});
+	clearInterval(updateTimer);
+}
+
+function reboot()
+{
+	url = "http://" + SERVER + ":" + PORT + "/?reboot";
+    httpGet(url,function(doNothing){});
+    clearInterval(updateTimer);
+}
+
+function checkUpdate()
+{
+	url = "http://" + SERVER + ":" + PORT + "/?otaUpdate";
+    httpGet(url,function(otaResp){
+		if(otaResp.indexOf("ota complete") >= 0)
+		{
+			$('#otaModal').closeModal();
+			Materialize.Toast("System update successful. New features will take effect after restart.", 6000);
+		}
+		if(otaResp.indexOf("ota unavailable") >= 0)
+                { 
+                        $('#otaModal').closeModal();
+                        Materialize.Toast("Your software is up to date.", 3000);
+                }	
+	});
+	clearInterval(updateTimer);
 }
