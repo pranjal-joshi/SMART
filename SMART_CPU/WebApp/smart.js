@@ -232,15 +232,17 @@ function setRoomNames()
 	}
 	for(i=1;i<9;i++)
 	{
-		var textId = "roomName" + i.toString();
+		var textId = "r" + i.toString();
 		url = url + "&" + document.getElementById(textId).value;
 	}
 	httpGet(activeRoomUrl,function (updateRes){
 		if(!(updateRes.indexOf("OK")>=0))
 			$('#errorModal').openModal();
-		url = "";
-		activeRoomUrl = "";
-		location.href = "control.html";
+		else {
+			url = "";
+			activeRoomUrl = "";
+			location.href = "control.html";
+		}
 	});
 	httpGet(url,function(nothing){});
 }
@@ -274,7 +276,7 @@ function disableTextbox(chk)
 {
 	var idNo = chk.id.split('');
 	idNo = idNo[4];
-	var txtId = "roomName" + idNo;
+	var txtId = "r" + idNo;
 	if(chk.checked)
 		document.getElementById(txtId).disabled = false;
 	else
@@ -312,4 +314,35 @@ function checkUpdate()
                 }	
 	});
 	clearInterval(updateTimer);
+}
+
+function getRoomNamesForConfigPage()									// call this onLoad
+{
+	url = "http://" + SERVER + ":" + PORT + "/?getRoomNames";
+	httpGet(url,function(list){
+		if(DEBUG)
+			console.log(list);
+		if(list[0] != "&")
+		{
+			list = list.split("&");
+			var loopId;
+			for(i=1;i<9;i++)
+			{
+				loopId = "r" + i.toString();
+				document.getElementById(loopId).innerHTML = decodeURI(list[i-1]);
+				ROOM_NAMES[i-1] = list[i-1];
+			}
+			for(i=1;i<9;i++)
+			{
+				if((ROOM_NAMES[i-1] == null) || (ROOM_NAMES[i-1] == 0) || (ROOM_NAMES[i-1] == undefined))
+				{
+					var checkboxName = "room" + i.toString();
+					document.getElementById(checkboxName).checked = false;
+					var txtId = "r" + i.toString();
+					document.getElementById(txtId).disabled = true;
+				}
+			}
+		}
+
+	});
 }

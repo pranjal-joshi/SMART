@@ -24,7 +24,7 @@
       <link rel="icon" href="config.ico" type="image/x-icon" />
     </head>
 
-    <body class="configBody" style="font-family: ubuntu">
+    <body class="configBody" style="font-family: ubuntu" onload="getRoomNamesForConfigPage()">
     <main class="contents">
     <nav>
       <div class="nav-wrapper teal lighten-2" id="welcomeNavBar">
@@ -63,13 +63,13 @@
       <!--
           **** Add php code for checkbox check property to retrive applied settings by fetching active flag from db and set checkboxes according while loading the webpage.
       -->
-        <form action="#">
+        <form>
             <p>
               <div class="row">
 
               <div class="input-field col s8">
-                <input id="roomName1" type="text" class="validate">
-                <label for="roomName1">Room 1</label>
+                <input id="r1" type="text" class="validate">
+                <label for="r1">Room 1</label>
               </div>
 
               <input type="checkbox" class="filled-in" id="room1" checked="checked" onchange="disableTextbox(this)"/>
@@ -83,8 +83,8 @@
               <div class="row">
 
               <div class="input-field col s8">
-                <input id="roomName2" type="text" class="validate">
-                <label for="roomName2">Room 2</label>
+                <input id="r2" type="text" class="validate">
+                <label for="r2">Room 2</label>
               </div>
 
               <input type="checkbox" class="filled-in" id="room2" checked="checked" onchange="disableTextbox(this)"/>
@@ -97,8 +97,8 @@
               <div class="row">
 
               <div class="input-field col s8">
-                <input id="roomName3" type="text" class="validate">
-                <label for="roomName3">Room 3</label>
+                <input id="r3" type="text" class="validate">
+                <label for="r3">Room 3</label>
               </div>
 
               <input type="checkbox" class="filled-in" id="room3" checked="checked" onchange="disableTextbox(this)"/>
@@ -111,8 +111,8 @@
               <div class="row">
 
               <div class="input-field col s8">
-                <input id="roomName4" type="text" class="validate">
-                <label for="roomName4">Room 4</label>
+                <input id="r4" type="text" class="validate">
+                <label for="r4">Room 4</label>
               </div>
 
               <input type="checkbox" class="filled-in" id="room4" checked="checked" onchange="disableTextbox(this)"/>
@@ -125,8 +125,8 @@
               <div class="row">
 
               <div class="input-field col s8">
-                <input id="roomName5" type="text" class="validate">
-                <label for="roomName5">Room 5</label>
+                <input id="r5" type="text" class="validate">
+                <label for="r5">Room 5</label>
               </div>
 
               <input type="checkbox" class="filled-in" id="room5" onchange="disableTextbox(this)"/>
@@ -139,8 +139,8 @@
               <div class="row">
 
               <div class="input-field col s8">
-                <input id="roomName6" type="text" class="validate">
-                <label for="roomName6">Room 6</label>
+                <input id="r6" type="text" class="validate">
+                <label for="r6">Room 6</label>
               </div>
 
               <input type="checkbox" class="filled-in" id="room6" onchange="disableTextbox(this)"/>
@@ -153,8 +153,8 @@
               <div class="row">
 
               <div class="input-field col s8">
-                <input id="roomName7" type="text" class="validate">
-                <label for="roomName7">Room 7</label>
+                <input id="r7" type="text" class="validate">
+                <label for="r7">Room 7</label>
               </div>
 
               <input type="checkbox" class="filled-in" id="room7" onchange="disableTextbox(this)"/>
@@ -167,8 +167,8 @@
               <div class="row">
 
               <div class="input-field col s8">
-                <input id="roomName8" type="text" class="validate">
-                <label for="roomName8">Room 8</label>
+                <input id="r8" type="text" class="validate">
+                <label for="r8">Room 8</label>
               </div>
 
               <input type="checkbox" class="filled-in" id="room8" onchange="disableTextbox(this)"/>
@@ -178,7 +178,7 @@
             </p>
 
             <div class="row">
-            <button class="btn waves-effect waves-light col s4 offset-s2" type="submit" name="action" onclick="setRoomNames()">Apply
+            <button class="btn waves-effect waves-light col s4 offset-s2" type="button" onclick="setRoomNames()" id="applyButton">Apply
               <i class="material-icons right">settings</i>
             </button>
             <button class="btn-flat waves-effect waves-light col s4" onclick="goBack()">Cancel
