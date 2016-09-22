@@ -23,7 +23,7 @@ DEBUG = True
 VERSION = 1.0
 
 SERVER_IP = "192.168.0.160"				#change later
-SERVER_PORT = "98"
+SERVER_PORT = "80"
 PORT = int(SERVER_PORT) - 1
 
 SYNCPIN = 14
