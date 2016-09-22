@@ -18,7 +18,7 @@ VERSION_NODE = 1.0
 VERSION_WEB = 1.0
 ################################################
 
-PORT = 98
+PORT = 80
 NODE_PORT = PORT-1
 
 loginAttempt = 0
@@ -26,12 +26,33 @@ loginAttempt = 0
 REQUEST_ROOM = 0
 APP_ACTIVITY = False
 
+####### Server load files ###########
+CSSFILE = ""
+JSFILE = ""
+JQUERY = ""
+SMARTJS = ""
+welcomeIco = 0
+configIco = 0
+controlIco = 0
+htmlConfig = ""
+htmlControl = ""
+htmlWelcome = ""
+#####################################
+
 con = mdb.connect("localhost","root","linux")
 db = con.cursor()
 dbThread = con.cursor()
 
 # HTTP handler for GET request
 class handler(SimpleHTTPRequestHandler):
+
+	def end_headers(self):
+		self.send_cors_headers()
+		SimpleHTTPRequestHandler.end_headers(self)
+
+	def send_cors_headers(self):
+		self.send_header("Access-Control-Allow-Origin","*")
+
 	def do_GET(self):
 		global APP_ACTIVITY
 		global REQUEST_ROOM
@@ -100,7 +121,6 @@ class handler(SimpleHTTPRequestHandler):
 			db.execute("update map set slider=%s where room_no=%s" % (thumbValue, room))
 			db.execute("update map set active=1 where room_no=%s" % (room))
 			con.commit()
-			NumOfRooms()
 			self.send_response(200)
 			self.end_headers()
 			self.wfile.write("slider ok")
@@ -121,6 +141,18 @@ class handler(SimpleHTTPRequestHandler):
 			print "requestUpdate executed."
 			return
 
+		elif(url.find("setRoomNames") > 0):
+			urlSplit = url.split("&")
+			db.execute("use smart")
+			for i in range(1,9):
+				if(urlSplit[i] == None):
+					break
+				db.execute("update map set room_name='%s' where room_no=%s" % (urlSplit[i],str(i)))
+			con.commit()
+			self.send_response(200)
+			self.end_headers()
+			self.wfile.write("OK")
+
 		elif(url.find("activeRooms") > 0):
 			rooms = url.split("&")
 			rooms = rooms[1:]
@@ -135,7 +167,6 @@ class handler(SimpleHTTPRequestHandler):
 			self.send_response(200)
 			self.end_headers()
 			self.wfile.write("OK")
-			return
 
 		elif(url.find("voiceQuery") > 0):
 			query = url.split("=");
@@ -209,10 +240,96 @@ class handler(SimpleHTTPRequestHandler):
 				self.end_headers()
 				self.wfile.write("ota unavailable")
 
+		elif(url.find("getRoomNames") > 0):
+			db.execute("use smart")
+			db.execute("select room_name from map")
+			names = db.fetchall()
+			names = str(names[0][0]) + "&" + str(names[1][0]) + "&" + str(names[2][0]) + "&" + str(names[3][0]) + "&" + str(names[4][0]) + "&" + str(names[5][0]) + "&" + str(names[6][0]) + "&" + str(names[7][0])
+			self.send_response(200)
+			self.end_headers()
+			self.wfile.write(names)
+			self.wfile.close()
+			return
+
+		elif(url.find("getDeviceNames") > 0):
+			room = url.split("&")
+			room = room[1]
+			db.execute("use smart")
+			db.execute("select d1name,d2name,d3name,d4name,d5name,d6name,d7name,d8name from map where room_no=%s" % (str(room)))
+			names = db.fetchall()
+			names = str(names[0][0]) + "&" + str(names[0][1]) + "&" + str(names[0][2]) + "&" + str(names[0][3]) + "&" + str(names[0][4]) + "&" + str(names[0][5]) + "&" + str(names[0][6]) + "&" + str(names[0][7])
+			self.send_response(200)
+			self.end_headers()
+			self.wfile.write(names)
+			return
+
+		elif(url.find("setDeviceName") > 0):
+			urlSplit = url.split('&')
+			print url.split('&')
+			room = urlSplit[1]
+			deviceNo = urlSplit[2]
+			deviceNo = "d" + str(deviceNo) + "name"
+			deviceName = urlSplit[3]
+			db.execute("use smart")
+			db.execute("update map set %s='%s' where room_no=%s" % (deviceNo, deviceName, room))
+			con.commit()
+			self.send_response(200)
+			self.end_headers()
+			self.wfile.write("ok")
+			return
+
+		elif((url.find("materialize.min.css") > 0) or (url.find("materialize.css") > 0)):
+			self.send_response(200)
+			self.end_headers()
+			self.wfile.write(CSSFILE)
+
+		elif((url.find("materialize.min.js") > 0) or (url.find("materialize.js") > 0)):
+			self.send_response(200)
+			self.end_headers()
+			self.wfile.write(JSFILE)
+
+		elif((url.find("jquery.min.js") > 0) or (url.find("jquery.js") > 0)):
+			self.send_response(200)
+			self.end_headers()
+			self.wfile.write(JQUERY)
+
+		elif(url.find("smart.js") > 0):
+			self.send_response(200)
+			self.end_headers()
+			self.wfile.write(SMARTJS)
+
+		elif(url.find("welcome.ico") > 0):
+			self.send_response(200)
+			self.end_headers()
+			self.wfile.write(welcomeIco)
+
+		elif(url.find("config.ico") > 0):
+			self.send_response(200)
+			self.end_headers()
+			self.wfile.write(configIco)
+
+		elif(url.find("control.ico") > 0):
+			self.send_response(200)
+			self.end_headers()
+			self.wfile.write(controlIco)
+
+		elif(url.find("welcome.html") > 0):
+			self.send_response(200)
+			self.end_headers()
+			self.wfile.write(htmlWelcome)
+
+		elif(url.find("config.html") > 0):
+			self.send_response(200)
+			self.end_headers()
+			self.wfile.write(htmlConfig)
+
+		elif(url.find("control.html") > 0):
+			self.send_response(200)
+			self.end_headers()
+			self.wfile.write(htmlControl)
 
 		else:
-			print "Invalid URL."
-			f = open("index.html",'r')
+			f = open("welcome.html",'r')
 			resp = f.read()
 			f.close()
 			self.send_response(200)
@@ -235,7 +352,7 @@ def initDB():
 		print "---> Database not found. creating..."
 		db.execute("create database smart")
 		db.execute("use smart")
-		db.execute("create table map(room_no INT, d1 INT not null default 0, d2 INT not null default 0, d3 INT not null default 0, d4 INT not null default 0, d5 INT not null default 0, d6 INT not null default 0, d7 INT not null default 0, d8 INT not null default 0, slider INT not null default 0, timer_active INT not null default 0, active INT not null default 0, address VARCHAR(25), is_server INT not null default 0, assigned_no INT not null default 0)")
+		db.execute("create table map(room_no INT, d1 INT not null default 0, d2 INT not null default 0, d3 INT not null default 0, d4 INT not null default 0, d5 INT not null default 0, d6 INT not null default 0, d7 INT not null default 0, d8 INT not null default 0, slider INT not null default 0, timer_active INT not null default 0, active INT not null default 0, address VARCHAR(25), is_server INT not null default 0, d1name VARCHAR(25), d2name VARCHAR(25), d3name VARCHAR(25), d4name VARCHAR(25), d5name VARCHAR(25), d6name VARCHAR(25), d7name VARCHAR(25), d8name VARCHAR(25), room_name VARCHAR(25))")
 		db.execute("insert into map (room_no) values (1)")
 		db.execute("insert into map (room_no) values (2)")
 		db.execute("insert into map (room_no) values (3)")
@@ -331,18 +448,69 @@ def downloadOTA():
 	os.system("tar -xvzf *.tar.gz")
 	os.system("rm *.tar.gz")
 
+def loadServerFiles():
+	global CSSFILE
+	global JSFILE
+	global SMARTJS
+	global JQUERY
+	global welcomeIco
+	global configIco
+	global controlIco
+	global htmlControl
+	global htmlConfig
+	global htmlWelcome
+
+	print "Loading server files..."
+	f = open("materialize.min.css","r")		# read css file
+	CSSFILE = f.read()
+	f.close()
+	f = open("materialize.min.js","r")		# read js file
+	JSFILE = f.read()
+	f.close()
+	f = open("jquery.min.js","r")			# read jquery
+	JQUERY = f.read()
+	f.close()
+	f = open("smart.js","r")				# read smart.js
+	SMARTJS = f.read()
+	f.close()
+										# load title icons
+	f = open("control.ico","r")
+	controlIco = f.read()
+	f.close()
+	f = open("config.ico","r")
+	configIco = f.read()
+	f.close()
+	f = open("welcome.ico","r")
+	welcomeIco = f.read()
+	f.close()
+										# load HTML files
+
+	f = open("control.html","r")
+	htmlControl = f.read()
+	f.close()
+	f = open("config.html","r")
+	htmlConfig = f.read()
+	f.close()
+	f = open("welcome.html","r")
+	htmlWelcome = f.read()
+	f.close()
+
 
 # Main program begins here...
-
-os.system("clear")
-httpd = SocketServer.TCPServer(("",PORT),handler)
-print "\n\r[ Self Monitoring Analysing & Reporting Technology ] (S.M.A.R.T)\n\r"
-print "Started at: " +  time.strftime("%d/%m/%y  %I:%M:%S %p")
-print "IP Address: " + str(os.system("hostname -I"))
-sysLog("SMART INITIALIZED.")
-print "Initializing with SU access..."
-initDB()
-print "Attempting to start localhost HTTP server on port ", PORT,"..."
-print "Started listening to S.M.A.R.T app  with security key: " + loginKey()
-appActivity()
-httpd.serve_forever()
+try:
+	os.system("clear")
+	httpd = SocketServer.TCPServer(("",PORT),handler)
+	print "\n\r[ Self Monitoring Analysing & Reporting Technology ] (S.M.A.R.T)\n\r"
+	print "Started at: " +  time.strftime("%d/%m/%y  %I:%M:%S %p")
+	print "IP Address: " + str(os.system("hostname -I"))
+	loadServerFiles()
+	sysLog("SMART INITIALIZED.")
+	print "Initializing with SU access..."
+	initDB()
+	print "Attempting to start localhost HTTP server on port ", PORT,"..."
+	print "Started listening to S.M.A.R.T app  with security key: " + loginKey()
+	appActivity()
+	httpd.serve_forever()
+except(KeyboardInterrupt):
+	httpd.shutdown()
+	sys.exit()
