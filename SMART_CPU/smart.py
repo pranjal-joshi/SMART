@@ -18,7 +18,7 @@ VERSION_NODE = 1.0
 VERSION_WEB = 1.0
 ################################################
 
-PORT = 80
+PORT = 98
 NODE_PORT = PORT-1
 
 loginAttempt = 0
@@ -183,16 +183,13 @@ class handler(SimpleHTTPRequestHandler):
 			return
 
 		elif(url.find("shutDown") > 0):
-			key = url.split("&")
-			key = key[1]
-			if(key == str(loginKey())):
-				self.send_response(200)
-				self.end_headers()
-				self.wfile.write("SMART SHUTDOWN commencing.")
-				sysLog("SHUT_DOWN\t")
-				nodeBroadcast("nodeShutdown")
-				shutDown()
-				return
+			self.send_response(200)
+			self.end_headers()
+			self.wfile.write("SMART SHUTDOWN commencing.")
+			sysLog("SHUT_DOWN\t")
+			nodeBroadcast("nodeShutdown")
+			shutDown()
+			return
 
 		elif(url.find("updateNode") > 0):
 			z = url.split("&")
@@ -513,4 +510,5 @@ try:
 	httpd.serve_forever()
 except(KeyboardInterrupt):
 	httpd.shutdown()
+	print "exiting.."
 	sys.exit()
