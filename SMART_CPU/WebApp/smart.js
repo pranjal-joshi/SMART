@@ -1,12 +1,12 @@
 // smart javascript file
 
 var SERVER = "192.168.0.160";
-var PORT = "80";
+var PORT = "98";
 var ROOM = 1;
 var ROOM_NAMES = ["Room 1","Room 2","Room 3","Room 4","Room 5","Room 6","Room 7","Room 8"];
 
 var DEBUG = 1;
-var updateTimer;
+var updateTimer = 0;
 
 function startDictation() {
  
@@ -45,11 +45,6 @@ function startDictation() {
       console.log("focus lost");
     }
 
-    function range123()
-    {
-     var x = document.getElementById("fan_slider").value;
-    document.getElementById("demo").innerHTML = x;
-    }
 
     $(document).ready(function(){
       $('.modal-trigger').leanModal();
@@ -89,7 +84,7 @@ function reloadWindow()
 
 function closeTab()
 {
-    location.href="welcome.html";
+    location.href="index.html";
 }
 
 function httpGet(theUrl, callback)
@@ -158,7 +153,16 @@ function getRoom(room)
 
 	// get switch states
 	getSwitches(ROOM);
+	if(updateTimer)
+		clearInterval(updateTimer);
 	updateTimer = setInterval(getSwitches,1500,ROOM);
+	console.log(updateTimer);
+
+	if($(document).width()<977)
+	{
+		$('.button-collapse').sideNav('hide');
+		console.log($(document).width());
+	}
 }
 
 function getSwitches(r)
@@ -175,6 +179,7 @@ function getSwitches(r)
 			else
 				document.getElementById(i.toString()).checked = false;
 		}
+		document.getElementById("fan_slider").value = resp[8];
 	});
 }
 
@@ -320,16 +325,18 @@ function getRoomNamesForConfigPage()									// call this onLoad
 {
 	url = "http://" + SERVER + ":" + PORT + "/?getRoomNames";
 	httpGet(url,function(list){
-		if(DEBUG)
+		if(DEBUG) {
 			console.log(list);
+		}
 		if(list[0] != "&")
 		{
 			list = list.split("&");
+			console.log(list);
 			var loopId;
 			for(i=1;i<9;i++)
 			{
 				loopId = "r" + i.toString();
-				document.getElementById(loopId).innerHTML = decodeURI(list[i-1]);
+				document.getElementById(loopId).value = decodeURI(list[i-1]);
 				ROOM_NAMES[i-1] = list[i-1];
 			}
 			for(i=1;i<9;i++)
@@ -345,4 +352,19 @@ function getRoomNamesForConfigPage()									// call this onLoad
 		}
 
 	});
+}
+
+function sliderChange(val)
+{
+	//var x = document.getElementById("fan_slider").value;
+	var x = val;
+	console.log(x);
+	var url = "http://" + SERVER + ":" + PORT + "/?slider=&" + ROOM.toString() + "&" + x.toString();
+	httpGet(url, function sliderCallback(){
+		// do nothing
+	});
+}
+
+function goBack() {
+    window.history.back();
 }
