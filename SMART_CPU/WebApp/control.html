@@ -143,7 +143,46 @@
         
                   
         <div class="row">
-            <span class="teal-text text-darken-2"><center style="font-size:16px">Fan</center></span>
+            <span class="teal-text text-darken-2"><center style="font-size:16px">Fan  <i class="tiny material-icons myFan">toys</i></center></span>
+            <!-- script to rotate Fan icon infinitely -->
+            <style type="text/css">
+              .myFan {
+                animation-name: myfirst;
+                  animation-duration: 2s;
+                  animation-timing-function: linear;
+                  animation-iteration-count: infinite;
+                  animation-play-state: running;
+                  /* Firefox: */
+                  -moz-animation-name: myfirst;
+                  -moz-animation-duration: 2s;
+                  -moz-animation-timing-function: linear;
+                  -moz-animation-iteration-count: infinite;
+                  -moz-animation-play-state: running;
+                  /* Safari and Chrome: */
+                  -webkit-animation-name: myfirst;
+                  -webkit-animation-duration: 2s;
+                  -webkit-animation-timing-function: linear;
+                  -webkit-animation-iteration-count: infinite;
+                  -webkit-animation-play-state: running;
+                  }
+                  @keyframes myfirst
+                  {
+                  from {transform:rotate(0deg);}
+                  to {transform:rotate(360deg);}
+                  }
+                   
+                  @-moz-keyframes myfirst /* Firefox */
+                  {
+                  from {-moz-transform:rotate(0deg);}
+                  to {-moz-transform:rotate(360deg);}
+                  }
+                   
+                  @-webkit-keyframes myfirst /* Safari and Chrome */
+                  {
+                  from {-webkit-transform:rotate(0deg);}
+                  to {-webkit-transform:rotate(360deg);}
+              }
+            </style>
         </div> 
         <div class="row">
             <p class="range-field">
