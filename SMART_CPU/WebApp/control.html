@@ -22,6 +22,8 @@
     <!-- Compiled and minified JavaScript -->
     <script src="materialize.min.js"></script>
     <!-- use 0.97.6 js and 0.97.7 css for DROPDOWN and SIDENAV together!!!!!!!!-->
+    <script type="text/javascript" src="lolliclock.js"></script>
+    <link rel="stylesheet" href="lolliclock.css">
     
     <!-- Ubuntu Font-->
     <link rel="stylesheet" type="text/css" href="http://fonts.googleapis.com/css?family=Ubuntu:regular,bold&subset=Latin,Cyrillic">
@@ -59,7 +61,7 @@
             </table>
         </li>
         <li class="divider"></li>
-        <li><a href="#!">Help<i class="material-icons right">help_outline</i></a></li> 
+        <li><a href="help.html">Help<i class="material-icons right">help_outline</i></a></li> 
     </ul>
     
   
@@ -304,121 +306,43 @@
     <div id="timerModal1" class="modal">
       <div class="modal-content">
         
-        <h4>Schedule manager</h4>
-        <hr>
-        <p>
-        <form action="#">
-        <div class="row">
-          <div class="col s12 m6 l3"><span class="teal-text text-darken-2"><center>Schedule ON time: </center></span></div>
-          
-          <div class="input-field col s12 m6 l3">
-            <select>
-              <option value="" disabled selected>Choose Hour</option>
-              <option value="1">1</option>
-              <option value="2">2</option>
-              <option value="3">3</option>
-              <option value="4">4</option>
-              <option value="5">5</option>
-              <option value="6">6</option>
-              <option value="7">7</option>
-              <option value="8">8</option>
-              <option value="9">9</option>
-              <option value="10">10</option>
-              <option value="11">11</option>
-              <option value="12">12</option>
-            </select>
-          <label>ON Hour Select</label>
-          </div>     
-                    
-          
-          <div class="input-field col s12 m6 l3 offset-m6">
-            <select>
-              <option value="" disabled selected>Choose Minute</option>
-              <option value="00">00</option>
-              <option value="10">10</option>
-              <option value="20">20</option>
-              <option value="30">30</option>
-              <option value="40">40</option>
-              <option value="50">50</option>
-            </select>
-          <label>ON Minute Select</label>
-          </div>
-                            
-          
-          <div class="input-field col s12 m6 l3 offset-m6">
-            <select>
-              <option value="" disabled selected>AM/PM</option>
-              <option value="AM">AM</option>
-              <option value="PM">PM</option>
-            </select>
-          <label>AM/PM</label>
-          </div>
-          
-          
-        </div>
+        <!------------------------------------------------------------------------------ -->
+        
+            <h4>Schedule manager</h4>
+            
+              <div class="row">
+              <div class="col s12 m6 l3"><span class="teal-text text-darken-2"><center>Schedule ON time: </center></span></div>
+               <div class="input-field col s12 m6 l3">     
+                <input readonly="true" id="onTime1" >
+                    <script>
+                        $('#onTime1').lolliclock({autoclose:false});
+                    </script>    
+               </div>
+               </div> 
+            <div class="row">
+              <div class="col s12 m6 l3"><span class="teal-text text-darken-2"><center>Schedule OFF time: </center></span></div>
+              <div class="input-field col s12 m6 l3">
+                <input readonly="true" id="offTime1" >
+                    <script>
+                        $('#offTime1').lolliclock({autoclose:false});
+                    </script>    
+                
+              </div>
+            </div>
 
-        <div class="row">
-          <div class="col s12 m6 l3"><span class="teal-text text-darken-2"><center>Schedule OFF time: </center></span></div>
-          <div class="input-field col s12 m6 l3">
-            <select>
-              <option value="" disabled selected>Choose Hour</option>
-              <option value="1">1</option>
-              <option value="2">2</option>
-              <option value="3">3</option>
-              <option value="4">4</option>
-              <option value="5">5</option>
-              <option value="6">6</option>
-              <option value="7">7</option>
-              <option value="8">8</option>
-              <option value="9">9</option>
-              <option value="10">10</option>
-              <option value="11">11</option>
-              <option value="12">12</option>
-            </select>
-          <label>OFF Hour Select</label>
-          </div>
+            <center>
+            <div class="switch" id="dailySwitch1">
+              <label>
+                Once
+                <input type="checkbox">
+                <span class="lever"></span>
+                Daily
+             </label>
+            </div>
+            </center>
 
-          
-          <div class="input-field col s12 m6 l3 offset-m6">
-            <select>
-              <option value="" disabled selected>Choose Minute</option>
-              <option value="00">00</option>
-              <option value="10">10</option>
-              <option value="20">20</option>
-              <option value="30">30</option>
-              <option value="40">40</option>
-              <option value="50">50</option>
-            </select>
-          <label>OFF Minute Select</label>
-          </div>
-          
+        <!------------------------------------------------------------------------------ -->
 
-
-          <div class="input-field col s12 m6 l3 offset-m6">
-            <select>
-              <option value="" disabled selected>AM/PM</option>
-              <option value="AM">AM</option>
-              <option value="PM">PM</option>
-            </select>
-          <label>AM/PM</label>
-          </div>
-          
-
-        </div>
-
-        <center>
-        <div class="switch">
-          <label>
-            Once
-            <input type="checkbox">
-            <span class="lever"></span>
-            Daily
-         </label>
-        </div>
-        </center>
-
-        </form>
-        </p>
       </div>
 
       <div class="modal-footer">
@@ -432,124 +356,38 @@
       <div class="modal-content">
         
         <h4>Schedule manager</h4>
-        <hr>
-        <p>
-        <form action="#">
-        <div class="row">
-          <div class="col s12 m6 l3"><span class="teal-text text-darken-2"><center>Schedule ON time: </center></span></div>
-          
-          <div class="input-field col s12 m6 l3">
-            <select>
-              <option value="" disabled selected>Choose Hour</option>
-              <option value="1">1</option>
-              <option value="2">2</option>
-              <option value="3">3</option>
-              <option value="4">4</option>
-              <option value="5">5</option>
-              <option value="6">6</option>
-              <option value="7">7</option>
-              <option value="8">8</option>
-              <option value="9">9</option>
-              <option value="10">10</option>
-              <option value="11">11</option>
-              <option value="12">12</option>
-            </select>
-          <label>ON Hour Select</label>
-          </div>
-          
-           
-          
-          
-          <div class="input-field col s12 m6 l3 offset-m6">
-            <select>
-              <option value="" disabled selected>Choose Minute</option>
-              <option value="00">00</option>
-              <option value="10">10</option>
-              <option value="20">20</option>
-              <option value="30">30</option>
-              <option value="40">40</option>
-              <option value="50">50</option>
-            </select>
-          <label>ON Minute Select</label>
-          </div>
             
-          
-          
-          
-          <div class="input-field col s12 m6 l3 offset-m6">
-            <select>
-              <option value="" disabled selected>AM/PM</option>
-              <option value="AM">AM</option>
-              <option value="PM">PM</option>
-            </select>
-          <label>AM/PM</label>
-          </div>
-            
-          
-        </div>
+              <div class="row">
+              <div class="col s12 m6 l3"><span class="teal-text text-darken-2"><center>Schedule ON time: </center></span></div>
+               <div class="input-field col s12 m6 l3">     
+                <input readonly="true" id="onTime2" >
+                    <script>
+                        $('#onTime2').lolliclock({autoclose:false});
+                    </script>    
+               </div>
+               </div> 
+            <div class="row">
+              <div class="col s12 m6 l3"><span class="teal-text text-darken-2"><center>Schedule OFF time: </center></span></div>
+              <div class="input-field col s12 m6 l3">
+                <input readonly="true" id="offTime2" >
+                    <script>
+                        $('#offTime2').lolliclock({autoclose:false});
+                    </script>    
+                
+              </div>
+            </div>
 
-        <div class="row">
-          <div class="col s12 m6 l3"><span class="teal-text text-darken-2"><center>Schedule OFF time: </center></span></div>
-          <div class="input-field col s12 m6 l3">
-            <select>
-              <option value="" disabled selected>Choose Hour</option>
-              <option value="1">1</option>
-              <option value="2">2</option>
-              <option value="3">3</option>
-              <option value="4">4</option>
-              <option value="5">5</option>
-              <option value="6">6</option>
-              <option value="7">7</option>
-              <option value="8">8</option>
-              <option value="9">9</option>
-              <option value="10">10</option>
-              <option value="11">11</option>
-              <option value="12">12</option>
-            </select>
-          <label>OFF Hour Select</label>
-          </div>
+            <center>
+            <div class="switch" id="dailySwitch2">
+              <label>
+                Once
+                <input type="checkbox">
+                <span class="lever"></span>
+                Daily
+             </label>
+            </div>
+            </center>
 
-          
-          <div class="input-field col s12 m6 l3 offset-m6">
-            <select>
-              <option value="" disabled selected>Choose Minute</option>
-              <option value="00">00</option>
-              <option value="10">10</option>
-              <option value="20">20</option>
-              <option value="30">30</option>
-              <option value="40">40</option>
-              <option value="50">50</option>
-            </select>
-          <label>OFF Minute Select</label>
-          </div>
-          
-
-
-          <div class="input-field col s12 m6 l3 offset-m6">
-            <select>
-              <option value="" disabled selected>AM/PM</option>
-              <option value="AM">AM</option>
-              <option value="PM">PM</option>
-            </select>
-          <label>AM/PM</label>
-          </div>
-          
-
-        </div>
-
-        <center>
-        <div class="switch">
-          <label>
-            Once
-            <input type="checkbox">
-            <span class="lever"></span>
-            Daily
-         </label>
-        </div>
-        </center>
-
-        </form>
-        </p>
       </div>
 
       <div class="modal-footer">
@@ -564,124 +402,38 @@
       <div class="modal-content">
         
         <h4>Schedule manager</h4>
-        <hr>
-        <p>
-        <form action="#">
-        <div class="row">
-          <div class="col s12 m6 l3"><span class="teal-text text-darken-2"><center>Schedule ON time: </center></span></div>
-          
-          <div class="input-field col s12 m6 l3">
-            <select>
-              <option value="" disabled selected>Choose Hour</option>
-              <option value="1">1</option>
-              <option value="2">2</option>
-              <option value="3">3</option>
-              <option value="4">4</option>
-              <option value="5">5</option>
-              <option value="6">6</option>
-              <option value="7">7</option>
-              <option value="8">8</option>
-              <option value="9">9</option>
-              <option value="10">10</option>
-              <option value="11">11</option>
-              <option value="12">12</option>
-            </select>
-          <label>ON Hour Select</label>
-          </div>
-          
-           
-          
-          
-          <div class="input-field col s12 m6 l3 offset-m6">
-            <select>
-              <option value="" disabled selected>Choose Minute</option>
-              <option value="00">00</option>
-              <option value="10">10</option>
-              <option value="20">20</option>
-              <option value="30">30</option>
-              <option value="40">40</option>
-              <option value="50">50</option>
-            </select>
-          <label>ON Minute Select</label>
-          </div>
             
-          
-          
-          
-          <div class="input-field col s12 m6 l3 offset-m6">
-            <select>
-              <option value="" disabled selected>AM/PM</option>
-              <option value="AM">AM</option>
-              <option value="PM">PM</option>
-            </select>
-          <label>AM/PM</label>
-          </div>
-            
-          
-        </div>
+              <div class="row">
+              <div class="col s12 m6 l3"><span class="teal-text text-darken-2"><center>Schedule ON time: </center></span></div>
+               <div class="input-field col s12 m6 l3">     
+                <input readonly="true" id="onTime3" >
+                    <script>
+                        $('#onTime3').lolliclock({autoclose:false});
+                    </script>    
+               </div>
+               </div> 
+            <div class="row">
+              <div class="col s12 m6 l3"><span class="teal-text text-darken-2"><center>Schedule OFF time: </center></span></div>
+              <div class="input-field col s12 m6 l3">
+                <input readonly="true" id="offTime3" >
+                    <script>
+                        $('#offTime3').lolliclock({autoclose:false});
+                    </script>    
+                
+              </div>
+            </div>
 
-        <div class="row">
-          <div class="col s12 m6 l3"><span class="teal-text text-darken-2"><center>Schedule OFF time: </center></span></div>
-          <div class="input-field col s12 m6 l3">
-            <select>
-              <option value="" disabled selected>Choose Hour</option>
-              <option value="1">1</option>
-              <option value="2">2</option>
-              <option value="3">3</option>
-              <option value="4">4</option>
-              <option value="5">5</option>
-              <option value="6">6</option>
-              <option value="7">7</option>
-              <option value="8">8</option>
-              <option value="9">9</option>
-              <option value="10">10</option>
-              <option value="11">11</option>
-              <option value="12">12</option>
-            </select>
-          <label>OFF Hour Select</label>
-          </div>
+            <center>
+            <div class="switch" id="dailySwitch3">
+              <label>
+                Once
+                <input type="checkbox">
+                <span class="lever"></span>
+                Daily
+             </label>
+            </div>
+            </center>
 
-          
-          <div class="input-field col s12 m6 l3 offset-m6">
-            <select>
-              <option value="" disabled selected>Choose Minute</option>
-              <option value="00">00</option>
-              <option value="10">10</option>
-              <option value="20">20</option>
-              <option value="30">30</option>
-              <option value="40">40</option>
-              <option value="50">50</option>
-            </select>
-          <label>OFF Minute Select</label>
-          </div>
-          
-
-
-          <div class="input-field col s12 m6 l3 offset-m6">
-            <select>
-              <option value="" disabled selected>AM/PM</option>
-              <option value="AM">AM</option>
-              <option value="PM">PM</option>
-            </select>
-          <label>AM/PM</label>
-          </div>
-          
-
-        </div>
-
-        <center>
-        <div class="switch">
-          <label>
-            Once
-            <input type="checkbox">
-            <span class="lever"></span>
-            Daily
-         </label>
-        </div>
-        </center>
-
-        </form>
-        </p>
       </div>
 
       <div class="modal-footer">
@@ -696,124 +448,38 @@
       <div class="modal-content">
         
         <h4>Schedule manager</h4>
-        <hr>
-        <p>
-        <form action="#">
-        <div class="row">
-          <div class="col s12 m6 l3"><span class="teal-text text-darken-2"><center>Schedule ON time: </center></span></div>
-          
-          <div class="input-field col s12 m6 l3">
-            <select>
-              <option value="" disabled selected>Choose Hour</option>
-              <option value="1">1</option>
-              <option value="2">2</option>
-              <option value="3">3</option>
-              <option value="4">4</option>
-              <option value="5">5</option>
-              <option value="6">6</option>
-              <option value="7">7</option>
-              <option value="8">8</option>
-              <option value="9">9</option>
-              <option value="10">10</option>
-              <option value="11">11</option>
-              <option value="12">12</option>
-            </select>
-          <label>ON Hour Select</label>
-          </div>
-          
-           
-          
-          
-          <div class="input-field col s12 m6 l3 offset-m6">
-            <select>
-              <option value="" disabled selected>Choose Minute</option>
-              <option value="00">00</option>
-              <option value="10">10</option>
-              <option value="20">20</option>
-              <option value="30">30</option>
-              <option value="40">40</option>
-              <option value="50">50</option>
-            </select>
-          <label>ON Minute Select</label>
-          </div>
             
-          
-          
-          
-          <div class="input-field col s12 m6 l3 offset-m6">
-            <select>
-              <option value="" disabled selected>AM/PM</option>
-              <option value="AM">AM</option>
-              <option value="PM">PM</option>
-            </select>
-          <label>AM/PM</label>
-          </div>
-            
-          
-        </div>
+              <div class="row">
+              <div class="col s12 m6 l3"><span class="teal-text text-darken-2"><center>Schedule ON time: </center></span></div>
+               <div class="input-field col s12 m6 l3">     
+                <input readonly="true" id="onTime4" >
+                    <script>
+                        $('#onTime4').lolliclock({autoclose:false});
+                    </script>    
+               </div>
+               </div> 
+            <div class="row">
+              <div class="col s12 m6 l3"><span class="teal-text text-darken-2"><center>Schedule OFF time: </center></span></div>
+              <div class="input-field col s12 m6 l3">
+                <input readonly="true" id="offTime4" >
+                    <script>
+                        $('#offTime4').lolliclock({autoclose:false});
+                    </script>    
+                
+              </div>
+            </div>
 
-        <div class="row">
-          <div class="col s12 m6 l3"><span class="teal-text text-darken-2"><center>Schedule OFF time: </center></span></div>
-          <div class="input-field col s12 m6 l3">
-            <select>
-              <option value="" disabled selected>Choose Hour</option>
-              <option value="1">1</option>
-              <option value="2">2</option>
-              <option value="3">3</option>
-              <option value="4">4</option>
-              <option value="5">5</option>
-              <option value="6">6</option>
-              <option value="7">7</option>
-              <option value="8">8</option>
-              <option value="9">9</option>
-              <option value="10">10</option>
-              <option value="11">11</option>
-              <option value="12">12</option>
-            </select>
-          <label>OFF Hour Select</label>
-          </div>
+            <center>
+            <div class="switch" id="dailySwitch4">
+              <label>
+                Once
+                <input type="checkbox">
+                <span class="lever"></span>
+                Daily
+             </label>
+            </div>
+            </center>
 
-          
-          <div class="input-field col s12 m6 l3 offset-m6">
-            <select>
-              <option value="" disabled selected>Choose Minute</option>
-              <option value="00">00</option>
-              <option value="10">10</option>
-              <option value="20">20</option>
-              <option value="30">30</option>
-              <option value="40">40</option>
-              <option value="50">50</option>
-            </select>
-          <label>OFF Minute Select</label>
-          </div>
-          
-
-
-          <div class="input-field col s12 m6 l3 offset-m6">
-            <select>
-              <option value="" disabled selected>AM/PM</option>
-              <option value="AM">AM</option>
-              <option value="PM">PM</option>
-            </select>
-          <label>AM/PM</label>
-          </div>
-          
-
-        </div>
-
-        <center>
-        <div class="switch">
-          <label>
-            Once
-            <input type="checkbox">
-            <span class="lever"></span>
-            Daily
-         </label>
-        </div>
-        </center>
-
-        </form>
-        </p>
       </div>
 
       <div class="modal-footer">
@@ -828,124 +494,38 @@
       <div class="modal-content">
         
         <h4>Schedule manager</h4>
-        <hr>
-        <p>
-        <form action="#">
-        <div class="row">
-          <div class="col s12 m6 l3"><span class="teal-text text-darken-2"><center>Schedule ON time: </center></span></div>
-          
-          <div class="input-field col s12 m6 l3">
-            <select>
-              <option value="" disabled selected>Choose Hour</option>
-              <option value="1">1</option>
-              <option value="2">2</option>
-              <option value="3">3</option>
-              <option value="4">4</option>
-              <option value="5">5</option>
-              <option value="6">6</option>
-              <option value="7">7</option>
-              <option value="8">8</option>
-              <option value="9">9</option>
-              <option value="10">10</option>
-              <option value="11">11</option>
-              <option value="12">12</option>
-            </select>
-          <label>ON Hour Select</label>
-          </div>
-          
-           
-          
-          
-          <div class="input-field col s12 m6 l3 offset-m6">
-            <select>
-              <option value="" disabled selected>Choose Minute</option>
-              <option value="00">00</option>
-              <option value="10">10</option>
-              <option value="20">20</option>
-              <option value="30">30</option>
-              <option value="40">40</option>
-              <option value="50">50</option>
-            </select>
-          <label>ON Minute Select</label>
-          </div>
             
-          
-          
-          
-          <div class="input-field col s12 m6 l3 offset-m6">
-            <select>
-              <option value="" disabled selected>AM/PM</option>
-              <option value="AM">AM</option>
-              <option value="PM">PM</option>
-            </select>
-          <label>AM/PM</label>
-          </div>
-            
-          
-        </div>
+              <div class="row">
+              <div class="col s12 m6 l3"><span class="teal-text text-darken-2"><center>Schedule ON time: </center></span></div>
+               <div class="input-field col s12 m6 l3">     
+                <input readonly="true" id="onTime5" >
+                    <script>
+                        $('#onTime5').lolliclock({autoclose:false});
+                    </script>    
+               </div>
+               </div> 
+            <div class="row">
+              <div class="col s12 m6 l3"><span class="teal-text text-darken-2"><center>Schedule OFF time: </center></span></div>
+              <div class="input-field col s12 m6 l3">
+                <input readonly="true" id="offTime5" >
+                    <script>
+                        $('#offTime5').lolliclock({autoclose:false});
+                    </script>    
+                
+              </div>
+            </div>
 
-        <div class="row">
-          <div class="col s12 m6 l3"><span class="teal-text text-darken-2"><center>Schedule OFF time: </center></span></div>
-          <div class="input-field col s12 m6 l3">
-            <select>
-              <option value="" disabled selected>Choose Hour</option>
-              <option value="1">1</option>
-              <option value="2">2</option>
-              <option value="3">3</option>
-              <option value="4">4</option>
-              <option value="5">5</option>
-              <option value="6">6</option>
-              <option value="7">7</option>
-              <option value="8">8</option>
-              <option value="9">9</option>
-              <option value="10">10</option>
-              <option value="11">11</option>
-              <option value="12">12</option>
-            </select>
-          <label>OFF Hour Select</label>
-          </div>
+            <center>
+            <div class="switch" id="dailySwitch5">
+              <label>
+                Once
+                <input type="checkbox">
+                <span class="lever"></span>
+                Daily
+             </label>
+            </div>
+            </center>
 
-          
-          <div class="input-field col s12 m6 l3 offset-m6">
-            <select>
-              <option value="" disabled selected>Choose Minute</option>
-              <option value="00">00</option>
-              <option value="10">10</option>
-              <option value="20">20</option>
-              <option value="30">30</option>
-              <option value="40">40</option>
-              <option value="50">50</option>
-            </select>
-          <label>OFF Minute Select</label>
-          </div>
-          
-
-
-          <div class="input-field col s12 m6 l3 offset-m6">
-            <select>
-              <option value="" disabled selected>AM/PM</option>
-              <option value="AM">AM</option>
-              <option value="PM">PM</option>
-            </select>
-          <label>AM/PM</label>
-          </div>
-          
-
-        </div>
-
-        <center>
-        <div class="switch">
-          <label>
-            Once
-            <input type="checkbox">
-            <span class="lever"></span>
-            Daily
-         </label>
-        </div>
-        </center>
-
-        </form>
-        </p>
       </div>
 
       <div class="modal-footer">
@@ -959,124 +539,38 @@
       <div class="modal-content">
         
         <h4>Schedule manager</h4>
-        <hr>
-        <p>
-        <form action="#">
-        <div class="row">
-          <div class="col s12 m6 l3"><span class="teal-text text-darken-2"><center>Schedule ON time: </center></span></div>
-          
-          <div class="input-field col s12 m6 l3">
-            <select>
-              <option value="" disabled selected>Choose Hour</option>
-              <option value="1">1</option>
-              <option value="2">2</option>
-              <option value="3">3</option>
-              <option value="4">4</option>
-              <option value="5">5</option>
-              <option value="6">6</option>
-              <option value="7">7</option>
-              <option value="8">8</option>
-              <option value="9">9</option>
-              <option value="10">10</option>
-              <option value="11">11</option>
-              <option value="12">12</option>
-            </select>
-          <label>ON Hour Select</label>
-          </div>
-          
-           
-          
-          
-          <div class="input-field col s12 m6 l3 offset-m6">
-            <select>
-              <option value="" disabled selected>Choose Minute</option>
-              <option value="00">00</option>
-              <option value="10">10</option>
-              <option value="20">20</option>
-              <option value="30">30</option>
-              <option value="40">40</option>
-              <option value="50">50</option>
-            </select>
-          <label>ON Minute Select</label>
-          </div>
             
-          
-          
-          
-          <div class="input-field col s12 m6 l3 offset-m6">
-            <select>
-              <option value="" disabled selected>AM/PM</option>
-              <option value="AM">AM</option>
-              <option value="PM">PM</option>
-            </select>
-          <label>AM/PM</label>
-          </div>
-            
-          
-        </div>
+              <div class="row">
+              <div class="col s12 m6 l3"><span class="teal-text text-darken-2"><center>Schedule ON time: </center></span></div>
+               <div class="input-field col s12 m6 l3">     
+                <input readonly="true" id="onTime6" >
+                    <script>
+                        $('#onTime6').lolliclock({autoclose:false});
+                    </script>    
+               </div>
+               </div> 
+            <div class="row">
+              <div class="col s12 m6 l3"><span class="teal-text text-darken-2"><center>Schedule OFF time: </center></span></div>
+              <div class="input-field col s12 m6 l3">
+                <input readonly="true" id="offTime6" >
+                    <script>
+                        $('#offTime6').lolliclock({autoclose:false});
+                    </script>    
+                
+              </div>
+            </div>
 
-        <div class="row">
-          <div class="col s12 m6 l3"><span class="teal-text text-darken-2"><center>Schedule OFF time: </center></span></div>
-          <div class="input-field col s12 m6 l3">
-            <select>
-              <option value="" disabled selected>Choose Hour</option>
-              <option value="1">1</option>
-              <option value="2">2</option>
-              <option value="3">3</option>
-              <option value="4">4</option>
-              <option value="5">5</option>
-              <option value="6">6</option>
-              <option value="7">7</option>
-              <option value="8">8</option>
-              <option value="9">9</option>
-              <option value="10">10</option>
-              <option value="11">11</option>
-              <option value="12">12</option>
-            </select>
-          <label>OFF Hour Select</label>
-          </div>
+            <center>
+            <div class="switch" id="dailySwitch6">
+              <label>
+                Once
+                <input type="checkbox">
+                <span class="lever"></span>
+                Daily
+             </label>
+            </div>
+            </center>
 
-          
-          <div class="input-field col s12 m6 l3 offset-m6">
-            <select>
-              <option value="" disabled selected>Choose Minute</option>
-              <option value="00">00</option>
-              <option value="10">10</option>
-              <option value="20">20</option>
-              <option value="30">30</option>
-              <option value="40">40</option>
-              <option value="50">50</option>
-            </select>
-          <label>OFF Minute Select</label>
-          </div>
-          
-
-
-          <div class="input-field col s12 m6 l3 offset-m6">
-            <select>
-              <option value="" disabled selected>AM/PM</option>
-              <option value="AM">AM</option>
-              <option value="PM">PM</option>
-            </select>
-          <label>AM/PM</label>
-          </div>
-          
-
-        </div>
-
-        <center>
-        <div class="switch">
-          <label>
-            Once
-            <input type="checkbox">
-            <span class="lever"></span>
-            Daily
-         </label>
-        </div>
-        </center>
-
-        </form>
-        </p>
       </div>
 
       <div class="modal-footer">
@@ -1091,124 +585,38 @@
       <div class="modal-content">
         
         <h4>Schedule manager</h4>
-        <hr>
-        <p>
-        <form action="#">
-        <div class="row">
-          <div class="col s12 m6 l3"><span class="teal-text text-darken-2"><center>Schedule ON time: </center></span></div>
-          
-          <div class="input-field col s12 m6 l3">
-            <select>
-              <option value="" disabled selected>Choose Hour</option>
-              <option value="1">1</option>
-              <option value="2">2</option>
-              <option value="3">3</option>
-              <option value="4">4</option>
-              <option value="5">5</option>
-              <option value="6">6</option>
-              <option value="7">7</option>
-              <option value="8">8</option>
-              <option value="9">9</option>
-              <option value="10">10</option>
-              <option value="11">11</option>
-              <option value="12">12</option>
-            </select>
-          <label>ON Hour Select</label>
-          </div>
-          
-           
-          
-          
-          <div class="input-field col s12 m6 l3 offset-m6">
-            <select>
-              <option value="" disabled selected>Choose Minute</option>
-              <option value="00">00</option>
-              <option value="10">10</option>
-              <option value="20">20</option>
-              <option value="30">30</option>
-              <option value="40">40</option>
-              <option value="50">50</option>
-            </select>
-          <label>ON Minute Select</label>
-          </div>
             
-          
-          
-          
-          <div class="input-field col s12 m6 l3 offset-m6">
-            <select>
-              <option value="" disabled selected>AM/PM</option>
-              <option value="AM">AM</option>
-              <option value="PM">PM</option>
-            </select>
-          <label>AM/PM</label>
-          </div>
-            
-          
-        </div>
+              <div class="row">
+              <div class="col s12 m6 l3"><span class="teal-text text-darken-2"><center>Schedule ON time: </center></span></div>
+               <div class="input-field col s12 m6 l3">     
+                <input readonly="true" id="onTime7" >
+                    <script>
+                        $('#onTime7').lolliclock({autoclose:false});
+                    </script>    
+               </div>
+               </div> 
+            <div class="row">
+              <div class="col s12 m6 l3"><span class="teal-text text-darken-2"><center>Schedule OFF time: </center></span></div>
+              <div class="input-field col s12 m6 l3">
+                <input readonly="true" id="offTime7" >
+                    <script>
+                        $('#offTime7').lolliclock({autoclose:false});
+                    </script>    
+                
+              </div>
+            </div>
 
-        <div class="row">
-          <div class="col s12 m6 l3"><span class="teal-text text-darken-2"><center>Schedule OFF time: </center></span></div>
-          <div class="input-field col s12 m6 l3">
-            <select>
-              <option value="" disabled selected>Choose Hour</option>
-              <option value="1">1</option>
-              <option value="2">2</option>
-              <option value="3">3</option>
-              <option value="4">4</option>
-              <option value="5">5</option>
-              <option value="6">6</option>
-              <option value="7">7</option>
-              <option value="8">8</option>
-              <option value="9">9</option>
-              <option value="10">10</option>
-              <option value="11">11</option>
-              <option value="12">12</option>
-            </select>
-          <label>OFF Hour Select</label>
-          </div>
+            <center>
+            <div class="switch" id="dailySwitch7">
+              <label>
+                Once
+                <input type="checkbox">
+                <span class="lever"></span>
+                Daily
+             </label>
+            </div>
+            </center>
 
-          
-          <div class="input-field col s12 m6 l3 offset-m6">
-            <select>
-              <option value="" disabled selected>Choose Minute</option>
-              <option value="00">00</option>
-              <option value="10">10</option>
-              <option value="20">20</option>
-              <option value="30">30</option>
-              <option value="40">40</option>
-              <option value="50">50</option>
-            </select>
-          <label>OFF Minute Select</label>
-          </div>
-          
-
-
-          <div class="input-field col s12 m6 l3 offset-m6">
-            <select>
-              <option value="" disabled selected>AM/PM</option>
-              <option value="AM">AM</option>
-              <option value="PM">PM</option>
-            </select>
-          <label>AM/PM</label>
-          </div>
-          
-
-        </div>
-
-        <center>
-        <div class="switch">
-          <label>
-            Once
-            <input type="checkbox">
-            <span class="lever"></span>
-            Daily
-         </label>
-        </div>
-        </center>
-
-        </form>
-        </p>
       </div>
 
       <div class="modal-footer">
@@ -1223,124 +631,38 @@
       <div class="modal-content">
         
         <h4>Schedule manager</h4>
-        <hr>
-        <p>
-        <form action="#">
-        <div class="row">
-          <div class="col s12 m6 l3"><span class="teal-text text-darken-2"><center>Schedule ON time: </center></span></div>
-          
-          <div class="input-field col s12 m6 l3">
-            <select>
-              <option value="" disabled selected>Choose Hour</option>
-              <option value="1">1</option>
-              <option value="2">2</option>
-              <option value="3">3</option>
-              <option value="4">4</option>
-              <option value="5">5</option>
-              <option value="6">6</option>
-              <option value="7">7</option>
-              <option value="8">8</option>
-              <option value="9">9</option>
-              <option value="10">10</option>
-              <option value="11">11</option>
-              <option value="12">12</option>
-            </select>
-          <label>ON Hour Select</label>
-          </div>
-          
-           
-          
-          
-          <div class="input-field col s12 m6 l3 offset-m6">
-            <select>
-              <option value="" disabled selected>Choose Minute</option>
-              <option value="00">00</option>
-              <option value="10">10</option>
-              <option value="20">20</option>
-              <option value="30">30</option>
-              <option value="40">40</option>
-              <option value="50">50</option>
-            </select>
-          <label>ON Minute Select</label>
-          </div>
             
-          
-          
-          
-          <div class="input-field col s12 m6 l3 offset-m6">
-            <select>
-              <option value="" disabled selected>AM/PM</option>
-              <option value="AM">AM</option>
-              <option value="PM">PM</option>
-            </select>
-          <label>AM/PM</label>
-          </div>
-            
-          
-        </div>
+              <div class="row">
+              <div class="col s12 m6 l3"><span class="teal-text text-darken-2"><center>Schedule ON time: </center></span></div>
+               <div class="input-field col s12 m6 l3">     
+                <input readonly="true" id="onTime8" >
+                    <script>
+                        $('#onTime8').lolliclock({autoclose:false});
+                    </script>    
+               </div>
+               </div> 
+            <div class="row">
+              <div class="col s12 m6 l3"><span class="teal-text text-darken-2"><center>Schedule OFF time: </center></span></div>
+              <div class="input-field col s12 m6 l3">
+                <input readonly="true" id="offTime8" >
+                    <script>
+                        $('#offTime8').lolliclock({autoclose:false});
+                    </script>    
+                
+              </div>
+            </div>
 
-        <div class="row">
-          <div class="col s12 m6 l3"><span class="teal-text text-darken-2"><center>Schedule OFF time: </center></span></div>
-          <div class="input-field col s12 m6 l3">
-            <select>
-              <option value="" disabled selected>Choose Hour</option>
-              <option value="1">1</option>
-              <option value="2">2</option>
-              <option value="3">3</option>
-              <option value="4">4</option>
-              <option value="5">5</option>
-              <option value="6">6</option>
-              <option value="7">7</option>
-              <option value="8">8</option>
-              <option value="9">9</option>
-              <option value="10">10</option>
-              <option value="11">11</option>
-              <option value="12">12</option>
-            </select>
-          <label>OFF Hour Select</label>
-          </div>
+            <center>
+            <div class="switch" id="dailySwitch8">
+              <label>
+                Once
+                <input type="checkbox">
+                <span class="lever"></span>
+                Daily
+             </label>
+            </div>
+            </center>
 
-          
-          <div class="input-field col s12 m6 l3 offset-m6">
-            <select>
-              <option value="" disabled selected>Choose Minute</option>
-              <option value="00">00</option>
-              <option value="10">10</option>
-              <option value="20">20</option>
-              <option value="30">30</option>
-              <option value="40">40</option>
-              <option value="50">50</option>
-            </select>
-          <label>OFF Minute Select</label>
-          </div>
-          
-
-
-          <div class="input-field col s12 m6 l3 offset-m6">
-            <select>
-              <option value="" disabled selected>AM/PM</option>
-              <option value="AM">AM</option>
-              <option value="PM">PM</option>
-            </select>
-          <label>AM/PM</label>
-          </div>
-          
-
-        </div>
-
-        <center>
-        <div class="switch">
-          <label>
-            Once
-            <input type="checkbox">
-            <span class="lever"></span>
-            Daily
-         </label>
-        </div>
-        </center>
-
-        </form>
-        </p>
       </div>
 
       <div class="modal-footer">
