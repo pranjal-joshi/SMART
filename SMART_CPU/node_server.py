@@ -43,10 +43,20 @@ RESPONSE = 0
 SPEED = 0
 OLD_SPEED = 0
 
+APP_SPEED = 0
+OLD_APP_SPEED = 0
+
+APP_FAN_TIME = None
+POT_FAN_TIME = None
+
 PRESENT_STATE = [0,0,0,0,0,0,0,0,0]		# requestUpdate from server after appActivity
 PRESENT_STATE_RESPONSE = 0
 
+FANPIN = 99 # CHANGE THIS LATER
+
 class handler(SimpleHTTPRequestHandler):
+	global APP_FAN_TIME
+	global APP_SPEED
 	def do_GET(self):
 		url = self.path
 
@@ -56,8 +66,12 @@ class handler(SimpleHTTPRequestHandler):
 			### get data from main server database and apply to GPIO
 			url = "http://" + str(SERVER_IP) + ":" + str(SERVER_PORT) + "/?requestUpdate=&" + str(ROOM_NO)
 			PRESENT_STATE_RESPONSE = urllib2.urlopen(url).read()
+			APP_SPEED = PRESENT_STATE_RESPONSE[8]
 			PRESENT_STATE_RESPONSE = PRESENT_STATE_RESPONSE[0:8]
 			PRESENT_STATE_RESPONSE = map(int, str(PRESENT_STATE_RESPONSE))
+			if(OLD_APP_SPEED != APP_SPEED):
+				APP_FAN_TIME = time.time()
+				OLD_APP_SPEED = APP_SPEED
 			if DEBUG:
 				print str(PRESENT_STATE_RESPONSE)
 			applyToRelay(PRESENT_STATE_RESPONSE)					# actually apply data to relay
@@ -90,22 +104,56 @@ class handler(SimpleHTTPRequestHandler):
 			print "Update completed. New features will take effect after restart."
 			return
 			
-
+def stopPWM():
+	io.output(FANPIN, False)
 
 ### triggers on ZCD interrupt for triac sync
 def syncMains():
 	if DEBUG:
 		print "Zero crossing interrupt triggered!"
-	### to-do from here
+	pwmDealy = 0
+	if(POT_FAN_TIME >= APP_FAN_TIME):		# check last recent update is from App or Pot by checking update time stamp.
+		if(SPEED > 0):
+			if SPEED == 1:
+				pwmDealy = 0.002			# delay in ms. Time to keep HIGH pulse on triac gate.
+			elif SPEED == 2:
+				pwmDealy = 0.004
+			elif SPEED == 3:
+				pwmDealy = 0.006
+			elif SPEED == 4:
+				pwmDealy = 0.008
+			else:
+				pwmDealy = 0.01
+			threading.Timer(pwmDealy, stopPWM).start()
+		else:
+			stopPWM()
+	else:
+		if(APP_SPEED > 0):
+			if APP_SPEED == 1:
+				pwmDealy = 0.002			# delay in ms. Time to keep HIGH pulse on triac gate.
+			elif APP_APP_SPEED == 2:
+				pwmDealy = 0.004
+			elif APP_SPEED == 3:
+				pwmDealy = 0.006
+			elif APP_SPEED == 4:
+				pwmDealy = 0.008
+			else:
+				pwmDealy = 0.01
+			threading.Timer(pwmDealy, stopPWM).start()
+		else:
+			stopPWM()
 
 
 ### confifure interrupts for ZCD sync
 def initSync():
 	if DEBUG:
 		print "ZCD synchronization interrupt enabled on BCM pin " + str(SYNCPIN)
+		print "Setting FAN pin as output: pin no. " + str(FANPIN)
 	io.setmode(io.BCM)
 	io.setup(SYNCPIN, io.IN, pull_up_down=io.PUD_UP)
-	io.add_event_detect(SYNCPIN, io.FALLING, callback=syncMains, bouncetime=200)
+	io.add_event_detect(SYNCPIN, io.FALLING, callback=syncMains, bouncetime=8)
+	io.setup(FANPIN, io.OUT)
+
 
 def initSwitchPins(array,relArray):
 	for i in range(0,len(array)):
@@ -282,6 +330,7 @@ def analogRead():
 def fanSpeedController(value):
 	global SPEED
 	global OLD_SPEED
+	global POT_FAN_TIME
 	if value in range(100,200):
 		SPEED = 1
 	elif value in  range(300,400):
@@ -300,6 +349,7 @@ def fanSpeedController(value):
 		if DEBUG:
 			print "FanSpeedURL: " + url
 		sliderResp = urllib2.urlopen(url).read()
+		POT_FAN_TIME = time.time()		# get time at which pot speed is updated.
 		OLD_SPEED = SPEED
 
 def applyToRelay(relayArray):
