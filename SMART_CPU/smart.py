@@ -26,6 +26,9 @@ loginAttempt = 0
 REQUEST_ROOM = 0
 APP_ACTIVITY = False
 
+TIMER_MINUTE_CNT = 0
+OLD_TIMER_MINUTE_CNT = 0
+
 ####### Server load files ###########
 CSSFILE = ""
 JSFILE = ""
@@ -42,6 +45,7 @@ htmlWelcome = ""
 con = mdb.connect("localhost","root","linux")
 db = con.cursor()
 dbThread = con.cursor()
+dbTimerServiceThread = con.cursor()
 
 # HTTP handler for GET request
 class handler(SimpleHTTPRequestHandler):
@@ -325,6 +329,28 @@ class handler(SimpleHTTPRequestHandler):
 			self.end_headers()
 			self.wfile.write(htmlControl)
 
+		elif(url.find("setTimer") > 0):
+			urlSplit = url.split('&')
+			room = "r" + str(urlSplit[1])
+			device = "d" + str(urlSplit[2])
+			onHr = urlSplit[3]
+			onMin = urlSplit[4]
+			onampm = urlSplit[5]
+			offHr = urlSplit[6]
+			offMin = urlSplit[7]
+			offampm = urlSplit[8]
+			repeate = urlSplit[9]
+			db.execute("use smart")
+			db.execute("update %s set onHr=%s where device=%s" % (room, onHr, device))
+			db.execute("update %s set onMin=%s where device=%s" % (room, onMin, device))
+			db.execute("update %s set onampm=%s where device=%s" % (room, onampm, device))
+			db.execute("update %s set offHr=%s where device=%s" % (room, offHr, device))
+			db.execute("update %s set offMin=%s where device=%s" % (room, offMin, device))
+			db.execute("update %s set offampm=%s where device=%s" % (room, offampm, device))
+			db.execute("update %s set repeate=%s where device=%s" % (room, repeate, device))
+			db.execute("update %s set timer_active=1 where device=%s" % (room, device))
+			con.commit()
+
 		else:
 			f = open("welcome.html",'r')
 			resp = f.read()
@@ -349,7 +375,7 @@ def initDB():
 		print "---> Database not found. creating..."
 		db.execute("create database smart")
 		db.execute("use smart")
-		db.execute("create table map(room_no INT, d1 INT not null default 0, d2 INT not null default 0, d3 INT not null default 0, d4 INT not null default 0, d5 INT not null default 0, d6 INT not null default 0, d7 INT not null default 0, d8 INT not null default 0, slider INT not null default 0, timer_active INT not null default 0, active INT not null default 0, address VARCHAR(25), is_server INT not null default 0, d1name VARCHAR(25), d2name VARCHAR(25), d3name VARCHAR(25), d4name VARCHAR(25), d5name VARCHAR(25), d6name VARCHAR(25), d7name VARCHAR(25), d8name VARCHAR(25), room_name VARCHAR(25))")
+		db.execute("create table map(room_no INT, d1 INT not null default 0, d2 INT not null default 0, d3 INT not null default 0, d4 INT not null default 0, d5 INT not null default 0, d6 INT not null default 0, d7 INT not null default 0, d8 INT not null default 0, slider INT not null default 0, active INT not null default 0, address VARCHAR(25), d1name VARCHAR(25), d2name VARCHAR(25), d3name VARCHAR(25), d4name VARCHAR(25), d5name VARCHAR(25), d6name VARCHAR(25), d7name VARCHAR(25), d8name VARCHAR(25), room_name VARCHAR(25))")
 		db.execute("insert into map (room_no) values (1)")
 		db.execute("insert into map (room_no) values (2)")
 		db.execute("insert into map (room_no) values (3)")
@@ -359,6 +385,21 @@ def initDB():
 		db.execute("insert into map (room_no) values (7)")
 		db.execute("insert into map (room_no) values (8)")
 		con.commit()
+
+		# create 8 separate tables for each room timer
+		for i in range(1,9):
+			tableName = "r" + str(i)
+			db.execute("create table %s(device VARCHAR(3), onHr INT, onMin INT, onampm VARCHAR(1), offHr INT, offMin INT, offampm VARCHAR(1), repeate INT, timer_active INT not null default 0)" % (tableName))
+			db.execute("insert into %s (device) values ('d1')" % (tableName))
+			db.execute("insert into %s (device) values ('d2')" % (tableName))
+			db.execute("insert into %s (device) values ('d3')" % (tableName))
+			db.execute("insert into %s (device) values ('d4')" % (tableName))
+			db.execute("insert into %s (device) values ('d5')" % (tableName))
+			db.execute("insert into %s (device) values ('d6')" % (tableName))
+			db.execute("insert into %s (device) values ('d7')" % (tableName))
+			db.execute("insert into %s (device) values ('d8')" % (tableName))
+		con.commit()
+		
 		db.execute("show databases")
 		a = db.fetchall()
 		a = str(a)
@@ -402,9 +443,6 @@ def loginControl():
 		return True
 	else:
 		return False
-
-def timerScheduler():
-	return 0
 
 def getNodeIP(roomNo):							# New connection cursor for diffrent thread
 	dbThread.execute("use smart")
@@ -493,6 +531,91 @@ def loadServerFiles():
 	f.close()
 
 
+def timerService():
+	roomName = "r"
+	for i in range(1,9):
+		roomName = roomName + str(i)
+		dbTimerServiceThread.execute("select device from %s where timer_active=1")
+		activeResult = dbTimerServiceThread.fetchall()
+		noOfDevices = len(activeResult)
+
+		if noOfDevices > 0:
+			for j in range(0,noOfDevices):
+				curHr = int(time.strftime("%I"))
+				curMin = int(time.strftime("%M"))
+				curAmpm = time.strftime("%p").split('M')
+				curAmpm = curAmpm[0]
+
+				dbTimerServiceThread.execute("select onMin from %s where device='%s'" % (roomName, activeResult[j]))
+				dbOnMin = dbTimerServiceThread.fetchone()
+				dbOnMin = int(dbOnMin[0])
+
+				if(curMin == dbOnMin):
+					dbTimerServiceThread.execute("select onHr from %s where device='%s'" % (roomName, activeResult[j]))
+					dbOnHr = dbTimerServiceThread.fetchone()
+					dbOnHr = int(dbOnHr[0])
+
+					if(curHr == dbOnHr):
+						dbTimerServiceTAmpmead.execute("select onampm from %s where device='%s'" % (roomName, activeResult[j]))
+						dbOnAmpm = dbTimerServiceTAmpmead.fetchone()
+						dbOnAmpm = dbOnAmpm[0]
+
+						if(curAmpm == dbOnAmpm):
+							urlRoom = str(i)
+							urlDevice = activeResult[j]
+							urlDevice = urlDevice[1]
+							urlvalue = '1'
+							ip = getNodeIP(int(i))
+							url = "http://" + ip + ":" + NODE_PORT + "/?toggle=&" + urlRoom + "&" + urlDevice + "&" + urlvalue
+							urllib2.urlopen(url).read()
+							sysLog("ON TIMER: R:%s D:%S" % (urlRoom, urlDevice))
+
+							dbTimerServiceThread.execute("select repeate from %s where device='%s'" % (roomName, activeResult[j]))
+							isReapeat = dbTimerServiceThread.fetchone()
+							isReapeat = int(isReapeat[0])
+
+							if(isReapeat == 0):
+								dbTimerServiceThread.execute("update %s set timer_active=0 where device='%s'" % (roomName, activeResult[j]))
+								con.commit()
+
+
+				dbTimerServiceThread.execute("select offMin from %s where device='%s'" % (roomName, activeResult[j]))
+				dboffMin = dbTimerServiceThread.fetchone()
+				dboffMin = int(dboffMin[0])
+
+				if(curMin == dboffMin):
+					dbTimerServiceThread.execute("select offHr from %s where device='%s'" % (roomName, activeResult[j]))
+					dboffHr = dbTimerServiceThread.fetchone()
+					dboffHr = int(dboffHr[0])
+
+					if(curHr == dboffHr):
+						dbTimerServiceTAmpmead.execute("select offampm from %s where device='%s'" % (roomName, activeResult[j]))
+						dboffAmpm = dbTimerServiceTAmpmead.fetchone()
+						dboffAmpm = dboffAmpm[0]
+
+						if(curAmpm == dboffAmpm):
+							urlRoom = str(i)
+							urlDevice = activeResult[j]
+							urlDevice = urlDevice[1]
+							urlvalue = '0'
+							ip = getNodeIP(int(i))
+							url = "http://" + ip + ":" + NODE_PORT + "/?toggle=&" + urlRoom + "&" + urlDevice + "&" + urlvalue
+							urllib2.urlopen(url).read()
+							sysLog("OFF TIMER: R:%s D:%S" % (urlRoom, urlDevice))
+
+							dbTimerServiceThread.execute("select repeate from %s where device='%s'" % (roomName, activeResult[j]))
+							isReapeat = dbTimerServiceThread.fetchone()
+							isReapeat = int(isReapeat[0])
+
+							if(isReapeat == 0):
+								dbTimerServiceThread.execute("update %s set timer_active=0 where device='%s'" % (roomName, activeResult[j]))
+								con.commit()
+
+	ts = threading.Timer(1, timerService)
+	ts.daemon = True
+	ts.start()
+
+
 # Main program begins here...
 try:
 	os.system("clear")
@@ -507,6 +630,7 @@ try:
 	print "Attempting to start localhost HTTP server on port ", PORT,"..."
 	print "Started listening to S.M.A.R.T app  with security key: " + loginKey()
 	appActivity()
+	timerService()
 	httpd.serve_forever()
 except(KeyboardInterrupt):
 	httpd.shutdown()
