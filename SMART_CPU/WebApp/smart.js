@@ -8,6 +8,8 @@ var ROOM_NAMES = ["Room 1","Room 2","Room 3","Room 4","Room 5","Room 6","Room 7"
 var DEBUG = 1;
 var updateTimer = 0;
 
+var color_change_var;
+
 function startDictation() {
  
     if (window.hasOwnProperty('webkitSpeechRecognition')) {
@@ -356,7 +358,6 @@ function getRoomNamesForConfigPage()									// call this onLoad
 
 function sliderChange(val)
 {
-	//var x = document.getElementById("fan_slider").value;
 	var x = val;
 	console.log(x);
 	var url = "http://" + SERVER + ":" + PORT + "/?slider=&" + ROOM.toString() + "&" + x.toString();
@@ -367,4 +368,65 @@ function sliderChange(val)
 
 function goBack() {
     window.history.back();
+}
+
+function setTimer(id)
+{
+
+	var device = id.toString().split("");
+	device = device[2];
+	color_change_var = device;
+
+	var onTimeBox = document.getElementById("onTime" + device).value;
+	var offTimeBox = document.getElementById("offTime" + device).value;
+
+	if((offTimeBox != null) && (onTimeBox != null))
+	{
+		var onHr = onTimeBox.toString().split(":");
+		var onMin = onHr[1];
+		onHr = onHr[0];
+		onMin = onMin.toString().split(" ");
+		var onampm = onMin[1];
+		onMin = onMin[0];
+		onampm = onampm.split("");
+		onampm = onampm[0];
+
+		var offHr = offTimeBox.toString().split(":");
+		var offMin = offHr[1];
+		offHr = offHr[0];
+		offMin = offMin.toString().split(" ");
+		var offampm = offMin[1];
+		offMin = offMin[0];
+		offampm = offampm.split("");
+		offampm = offampm[0];
+
+		var repeate;
+		if(document.getElementById("dailySwitch" + device).checked)		// checked for daily/repeate
+			repeate = "1";
+		else
+			repeate = "0";
+
+		url = "http://" + SERVER + ":" + PORT + "/?setTimer=&" + ROOM.toString() + "&" + device + "&" + onHr + "&" + onMin + "&" + onampm + "&" + offHr + "&" + offMin + "&" + offampm + "&" + repeate;
+		httpGet(url, function callback(resp){
+			if(resp.toLowerCase() == "ack")
+				document.getElementById("timerButton" + color_change_var.toString()).style.backgroundColor = "#ff1744"; // red-accent 4 color on timer enabled
+		});
+	}
+	else
+	{
+		$('#timerErrorModal').openModal();
+	}
+}
+
+function disableTimer(id)
+{
+	var device = id.toString().split("");
+	device = device[2];
+	color_change_var = device;
+
+	url = "http://" + SERVER + ":" + PORT + "/?disableTimer=&" + ROOM.toString() + "&" + device;
+	httpGet(url, function callback(resp){
+		if(resp.toLowerCase() == "ack")
+				document.getElementById("timerButton" + color_change_var.toString()).style.backgroundColor = "#009688"; // teal color on timer disabled
+	});
 }

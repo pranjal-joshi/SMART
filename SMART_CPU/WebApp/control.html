@@ -23,6 +23,7 @@
     <script src="materialize.min.js"></script>
     <!-- use 0.97.6 js and 0.97.7 css for DROPDOWN and SIDENAV together!!!!!!!!-->
     <script type="text/javascript" src="lolliclock.js"></script>
+    <script type="text/javascript" src="smart.js"></script>
     <link rel="stylesheet" href="lolliclock.css">
     
     <!-- Ubuntu Font-->
@@ -102,42 +103,42 @@
                     <tr>
                         <td><input placeholder="Device 1" id="d1" type="text" class="validate" onblur="setDeviceName(this)"></td>
                         <td><center><center><div class="switch"><label><input type="checkbox" id="1" onchange="switchToggle(this)" ><span class="lever"></span></label></div></center></td>
-                        <td><a class="waves-effect waves-light waves-red btn modal-trigger red lighten-1" href="#timerModal1"><i class="material-icons center">access_time</i></a></td>
+                        <td><a class="waves-effect waves-light waves-red btn modal-trigger" href="#timerModal1" id="timerButton1"><i class="material-icons center">access_time</i></a></td>
                     </tr>
                     <tr>
                         <td><input placeholder="Device 2" id="d2" type="text" class="validate" onblur="setDeviceName(this)"></td> 
                         <td><center><div class="switch"><label><input type="checkbox" id="2" onchange="switchToggle(this)"><span class="lever"></span></label></div></center></td>
-                        <td><a class="waves-effect waves-light waves-teal btn modal-trigger" href="#timerModal2"><i class="material-icons center">access_time</i></a></td>
+                        <td><a class="waves-effect waves-light waves-teal btn modal-trigger" href="#timerModal2" id="timerButton2"><i class="material-icons center">access_time</i></a></td>
                     </tr>
                     <tr>
                         <td><input placeholder="Device 3" id="d3" type="text" class="validate" onblur="setDeviceName(this)"></td> 
                         <td><center><div class="switch"><label><input type="checkbox" id="3" onchange="switchToggle(this)"><span class="lever"></span></label></div></center></td>
-                        <td><a class="waves-effect waves-light waves-teal btn modal-trigger" href="#timerModal3"><i class="material-icons center">access_time</i></a></td>
+                        <td><a class="waves-effect waves-light waves-teal btn modal-trigger" href="#timerModal3" id="timerButton3"><i class="material-icons center">access_time</i></a></td>
                     </tr>
                     <tr>
                         <td><input placeholder="Device 4" id="d4" type="text" class="validate" onblur="setDeviceName(this)"></td> 
                         <td><center><div class="switch"><label><input type="checkbox" id="4" onchange="switchToggle(this)"><span class="lever"></span></label></div></center></td>
-                        <td><a class="waves-effect waves-light waves-teal btn modal-trigger" href="#timerModal4"><i class="material-icons center">access_time</i></a></td>
+                        <td><a class="waves-effect waves-light waves-teal btn modal-trigger" href="#timerModal4" id="timerButton4"><i class="material-icons center">access_time</i></a></td>
                     </tr>
                     <tr>
                         <td><input placeholder="Device 5" id="d5" type="text" class="validate" onblur="setDeviceName(this)"></td> 
                         <td><center><div class="switch"><label><input type="checkbox" id="5" onchange="switchToggle(this)"><span class="lever"></span></label></div></center></td>
-                        <td><a class="waves-effect waves-light waves-teal btn modal-trigger" href="#timerModal5"><i class="material-icons center">access_time</i></a></td>
+                        <td><a class="waves-effect waves-light waves-teal btn modal-trigger" href="#timerModal5" id="timerButton5"><i class="material-icons center">access_time</i></a></td>
                     </tr>
                     <tr>
                         <td><input placeholder="Device 6" id="d6" type="text" class="validate" onblur="setDeviceName(this)"></td> 
                         <td><center><div class="switch"><label><input type="checkbox" id="6" onchange="switchToggle(this)"><span class="lever"></span></label></div></center></td>
-                        <td><a class="waves-effect waves-light waves-teal btn modal-trigger" href="#timerModal6"><i class="material-icons center">access_time</i></a></td>
+                        <td><a class="waves-effect waves-light waves-teal btn modal-trigger" href="#timerModal6" id="timerButton6"><i class="material-icons center">access_time</i></a></td>
                     </tr>
                     <tr>
                         <td><input placeholder="Device 7" id="d7" type="text" class="validate" onblur="setDeviceName(this)"></td> 
                         <td><center><div class="switch"><label><input type="checkbox" id="7" onchange="switchToggle(this)"><span class="lever"></span></label></div></center></td>
-                        <td><a class="waves-effect waves-light waves-teal btn modal-trigger" href="#timerModal7"><i class="material-icons center">access_time</i></a></td>
+                        <td><a class="waves-effect waves-light waves-teal btn modal-trigger" href="#timerModal7" id="timerButton7"><i class="material-icons center">access_time</i></a></td>
                     </tr>
                     <tr>
                         <td><input placeholder="Device 8" id="d8" type="text" class="validate" onblur="setDeviceName(this)"></td> 
                         <td><center><div class="switch"><label><input type="checkbox" id="8" onchange="switchToggle(this)"><span class="lever"></span></label></div></center></td>
-                        <td><a class="waves-effect waves-light waves-teal btn modal-trigger" href="#timerModal8"><i class="material-icons center">access_time</i></a></td>
+                        <td><a class="waves-effect waves-light waves-teal btn modal-trigger" href="#timerModal8" id="timerButton8"><i class="material-icons center">access_time</i></a></td>
                     </tr>
                 </tbody>
             </table>    
@@ -301,6 +302,17 @@
           <a href="#!" class="modal-action modal-close waves-effect waves-red btn-flat">Done</a>
       </div>
       </div>
+
+      <div id="timerErrorModal" class="modal grey lighten-4">
+        <div class="modal-contnet">
+          <center><h5 style="color: red">ON/OFF time can't be left blank!</h5>
+          <div class="divider"></div>
+          <p style="color: black">We can't set timer for you if you don't provide both ON & OFF timings for your device!</p></center>
+        </div>
+        <div class="modal-footer grey lighten-4">
+          <a href="#!" class="modal-action modal-close waves-effect waves-red btn-flat">Done</a>
+      </div>
+      </div>
            
   <!-- TimerModal start -->          
     <div id="timerModal1" class="modal">
@@ -331,10 +343,10 @@
             </div>
 
             <center>
-            <div class="switch" id="dailySwitch1">
+            <div class="switch">
               <label>
                 Once
-                <input type="checkbox">
+                <input type="checkbox" id="dailySwitch1">
                 <span class="lever"></span>
                 Daily
              </label>
@@ -346,8 +358,8 @@
       </div>
 
       <div class="modal-footer">
-        <a href="#!" class=" modal-action modal-close waves-effect waves-teal btn" type="submit">Apply</a>
-        <a href="#!" class=" modal-action modal-close waves-effect waves-teal btn-flat">Disable scheduler</a>
+        <a href="#!" class=" modal-action modal-close waves-effect waves-teal btn" type="submit" id="ts1" onclick="setTimer(this.id)">Apply</a>
+        <a href="#!" class=" modal-action modal-close waves-effect waves-teal btn-flat" id="td1" onclick="disableTimer(this.id)" onclick="disableTimer(this.id)">Disable timer</a>
       </div>
     </div>
 
@@ -378,10 +390,10 @@
             </div>
 
             <center>
-            <div class="switch" id="dailySwitch2">
+            <div class="switch" >
               <label>
                 Once
-                <input type="checkbox">
+                <input type="checkbox" id="dailySwitch2">
                 <span class="lever"></span>
                 Daily
              </label>
@@ -391,8 +403,8 @@
       </div>
 
       <div class="modal-footer">
-        <a href="#!" class=" modal-action modal-close waves-effect waves-teal btn" type="submit">Apply</a>
-        <a href="#!" class=" modal-action modal-close waves-effect waves-teal btn-flat">Disable scheduler</a>
+        <a href="#!" class=" modal-action modal-close waves-effect waves-teal btn" type="submit" id="ts2" onclick="setTimer(this.id)">Apply</a>
+        <a href="#!" class=" modal-action modal-close waves-effect waves-teal btn-flat" id="td2" onclick="disableTimer(this.id)">Disable timer</a>
       </div>
     </div>
 
@@ -424,10 +436,10 @@
             </div>
 
             <center>
-            <div class="switch" id="dailySwitch3">
+            <div class="switch" >
               <label>
                 Once
-                <input type="checkbox">
+                <input type="checkbox" id="dailySwitch3">
                 <span class="lever"></span>
                 Daily
              </label>
@@ -437,8 +449,8 @@
       </div>
 
       <div class="modal-footer">
-        <a href="#!" class=" modal-action modal-close waves-effect waves-teal btn" type="submit">Apply</a>
-        <a href="#!" class=" modal-action modal-close waves-effect waves-teal btn-flat">Disable scheduler</a>
+        <a href="#!" class=" modal-action modal-close waves-effect waves-teal btn" type="submit" id="ts3" onclick="setTimer(this.id)">Apply</a>
+        <a href="#!" class=" modal-action modal-close waves-effect waves-teal btn-flat" id="td3" onclick="disableTimer(this.id)">Disable timer</a>
       </div>
     </div>
     
@@ -470,10 +482,10 @@
             </div>
 
             <center>
-            <div class="switch" id="dailySwitch4">
+            <div class="switch" >
               <label>
                 Once
-                <input type="checkbox">
+                <input type="checkbox" id="dailySwitch4">
                 <span class="lever"></span>
                 Daily
              </label>
@@ -483,8 +495,8 @@
       </div>
 
       <div class="modal-footer">
-        <a href="#!" class=" modal-action modal-close waves-effect waves-teal btn" type="submit">Apply</a>
-        <a href="#!" class=" modal-action modal-close waves-effect waves-teal btn-flat">Disable scheduler</a>
+        <a href="#!" class=" modal-action modal-close waves-effect waves-teal btn" type="submit" id="ts4" onclick="setTimer(this.id)">Apply</a>
+        <a href="#!" class=" modal-action modal-close waves-effect waves-teal btn-flat" id="td4" onclick="disableTimer(this.id)">Disable timer</a>
       </div>
     </div>
 
@@ -516,10 +528,10 @@
             </div>
 
             <center>
-            <div class="switch" id="dailySwitch5">
+            <div class="switch" >
               <label>
                 Once
-                <input type="checkbox">
+                <input type="checkbox" id="dailySwitch5">
                 <span class="lever"></span>
                 Daily
              </label>
@@ -529,8 +541,8 @@
       </div>
 
       <div class="modal-footer">
-        <a href="#!" class=" modal-action modal-close waves-effect waves-teal btn" type="submit">Apply</a>
-        <a href="#!" class=" modal-action modal-close waves-effect waves-teal btn-flat">Disable scheduler</a>
+        <a href="#!" class=" modal-action modal-close waves-effect waves-teal btn" type="submit" id="ts5" onclick="setTimer(this.id)">Apply</a>
+        <a href="#!" class=" modal-action modal-close waves-effect waves-teal btn-flat" id="td5" onclick="disableTimer(this.id)">Disable timer</a>
       </div>
     </div>
 
@@ -561,10 +573,10 @@
             </div>
 
             <center>
-            <div class="switch" id="dailySwitch6">
+            <div class="switch" >
               <label>
                 Once
-                <input type="checkbox">
+                <input type="checkbox" id="dailySwitch6">
                 <span class="lever"></span>
                 Daily
              </label>
@@ -574,8 +586,8 @@
       </div>
 
       <div class="modal-footer">
-        <a href="#!" class=" modal-action modal-close waves-effect waves-teal btn" type="submit">Apply</a>
-        <a href="#!" class=" modal-action modal-close waves-effect waves-teal btn-flat">Disable scheduler</a>
+        <a href="#!" class=" modal-action modal-close waves-effect waves-teal btn" type="submit" id="ts6" onclick="setTimer(this.id)">Apply</a>
+        <a href="#!" class=" modal-action modal-close waves-effect waves-teal btn-flat" id="td6" onclick="disableTimer(this.id)">Disable timer</a>
       </div>
     </div>
 
@@ -607,10 +619,10 @@
             </div>
 
             <center>
-            <div class="switch" id="dailySwitch7">
+            <div class="switch" >
               <label>
                 Once
-                <input type="checkbox">
+                <input type="checkbox" id="dailySwitch7">
                 <span class="lever"></span>
                 Daily
              </label>
@@ -620,8 +632,8 @@
       </div>
 
       <div class="modal-footer">
-        <a href="#!" class=" modal-action modal-close waves-effect waves-teal btn" type="submit">Apply</a>
-        <a href="#!" class=" modal-action modal-close waves-effect waves-teal btn-flat">Disable scheduler</a>
+        <a href="#!" class=" modal-action modal-close waves-effect waves-teal btn" type="submit" id="ts7" onclick="setTimer(this.id)">Apply</a>
+        <a href="#!" class=" modal-action modal-close waves-effect waves-teal btn-flat" id="td7" onclick="disableTimer(this.id)">Disable timer</a>
       </div>
     </div>    
     
@@ -653,10 +665,10 @@
             </div>
 
             <center>
-            <div class="switch" id="dailySwitch8">
+            <div class="switch">
               <label>
                 Once
-                <input type="checkbox">
+                <input type="checkbox" id="dailySwitch8">
                 <span class="lever"></span>
                 Daily
              </label>
@@ -666,8 +678,8 @@
       </div>
 
       <div class="modal-footer">
-        <a href="#!" class=" modal-action modal-close waves-effect waves-teal btn" type="submit">Apply</a>
-        <a href="#!" class=" modal-action modal-close waves-effect waves-teal btn-flat">Disable scheduler</a>
+        <a href="#!" class=" modal-action modal-close waves-effect waves-teal btn" type="submit" id="ts8" onclick="setTimer(this.id)">Apply</a>
+        <a href="#!" class=" modal-action modal-close waves-effect waves-teal btn-flat" id="td8" onclick="disableTimer(this.id)">Disable timer</a>
       </div>
     </div>
     </main>
@@ -683,7 +695,4 @@
   <!-- TimerModal end -->  
 <script src="smart.js"></script>
 
-  
 </body>
-
-
