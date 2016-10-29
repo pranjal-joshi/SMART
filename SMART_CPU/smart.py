@@ -350,6 +350,22 @@ class handler(SimpleHTTPRequestHandler):
 			db.execute("update %s set repeate=%s where device=%s" % (room, repeate, device))
 			db.execute("update %s set timer_active=1 where device=%s" % (room, device))
 			con.commit()
+			sysLog("TIMER ENABLED. R:%s D:%s" % (urlSplit[1], urlSplit[2]))
+			self.send_response(200)
+			self.end_headers()
+			self.wfile.write("ack")
+
+		elif(url.find("disableTimer") > 0):
+			urlSplit = url.split('&')
+			device = "d" + str(urlSplit[2])
+			room = "r" + str(urlSplit[1])
+			db.execute("use smart")
+			db.execute("update %s set timer_active=0 where device=%s" % (room, device))
+			con.commit()
+			sysLog("TIMER DISABLED. R:%s D:%s" % (urlSplit[1], urlSplit[2]))
+			self.send_response(200)
+			self.end_headers()
+			self.wfile.write("ack")
 
 		else:
 			f = open("welcome.html",'r')
@@ -631,6 +647,7 @@ try:
 	print "Started listening to S.M.A.R.T app  with security key: " + loginKey()
 	appActivity()
 	timerService()
+	print "Starting AppActivityService and timerService..."
 	httpd.serve_forever()
 except(KeyboardInterrupt):
 	httpd.shutdown()
