@@ -55,7 +55,7 @@
                         <td><a href="#!"><span class="teal-text" style="font-size:16px">Motion Sensor</span></a></td> 
                         <!--CHECK FONT OF AUTO-->
                         <td>
-                          <div class="switch"><label><input type="checkbox" id="manualSwitch"><span class="lever"></span></label></div>
+                          <div class="switch"><label><input type="checkbox" id="motionSwitch"><span class="lever"></span></label></div>
                         </td>
                     </tr>
                 </tbody>
@@ -198,7 +198,7 @@
             <a class="btn-floating btn-large red modal-trigger" onclick="startDictation()" href="#modal1"><i class="material-icons center">mic</i></a>
         </div>    
             
-        <div id="modal1" class="modal">
+        <div id="modal1" class="modal bottom-sheet">
             <div class="modal-content">
                 
                 <p>
@@ -225,7 +225,7 @@
     <!--
           Shutdown modal STARTS
         -->
-        <div id="shutdownModal" class="modal modal-fixed-footer">
+        <div id="shutdownModal" class="modal modal-fixed-footer bottom-sheet">
           <div class="modal-content">
            <h4 style="color: red">Alert!</h4>
            <div class="divider"></div>
@@ -234,7 +234,7 @@
           </div>
           <div class="modal-footer">
             <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat" onclick="updateTimer = setInterval(getSwitches,1500,ROOM)">Abort</a>
-            <a href="#shutdownPreloadModal" class="modal-action modal-close waves-effect waves-red btn red darken-3 modal-trigger" onclick="shutdown(); setTimeout(closeTab, 7000)">Shutdown anyway</a>
+            <a href="#shutdownPreloadModal" class="modal-action modal-close waves-effect waves-red btn red darken-3 modal-trigger" onclick="shutdown(); setTimeout(closeTab, 7000)">Shutdown</a>
           </div>
         </div>
         <!--
@@ -242,7 +242,7 @@
         -->
 
         <!-- system update modal START -->
-          <div id="otaModal" class="modal">
+          <div id="otaModal" class="modal bottom-sheet">
             <div class="modal-content">
               <h5 style="color: teal">Checking for system updates...</h5>
                <div class="progress">
@@ -253,7 +253,7 @@
         <!-- system update modal ENDS  -->
 
         <!-- RESTART modal STARTS-->
-        <div id="restartModal" class="modal modal-fixed-footer">
+        <div id="restartModal" class="modal modal-fixed-footer bottom-sheet">
           <div class="modal-content">
            <h4 style="color: teal">Restart?</h4>
            <div class="divider"></div>
@@ -268,7 +268,7 @@
         <!-- RESTART modal ENDS  -->
 
         <!-- Restart preloader STARTS -->
-        <div id="restartPreloadModal" class="modal">
+        <div id="restartPreloadModal" class="modal bottom-sheet">
             <div class="modal-content">
               <h5 style="color: teal">S.M.A.R.T is restarting...</h5>
                <div class="progress">
@@ -280,7 +280,7 @@
         <!-- Restart preloader ENDS   -->
 
         <!-- shutdown preloader ENDS   -->
-        <div id="shutdownPreloadModal" class="modal">
+        <div id="shutdownPreloadModal" class="modal bottom-sheet">
             <div class="modal-content">
               <h5 style="color: red">S.M.A.R.T is shutting down...</h5>
                <div class="progress red lighten-5">
@@ -292,7 +292,7 @@
           <!-- shutdown preloader ENDS   -->
 
       <!-- error modal -->
-      <div id="errorModal" class="modal grey lighten-4">
+      <div id="errorModal" class="modal grey lighten-4 bottom-sheet">
         <div class="modal-contnet">
           <center><h5 style="color: red">Oops!</h5>
           <div class="divider"></div>
@@ -303,7 +303,7 @@
       </div>
       </div>
 
-      <div id="timerErrorModal" class="modal grey lighten-4">
+      <div id="timerErrorModal" class="modal grey lighten-4 bottom-sheet">
         <div class="modal-contnet">
           <center><h5 style="color: red">ON/OFF time can't be left blank!</h5>
           <div class="divider"></div>
@@ -313,9 +313,20 @@
           <a href="#!" class="modal-action modal-close waves-effect waves-red btn-flat">Done</a>
       </div>
       </div>
+
+      <div id="sameTimeErrorModal" class="modal grey lighten-4 bottom-sheet">
+        <div class="modal-contnet">
+          <center><h5 style="color: red">That's weird!</h5>
+          <div class="divider"></div>
+          <p style="color: black">ON & OFF time can't be same!</p></center>
+        </div>
+        <div class="modal-footer grey lighten-4">
+          <a href="#!" class="modal-action modal-close waves-effect waves-red btn-flat">Done</a>
+      </div>
+      </div>
            
-  <!-- TimerModal start -->          
-    <div id="timerModal1" class="modal">
+  <!-- TimerModal start -->  
+    <div id="timerModal1" class="modal bottom-sheet modal-fixed-footer" style="font-family: ubuntu">
       <div class="modal-content">
         
         <!------------------------------------------------------------------------------ -->
@@ -356,7 +367,7 @@
         <!------------------------------------------------------------------------------ -->
 
       </div>
-
+      
       <div class="modal-footer">
         <a href="#!" class=" modal-action modal-close waves-effect waves-teal btn" type="submit" id="ts1" onclick="setTimer(this.id)">Apply</a>
         <a href="#!" class=" modal-action modal-close waves-effect waves-teal btn-flat" id="td1" onclick="disableTimer(this.id)" onclick="disableTimer(this.id)">Disable timer</a>
@@ -364,9 +375,9 @@
     </div>
 
 
-    <div id="timerModal2" class="modal">
+    <div id="timerModal2" class="modal bottom-sheet modal-fixed-footer">
       <div class="modal-content">
-        
+
         <h4>Schedule manager</h4>
             
               <div class="row">
@@ -410,7 +421,7 @@
 
 
 
-    <div id="timerModal3" class="modal">
+    <div id="timerModal3" class="modal bottom-sheet modal-fixed-footer">
       <div class="modal-content">
         
         <h4>Schedule manager</h4>
@@ -456,7 +467,7 @@
     
 
 
-    <div id="timerModal4" class="modal">
+    <div id="timerModal4" class="modal bottom-sheet modal-fixed-footer">
       <div class="modal-content">
         
         <h4>Schedule manager</h4>
@@ -502,7 +513,7 @@
 
 
 
-    <div id="timerModal5" class="modal">
+    <div id="timerModal5" class="modal bottom-sheet modal-fixed-footer">
       <div class="modal-content">
         
         <h4>Schedule manager</h4>
@@ -547,7 +558,7 @@
     </div>
 
         
-    <div id="timerModal6" class="modal">
+    <div id="timerModal6" class="modal bottom-sheet modal-fixed-footer">
       <div class="modal-content">
         
         <h4>Schedule manager</h4>
@@ -593,7 +604,7 @@
 
     
 
-    <div id="timerModal7" class="modal">
+    <div id="timerModal7" class="modal bottom-sheet modal-fixed-footer">
       <div class="modal-content">
         
         <h4>Schedule manager</h4>
@@ -639,7 +650,7 @@
     
     
     
-    <div id="timerModal8" class="modal">
+    <div id="timerModal8" class="modal bottom-sheet modal-fixed-footer">
       <div class="modal-content">
         
         <h4>Schedule manager</h4>
