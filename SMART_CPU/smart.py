@@ -103,7 +103,7 @@ class handler(SimpleHTTPRequestHandler):
 			setValue = decode[3]
 			db.execute("use smart")
 			db.execute("update map set %s=%s where room_no=%s" % (device, setValue, room))
-			db.execute("update map set active=1 where room_no=%s" % (room))
+			#db.execute("update map set active=1 where room_no=%s" % (room))
 			con.commit()
 			print room, " ", device, " ", setValue
 			print "TOGGLE ACCEPTED."
@@ -123,7 +123,7 @@ class handler(SimpleHTTPRequestHandler):
 			print room, " ", thumbValue
 			db.execute("use smart")
 			db.execute("update map set slider=%s where room_no=%s" % (thumbValue, room))
-			db.execute("update map set active=1 where room_no=%s" % (room))
+			#db.execute("update map set active=1 where room_no=%s" % (room))
 			con.commit()
 			self.send_response(200)
 			self.end_headers()
@@ -367,8 +367,45 @@ class handler(SimpleHTTPRequestHandler):
 			self.end_headers()
 			self.wfile.write("ack")
 
+		elif(url.find("motion") > 0):
+			urlSplit = url.split('&')
+			db.execute("use smart")
+			db.execute("update map set motion_sensor=%d where room_no=%d" % (int(urlSplit[2]), int(urlSplit[1])))
+			con.commit()
+			sysLog("MOTION SENSOR TOGGLE. R:%s V:%s" % (str(urlSplit[1]), str(urlSplit[2])))
+			self.send_response(200)
+			self.end_headers()
+			self.wfile.write("sensor_ok")
+
+		elif(url.find("presence") > 0):
+			urlSplit = url.split('&')
+			timeNow = str(datetime.datetime.now().time())
+			timeNow = timeNow.split(':')
+			hrNow = timeNow[0]
+			minNow = timeNow[1]
+			# auto lighting enabled from 6.30PM to 6.30AM --> TO-DO: make this programmable through webApp
+			if((hrNow > 18 and minNow > 30) or (hrNow < 7 and minNow < 30)):
+				db.execute("use smart")
+				db.execute("select motion_sensor from map where room_no=%s" % (urlSplit[1]))
+				isMotionEnable = db.fetchone()
+				isMotionEnable = int(isMotionEnable[0])
+				if(isMotionEnable):
+					global APP_ACTIVITY
+					global REQUEST_ROOM
+					if(int(urlSplit[2])):
+						db.execute("update map set d1=1 where room_no=%s" % (urlSplit[1]))
+					else:
+						db.execute("update map set d1=0 where room_no=%s" % (urlSplit[1]))
+					con.commit()
+					REQUEST_ROOM = int(urlSplit[1])
+					APP_ACTIVITY = True		# force Node to requestUpdate
+					sysLog("MOTION TRIGGER. MOTION: %s ROOM: %s" % (urlSplit[2],urlSplit[1]))
+			self.send_response(200)
+			self.end_headers()
+			self.wfile.write("presence")
+
 		else:
-			f = open("welcome.html",'r')
+			f = open("index.html",'r')
 			resp = f.read()
 			f.close()
 			self.send_response(200)
@@ -391,7 +428,7 @@ def initDB():
 		print "---> Database not found. creating..."
 		db.execute("create database smart")
 		db.execute("use smart")
-		db.execute("create table map(room_no INT, d1 INT not null default 0, d2 INT not null default 0, d3 INT not null default 0, d4 INT not null default 0, d5 INT not null default 0, d6 INT not null default 0, d7 INT not null default 0, d8 INT not null default 0, slider INT not null default 0, active INT not null default 0, address VARCHAR(25), d1name VARCHAR(25), d2name VARCHAR(25), d3name VARCHAR(25), d4name VARCHAR(25), d5name VARCHAR(25), d6name VARCHAR(25), d7name VARCHAR(25), d8name VARCHAR(25), room_name VARCHAR(25))")
+		db.execute("create table map(room_no INT, d1 INT not null default 0, d2 INT not null default 0, d3 INT not null default 0, d4 INT not null default 0, d5 INT not null default 0, d6 INT not null default 0, d7 INT not null default 0, d8 INT not null default 0, slider INT not null default 0, active INT not null default 0, address VARCHAR(25), d1name VARCHAR(25), d2name VARCHAR(25), d3name VARCHAR(25), d4name VARCHAR(25), d5name VARCHAR(25), d6name VARCHAR(25), d7name VARCHAR(25), d8name VARCHAR(25), room_name VARCHAR(25), motion_sensor INT not null default 0)")
 		db.execute("insert into map (room_no) values (1)")
 		db.execute("insert into map (room_no) values (2)")
 		db.execute("insert into map (room_no) values (3)")
@@ -545,7 +582,6 @@ def loadServerFiles():
 	f = open("welcome.html","r")
 	htmlWelcome = f.read()
 	f.close()
-
 
 def timerService():
 	roomName = "r"

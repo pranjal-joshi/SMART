@@ -32,6 +32,9 @@ SWITCHPINS = [0,1,7,8,11,9,10,24]		# DON'T CHANGE SEQUENCE
 
 RELAYPINS = [12,16,20,21,26,19,13,6]	# DON'T CHANGE SEQUENCE
 
+PIR1_PIN = 2
+PIR2_PIN = 3
+
 CHARGE = 17
 DISCHARGE = 27
 ANALOG_VAL = 0.0
@@ -52,7 +55,10 @@ POT_FAN_TIME = None
 PRESENT_STATE = [0,0,0,0,0,0,0,0,0]		# requestUpdate from server after appActivity
 PRESENT_STATE_RESPONSE = 0
 
-FANPIN = 99 # CHANGE THIS LATER
+FANPIN = 5 								# DON'T CHANGE THIS
+
+PIR_TIMEOUT_THREAD = None 				# Timer thread
+PIR_TIMEOUT = 2*60
 
 class handler(SimpleHTTPRequestHandler):
 	global APP_FAN_TIME
@@ -104,7 +110,10 @@ class handler(SimpleHTTPRequestHandler):
 			print "Update completed. New features will take effect after restart."
 			return
 			
-def stopPWM():
+def stopPWM():			### PWM inverted logic ### MOC led is in common anode configuration.
+	io.output(FANPIN, True)
+
+def startPWM():			### PWM inverted logic ### MOC led is in common anode configuration. 
 	io.output(FANPIN, False)
 
 ### triggers on ZCD interrupt for triac sync
@@ -114,6 +123,7 @@ def syncMains():
 	pwmDealy = 0
 	if(POT_FAN_TIME >= APP_FAN_TIME):		# check last recent update is from App or Pot by checking update time stamp.
 		if(SPEED > 0):
+			startPWM()
 			if SPEED == 1:
 				pwmDealy = 0.002			# delay in ms. Time to keep HIGH pulse on triac gate.
 			elif SPEED == 2:
@@ -129,6 +139,7 @@ def syncMains():
 			stopPWM()
 	else:
 		if(APP_SPEED > 0):
+			startPWM()
 			if APP_SPEED == 1:
 				pwmDealy = 0.002			# delay in ms. Time to keep HIGH pulse on triac gate.
 			elif APP_APP_SPEED == 2:
@@ -168,9 +179,16 @@ def initSwitchPins(array,relArray):
 	io.add_event_detect(array[5], io.BOTH, callback=swInt6, bouncetime=250)
 	io.add_event_detect(array[6], io.BOTH, callback=swInt7, bouncetime=250)
 	io.add_event_detect(array[7], io.BOTH, callback=swInt8, bouncetime=250)
+	io.setup(PIR1_PIN, io.IN, pull_up_down=io.PUD_UP)
+	io.setup(PIR2_PIN, io.IN, pull_up_down=io.PUD_UP)
+	io.add_event_detect(PIR1_PIN, io.RISING, callback=pirRise, bouncetime=250)
+	io.add_event_detect(PIR2_PIN, io.RISING, callback=pirRise, bouncetime=250)
+	io.add_event_detect(PIR1_PIN, io.FALLING, callback=pirFall, bouncetime=250)
+	io.add_event_detect(PIR2_PIN, io.FALLING, callback=pirFall, bouncetime=250)
 	if DEBUG:
 		print "Interrupts enabled on BCM pins: " + str(SWITCHPINS)
 		print "Set as relay output (BCM Pins): " + str(relArray)
+		print "Motion sensors pin initialized!"
 	return 0
 
 ### interrupt callback functions for every switch
@@ -381,6 +399,25 @@ def downloadOTA():
 	os.system("wget " + url + " -P " + os.getcwd() + "/")
 	os.system("tar -xvzf *.tar.gz")
 	os.system("rm *.tar.gz")
+
+def pirRise():
+	global PIR_TIMEOUT_THREAD
+	try:
+		if(PIR_TIMEOUT_THREAD.isAlive()):
+			PIR_TIMEOUT_THREAD.cancel()
+		presenceRequest(1)
+	except:
+		pass
+
+def pirFall():
+	global PIR_TIMEOUT_THREAD
+	global PIR_TIMEOUT
+	PIR_TIMEOUT_THREAD = threading.Timer(PIR_TIMEOUT, presenceRequest, 0)
+
+
+def presenceRequest(val):
+	url = "http://" + SERVER_IP + ":" + SERVER_PORT + "/?presence=&" + ROOM_NO + "&" + str(val)
+	urllib2.urlopen(url).read()
 
 
 ### main program starts here
