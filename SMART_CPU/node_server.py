@@ -16,6 +16,7 @@ import RPi.GPIO as io
 import time
 import threading
 import sys
+import datetime
 
 ### CONFIGURATION ###
 DEBUG = True
@@ -163,7 +164,6 @@ def initSync():
 	io.setmode(io.BCM)
 	io.setup(SYNCPIN, io.IN, pull_up_down=io.PUD_UP)
 	io.add_event_detect(SYNCPIN, io.FALLING, callback=syncMains, bouncetime=8)
-	io.setup(FANPIN, io.OUT)
 
 
 def initSwitchPins(array,relArray):
@@ -185,6 +185,7 @@ def initSwitchPins(array,relArray):
 	io.add_event_detect(PIR2_PIN, io.RISING, callback=pirRise, bouncetime=250)
 	io.add_event_detect(PIR1_PIN, io.FALLING, callback=pirFall, bouncetime=250)
 	io.add_event_detect(PIR2_PIN, io.FALLING, callback=pirFall, bouncetime=250)
+	io.setup(FANPIN, io.OUT)
 	if DEBUG:
 		print "Interrupts enabled on BCM pins: " + str(SWITCHPINS)
 		print "Set as relay output (BCM Pins): " + str(relArray)
@@ -330,7 +331,6 @@ def chargeCap():
 		print "Charging time (ms): " + str(z)
 	return ((end-start)/1e-3)			# return chargin time of RC in millis
 
-
 def analogRead():
 	try:
 		global ANALOG_VAL
@@ -407,6 +407,7 @@ def pirRise():
 			PIR_TIMEOUT_THREAD.cancel()
 		presenceRequest(1)
 	except:
+		presenceRequest(1)
 		pass
 
 def pirFall():
