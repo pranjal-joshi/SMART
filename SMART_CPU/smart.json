@@ -1,0 +1,259 @@
+
+{
+	"name":"node/webapp",
+	"type":"toggle",
+	"data":
+	{
+		"room":room_no,
+		"device":device_no,
+		"value":oneOrZero
+	}
+}
+
+
+{
+	"name":"node/webapp",
+	"type":"slider",
+	"data":
+	{
+		"room":room_no,
+		"speed":sliderValue
+	}
+}
+
+
+{
+	"name":"webapp",
+	"type":"login",
+	"data":
+	{
+		"key":loginKey
+	}
+}
+
+{
+	"name":"webapp",
+	"type":"broadcast",
+	"data":
+	{
+		"room":room_no,
+		"deviceValues":
+		{
+			"d1":1,
+			"d2":0,
+			"d3":1,
+			"d4":0,
+			"d5":1,
+			"d6":0,
+			"d7":1,
+			"d8":0
+		},
+		"speed":sliderValue
+	}
+}
+
+{
+	"name":"broadcast",
+	"type":"toggleNode",
+	"data":
+	{
+		"room":room_no,
+		"deviceValues":
+		{
+			"d1":1,
+			"d2":0,
+			"d3":1,
+			"d4":0,
+			"d5":1,
+			"d6":0,
+			"d7":1,
+			"d8":0
+		}
+	}
+}
+
+{
+	"name":"broadcast",
+	"type":"sliderNode",
+	"data":
+	{
+		"room":room_no,
+		"speed":sliderValue
+	}
+}
+
+{
+	"name":"webapp",
+	"type":"setRoomNames",
+	"data":
+	{
+		1:"name",
+		2:"name",
+		3:"name",
+		4:"name",
+		5:"name",
+		6:"name",
+		7:"name",
+		8:"name"
+	}
+}
+
+{
+	"name":"webapp",
+	"type":"activeRooms",
+	"data":
+	{
+		1:1,
+		2:1,
+		3:1,
+		4:1,
+		5:0,
+		6:0,
+		7:0,
+		8:0
+	}
+}
+
+{
+	"name":"webapp",
+	"type":"shutdown"
+}
+
+{
+	"name":"webapp",
+	"type":"reboot"
+}
+
+{
+	"name":"webapp",
+	"type":"ota"
+}
+
+{
+	"name":"webapp",
+	"type":"getRoomNames"
+}
+
+{
+	"name":"server",
+	"type":"respGetRoomNames",
+	"data":
+	{
+		1:"name",
+		2:"name",
+		3:"name",
+		4:"name",
+		5:"name",
+		6:"name",
+		7:"name",
+		8:"name"
+	}
+}
+
+{
+	"name":"server",
+	"type":"respGetDeviceNames",
+	"data":
+	{
+		"room":room_no,
+		"deviceNames":
+		{
+			1:"name",
+			2:"name",
+			3:"name",
+			4:"name",
+			5:"name",
+			6:"name",
+			7:"name",
+			8:"name"
+		}
+	}
+}
+
+{
+	"name":"server",
+	"type":"err",
+	"error":"YourErrorHere"
+}
+
+{
+	"name":"server",
+	"type":"shutdown"
+}
+
+{
+	"name":"server",
+	"type":"reboot"
+}
+
+{
+	"name":"webapp",
+	"type":"setDeviceNames",
+	"data":
+	{
+		"room":room_no,
+		"deviceNo":deviceNo,
+		"deviceName":"name"
+	}
+}
+
+{
+	"name":"server",
+	"resp":"ResponseHere"
+}
+
+{
+	"name":"webapp",
+	"type":"getDeviceNames",
+	"data":
+	{
+		"room":room_no
+	}
+}
+
+{
+	"name":"webapp",
+	"type":"setTimer",
+	"data":
+	{
+		"room":room_no,
+		"device":deviceNo,
+		"onHr":1,
+		"onMin":2,
+		"onampm":'a',
+		"offHr":1,
+		"offMin":2,
+		"offampm":'a',
+		"repeate":0
+	}
+}
+
+{
+	"name":"webapp",
+	"type":"disableTimer",
+	"data":
+	{
+		"room":room_no,
+		"device":deviceNo
+	}
+}
+
+{
+	"name":"node",
+	"type":"motionEnable",
+	"data":
+	{
+		"room":room_no,
+		"motionEnable":motionStatus
+	}
+}
+
+{
+	"name":"node",
+	"type":"presence",
+	"data":
+	{
+		"room":room_no,
+		"presence":status
+	}
+}
