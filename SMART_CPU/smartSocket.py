@@ -1,4 +1,11 @@
 #!/usr/bin/python
+'''
+# SMART Central server
+
+Author	:	Pranjal P. Joshi
+Date 	:	04/11/2016
+All rights reserved.
+'''
 
 import tornado.httpserver
 import tornado.websocket
@@ -107,7 +114,8 @@ def initDB():
 class WSHandler(tornado.websocket.WebSocketHandler):
 
 	def open(self):
-		print "New connection: " + self.request.remote_ip
+		if DEBUG:
+			print "New connection: " + self.request.remote_ip
 
 	def on_message(self,message):
 
@@ -117,6 +125,7 @@ class WSHandler(tornado.websocket.WebSocketHandler):
 		if(msg['name'] == "node"):
 			if self not in node_cli:
 				node_cli.append(self)
+			sendDataToNode(msg['data']['room'])
 
 		if(msg['name'] == "webapp"):
 			if self not in web_cli:
@@ -314,7 +323,7 @@ class WSHandler(tornado.websocket.WebSocketHandler):
 
 		elif(msg['type'] == "shutdown"):
 			resp = {
-						"name":"server",
+						"name":"broadcast",
 						"type":"shutdown"
 					}
 			resp = json.dumps(resp)
@@ -323,7 +332,7 @@ class WSHandler(tornado.websocket.WebSocketHandler):
 
 		elif(msg['type'] == "reboot"):
 			resp = {
-						"name":"server",
+						"name":"broadcast",
 						"type":"reboot"
 					}
 			resp = json.dumps(resp)
@@ -340,7 +349,12 @@ class WSHandler(tornado.websocket.WebSocketHandler):
 				versionCheck = versionCheck.split("\n")
 				versionCheck = float(versionCheck[0])
 				if(VERSION < versionCheck):
-					self.broadcastNode("downloadOTA")
+					respNode = {
+						"name":"broadcast",
+						"type":"otaDownload"
+					}
+					respNode = json.dumps(respNode)
+					self.broadcastNode(respNode)
 					downloadOTA()
 					print "System Update complete. New features will take effect after restart!"
 					resp = {
@@ -348,7 +362,7 @@ class WSHandler(tornado.websocket.WebSocketHandler):
 						"type":"ota_complete"
 					}
 					resp = json.dumps(resp)
-					self.broadcastNode(resp)
+					self.broadcastWeb(resp)
 				else:
 					print "Your software is up-to-date!"
 					resp = {
@@ -356,7 +370,7 @@ class WSHandler(tornado.websocket.WebSocketHandler):
 						"type":"ota_unavailable"
 					}
 					resp = json.dumps(resp)
-					self.broadcastNode(resp)
+					self.broadcastWeb(resp)
 			except:
 				print "OTA error."
 				resp = {
@@ -365,7 +379,7 @@ class WSHandler(tornado.websocket.WebSocketHandler):
 							"error":"ota_error"
 						}
 				resp = json.dumps(resp)
-				self.broadcastNode(resp)
+				self.broadcastWeb(resp)
 
 
 		elif(msg['type'] == "getRoomNames"):
@@ -547,17 +561,32 @@ class WSHandler(tornado.websocket.WebSocketHandler):
 					isMotionEnable = db.fetchone()
 					isMotionEnable = int(isMotionEnable[0])
 					if(isMotionEnable):
-						if(int(urlSplit[2])):
-							db.execute("update map set d1=1 where room_no=%s" % (msg['data']['presence']))
-						else:
-							db.execute("update map set d1=0 where room_no=%s" % (msg['data']['presecne']))
+						db.execute("update map set d1=%s where room_no=%s" % (msg['data']['presence'], msg['data']['room']))
 						con.commit()
-				resp = {
-							"name":"server",
-							"resp":"ack_presence"
-						}
-				resp = json.dumps(resp)
-				self.write_message(resp)
+
+					# send updated response back to the node
+					db.execute("select d1,d2,d3,d4,d5,d6,d7,d8,slider from map where room_no=%s" % (room))
+					result = db.fetchone()
+					result = str(result[0]) + str(result[1]) + str(result[2]) + str(result[3]) + str(result[4]) + str(result[5]) + str(result[6]) + str(result[7]) + str(result[8])
+					respNode = {
+									"name":"broadcast",
+									"type":"toggleNode",
+									"data":
+									{
+										"room":room_no,
+										"deviceValues":
+										{
+											"d1":int(result[0]),
+											"d2":int(result[1]),
+											"d3":int(result[2]),
+											"d4":int(result[3]),
+											"d5":int(result[4]),
+											"d6":int(result[5]),
+											"d7":int(result[6]),
+											"d8":int(result[7])
+										}
+									}
+								}
 			except:
 				resp = {
 							"name":"server",
@@ -584,20 +613,50 @@ class WSHandler(tornado.websocket.WebSocketHandler):
 	def check_origin(self,origin):
 		return True
 
-	def broadcastWeb(msg1):
+	def broadcastWeb(self,msg1):
 		for c1 in web_cli:
 			c1.write_message(msg1)
 
-	def broadcastNode(msg2):
+	def broadcastNode(self,msg2):
 		for c2 in node_cli:
 			c2.write_message(msg2)
 
+	def sendDataToNode(self,room):
+		db.execute("select d1,d2,d3,d4,d5,d6,d7,d8,slider from map where room_no=%s" % (room))
+		result = db.fetchone()
+		result = str(result[0]) + str(result[1]) + str(result[2]) + str(result[3]) + str(result[4]) + str(result[5]) + str(result[6]) + str(result[7]) + str(result[8])
+		respNode = {
+								"name":"broadcast",
+								"type":"toggleNode",
+								"data":
+								{
+									"room":room_no,
+									"deviceValues":
+									{
+										"d1":int(result[0]),
+										"d2":int(result[1]),
+										"d3":int(result[2]),
+										"d4":int(result[3]),
+										"d5":int(result[4]),
+										"d6":int(result[5]),
+										"d7":int(result[6]),
+										"d8":int(result[7])
+									}
+									"speed":int(result[8])
+								}
+					}
+		respNode = json.dumps(respNode)
+		self.write_message(respNode)
+
 	def printRequestInfo(s,msg):
 		if DEBUG:
-			print "From: \t\t" + str(s.request.remote_ip)
-			print "Name: \t\t" + msg['name']
-			print "Type: \t\t" + msg['type']
-			print "JSON data:\t" + str(msg['data'])
+			try:
+				print "From: \t\t" + str(s.request.remote_ip)
+				print "Name: \t\t" + msg['name']
+				print "Type: \t\t" + msg['type']
+				print "JSON data:\t" + str(msg['data'])
+			except:
+				print "Unknown JSON data. Unable to print."
 
 
 #### Main program begins from here ####
@@ -611,13 +670,13 @@ if __name__ == "__main__":
 		print "Started at: " +  time.strftime("%d/%m/%y  %I:%M:%S %p")
 		print "IP Address: " + str(os.popen("hostname -I").read())
 		try:
+			initDB()
 			http_server = tornado.httpserver.HTTPServer(app)
 			http_server.listen(PORT)
 			myIP = socket.gethostbyname(socket.gethostname())
 			print "Tornado websocket started at %s:%s" % (myIP,PORT)
 			tornado.ioloop.IOLoop.instance().start()
 		except:
-			print "Weird! Tornado Exception occured.Aborting..."
-			sys.exit()
+			sys.exit("Weird! Tornado Exception occured.Aborting...")
 	except(KeyboardInterrupt):
-		print "Keyboard Interrupt. Aborting..."
+		sys.exit("Keyboard Interrupt. Aborting...")

@@ -177,12 +177,12 @@
 }
 
 {
-	"name":"server",
+	"name":"broadcast",
 	"type":"shutdown"
 }
 
 {
-	"name":"server",
+	"name":"broadcast",
 	"type":"reboot"
 }
 
@@ -255,5 +255,25 @@
 	{
 		"room":room_no,
 		"presence":status
+	}
+}
+
+{
+	"name":"server",
+	"type":"timerService",
+	"data":
+	{
+		"room":room_no,
+		"device":deviceNo,
+		
+	}
+}
+
+{
+	"name":"node",
+	"type":"id",
+	"data":
+	{
+		"room":room_no
 	}
 }
