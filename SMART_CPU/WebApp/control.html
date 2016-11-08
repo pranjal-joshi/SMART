@@ -18,12 +18,11 @@
     <link href="http://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <!-- Compiled and minified CSS -->
     <link rel="stylesheet" href="materialize.min.css">
-    <script type="text/javascript" src="jquery.min.js"></script>  
     <!-- Compiled and minified JavaScript -->
-    <script src="materialize.min.js"></script>
     <!-- use 0.97.6 js and 0.97.7 css for DROPDOWN and SIDENAV together!!!!!!!!-->
+    <!-- JS scripts linked at bottom to improve page loading speed -->
+    <script type="text/javascript" src="jquery.min.js"></script>
     <script type="text/javascript" src="lolliclock.js"></script>
-    <script type="text/javascript" src="smart.js"></script>
     <link rel="stylesheet" href="lolliclock.css">
     
     <!-- Ubuntu Font-->
@@ -37,7 +36,16 @@
   
 </head>
 
-<body class="controlBody" style="font-family: ubuntu" onload="getRoomNames(); getRoom(document.getElementById('r1'))">
+<body class="controlBody" style="font-family: ubuntu" onload="getRoomNames(); getRoom(document.getElementById('r1'))" onresize="windowResize()" onunload="deleteCookie()">
+    <script type="text/javascript">   //security using cookie
+      var x = document.cookie;
+      x = x.toString().split('=');
+      x = x[1];
+      if(x.indexOf("smartLogin=grant") > -1){
+        alert("Got you! You have to login first to control your smarthome.");
+        location.href = "index.html";
+      }
+    </script>
     <main class="contents">
     <ul id="dropdown" class="dropdown-content" style="min-width: 250px;">
         <li><a href="config.html">Configure<i class="material-icons right">build</i></a></a></li>
@@ -102,7 +110,7 @@
                 <tbody>
                     <tr>
                         <td><input placeholder="Device 1" id="d1" type="text" class="validate" onblur="setDeviceName(this)"></td>
-                        <td><center><center><div class="switch"><label><input type="checkbox" id="1" onchange="switchToggle(this)" ><span class="lever"></span></label></div></center></td>
+                        <td><center><div class="switch"><label><input type="checkbox" id="1" onchange="switchToggle(this)" ><span class="lever"></span></label></div></center></td>
                         <td><a class="waves-effect waves-light waves-red btn modal-trigger" href="#timerModal1" id="timerButton1"><i class="material-icons center">access_time</i></a></td>
                     </tr>
                     <tr>
@@ -704,6 +712,7 @@
     </footer>
     
   <!-- TimerModal end -->  
-<script src="smart.js"></script>
+<script type="text/javascript" src="materialize.min.js"></script>
+<script type="text/javascript" src="smartSocket.js"></script>
 
 </body>

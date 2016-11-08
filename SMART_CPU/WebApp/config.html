@@ -31,7 +31,16 @@
 
     </head>
 
-    <body class="configBody" style="font-family: ubuntu" onload="getRoomNamesForConfigPage()">
+    <body class="configBody" style="font-family: ubuntu" onload="getRoomNamesForConfigPage()" onunload="deleteCookie()">
+    <script type="text/javascript">   //security using cookie
+      var x = document.cookie;
+      x = x.toString().split('=');
+      x = x[1];
+      if(x.indexOf("smartLogin=grant") > -1){
+        alert("Got you! You have to login first to control your smarthome.");
+        location.href = "index.html";
+      }
+    </script>
     <main class="contents">
     <div class="navbar-fixed">
     <nav>
@@ -213,12 +222,11 @@
     </footer>
 
       <!--Import jQuery before materialize.js-->
-      <script src="smart.js"></script>
     <!-- Compiled and minified CSS -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.7/css/materialize.min.css">
-    <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.3.min.js"></script>  
-    <!-- Compiled and minified JavaScript -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.6/js/materialize.min.js"></script>
+    <link rel="stylesheet" href="materialize.min.css">
+    <script type="text/javascript" src="jquery.min.js"></script>
+    <script type="text/javascript" src="materialize.min.js"></script>
+    <script type="text/javascript" src="smartSocket.js"></script>
 
     </body>
   </html>
