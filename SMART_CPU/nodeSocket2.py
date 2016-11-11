@@ -55,6 +55,8 @@ APP_FAN_TIME = None
 
 PIR_TIMEOUT_THREAD = None
 
+CON_FLAG = 0
+
 
 def opened(self):
 	identification = {
@@ -104,24 +106,16 @@ def received_message(self, msg):
 		printErrorResponse(msg)
 
 def closed(self):
+	global CON_FLAG
  	print "Connection closed by SMART Server!"
-	'''print "SERVER_SOCKET_DISCONNECTED. Attempting to reconnect..."
-	### Implement auto reconnection..
-	ioloop.IOLoop.instance().stop()
-	#io.cleanup()
-	threading.Timer(10, self.reconnect).start()'''
+ 	t = threading.Timer(5,restartCode)
+ 	t.daemon = True
+ 	t.start()
+ 	time.sleep(10)
 
-def reconnect(self):
-	global ws
-	try:
-		ws = smartNode(wsAddr,0)
-		ws.connect()
-		ioloop.IOLoop.instance().start()
-	except:
-		t = threading.Timer(10, self.reconnect)
-		t.daemon = True
-		t.start()
-		print "Still trying to reconnect..."
+def restartCode():
+	os.system("sudo python nodeSocket2.py")
+	sys.exit("Trying to reconnect...")
 
 def printRequestInfoClient(msg):
 	if DEBUG:
@@ -341,8 +335,6 @@ def downloadOTA():
 def error(self,err):
 	print err
 
-def dumper(self,m):
-	print m
 
 
 ############ MAIN PROGRAM BEGINS HERE #############
