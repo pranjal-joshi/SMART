@@ -36,8 +36,9 @@
   
 </head>
 
-<body class="controlBody" style="font-family: ubuntu" onload="getRoomNames(); getRoom(document.getElementById('r1'))" onresize="windowResize()" onunload="deleteCookie()">
+<body class="controlBody" style="font-family: ubuntu" onload="setTimeout(getRoomNames,200); setTimeout(addClient, 100); setTimeout(getRoom,300,1);" onresize="windowResize()" onunload="deleteCookie()">
     <script type="text/javascript">   //security using cookie
+      try{
       var x = document.cookie;
       x = x.toString().split('=');
       x = x[1];
@@ -45,6 +46,8 @@
         alert("Got you! You have to login first to control your smarthome.");
         location.href = "index.html";
       }
+    }
+      catch(err){}
     </script>
     <main class="contents">
     <ul id="dropdown" class="dropdown-content" style="min-width: 250px;">
@@ -63,7 +66,7 @@
                         <td><a href="#!"><span class="teal-text" style="font-size:16px">Motion Sensor</span></a></td> 
                         <!--CHECK FONT OF AUTO-->
                         <td>
-                          <div class="switch"><label><input type="checkbox" id="motionSwitch"><span class="lever"></span></label></div>
+                          <div class="switch"><label><input type="checkbox" id="motionSwitch" onclick="motionSensorToggleButton()"><span class="lever"></span></label></div>
                         </td>
                     </tr>
                 </tbody>
@@ -84,7 +87,7 @@
                 </ul>
         
                 <ul id="slide-out" class="side-nav fixed grey lighten-4"><!--fixed: for showing in mobile mode-->      
-                    <li><a href="#!" class="waves-effect"><span class="teal-text text-darken-2"><center style="font-size:18px" onclick="getRoom(this)" id="r1" onload="getRoom(this)">Room 1</center></span></a></li>
+                    <li><a href="#!" class="waves-effect"><span class="teal-text text-darken-2"><center style="font-size:18px" onclick="getRoom(this)" id="r1">Room 1</center></span></a></li>
                     <li><a href="#!" class="waves-effect"><span class="teal-text text-darken-2"><center style="font-size:18px" onclick="getRoom(this)" id="r2">Room 2</center></span></a></li>
                     <li><a href="#!" class="waves-effect"><span class="teal-text text-darken-2"><center style="font-size:18px" onclick="getRoom(this)" id="r3">Room 3</center></span></a></li>
                     <li><a href="#!" class="waves-effect"><span class="teal-text text-darken-2"><center style="font-size:18px" onclick="getRoom(this)" id="r4">Room 4</center></span></a></li>

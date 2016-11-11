@@ -2,12 +2,8 @@
 
 <head>
 
-<script type="text/javascript" src="smart.js"></script>
 <!-- Compiled and minified CSS -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.7/css/materialize.min.css">
-<script type="text/javascript" src="https://code.jquery.com/jquery-2.1.3.min.js"></script>  
 <!-- Compiled and minified JavaScript -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.6/js/materialize.min.js"></script>
 
 <style type="text/css">
     .helpBody {
@@ -20,7 +16,7 @@
     	flex: 1;
     }
 </style>
-
+    <link type="text/css" rel="stylesheet" href="materialize.min.css"  media="screen,projection"/>
 	<link href="http://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 	<link href='http://fonts.googleapis.com/css?family=Ubuntu&subset=cyrillic,latin' rel='stylesheet' type='text/css' />
 
@@ -60,9 +56,9 @@
 }
 </style>
 
-<ul class="collapsible popout" data-collapsible="accordion">
+<ul class="collapsible" data-collapsible="accordion">
 	<li>
-		<div class="collapsible-header grey lighten-4"><i class="material-icons flip">expand_more</i>Configuring S.M.A.R.T</div>
+		<div class="collapsible-header grey lighten-4 active"><i class="material-icons flip">expand_more</i>Configuring S.M.A.R.T</div>
     	<div class="collapsible-body grey lighten-4">
     		<br></br>
     		<center><img class="materialboxed" height="400" data-caption="Room configuration page" src="help_ss/config.jpg"></center>
@@ -86,7 +82,7 @@
     	</div>
 	</li>
 	<li>
-		<div class="collapsible-header active grey lighten-4"><i class="material-icons flip">expand_more</i>About S.M.A.R.T</div>
+		<div class="collapsible-header grey lighten-4"><i class="material-icons flip">expand_more</i>About S.M.A.R.T</div>
     	<div class="collapsible-body grey lighten-4">
     		<br></br>
     		<center>
@@ -142,5 +138,9 @@
         </div>
       </div>
 </footer>
+
+<script type="text/javascript" src="jquery.min.js"></script>
+<script type="text/javascript" src="materialize.min.js"></script>
+<script type="text/javascript" src="smartSocket.js"></script>
 
 </html>

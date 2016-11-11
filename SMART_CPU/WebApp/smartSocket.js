@@ -3,7 +3,8 @@
 //Date 		:	0/11/2016
 //All rights reserved.
 
-var SERVER = "192.168.0.160";
+//var SERVER = "192.168.0.160";
+var SERVER = "localhost";
 var PORT = "98";
 var ROOM = 1;
 var ROOM_NAMES = ["Room 1","Room 2","Room 3","Room 4","Room 5","Room 6","Room 7","Room 8"];
@@ -142,6 +143,7 @@ ws.onmessage = function(evt){
 			document.getElementById("7").checked = Boolean(msg.data.deviceValues.d7);
 			document.getElementById("8").checked = Boolean(msg.data.deviceValues.d8);
 			document.getElementById("fan_slider").value = msg.data.speed;
+			document.getElementById("motionSwitch").checked = Boolean(msg.data.motionStatus);
 		}
 	}
 
@@ -173,19 +175,38 @@ ws.onmessage = function(evt){
 		ROOM_NAMES[6] = msg.data.r7;
 		ROOM_NAMES[7] = msg.data.r8;
 		for(i=0;i<8;i++){
-			document.getElementById("r"+i.toString()).value = ROOM_NAMES[i];
+			var tmp = "r"+ (i+1).toString();
+			document.getElementById(tmp).innerHTML = ROOM_NAMES[i];
 		}
+		try{
+			document.getElementById("navbarTitle").innerHTML = ROOM_NAMES[0];
+		}
+		catch(err){}
+		try{
+			for(i=1;i<9;i++)
+			{
+				if((ROOM_NAMES[i-1] == null) || (ROOM_NAMES[i-1] == 0) || (ROOM_NAMES[i-1] == undefined))
+				{
+					var checkboxName = "room" + i.toString();
+					document.getElementById(checkboxName).checked = false;
+
+					var txtId = "r" + i.toString();
+					document.getElementById(txtId).disabled = true;
+				}
+			}
+		}
+		catch(err){}
 	}
 
 	else if(msg.type === "respGetDeviceNames"){
-		document.getElementById("d1").value = msg.data.d1;
-		document.getElementById("d2").value = msg.data.d2;
-		document.getElementById("d3").value = msg.data.d3;
-		document.getElementById("d4").value = msg.data.d4;
-		document.getElementById("d5").value = msg.data.d5;
-		document.getElementById("d6").value = msg.data.d6;
-		document.getElementById("d7").value = msg.data.d7;
-		document.getElementById("d8").value = msg.data.d8;
+		document.getElementById("d1").value = msg.data.deviceNames.d1;
+		document.getElementById("d2").value = msg.data.deviceNames.d2;
+		document.getElementById("d3").value = msg.data.deviceNames.d3;
+		document.getElementById("d4").value = msg.data.deviceNames.d4;
+		document.getElementById("d5").value = msg.data.deviceNames.d5;
+		document.getElementById("d6").value = msg.data.deviceNames.d6;
+		document.getElementById("d7").value = msg.data.deviceNames.d7;
+		document.getElementById("d8").value = msg.data.deviceNames.d8;
 	}
 
 	else if(msg.type === "respGetDeviceValues"){
@@ -237,15 +258,30 @@ function login(){
 	ws.send(jsonData);
 }
 
+function switchToggle(btn) {
+	var jsonData = JSON.stringify({
+			"name":"webapp",
+			"type":"toggle",
+			"data":
+			{
+				"room":ROOM,
+				"device":btn.id,
+				"value":btn.checked | 0
+			}
+		});
+	ws.send(jsonData);
+}
+
 function getRoomNames(){
 	var jsonData = JSON.stringify({
 		"name":"webapp",
 		"type":"getRoomNames"
 	});
 	ws.send(jsonData);
+	getRoom(document.getElementById('r1'));
 }
 
-function getRoom(){
+function getRoom(room){
 	var roomNo = room.id.split('');
 	ROOM = roomNo[1];
 	document.getElementById("navbarTitle").innerHTML = ROOM_NAMES[ROOM - 1];
@@ -259,7 +295,7 @@ function getRoom(){
 		}
 	});
 	ws.send(jsonData);
-	getSwitches(ROOM);
+	setTimeout(getSwitches,100,ROOM);
 }
 
 function getSwitches(room){
@@ -318,14 +354,14 @@ function setRoomNames(){
 		"type":"activeRooms",
 		"data":
 		{
-			"r1":document.getElementById("room1").value | 0,
-			"r2":document.getElementById("room2").value | 0,
-			"r3":document.getElementById("room3").value | 0,
-			"r4":document.getElementById("room4").value | 0,
-			"r5":document.getElementById("room5").value | 0,
-			"r6":document.getElementById("room6").value | 0,
-			"r7":document.getElementById("room7").value | 0,
-			"r8":document.getElementById("room8").value | 0
+			"r1":document.getElementById("room1").checked | 0,
+			"r2":document.getElementById("room2").checked | 0,
+			"r3":document.getElementById("room3").checked | 0,
+			"r4":document.getElementById("room4").checked | 0,
+			"r5":document.getElementById("room5").checked | 0,
+			"r6":document.getElementById("room6").checked | 0,
+			"r7":document.getElementById("room7").checked | 0,
+			"r8":document.getElementById("room8").checked | 0
 		}
 	});
 	ws.send(jsonData2);
@@ -356,7 +392,7 @@ function checkUpdate(){
 }
 
 function getRoomNamesForConfigPage(){
-	getRoomNames();
+	//getRoomNames();
 	for(i=1;i<9;i++)
 	{
 		if((ROOM_NAMES[i-1] == null) || (ROOM_NAMES[i-1] == 0) || (ROOM_NAMES[i-1] == undefined))
@@ -366,6 +402,13 @@ function getRoomNamesForConfigPage(){
 
 			var txtId = "r" + i.toString();
 			document.getElementById(txtId).disabled = true;
+		}
+		else
+		{
+			var id = "r" + i.toString();
+			document.getElementById(id).value = ROOM_NAMES[i-1];
+			var checkboxName = "room" + i.toString();
+			document.getElementById(checkboxName).checked = true;
 		}
 	}
 }
@@ -480,5 +523,13 @@ function motionSensorToggleButton()
 				"motionEnable":document.getElementById("motionSwitch").checked | 0
 			}
 		});
+	ws.send(jsonData);
+}
+
+function addClient(){
+	var jsonData = JSON.stringify({
+		"name":"webapp",
+		"type":"id"
+	});
 	ws.send(jsonData);
 }
