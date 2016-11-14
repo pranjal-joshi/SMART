@@ -12,7 +12,7 @@ import websocket
 import os
 import sys
 import json
-#import RPi.GPIO as io
+import RPi.GPIO as io
 import time
 import threading
 import datetime
@@ -75,35 +75,38 @@ def received_message(self, msg):
 	msg = json.loads(msg)
 	printRequestInfoClient(msg)
 
-	if(msg['name'] == "broadcast"):				# check if msg is broadcasted
+	try:
+		if(msg['name'] == "broadcast"):				# check if msg is broadcasted
 
-		if(msg['type'] == "toggleNode"):		# check if toggled?
+			if(msg['type'] == "toggleNode"):		# check if toggled?
 
-			if(msg['data']['room'] == ROOM_NO):	# check if its for me!
-				for i in range(0,8):
-					#io.output(RELAYPINS[i], bool(msg['data']['deviceValues']['d' + str(i+1)]))
-					pass
+				if(int(msg['data']['room']) == ROOM_NO):	# check if its for me!
+					for i in range(0,8):
+						io.output(RELAYPINS[i], msg['data']['deviceValues']['d'+str(i+1)])
 
-		elif(msg['type'] == "toggleSlider"):
+			elif(msg['type'] == "toggleSlider"):
 
-			if(msg['data']['room'] == ROOM_NO):
+				if(msg['data']['room'] == ROOM_NO):
 
-				APP_SPEED = msg['data']['speed']
-				APP_FAN_TIME = time.time()
+					APP_SPEED = msg['data']['speed']
+					APP_FAN_TIME = time.time()
 
-		elif(msg['type']=="shutdown"):
-			time.sleep(5)
-			os.system("sudo shutdown -h now")
+			elif(msg['type']=="shutdown"):
+				time.sleep(5)
+				os.system("sudo shutdown -h now")
 
-		elif(msg['type']=="reboot"):
-			time.sleep(5)
-			os.system("sudo reboot")
+			elif(msg['type']=="reboot"):
+				time.sleep(5)
+				os.system("sudo reboot")
 
-		elif(msg['type']=="otaDownload"):
-			downloadOTA()
+			elif(msg['type']=="otaDownload"):
+				downloadOTA()
 
-	elif(msg['type'] == "err"):
-		printErrorResponse(msg)
+		elif(msg['type'] == "err"):
+			printErrorResponse(msg)
+
+	except Exception as e:
+		raise e
 
 def closed(self):
 	global CON_FLAG
@@ -134,43 +137,49 @@ def printErrorResponse(msg):
 	except:
 		print "Unknown JSON data. Unable to print."
 
-def initGPIO(self):
+def initGPIO():
 	try:
-		#io.setmode(#io.BCM)
-		#io.setup(SYNCPIN, #io.IN, pull_up_down=#io.PUD_UP)
-		#io.add_event_detect(SYNCPIN, #io.FALLING, callback=self.syncMains, bouncetime=8)
+		io.setmode(io.BCM)
 		for i in range(0,8):
-			pass
-			#io.setup(SWITCHPINS[i], #io.IN, pull_up_down=#io.PUD_UP)
-			#io.setup(RELAYPINS[i], #io.OUT)
-			#io.add_event_detect(SWITCHPINS[i], #io.BOTH, callback=self.switchIntr, bouncetime=250)
-		#io.setup(PIR1_PIN, #io.IN, pull_up_down=#io.PUD_UP)
-		#io.setup(PIR2_PIN, #io.IN, pull_up_down=#io.PUD_UP)
-		#io.setup(FANPIN, #io.OUT)
-		#io.setup(PIR1_PIN, #io.IN, pull_up_down=#io.PUD_UP)
-		#io.setup(PIR2_PIN, #io.IN, pull_up_down=#io.PUD_UP)
-		#io.add_event_detect(PIR1_PIN, #io.RISING, callback=self.pirRise, bouncetime=250)
-		#io.add_event_detect(PIR2_PIN, #io.RISING, callback=self.pirRise, bouncetime=250)
-		#io.add_event_detect(PIR1_PIN, #io.FALLING, callback=self.pirFall, bouncetime=250)
-		#io.add_event_detect(PIR2_PIN, #io.FALLING, callback=self.pirFall, bouncetime=250)
+			io.setup(SWITCHPINS[i], io.IN, pull_up_down=io.PUD_UP)
+			io.setup(RELAYPINS[i], io.OUT)
+		io.add_event_detect(SWITCHPINS[0], io.BOTH, callback=switchIntr1, bouncetime=250)
+		io.add_event_detect(SWITCHPINS[1], io.BOTH, callback=switchIntr2, bouncetime=250)
+		io.add_event_detect(SWITCHPINS[2], io.BOTH, callback=switchIntr3, bouncetime=250)
+		io.add_event_detect(SWITCHPINS[3], io.BOTH, callback=switchIntr4, bouncetime=250)
+		io.add_event_detect(SWITCHPINS[4], io.BOTH, callback=switchIntr5, bouncetime=250)
+		io.add_event_detect(SWITCHPINS[5], io.BOTH, callback=switchIntr6, bouncetime=250)
+		io.add_event_detect(SWITCHPINS[6], io.BOTH, callback=switchIntr7, bouncetime=250)
+		io.add_event_detect(SWITCHPINS[7], io.BOTH, callback=switchIntr8, bouncetime=250)
+		io.setup(PIR1_PIN, io.IN, pull_up_down=io.PUD_UP)
+		io.setup(PIR2_PIN, io.IN, pull_up_down=io.PUD_UP)
+		io.setup(FANPIN, io.OUT)
+		io.setup(PIR1_PIN, io.IN, pull_up_down=io.PUD_UP)
+		io.setup(PIR2_PIN, io.IN, pull_up_down=io.PUD_UP)
+		#io.add_event_detect(PIR1_PIN, io.RISING, callback=pirRise, bouncetime=250)
+		#io.add_event_detect(PIR2_PIN, io.RISING, callback=pirRise, bouncetime=250)
+		#io.add_event_detect(PIR1_PIN, io.FALLING, callback=pirFall, bouncetime=250)
+		#io.add_event_detect(PIR2_PIN, io.FALLING, callback=pirFall, bouncetime=250)
+		io.setup(SYNCPIN, io.IN, pull_up_down=io.PUD_UP)
+		io.add_event_detect(SYNCPIN, io.FALLING, callback=syncMains, bouncetime=8)
 		if DEBUG:
 			print "ZCD synchronization interrupt enabled on BCM pin " + str(SYNCPIN)
 			print "Setting FAN pin as output: pin no. " + str(FANPIN)
 			print "Interrupts enabled on BCM pins: " + str(SWITCHPINS)
 			print "Set as relay output (BCM Pins): " + str(RELAYPINS)
 			print "Motion sensors pin initialized!"
-	except:
+	except Exception as e:
+		raise e
 		sys.exit("GPIO Exception occured during initGPIO! Exiting...")
 
-def switchIntr(self,switchPin):
-	index = SWITCHPINS.index(switchPin) + 1
-	'''if(#io.input(SWITCHPINS[index-1]) == True):
+def switchIntr1(self):
+	index = 1
+	if(io.input(SWITCHPINS[index-1]) == True):
 		val = 1
 	else:
-		val = 0'''
-	val = 1
+		val = 0
 	resp = {
-					"name":"node/webapp",
+					"name":"node",
 					"type":"toggle",
 					"data":
 					{
@@ -180,14 +189,147 @@ def switchIntr(self,switchPin):
 					}
 				}
 	resp = json.dumps(resp)
-	self.send(resp)
+	ws.send(resp)
+
+def switchIntr2(self):
+	index = 2
+	if(io.input(SWITCHPINS[index-1]) == True):
+		val = 1
+	else:
+		val = 0
+	resp = {
+					"name":"node",
+					"type":"toggle",
+					"data":
+					{
+						"room":ROOM_NO,
+						"device":index,
+						"value":val
+					}
+				}
+	resp = json.dumps(resp)
+	ws.send(resp)
+
+def switchIntr3(self):
+	index = 3
+	if(io.input(SWITCHPINS[index-1]) == True):
+		val = 1
+	else:
+		val = 0
+	resp = {
+					"name":"node",
+					"type":"toggle",
+					"data":
+					{
+						"room":ROOM_NO,
+						"device":index,
+						"value":val
+					}
+				}
+	resp = json.dumps(resp)
+	ws.send(resp)
+
+def switchIntr4(self):
+	index = 4
+	if(io.input(SWITCHPINS[index-1]) == True):
+		val = 1
+	else:
+		val = 0
+	resp = {
+					"name":"node",
+					"type":"toggle",
+					"data":
+					{
+						"room":ROOM_NO,
+						"device":index,
+						"value":val
+					}
+				}
+	resp = json.dumps(resp)
+	ws.send(resp)
+
+def switchIntr5(self):
+	index = 5
+	if(io.input(SWITCHPINS[index-1]) == True):
+		val = 1
+	else:
+		val = 0
+	resp = {
+					"name":"node",
+					"type":"toggle",
+					"data":
+					{
+						"room":ROOM_NO,
+						"device":index,
+						"value":val
+					}
+				}
+	resp = json.dumps(resp)
+	ws.send(resp)
+
+def switchIntr6(self):
+	index = 6
+	if(io.input(SWITCHPINS[index-1]) == True):
+		val = 1
+	else:
+		val = 0
+	resp = {
+					"name":"node",
+					"type":"toggle",
+					"data":
+					{
+						"room":ROOM_NO,
+						"device":index,
+						"value":val
+					}
+				}
+	resp = json.dumps(resp)
+	ws.send(resp)
+
+def switchIntr7(self):
+	index = 7
+	if(io.input(SWITCHPINS[index-1]) == True):
+		val = 1
+	else:
+		val = 0
+	resp = {
+					"name":"node",
+					"type":"toggle",
+					"data":
+					{
+						"room":ROOM_NO,
+						"device":index,
+						"value":val
+					}
+				}
+	resp = json.dumps(resp)
+	ws.send(resp)
+
+def switchIntr8(self):
+	index = 8
+	if(io.input(SWITCHPINS[index-1]) == True):
+		val = 1
+	else:
+		val = 0
+	resp = {
+					"name":"node",
+					"type":"toggle",
+					"data":
+					{
+						"room":ROOM_NO,
+						"device":index,
+						"value":val
+					}
+				}
+	resp = json.dumps(resp)
+	ws.send(resp)
 
 def stopPWM():			### PWM inverted logic ### MOC LED is in common anode configuration.
-	#io.output(FANPIN, True)
+	io.output(FANPIN, True)
 	pass
 
 def startPWM():			### PWM inverted logic ### MOC LED is in common anode configuration. 
-	#io.output(FANPIN, False)
+	io.output(FANPIN, False)
 	pass
 
 def pirRise(self):
@@ -203,7 +345,7 @@ def pirFall(self):
 	global PIR_TIMEOUT_THREAD
 	PIR_TIMEOUT_THREAD = threading.Timer(PIR_TIMEOUT, presenceReq, 0).start()
 
-def presenceReq(self,value):
+def presenceReq(value):
 	resp = {
 					"name":"node",
 					"type":"presence",
@@ -214,27 +356,27 @@ def presenceReq(self,value):
 					}
 				}
 	resp = json.dumps(resp)
-	self.send(resp)
+	ws.send(resp)
 
 def dischargeCap():
-	#io.setup(CHARGE, #io.IN)
-	#io.setup(DISCHARGE, #io.OUT)
-	#io.output(DISCHARGE, False)
+	io.setup(CHARGE, io.IN)
+	io.setup(DISCHARGE, io.OUT)
+	io.output(DISCHARGE, False)
 	time.sleep(0.01)
 	if DEBUG:
 		print "Discharging Capacitor!"
 
 def chargeCap():
-	#io.setup(DISCHARGE, #io.IN)
-	#io.setup(CHARGE, #io.OUT)
-	#io.output(CHARGE, True)
+	io.setup(DISCHARGE, io.IN)
+	io.setup(CHARGE, io.OUT)
+	io.output(CHARGE, True)
 	start = time.time()
-	'''while not (#io.input(DISCHARGE)):
+	'''while not (io.input(DISCHARGE)):
 		try:
 			if(time.time() - start > 1.0):
 				break
 		except(KeyboardInterrupt):
-			#io.cleanup()
+			io.cleanup()
 			return'''
 	end = time.time()
 	if DEBUG:
@@ -253,7 +395,7 @@ def analogRead(self):
 		capThread.start()
 	except Exception as e:
 		raise e
-		#io.cleanup()
+		io.cleanup()
 		sys.exit()
 		return
 
@@ -339,6 +481,8 @@ def error(self,err):
 
 ############ MAIN PROGRAM BEGINS HERE #############
 try:
+	os.system("clear")
+	initGPIO()
 	wsAddr = "ws://" + SERVER_IP + ":" + SERVER_PORT + "/"
 	ws = websocket.WebSocketApp(wsAddr,on_message = received_message,on_close = closed,on_error=error)
 	ws.on_open = opened
@@ -346,5 +490,5 @@ try:
 except Exception as e:
 	raise e
 	print "Socket connection error. Exiting..."
-	#io.cleanup()
+	io.cleanup()
 	sys.exit()

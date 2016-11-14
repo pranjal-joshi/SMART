@@ -36,10 +36,10 @@ node_cli = []
 
 ### DATABASE CONNECTIONS ###
 try:
-	#con = mdb.connect("localhost","root","linux")
-	#con2 = mdb.connect("localhost","root","linux")
-	con = mdb.connect("localhost","root","")				# Only for testing purpose
-	con2 = mdb.connect("localhost","root","")				# Only for testing purpose
+	con = mdb.connect("localhost","root","linux")
+	con2 = mdb.connect("localhost","root","linux")
+	#con = mdb.connect("localhost","root","")				# Only for testing purpose
+	#con2 = mdb.connect("localhost","root","")				# Only for testing purpose
 	db = con.cursor()
 except:
 	sys.exit("\nError: Failed to connect to database.\nCheck whether the service is running and credentials are correct.")
