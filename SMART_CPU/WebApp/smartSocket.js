@@ -3,8 +3,8 @@
 //Date 		:	0/11/2016
 //All rights reserved.
 
-//var SERVER = "192.168.0.160";
-var SERVER = "localhost";
+var SERVER = "192.168.0.160";
+//var SERVER = "localhost";
 var PORT = "98";
 var ROOM = 1;
 var ROOM_NAMES = ["Room 1","Room 2","Room 3","Room 4","Room 5","Room 6","Room 7","Room 8"];
@@ -111,12 +111,6 @@ function disableTextbox(chk)
 
 }
 
-function deleteCookie()
-{
-	document.cookie = "smartLogin=; expires=Thu, 01 Jan 1970 00:00:00 UTC";
-}
-
-
 // -------------------- SOCKET HANDLER ----------------
 ws.onclose = function(evt){
 	$('#errorModal').openModal();
@@ -151,13 +145,15 @@ ws.onmessage = function(evt){
 	if(msg.type === "login"){
 		switch(msg.resp){
 			case "grant":
-				document.cookie = "smartLogin=grant";
+				$.cookie('smartLogin','grant',{expires:1, path:'/'});
 				location.href = "control.html";
 				break;
 			case "locked":
+				$.cookie('smartLogin','locked',{expires:1, path:'/'});
 				Materialize.toast('Locked due to security reasons. Try again after few minutes.', 3000);
 				break;
 			case "denied":
+				$.cookie('smartLogin','denied',{expires:1, path:'/'});
 				Materialize.toast('Wronge password!', 2000);
 				break;
 			default:
@@ -296,6 +292,11 @@ function getRoom(room){
 	});
 	ws.send(jsonData);
 	setTimeout(getSwitches,100,ROOM);
+	// Close sideNav if window size < 977px i.e. mobile view
+	if($(document).width()<977)
+	{
+		$('.button-collapse').sideNav('hide');
+	}
 }
 
 function getSwitches(room){
@@ -365,6 +366,7 @@ function setRoomNames(){
 		}
 	});
 	ws.send(jsonData2);
+	Materialize.toast("Configuration updated.",1500);
 }
 
 function shutdown(){
@@ -532,4 +534,9 @@ function addClient(){
 		"type":"id"
 	});
 	ws.send(jsonData);
+}
+
+window.onbeforeunload = closing;
+var closing = function () {
+	window.alert("closing now.....");
 }

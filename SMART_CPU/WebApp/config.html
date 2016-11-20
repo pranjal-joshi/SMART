@@ -23,6 +23,11 @@
       <title>Configure</title>
       <link rel="icon" href="config.ico" type="image/x-icon" />
 
+    <script type="text/javascript" src="jquery.min.js"></script>
+    <script type="text/javascript" src="materialize.min.js"></script>
+    <script type="text/javascript" src="smartSocket.js"></script>
+    <script type="text/javascript" src="jquery.cookie.js"></script>
+
      <!-- Disable caching of browser -->
      <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
      <meta http-equiv="Pragma" content="no-cache" />
@@ -34,13 +39,11 @@
     <body class="configBody" style="font-family: ubuntu" onload="setTimeout(getRoomNames, 200); setTimeout(getRoomNamesForConfigPage,300)" onunload="deleteCookie()">
     <script type="text/javascript">   //security using cookie
       try{
-      var x = document.cookie;
-      x = x.toString().split('=');
-      x = x[1];
-      if(x.indexOf("smartLogin=grant") > -1){
-        alert("Got you! You have to login first to control your smarthome.");
-        location.href = "index.html";
-      }
+        
+      var x = $.cookie('smartLogin');
+        if(x !== "grant"){
+          location.href="reauth.html";
+        }
     }
       catch(err){}
     </script>
@@ -57,6 +60,11 @@
       <!-- <a class="right"><i class="material-icons right">arrow_back</i></a> -->
     </nav>
     </div>
+
+    <ul class="tabs">
+      <div class="indicator teal lighten-2" style="z-index:1"></div><li class="tab col s3 grey lighten-4"><a class="teal-text" href="#test1">Rooms</a></li>
+      <li class="tab col s3 grey lighten-4"><a href="#test2" class="teal-text">Profiles</a></li>
+    </ul>
 
     <!-- error modal -->
       <div id="errorModal" class="modal grey lighten-4">
@@ -227,9 +235,6 @@
       <!--Import jQuery before materialize.js-->
     <!-- Compiled and minified CSS -->
     <link rel="stylesheet" href="materialize.min.css">
-    <script type="text/javascript" src="jquery.min.js"></script>
-    <script type="text/javascript" src="materialize.min.js"></script>
-    <script type="text/javascript" src="smartSocket.js"></script>
 
     </body>
   </html>
