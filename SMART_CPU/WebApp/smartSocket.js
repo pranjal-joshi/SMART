@@ -3,8 +3,13 @@
 //Date 		:	0/11/2016
 //All rights reserved.
 
-var SERVER = "192.168.0.160";
+//var SERVER = "192.168.0.160";			// ---> Depricated method
 //var SERVER = "localhost";
+
+var SERVER= window.location.href;			// ----> USE THIS INSTEAD
+SERVER = SERVER.split('/');
+SERVER = SERVER[2];
+
 var PORT = "98";
 var ROOM = 1;
 var ROOM_NAMES = ["Room 1","Room 2","Room 3","Room 4","Room 5","Room 6","Room 7","Room 8"];
@@ -536,7 +541,7 @@ function addClient(){
 	ws.send(jsonData);
 }
 
-window.onbeforeunload = closing;
-var closing = function () {
-	window.alert("closing now.....");
+function logout() {
+	$.removeCookie('smartLogin', { path: '/' });
+	location.href = "index.html";
 }

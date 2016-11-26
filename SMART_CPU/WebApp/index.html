@@ -41,7 +41,17 @@
      <meta http-equiv="Expires" content="0" />
       </head>
 
-    <body class="indexBody" style="font-family: ubuntu" onunload="deleteCookie()" onload="setTimeout(addClient, 100)">
+    <body class="indexBody" style="font-family: ubuntu" onload="setTimeout(addClient, 100)">
+    <script type="text/javascript">   //security using cookie
+      try{
+        var x = $.cookie('smartLogin');
+        if(x == "grant"){
+          location.href="control.html";
+        }
+    }
+      catch(err){}
+    </script>
+
     <main class="contents">
     <div class="navbar-fixed">
     <nav>
