@@ -110,7 +110,10 @@ function disableTextbox(chk)
 	idNo = idNo[4];
 	var txtId = "r" + idNo;
 	if(chk.checked)
-		document.getElementById(txtId).disabled = false;
+    {
+        document.getElementById(txtId).disabled = false;
+        document.getElementById(txtId).value = ' ';
+    }
 	else
 		document.getElementById(txtId).disabled = true;
 
@@ -167,6 +170,10 @@ ws.onmessage = function(evt){
 	}
 
 	else if(msg.type === "respGetRoomNames"){
+		for(i=0;i<8;i++){
+			var tmp = "r"+ (i+1).toString();
+			document.getElementById(tmp).innerHTML = ROOM_NAMES[i];
+		}
 		ROOM_NAMES[0] = msg.data.r1;
 		ROOM_NAMES[1] = msg.data.r2;
 		ROOM_NAMES[2] = msg.data.r3;
@@ -175,10 +182,6 @@ ws.onmessage = function(evt){
 		ROOM_NAMES[5] = msg.data.r6;
 		ROOM_NAMES[6] = msg.data.r7;
 		ROOM_NAMES[7] = msg.data.r8;
-		for(i=0;i<8;i++){
-			var tmp = "r"+ (i+1).toString();
-			document.getElementById(tmp).innerHTML = ROOM_NAMES[i];
-		}
 		try{
 			document.getElementById("navbarTitle").innerHTML = ROOM_NAMES[0];
 		}

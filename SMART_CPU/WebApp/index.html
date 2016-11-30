@@ -160,6 +160,12 @@
         field: '#loginBox',
         control: '#showPassword'
       });
+
+      $("#loginBox").keyup(function(event){
+          if(event.keyCode == 13){
+              $("#loginButton").click();
+          }
+      });
       </script>
      <!-- Compiled and minified CSS -->
     </body>
