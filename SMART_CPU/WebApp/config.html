@@ -36,13 +36,13 @@
 
     </head>
 
-    <body class="configBody" style="font-family: ubuntu" onload="setTimeout(getRoomNames, 200); setTimeout(getRoomNamesForConfigPage,300)" onunload="deleteCookie()">
+    <body class="configBody" style="font-family: ubuntu" onload="setTimeout(getRoomNames, 200); setTimeout(getRoomNamesForConfigPage,300)">
     <script type="text/javascript">   //security using cookie
       try{
         
       var x = $.cookie('smartLogin');
         if(x !== "grant"){
-          location.href="reauth.html";
+          //location.href="reauth.html";
         }
     }
       catch(err){}
@@ -62,8 +62,9 @@
     </div>
 
     <ul class="tabs">
-      <div class="indicator teal lighten-2" style="z-index:1"></div><li class="tab col s3 grey lighten-4"><a class="teal-text" href="#test1">Rooms</a></li>
-      <li class="tab col s3 grey lighten-4"><a href="#test2" class="teal-text">Profiles</a></li>
+      <div class="indicator teal lighten-2" style="z-index:1"></div>
+      <li class="tab col s3 grey lighten-4" onclick="visibilityManager(0)"><a class="teal-text" href="#test1">Rooms</a></li>
+      <li class="tab col s3 grey lighten-4" onclick="visibilityManager(1)"><a href="#test2" class="teal-text">Profiles</a></li>
     </ul>
 
     <!-- error modal -->
@@ -219,6 +220,161 @@
       </center>
       
     </div>
+
+    <div class="card-panel grey lighten-4 hide" id="profileCard">
+    <center>
+      <span class="teal-text text-darken"><h5>Profile management</h5></span>
+      <div class="divider"></div>
+      <br>
+    </center>
+
+    <table>
+      <tbody>
+        <tr>
+          <td>
+          <script type="text/javascript">
+                  $(document).ready(function() {
+            $('select').material_select();
+          });
+          </script>
+            <div class="input-field">
+            <select id="profileRoom" onchange="getProfile()">
+              <option value="0" disabled selected>Select</option>
+              <option value="1" id="pr1">Room 1</option>
+              <option value="2" id="pr2">Room 2</option>
+              <option value="3" id="pr3">Room 3</option>
+              <option value="4" id="pr4">Room 4</option>
+              <option value="5" id="pr5">Room 5</option>
+              <option value="6" id="pr6">Room 6</option>
+              <option value="7" id="pr7">Room 7</option>
+              <option value="8" id="pr8">Room 8</option>
+            </select>
+            <label>Room</label>
+          </div>
+
+          </td>
+          <td>
+            <div class="input-field">
+            <select id="profileName" onchange="getProfile()">
+              <option value="0" disabled selected>Select</option>
+              <option value="1" id="p1">Profile 1</option>
+              <option value="2" id="p2">Profile 2</option>
+              <option value="3" id="p3">Profile 3</option>
+            </select>
+            <label>Profile</label>
+          </div>
+          </td>
+          <td>
+            <label>Profile Name</label>
+            <input placeholder="Profile Name" id="profileTxt" type="text" class="validate">
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div id="profileDeviceSetup">
+    <br>
+    <center>
+      <span class="teal-text text-darken"><h5>Device management</h5></span>
+      <div class="divider"></div>
+      <br>
+    </center>
+      <table style="font-size: 15px" class="centered">
+
+        <tbody>
+          <tr>
+            <td><p id="pdn1">Device 1</p></td>
+            <td>
+              <div class="switch">
+                <label><input type="checkbox" id="pds1"><span class="lever"></span></label>
+              </div>
+            </td>
+          </tr>
+
+          <tr>
+            <td><p id="pdn2">Device 2</p></td>
+            <td>
+              <div class="switch">
+                <label><input type="checkbox" id="pds2"><span class="lever"></span></label>
+              </div>
+            </td>
+          </tr>
+
+          <tr>
+            <td><p id="pdn3">Device 3</p></td>
+            <td>
+              <div class="switch">
+                <label><input type="checkbox" id="pds3"><span class="lever"></span></label>
+              </div>
+            </td>
+          </tr>
+
+          <tr>
+            <td><p id="pdn4">Device 4</p></td>
+            <td>
+              <div class="switch">
+                <label><input type="checkbox" id="pds4"><span class="lever"></span></label>
+              </div>
+            </td>
+          </tr>
+
+          <tr>
+            <td><p id="pdn5">Device 5</p></td>
+            <td>
+              <div class="switch">
+                <label><input type="checkbox" id="pds5"><span class="lever"></span></label>
+              </div>
+            </td>
+          </tr>
+
+          <tr>
+            <td><p id="pdn6">Device 6</p></td>
+            <td>
+              <div class="switch">
+                <label><input type="checkbox" id="pds6"><span class="lever"></span></label>
+              </div>
+            </td>
+          </tr>
+
+          <tr>
+            <td><p id="pdn7">Device 7</p></td>
+            <td>
+              <div class="switch">
+                <label><input type="checkbox" id="pds7"><span class="lever"></span></label>
+              </div>
+            </td>
+          </tr>
+
+          <tr>
+            <td><p id="pdn8">Device 8</p></td>
+            <td>
+              <div class="switch">
+                <label><input type="checkbox" id="pds8"><span class="lever"></span></label>
+              </div>
+            </td>
+          </tr>
+
+        </tbody>
+      </table>
+    </div>
+
+    <br>
+    <center><a class="waves-effect waves-light btn" onclick="setProfile()"><i class="material-icons right small">done</i>Apply</a></center>
+
+    <div id="profileErrorModal" class="modal grey lighten-4 bottom-sheet">
+        <div class="modal-contnet">
+        <center><h5 style="color: red">Error!</h5>
+          <div class="divider"></div>
+        </center>
+        <center>
+          <p style="color: black">Select valid room & profile from option before pressing Apply!</p></center>
+        </center>
+        </div>
+        <div class="modal-footer grey lighten-4">
+          <a href="#!" class="modal-action modal-close waves-effect waves-red btn-flat">Okay</a>
+      </div>
+      </div>
+
     </div>
     </div>
 
@@ -235,6 +391,21 @@
       <!--Import jQuery before materialize.js-->
     <!-- Compiled and minified CSS -->
     <link rel="stylesheet" href="materialize.min.css">
+    <script type="text/javascript">
+      // Tab visibility manager
+      function visibilityManager(cardNumber){
+        var roomCard = document.getElementById('configCard');
+        var profileCard = document.getElementById('profileCard');
+        if(cardNumber == 0){
+          roomCard.className = 'card-panel grey lighten-4';
+          profileCard.className = 'card-panel grey lighten-4 hide';
+        }
+        else{
+          roomCard.className = 'card-panel grey lighten-4 hide';
+          profileCard.className = 'card-panel grey lighten-4';
+        }
+      }
+    </script>
 
     </body>
   </html>
