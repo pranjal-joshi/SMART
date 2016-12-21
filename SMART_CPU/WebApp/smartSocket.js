@@ -244,14 +244,14 @@ ws.onmessage = function(evt){
 
   else if(msg.type === "respGetProfile"){
     document.getElementById("profileTxt").value = msg.data.name;
-    document.getElementById("pds1").checked = Boolean(msg.data.deviceValues.d1);
-    document.getElementById("pds2").checked = Boolean(msg.data.deviceValues.d2);
-    document.getElementById("pds3").checked = Boolean(msg.data.deviceValues.d3);
-    document.getElementById("pds4").checked = Boolean(msg.data.deviceValues.d4);
-    document.getElementById("pds5").checked = Boolean(msg.data.deviceValues.d5);
-    document.getElementById("pds6").checked = Boolean(msg.data.deviceValues.d6);
-    document.getElementById("pds7").checked = Boolean(msg.data.deviceValues.d7);
-    document.getElementById("pds8").checked = Boolean(msg.data.deviceValues.d8);
+    document.getElementById("pds1").checked = msg.data.deviceValues.d1 | 0;
+    document.getElementById("pds2").checked = msg.data.deviceValues.d2 | 0;
+    document.getElementById("pds3").checked = msg.data.deviceValues.d3 | 0;
+    document.getElementById("pds4").checked = msg.data.deviceValues.d4 | 0;
+    document.getElementById("pds5").checked = msg.data.deviceValues.d5 | 0;;
+    document.getElementById("pds6").checked = msg.data.deviceValues.d6 | 0;;
+    document.getElementById("pds7").checked = msg.data.deviceValues.d7 | 0;;
+    document.getElementById("pds8").checked = msg.data.deviceValues.d8 | 0;;
   }
 
   else if(msg.type === "ota_unavailable"){
@@ -317,7 +317,12 @@ function getRoomNames(){
 function getRoom(room){
   var roomNo = room.id.split('');
   ROOM = roomNo[1];
+  try{
   document.getElementById("navbarTitle").innerHTML = ROOM_NAMES[ROOM - 1];
+  }
+  catch(err){
+
+  }
 
   var jsonData = JSON.stringify({
     "name":"webapp",
@@ -449,10 +454,16 @@ function getRoomNamesForConfigPage(){
       document.getElementById(id).value = ROOM_NAMES[i-1];
       var checkboxName = "room" + i.toString();
       document.getElementById(checkboxName).checked = true;
+      var id2 = "pr" + i.toString();
+      document.getElementById(id2).text = ROOM_NAMES[i-1];
+      document.getElementById("profileRoom").options[i].disabled = false;
+      $(document).ready(function() {
+         $('select').material_select();
+      });
     }
       catch(err){
-        var id = "pdn" + i.toString();
-        document.getElementById(id).innerHTML = ROOM_NAMES[i-1];
+        //var id = "pdn" + i.toString();
+        //document.getElementById(id).innerHTML = ROOM_NAMES[i-1];
       }
     }
   }
@@ -597,15 +608,18 @@ function setProfile(){
   if(profRoom == 0 || profName == 0){
     $('#profileErrorModal').openModal();
   }
+  if(profNameString == null){
+    profNameString = ' ';
+  }
   else{
-    var jsonData = JSON.stringify({
+    var jsonData = JSON.stringify({                               // TO-DO : implement profile set in python
       "name":"webapp",
       "type":"profile",
       "data":
       {
         "room":profRoom,
         "profile":profName,
-        "profileText":profileTxt,
+        "profileTxt":profNameString,
         "deviceValues":
         {
           "d1":document.getElementById("pds1").checked | 0,
@@ -620,6 +634,7 @@ function setProfile(){
       }
     });
     ws.send(jsonData);
+    Materialize.toast('Profile updated!',2000);
   }
 }
 
