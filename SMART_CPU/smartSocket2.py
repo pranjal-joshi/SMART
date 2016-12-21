@@ -36,10 +36,10 @@ node_cli = []
 
 ### DATABASE CONNECTIONS ###
 try:
-	con = mdb.connect("localhost","root","linux")
-	con2 = mdb.connect("localhost","root","linux")
-	#con = mdb.connect("localhost","root","")				# Only for testing purpose
-	#con2 = mdb.connect("localhost","root","")				# Only for testing purpose
+	#con = mdb.connect("localhost","root","linux")
+	#con2 = mdb.connect("localhost","root","linux")
+	con = mdb.connect("localhost","root","")				# Only for testing purpose
+	con2 = mdb.connect("localhost","root","")				# Only for testing purpose
 	db = con.cursor()
 except:
 	sys.exit("\nError: Failed to connect to database.\nCheck whether the service is running and credentials are correct.")
@@ -105,6 +105,15 @@ def initDB():
 			db.execute("insert into %s (device) values ('d6')" % (tableName))
 			db.execute("insert into %s (device) values ('d7')" % (tableName))
 			db.execute("insert into %s (device) values ('d8')" % (tableName))
+
+		# create 8 separate tables for profiles
+		for i in range(1,9):
+			tableName = "rp" + str(i)
+			db.execute("create table %s(profile INT, name VARCHAR(25), d1 INT not null default 0, d2 INT not null default 0, d3 INT not null default 0, d4 INT not null default 0, d5 INT not null default 0, d6 INT not null default 0, d7 INT not null default 0, d8 INT not null default 0)" % tableName)
+			db.execute("insert into %s (profile) values (1)" % (tableName))
+			db.execute("insert into %s (profile) values (2)" % (tableName))
+			db.execute("insert into %s (profile) values (3)" % (tableName))
+
 		con.commit()
 		
 		db.execute("show databases")
@@ -162,7 +171,7 @@ class WSHandler(tornado.websocket.WebSocketHandler):
 					print "Login denied at : " +  time.strftime("%d/%m/%y  %I:%M:%S %p")
 				else:
 					lc = open("lc.time","w")
-					timeout = time.time() + 60
+					timeout = time.time() + 5*60		#lock for 5 mins
 					lc.write(str(timeout))
 					lc.close()
 					resp = {
@@ -486,7 +495,7 @@ class WSHandler(tornado.websocket.WebSocketHandler):
 							"error":"getDeviceNames_error"
 						}
 				resp = json.dumps(resp)
-				self.write_message(result)
+				self.write_message(resp)
 
 		elif(msg['type'] == "getDeviceValues"):
 			try:
@@ -530,6 +539,87 @@ class WSHandler(tornado.websocket.WebSocketHandler):
 						}
 				resp = json.dumps(resp)
 				self.write_message(result)
+
+		elif(msg['type'] == "getProfile"):
+			try:
+				room = msg['data']['room']
+				room = "rp" + str(room)
+				profile = msg['data']['profileName']
+				db.execute("use smart")
+				db.execute("select d1,d2,d3,d4,d5,d6,d7,d8,name from %s where profile=%s" % (room, profile))
+				result = db.fetchone()
+				resp = {
+							"name":"server",
+							"type":"respGetProfile",
+							"data":
+							{
+								"name":str(result[8]),
+								"deviceValues":
+								{
+									"d1":str(result[0]),
+									"d2":str(result[1]),
+									"d3":str(result[2]),
+									"d4":str(result[3]),
+									"d5":str(result[4]),
+									"d6":str(result[5]),
+									"d7":str(result[6]),
+									"d8":str(result[7])
+								}
+							}
+						}
+				respWeb = json.dumps(resp)
+				self.write_message(respWeb)
+			except Exception as e:
+				raise e
+				resp = {
+							"name":"server",
+							"type":"err",
+							"error":"getProfile_error"
+						}
+				resp = json.dumps(resp)
+				self.write_message(resp)
+
+		elif(msg['type'] == "profile"):
+			try:
+				room = msg['data']['room']
+				room = "rp" + str(room)
+				profile = msg['data']['profile']
+				profileTxt = msg['data']['profileTxt']
+				d1 = msg['data']['deviceValues']['d1']
+				d2 = msg['data']['deviceValues']['d2']
+				d3 = msg['data']['deviceValues']['d3']
+				d4 = msg['data']['deviceValues']['d4']
+				d5 = msg['data']['deviceValues']['d5']
+				d6 = msg['data']['deviceValues']['d6']
+				d7 = msg['data']['deviceValues']['d7']
+				d8 = msg['data']['deviceValues']['d8']
+				db.execute("use smart")
+				db.execute("update %s set name='%s' where profile=%s" % (room, profileTxt, profile))
+				db.execute("update %s set d1='%s' where profile=%s" % (room, d1, profile))
+				db.execute("update %s set d2='%s' where profile=%s" % (room, d2, profile))
+				db.execute("update %s set d3='%s' where profile=%s" % (room, d3, profile))
+				db.execute("update %s set d4='%s' where profile=%s" % (room, d4, profile))
+				db.execute("update %s set d5='%s' where profile=%s" % (room, d5, profile))
+				db.execute("update %s set d6='%s' where profile=%s" % (room, d6, profile))
+				db.execute("update %s set d7='%s' where profile=%s" % (room, d7, profile))
+				db.execute("update %s set d8='%s' where profile=%s" % (room, d8, profile))
+				con.commit()
+				resp = {
+							"name":"server",
+							"resp":"ack_profile"
+						}
+				resp = json.dumps(resp)
+				self.write_message(resp)
+			except Exception as e:
+				raise e
+				resp = {
+							"name":"server",
+							"type":"err",
+							"err":"err_profile"
+						}
+				resp = json.dumps(resp)
+				self.write_message(resp)
+
 
 		elif(msg['type'] == "setDeviceNames"):
 			# check SMART.JSON for json format.
