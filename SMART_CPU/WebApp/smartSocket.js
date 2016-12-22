@@ -242,40 +242,88 @@ ws.onmessage = function(evt){
       document.getElementById("offTime1").value = msg.data.offtime.t1;
       document.getElementById("dailySwitch1").checked = msg.data.repeate.t1 | 0;
     }
+    else
+    {
+      document.getElementById("onTime1").value = "";
+      document.getElementById("offTime1").value = "";
+      document.getElementById("dailySwitch1").checked = false;
+    }
     if(msg.data.ontime.t2.indexOf("None") < 0){
       document.getElementById("onTime2").value = msg.data.ontime.t2;
       document.getElementById("offTime2").value = msg.data.offtime.t2;
       document.getElementById("dailySwitch2").checked = msg.data.repeate.t2 | 0;
     }
+    else
+    {
+      document.getElementById("onTime2").value = "";
+      document.getElementById("offTime2").value = "";
+      document.getElementById("dailySwitch2").checked = false;
+    }
     if(msg.data.ontime.t3.indexOf("None") < 0){
-      document.getElementById("onTime3").value = msg.data.ontime.t2;
-      document.getElementById("offTime3").value = msg.data.offtime.t2;
-      document.getElementById("dailySwitch3").checked = msg.data.repeate.t2 | 0;
+      document.getElementById("onTime3").value = msg.data.ontime.t3;
+      document.getElementById("offTime3").value = msg.data.offtime.t3;
+      document.getElementById("dailySwitch3").checked = msg.data.repeate.t3 | 0;
+    }
+    else
+    {
+      document.getElementById("onTime3").value = "";
+      document.getElementById("offTime3").value = "";
+      document.getElementById("dailySwitch3").checked = false;
     }
     if(msg.data.ontime.t4.indexOf("None") < 0){
-      document.getElementById("onTime4").value = msg.data.ontime.t2;
-      document.getElementById("offTime4").value = msg.data.offtime.t2;
-      document.getElementById("dailySwitch4").checked = msg.data.repeate.t2 | 0;
+      document.getElementById("onTime4").value = msg.data.ontime.t4;
+      document.getElementById("offTime4").value = msg.data.offtime.t4;
+      document.getElementById("dailySwitch4").checked = msg.data.repeate.t4 | 0;
+    }
+    else
+    {
+      document.getElementById("onTime4").value = "";
+      document.getElementById("offTime4").value = "";
+      document.getElementById("dailySwitch4").checked = false;
     }
     if(msg.data.ontime.t5.indexOf("None") < 0){
-      document.getElementById("onTime5").value = msg.data.ontime.t2;
-      document.getElementById("offTime5").value = msg.data.offtime.t2;
-      document.getElementById("dailySwitch5").checked = msg.data.repeate.t2 | 0;
+      document.getElementById("onTime5").value = msg.data.ontime.t5;
+      document.getElementById("offTime5").value = msg.data.offtime.t5;
+      document.getElementById("dailySwitch5").checked = msg.data.repeate.t5 | 0;
+    }
+    else
+    {
+      document.getElementById("onTime5").value = "";
+      document.getElementById("offTime5").value = "";
+      document.getElementById("dailySwitch5").checked = false;
     }
     if(msg.data.ontime.t6.indexOf("None") < 0){
-      document.getElementById("onTime6").value = msg.data.ontime.t2;
-      document.getElementById("offTime6").value = msg.data.offtime.t2;
-      document.getElementById("dailySwitch6").checked = msg.data.repeate.t2 | 0;
+      document.getElementById("onTime6").value = msg.data.ontime.t6;
+      document.getElementById("offTime6").value = msg.data.offtime.t6;
+      document.getElementById("dailySwitch6").checked = msg.data.repeate.t6 | 0;
+    }
+    else
+    {
+      document.getElementById("onTime6").value = "";
+      document.getElementById("offTime6").value = "";
+      document.getElementById("dailySwitch6").checked = false;
     }
     if(msg.data.ontime.t7.indexOf("None") < 0){
-      document.getElementById("onTime7").value = msg.data.ontime.t2;
-      document.getElementById("offTime7").value = msg.data.offtime.t2;
-      document.getElementById("dailySwitch7").checked = msg.data.repeate.t2 | 0;
+      document.getElementById("onTime7").value = msg.data.ontime.t7;
+      document.getElementById("offTime7").value = msg.data.offtime.t7;
+      document.getElementById("dailySwitch7").checked = msg.data.repeate.t7 | 0;
+    }
+    else
+    {
+      document.getElementById("onTime7").value = "";
+      document.getElementById("offTime7").value = "";
+      document.getElementById("dailySwitch7").checked = false;
     }
     if(msg.data.ontime.t8.indexOf("None") < 0){
-      document.getElementById("onTime8").value = msg.data.ontime.t2;
-      document.getElementById("offTime8").value = msg.data.offtime.t2;
-      document.getElementById("dailySwitch8").checked = msg.data.repeate.t2 | 0;
+      document.getElementById("onTime8").value = msg.data.ontime.t8;
+      document.getElementById("offTime8").value = msg.data.offtime.t8;
+      document.getElementById("dailySwitch8").checked = msg.data.repeate.t8 | 0;
+    }
+    else
+    {
+      document.getElementById("onTime8").value = "";
+      document.getElementById("offTime8").value = "";
+      document.getElementById("dailySwitch1").checked = false;
     }
     
   }
