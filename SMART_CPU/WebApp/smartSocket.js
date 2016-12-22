@@ -12,8 +12,6 @@ SERVER = SERVER[2];
 
 var PORT = "98";
 var ROOM = 1;
-//var ROOM_NAMES = ["Room 1","Room 2","Room 3","Room 4","Room 5","Room 6","Room 7","Room 8"];
-//var ROOM_NAMES = [' ',' ',' ',' ',' ',' ',' ',' '];
 var ROOM_NAMES = new Array(8);
 
 var DEBUG = 1;
@@ -205,6 +203,83 @@ ws.onmessage = function(evt){
     catch(err){}
   }
 
+  else if(msg.type === "respGetTimers"){
+    if(msg.data.enabled.t1 == 1)
+      document.getElementById("timerButton1").style.backgroundColor = "#ff1744";
+    else
+      document.getElementById("timerButton1").style.backgroundColor = "#009688";
+    if(msg.data.enabled.t2 == 1)
+      document.getElementById("timerButton2").style.backgroundColor = "#ff1744";
+    else
+      document.getElementById("timerButton2").style.backgroundColor = "#009688";
+    if(msg.data.enabled.t3 == 1)
+      document.getElementById("timerButton3").style.backgroundColor = "#ff1744";
+    else
+      document.getElementById("timerButton3").style.backgroundColor = "#009688";
+    if(msg.data.enabled.t4 == 1)
+      document.getElementById("timerButton4").style.backgroundColor = "#ff1744";
+    else
+      document.getElementById("timerButton4").style.backgroundColor = "#009688";
+    if(msg.data.enabled.t5 == 1)
+      document.getElementById("timerButton5").style.backgroundColor = "#ff1744";
+    else
+      document.getElementById("timerButton5").style.backgroundColor = "#009688";
+    if(msg.data.enabled.t6 == 1)
+      document.getElementById("timerButton6").style.backgroundColor = "#ff1744";
+    else
+      document.getElementById("timerButton6").style.backgroundColor = "#009688";
+    if(msg.data.enabled.t7 == 1)
+      document.getElementById("timerButton7").style.backgroundColor = "#ff1744";
+    else
+      document.getElementById("timerButton7").style.backgroundColor = "#009688";
+    if(msg.data.enabled.t8 == 1)
+      document.getElementById("timerButton8").style.backgroundColor = "#ff1744";
+    else
+      document.getElementById("timerButton8").style.backgroundColor = "#009688";
+
+    if(msg.data.ontime.t1.indexOf("None") < 0){
+      document.getElementById("onTime1").value = msg.data.ontime.t1;
+      document.getElementById("offTime1").value = msg.data.offtime.t1;
+      document.getElementById("dailySwitch1").checked = msg.data.repeate.t1 | 0;
+    }
+    if(msg.data.ontime.t2.indexOf("None") < 0){
+      document.getElementById("onTime2").value = msg.data.ontime.t2;
+      document.getElementById("offTime2").value = msg.data.offtime.t2;
+      document.getElementById("dailySwitch2").checked = msg.data.repeate.t2 | 0;
+    }
+    if(msg.data.ontime.t3.indexOf("None") < 0){
+      document.getElementById("onTime3").value = msg.data.ontime.t2;
+      document.getElementById("offTime3").value = msg.data.offtime.t2;
+      document.getElementById("dailySwitch3").checked = msg.data.repeate.t2 | 0;
+    }
+    if(msg.data.ontime.t4.indexOf("None") < 0){
+      document.getElementById("onTime4").value = msg.data.ontime.t2;
+      document.getElementById("offTime4").value = msg.data.offtime.t2;
+      document.getElementById("dailySwitch4").checked = msg.data.repeate.t2 | 0;
+    }
+    if(msg.data.ontime.t5.indexOf("None") < 0){
+      document.getElementById("onTime5").value = msg.data.ontime.t2;
+      document.getElementById("offTime5").value = msg.data.offtime.t2;
+      document.getElementById("dailySwitch5").checked = msg.data.repeate.t2 | 0;
+    }
+    if(msg.data.ontime.t6.indexOf("None") < 0){
+      document.getElementById("onTime6").value = msg.data.ontime.t2;
+      document.getElementById("offTime6").value = msg.data.offtime.t2;
+      document.getElementById("dailySwitch6").checked = msg.data.repeate.t2 | 0;
+    }
+    if(msg.data.ontime.t7.indexOf("None") < 0){
+      document.getElementById("onTime7").value = msg.data.ontime.t2;
+      document.getElementById("offTime7").value = msg.data.offtime.t2;
+      document.getElementById("dailySwitch7").checked = msg.data.repeate.t2 | 0;
+    }
+    if(msg.data.ontime.t8.indexOf("None") < 0){
+      document.getElementById("onTime8").value = msg.data.ontime.t2;
+      document.getElementById("offTime8").value = msg.data.offtime.t2;
+      document.getElementById("dailySwitch8").checked = msg.data.repeate.t2 | 0;
+    }
+    
+  }
+
   else if(msg.type === "respGetDeviceNames"){
     try
     {
@@ -228,6 +303,12 @@ ws.onmessage = function(evt){
       document.getElementById("pdn8").innerHTML = msg.data.deviceNames.d8;
 
     }
+  }
+
+  else if(msg.type === "respGetProfileNames"){
+    document.getElementById("showProf1").innerHTML = msg.data.p1;
+    document.getElementById("showProf2").innerHTML = msg.data.p2;
+    document.getElementById("showProf3").innerHTML = msg.data.p3;
   }
 
   else if(msg.type === "respGetDeviceValues"){
@@ -334,6 +415,9 @@ function getRoom(room){
   });
   ws.send(jsonData);
   setTimeout(getSwitches,100,ROOM);
+  setTimeout(getProfileNames, 200, ROOM);
+  setTimeout(getTimers, 300, ROOM);
+
   // Close sideNav if window size < 977px i.e. mobile view
   if($(document).width()<977)
   {
@@ -660,6 +744,44 @@ function getProfileFromDatabase(room_no){
           "room":document.getElementById("profileRoom").value,
           "profileName":document.getElementById("profileName").value
         }
+  });
+  ws.send(jsonData);
+}
+
+function getProfileNames(room){
+  var jsonData = JSON.stringify({
+    "name":"webapp",
+    "type":"getProfileNames",
+    "data":
+    {
+      "room":room
+    }
+  });
+  ws.send(jsonData);
+}
+
+function applyProfile(val){
+  var jsonData = JSON.stringify({
+    "name":"webapp",
+    "type":"applyProfile",
+    "data":
+    {
+      "room":ROOM,
+      "profile":val
+    }
+  });
+  ws.send(jsonData);
+}
+
+function getTimers(room){
+  var jsonData = JSON.stringify(
+    {
+    "name":"webapp",
+    "type":"getTimers",
+    "data":
+    {
+      "room":room
+    }
   });
   ws.send(jsonData);
 }

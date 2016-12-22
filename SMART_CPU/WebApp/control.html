@@ -1,3 +1,8 @@
+<!--
+  Author: Pranjal Joshi
+  All rights reserved. 2016.
+-->
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -37,7 +42,7 @@
   
 </head>
 
-<body class="controlBody" style="font-family: ubuntu" onload="setTimeout(getRoomNames,200); setTimeout(addClient, 100); setTimeout(getRoom,300,1);" onresize="windowResize()" >
+<body class="controlBody" style="font-family: ubuntu" onload="setTimeout(getRoomNames,700); setTimeout(addClient, 400); setTimeout(getRoom,800,1);" onresize="windowResize()" >
     <script type="text/javascript">   //security using cookie
       try{
         var x = $.cookie('smartLogin');
@@ -75,6 +80,16 @@
         <li class="divider"></li>
         <li><a href="#" onclick="logout()">Logout<i class="material-icons right">close</i></a></li>
     </ul>
+
+    <ul id="profileDropdown" class="dropdown-content" style="min-width: 150px;">
+      <li disable><a href="#" style="color: grey">Select Profile</a></li>
+      <li class="divider"></li>
+      <li value="1" onclick="applyProfile(this.value)"><a href="#" id="showProf1" >Profile 1</a></li>
+      <li class="divider"></li>
+      <li value="2" onclick="applyProfile(this.value)"><a href="#" id="showProf2" >Profile 2</a></li>
+      <li class="divider"></li>
+      <li value="3" onclick="applyProfile(this.value)"><a href="#" id="showProf3" >Profile 3</a></li>
+    </ul>
     
   
     <div class="row">
@@ -83,7 +98,11 @@
             <div class="nav-wrapper teal lighten-2">
                 <a href="#" class="brand-logo center" id="navbarTitle"></a>
                 <ul class="right hide-off-med-and-down"><!--hide-off!! very imp for showing in mobile mode-->
-                    <a class="dropdown-button" href="#" data-activates="dropdown"><i class="material-icons right">more_vert</i></a>    
+                    <a class="dropdown-button" href="#" data-activates="dropdown"><i class="material-icons">more_vert</i></a>    
+                </ul>
+
+                <ul class="right hide-off-med-and-down">
+                  <a class="dropdown-button" href="#" data-activates="profileDropdown"><i class="material-icons">person_pin</i></a>
                 </ul>
         
                 <ul id="slide-out" class="side-nav fixed grey lighten-4"><!--fixed: for showing in mobile mode-->      
@@ -699,6 +718,7 @@
         <a href="#!" class=" modal-action modal-close waves-effect waves-teal btn-flat" id="td8" onclick="disableTimer(this.id)">Disable timer</a>
       </div>
     </div>
+
     </main>
 
     <footer class="page-footer teal lighten-2">

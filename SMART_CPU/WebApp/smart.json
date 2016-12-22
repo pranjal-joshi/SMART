@@ -1,0 +1,416 @@
+
+{
+	"name":"node/webapp",
+	"type":"toggle",
+	"data":
+	{
+		"room":room_no,
+		"device":device_no,
+		"value":oneOrZero
+	}
+}
+
+
+{
+	"name":"node/webapp",
+	"type":"slider",
+	"data":
+	{
+		"room":room_no,
+		"speed":sliderValue
+	}
+}
+
+
+{
+	"name":"webapp",
+	"type":"login",
+	"data":
+	{
+		"key":loginKey
+	}
+}
+
+{
+	"name":"webapp",
+	"type":"broadcast",
+	"data":
+	{
+		"room":room_no,
+		"deviceValues":
+		{
+			"d1":1,
+			"d2":0,
+			"d3":1,
+			"d4":0,
+			"d5":1,
+			"d6":0,
+			"d7":1,
+			"d8":0
+		},
+		"speed":sliderValue,
+		"motionStatus":oneOrZero
+	}
+}
+
+{
+	"name":"broadcast",
+	"type":"toggleNode",
+	"data":
+	{
+		"room":room_no,
+		"deviceValues":
+		{
+			"d1":1,
+			"d2":0,
+			"d3":1,
+			"d4":0,
+			"d5":1,
+			"d6":0,
+			"d7":1,
+			"d8":0
+		}
+	}
+}
+
+{
+	"name":"broadcast",
+	"type":"sliderNode",
+	"data":
+	{
+		"room":room_no,
+		"speed":sliderValue
+	}
+}
+
+{
+	"name":"webapp",
+	"type":"setRoomNames",
+	"data":
+	{
+		r1:"name",
+		r2:"name",
+		r3:"name",
+		r4:"name",
+		r5:"name",
+		r6:"name",
+		r7:"name",
+		r8:"name"
+	}
+}
+
+{
+	"name":"webapp",
+	"type":"activeRooms",
+	"data":
+	{
+		r1:1,
+		r2:1,
+		r3:1,
+		r4:1,
+		r5:0,
+		r6:0,
+		r7:0,
+		r8:0
+	}
+}
+
+{
+	"name":"webapp",
+	"type":"shutdown"
+}
+
+{
+	"name":"webapp",
+	"type":"reboot"
+}
+
+{
+	"name":"webapp",
+	"type":"ota"
+}
+
+{
+	"name":"webapp",
+	"type":"getRoomNames"
+}
+
+{
+	"name":"server",
+	"type":"respGetRoomNames",
+	"data":
+	{
+		"r1":"name",
+		"r2":"name",
+		"r3":"name",
+		"r4":"name",
+		"r5":"name",
+		"r6":"name",
+		"r7":"name",
+		"r8":"name"
+	}
+}
+
+{
+	"name":"server",
+	"type":"respGetDeviceNames",
+	"data":
+	{
+		"room":room_no,
+		"deviceNames":
+		{
+			d1:"name",
+			d2:"name",
+			d3:"name",
+			d4:"name",
+			d5:"name",
+			d6:"name",
+			d7:"name",
+			d8:"name"
+		}
+	}
+}
+
+{
+	"name":"server",
+	"type":"respGetProfile",
+	"data":
+	{
+		"deviceValues":
+		{
+			"d1":1,
+			"d2":1,
+			"d3":1,
+			"d4":1,
+			"d5":1,
+			"d6":1,
+			"d7":1,
+			"d8":1,
+		}
+	}
+}
+
+{
+	"name":"server",
+	"type":"err",
+	"error":"YourErrorHere"
+}
+
+{
+	"name":"broadcast",
+	"type":"shutdown"
+}
+
+{
+	"name":"broadcast",
+	"type":"reboot"
+}
+
+{
+	"name":"webapp",
+	"type":"setDeviceNames",
+	"data":
+	{
+		"room":room_no,
+		"deviceNo":deviceNo,
+		"deviceName":"name"
+	}
+}
+
+{
+	"name":"server",
+	"resp":"ResponseHere"
+}
+
+{
+	"name":"webapp",
+	"type":"getDeviceNames",
+	"data":
+	{
+		"room":room_no
+	}
+}
+
+{
+	"name":"webapp",
+	"type":"setTimer",
+	"data":
+	{
+		"room":room_no,
+		"device":deviceNo,
+		"onHr":1,
+		"onMin":2,
+		"onampm":'a',
+		"offHr":1,
+		"offMin":2,
+		"offampm":'a',
+		"repeate":0
+	}
+}
+
+{
+	"name":"webapp",
+	"type":"disableTimer",
+	"data":
+	{
+		"room":room_no,
+		"device":deviceNo
+	}
+}
+
+{
+	"name":"node",
+	"type":"motionEnable",
+	"data":
+	{
+		"room":room_no,
+		"motionEnable":motionStatus
+	}
+}
+
+{
+	"name":"node",
+	"type":"presence",
+	"data":
+	{
+		"room":room_no,
+		"presence":status
+	}
+}
+
+{
+	"name":"server",
+	"type":"timerService",
+	"data":
+	{
+		"room":room_no,
+		"device":deviceNo,
+	}
+}
+
+{
+	"name":"node",
+	"type":"id",
+	"data":
+	{
+		"room":room_no
+	}
+}
+
+{
+	"name":"webapp",
+	"type":"login",
+	"resp":"grant/denied/locked"
+}
+
+{
+      "name":"webapp",
+      "type":"profile",
+      "data":
+      {
+        "room":profRoom,
+        "profile":profName,
+        "profileText":profileTxt,
+        "deviceValues":
+        {
+          "d1":document.getElementById("pds1").checked | 0;
+          "d2":document.getElementById("pds2").checked | 0;
+          "d3":document.getElementById("pds3").checked | 0;
+          "d4":document.getElementById("pds4").checked | 0;
+          "d5":document.getElementById("pds5").checked | 0;
+          "d6":document.getElementById("pds6").checked | 0;
+          "d7":document.getElementById("pds7").checked | 0;
+          "d8":document.getElementById("pds8").checked | 0;
+        }
+      }
+}
+
+{
+	"name":"webapp",
+	"type":"getProfileNames",
+	"data":
+	{
+		"room":room
+	}
+}
+
+{
+	"name":"webapp",
+	"type":"getProfile",
+	"data":
+	{
+		"room":room_no
+		"profileName":profNumber
+	}
+}
+
+{
+    "name":"webapp",
+    "type":"applyProfile",
+    "data":
+    {
+      "room":ROOM,
+      "profile":val
+    }
+}
+
+{
+	"name":"webapp",
+	"type":"getTimers",
+	"data":
+	{
+		"room":room
+	}
+}
+
+{
+	"name":"server",
+	"type":"respGetTimers",
+	"data":
+	{
+		"enabled":
+		{
+			"t1":1,
+			"t2":0,
+			"t3":0,
+			"t4":0,
+			"t5":0,
+			"t6":0,
+			"t7":0,
+			"t8":0,
+		},
+		"ontime":
+		{
+			"t1":"1:38 PM",
+			"t2":null,
+			"t3":null,
+			"t4":null,
+			"t5":null,
+			"t6":null,
+			"t7":null,
+			"t8":null
+		},
+		"offtime":
+		{
+			"t1":"1:39 PM",
+			"t2":null,
+			"t3":null,
+			"t4":null,
+			"t5":null,
+			"t6":null,
+			"t7":null,
+			"t8":null
+		},
+		"repeate":
+		{
+			"t1":1,
+			"t2":0,
+			"t3":0,
+			"t4":0,
+			"t5":0,
+			"t6":0,
+			"t7":0,
+			"t8":0,
+		}
+	}
+}
