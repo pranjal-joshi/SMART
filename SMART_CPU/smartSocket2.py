@@ -184,6 +184,79 @@ class WSHandler(tornado.websocket.WebSocketHandler):
 					print "Login locked at : " +  time.strftime("%d/%m/%y  %I:%M:%S %p")
 			return
 
+		elif(msg['type'] == "applyProfile"):
+			try:
+				room = msg['data']['room']
+				profile = msg['data']['profile']
+				db.execute("use smart")
+				roomTable = "rp" + str(room)
+				for i in range(1,9):
+					dev = "d" + str(i)
+					db.execute("select %s from %s where profile=%s" % (dev, roomTable, profile))
+					result = db.fetchone()
+					result = result[0]
+					db.execute("update map set %s=%s where room_no=%s" % (dev, result, room))
+				con.commit()
+				db.execute("select d1,d2,d3,d4,d5,d6,d7,d8,slider from map where room_no=%s" % (room))
+				result = db.fetchone()
+				result = str(result[0]) + str(result[1]) + str(result[2]) + str(result[3]) + str(result[4]) + str(result[5]) + str(result[6]) + str(result[7]) + str(result[8])
+				db.execute("select motion_sensor from map where room_no=%s" % (msg['data']['room']))
+				motionStatus = db.fetchone()
+				motionStatus = int(motionStatus[0])
+				respNode = {
+								"name":"broadcast",
+								"type":"toggleNode",
+								"data":
+								{
+									"room":room,
+									"deviceValues":
+									{
+										"d1":int(result[0]),
+										"d2":int(result[1]),
+										"d3":int(result[2]),
+										"d4":int(result[3]),
+										"d5":int(result[4]),
+										"d6":int(result[5]),
+										"d7":int(result[6]),
+										"d8":int(result[7])
+									}
+								}
+							}
+				respWeb = {
+							"name":"webapp",
+							"type":"broadcast",
+							"data":
+							{
+								"room":room,
+								"deviceValues":
+								{
+									"d1":int(result[0]),
+									"d2":int(result[1]),
+									"d3":int(result[2]),
+									"d4":int(result[3]),
+									"d5":int(result[4]),
+									"d6":int(result[5]),
+									"d7":int(result[6]),
+									"d8":int(result[7])
+								},
+								"speed":int(result[8]),
+								"motionStatus":motionStatus
+							}
+						}
+				respNode = json.dumps(respNode)
+				respWeb = json.dumps(respWeb)
+				self.broadcastNode(respNode)
+				self.broadcastWeb(respWeb)
+			except Exception as e:
+				raise e
+				result = {
+							"name":"server",
+							"type":"err",
+							"error":"applyProfile_error"
+						}
+				result = json.dumps(result)
+				self.broadcastWeb(result)
+				self.broadcastNode(result)
 
 		elif(msg['type'] == "toggle"):
 			device = 'd'+str(msg['data']['device'])
@@ -579,6 +652,41 @@ class WSHandler(tornado.websocket.WebSocketHandler):
 				resp = json.dumps(resp)
 				self.write_message(resp)
 
+		elif(msg['type'] == "getProfileNames"):
+			try:
+				room = "rp" + str(msg['data']['room'])
+				db.execute("use smart")
+				db.execute("select name from %s" % room)
+				result = db.fetchall()
+				res = [1,2,3]
+				for i in range(0,3):
+					if result[i][0] == None:
+						res[i] = "None"
+					else:
+						res[i] = result[i][0]
+
+				resp = {
+					"name":"server",
+					"type":"respGetProfileNames",
+					"data":
+					{
+						"p1":res[0],
+						"p2":res[1],
+						"p3":res[2]
+					}
+				}
+				respWeb = json.dumps(resp)
+				self.write_message(respWeb)
+			except Exception as e:
+				raise e
+				resp = {
+							"name":"server",
+							"type":"err",
+							"error":"getProfileNames_error"
+						}
+				resp = json.dumps(resp)
+				self.write_message(resp)
+
 		elif(msg['type'] == "profile"):
 			try:
 				room = msg['data']['room']
@@ -678,7 +786,7 @@ class WSHandler(tornado.websocket.WebSocketHandler):
 		elif(msg['type'] == "disableTimer"):
 			try:
 				db.execute("use smart")
-				db.execute("update %s set timer_active=0 where device='%s'" % ('r'+str(msg['data']['room']), msg['data']['device']))
+				db.execute("update %s set timer_active=0 where device='%s'" % ('r'+str(msg['data']['room']), 'd' + str(msg['data']['device'])))
 				con.commit()
 				resp = {
 							"name":"server",
@@ -686,7 +794,8 @@ class WSHandler(tornado.websocket.WebSocketHandler):
 						}
 				resp = json.dumps(resp)
 				self.write_message(resp)
-			except:
+			except Exception as e:
+				raise e
 				resp = {
 							"name":"server",
 							"type":"err",
@@ -764,7 +873,91 @@ class WSHandler(tornado.websocket.WebSocketHandler):
 							"error":"presence_error"
 						}
 				resp = json.dumps(resp)
-				self.write_message(result)
+				self.write_message(resp)
+
+		elif(msg['type'] == "getTimers"):
+			try:
+				room = "r" + str(msg['data']['room'])
+				db.execute("use smart")
+				db.execute("select timer_active from %s" % room)
+				activeResult = db.fetchall()
+				db.execute("select onHr from %s" % room)
+				onHrResult = db.fetchall()
+				db.execute("select onMin from %s" % room)
+				onMinResult = db.fetchall()
+				db.execute("select offHr from %s" % room)
+				offHrResult = db.fetchall()
+				db.execute("select offMin from %s" % room)
+				offMinResult = db.fetchall()
+				db.execute("select onampm from %s" % room)
+				onampmResult = db.fetchall()
+				db.execute("select offampm from %s" % room)
+				offampmResult = db.fetchall()
+				db.execute("select repeate from %s" % room)
+				repeateResult = db.fetchall()
+				respWeb = {
+					"name":"server",
+					"type":"respGetTimers",
+					"data":
+					{
+						"enabled":
+						{
+							"t1":activeResult[0][0],
+							"t2":activeResult[1][0],
+							"t3":activeResult[2][0],
+							"t4":activeResult[3][0],
+							"t5":activeResult[4][0],
+							"t6":activeResult[5][0],
+							"t7":activeResult[6][0],
+							"t8":activeResult[7][0],
+						},
+						"ontime":
+						{
+							"t1":str(onHrResult[0][0]) + ":" + str(onMinResult[0][0]) + " " + str(onampmResult[0][0]),
+							"t2":str(onHrResult[1][0]) + ":" + str(onMinResult[1][0]) + " " + str(onampmResult[1][0]),
+							"t3":str(onHrResult[2][0]) + ":" + str(onMinResult[2][0]) + " " + str(onampmResult[2][0]),
+							"t4":str(onHrResult[3][0]) + ":" + str(onMinResult[3][0]) + " " + str(onampmResult[3][0]),
+							"t5":str(onHrResult[4][0]) + ":" + str(onMinResult[4][0]) + " " + str(onampmResult[4][0]),
+							"t6":str(onHrResult[5][0]) + ":" + str(onMinResult[5][0]) + " " + str(onampmResult[5][0]),
+							"t7":str(onHrResult[6][0]) + ":" + str(onMinResult[6][0]) + " " + str(onampmResult[6][0]),
+							"t8":str(onHrResult[7][0]) + ":" + str(onMinResult[7][0]) + " " + str(onampmResult[7][0])
+						},
+						"offtime":
+						{
+							"t1":str(offHrResult[0][0]) + ":" + str(offMinResult[0][0]) + " " + str(offampmResult[0][0]),
+							"t2":str(offHrResult[1][0]) + ":" + str(offMinResult[1][0]) + " " + str(offampmResult[1][0]),
+							"t3":str(offHrResult[2][0]) + ":" + str(offMinResult[2][0]) + " " + str(offampmResult[2][0]),
+							"t4":str(offHrResult[3][0]) + ":" + str(offMinResult[3][0]) + " " + str(offampmResult[3][0]),
+							"t5":str(offHrResult[4][0]) + ":" + str(offMinResult[4][0]) + " " + str(offampmResult[4][0]),
+							"t6":str(offHrResult[5][0]) + ":" + str(offMinResult[5][0]) + " " + str(offampmResult[5][0]),
+							"t7":str(offHrResult[6][0]) + ":" + str(offMinResult[6][0]) + " " + str(offampmResult[6][0]),
+							"t8":str(offHrResult[7][0]) + ":" + str(offMinResult[7][0]) + " " + str(offampmResult[7][0])
+						},
+						"repeate":
+						{
+							"t1":repeateResult[0][0],
+							"t2":repeateResult[1][0],
+							"t3":repeateResult[2][0],
+							"t4":repeateResult[3][0],
+							"t5":repeateResult[4][0],
+							"t6":repeateResult[5][0],
+							"t7":repeateResult[6][0],
+							"t8":repeateResult[7][0]
+						}
+					}
+				}
+				respWeb = json.dumps(respWeb)
+				self.write_message(respWeb)
+			except Exception as e:
+				raise e
+				resp = {
+							"name":"server",
+							"type":"err",
+							"error":"getTimers_error"
+						}
+				resp = json.dumps(resp)
+				self.write_message(resp)
+
 
 		else:
 			print "Request from bad source! Discarding.."
