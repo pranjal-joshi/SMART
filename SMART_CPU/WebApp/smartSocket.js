@@ -126,6 +126,9 @@ ws.onclose = function(evt){
 
 ws.onopen = function(evt){
   // don't know what to do..
+  var event = document.createEvent('Event');  
+  event.initEvent('load', false, false);  
+  window.dispatchEvent(event);
 };
 
 ws.onmessage = function(evt){
@@ -584,6 +587,7 @@ function getRoomNamesForConfigPage(){
       try{
       var id = "r" + i.toString();
       document.getElementById(id).value = ROOM_NAMES[i-1];
+      document.getElementById(id).disabled = false;
       var checkboxName = "room" + i.toString();
       document.getElementById(checkboxName).checked = true;
       var id2 = "pr" + i.toString();
