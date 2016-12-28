@@ -26,13 +26,12 @@
     <!-- Compiled and minified JavaScript -->
     <!-- use 0.97.6 js and 0.97.7 css for DROPDOWN and SIDENAV together!!!!!!!!-->
     <!-- JS scripts linked at bottom to improve page loading speed -->
+    <link rel="stylesheet" href="lolliclock.css">
+    <!-- Ubuntu Font-->
+    <link rel="stylesheet" type="text/css" href="http://fonts.googleapis.com/css?family=Ubuntu:regular,bold&subset=Latin,Cyrillic">
     <script type="text/javascript" src="jquery.min.js"></script>
     <script type="text/javascript" src="lolliclock.js"></script>
     <script type="text/javascript" src="jquery.cookie.js"></script>
-    <link rel="stylesheet" href="lolliclock.css">
-    
-    <!-- Ubuntu Font-->
-    <link rel="stylesheet" type="text/css" href="http://fonts.googleapis.com/css?family=Ubuntu:regular,bold&subset=Latin,Cyrillic">
   
      <!-- Disable caching of browser -->
      <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
@@ -47,7 +46,7 @@
       try{
         var x = $.cookie('smartLogin');
         if(x !== "grant"){
-          location.href="reauth.html";
+          //location.href="reauth.html";
         }
     }
       catch(err){}
@@ -82,7 +81,7 @@
     </ul>
 
     <ul id="profileDropdown" class="dropdown-content" style="min-width: 150px;">
-      <li disable><a href="#" style="color: grey">Select Profile</a></li>
+      <li disable><a href="#" style="color: grey;">Select Profile</a></li>
       <li class="divider"></li>
       <li value="1" onclick="applyProfile(this.value)"><a href="#" id="showProf1" >Profile 1</a></li>
       <li class="divider"></li>
@@ -220,6 +219,7 @@
         <div class="row">
             <p class="range-field">
                 <input type="range" id="fan_slider" min="0" max="5" onchange="sliderChange(this.value)"/>
+                <center><label>Slide to change speed</label></center>
             </p>
         </div> 
             
@@ -246,6 +246,25 @@
         </div>        
     </div>
 </div>
+
+
+<!--
+          No room configured modal starts
+        -->
+        <div id="reqConfigModal" class="modal modal-fixed-footer bottom-sheet">
+          <div class="modal-content">
+           <center><h4 style="color: red">Configure rooms</h4></center>
+           <div class="divider"></div>
+           <center><p style="color: black">Please create the room configuration according to your home layout. Click on the configure button to start.
+           </p></center>
+          </div>
+          <div class="modal-footer">
+            <a href="config.html" class="modal-action modal-close waves-effect waves-teal btn">Configure</a>
+          </div>
+        </div>
+        <!--
+          No room configured modal ENDS
+        -->
 
     <!--
           Shutdown modal STARTS
@@ -317,7 +336,7 @@
           <!-- shutdown preloader ENDS   -->
 
       <!-- error modal -->
-      <div id="errorModal" class="modal grey lighten-4 bottom-sheet">
+      <div id="errorModal" class="modal grey lighten-4 modal-fixed-footer">
         <div class="modal-contnet">
           <center><h5 style="color: red">Oops!</h5>
           <div class="divider"></div>
@@ -724,7 +743,7 @@
     <footer class="page-footer teal lighten-2">
       <div class="footer-copyright">
         <div class="container">
-         <center>© 2016 S.M.A.R.T, All rights reserved.</center>
+         <center>&copy; 2016 S.M.A.R.T, All rights reserved.</center>
         </div>
       </div>
     </footer>
@@ -734,3 +753,4 @@
 <script type="text/javascript" src="smartSocket.js"></script>
 
 </body>
+</html>

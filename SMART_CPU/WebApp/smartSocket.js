@@ -18,6 +18,7 @@ var DEBUG = 1;
 var updateTimer = 0;
 
 var color_change_var;
+var enable_textbox_id = 0;
 
 var ws = new WebSocket("ws://" + SERVER + ":" + PORT + "/");
 
@@ -90,7 +91,7 @@ function closeTab()
 }
 
 function goBack() {
-    window.history.back();
+    location.href="control.html";
 }
 
 function windowResize(){
@@ -188,6 +189,9 @@ ws.onmessage = function(evt){
                 }
     try{
       document.getElementById("navbarTitle").innerHTML = ROOM_NAMES[0];
+      if(ROOM_NAMES[0] == ' '){
+        $('#reqConfigModal').openModal();
+      }
     }
     catch(err){}
     try{
@@ -342,6 +346,13 @@ ws.onmessage = function(evt){
     document.getElementById("d6").value = msg.data.deviceNames.d6;
     document.getElementById("d7").value = msg.data.deviceNames.d7;
     document.getElementById("d8").value = msg.data.deviceNames.d8;
+    var k=0;
+    var j;
+    for(k=1;k<9;k++){
+      j = "d" + k.toString();
+      if(document.getElementById(j).value === "None")
+        document.getElementById(j).value = '';
+    }
     }
     catch(err){
       document.getElementById("pdn1").innerHTML = msg.data.deviceNames.d1;  // for profile config page.
@@ -775,6 +786,11 @@ function setProfile(){
 }
 
 function getProfile(){
+  var room = document.getElementById("profileRoom").value;
+  if(room == 0){
+    alert("Please select room before selecting profile.");
+  }
+  else{
   var jsonData = JSON.stringify({
     "name":"webapp",
     "type":"getDeviceNames",
@@ -785,6 +801,7 @@ function getProfile(){
   });
   ws.send(jsonData); 
   setTimeout(getProfileFromDatabase, 200);
+}
 }
 
 function getProfileFromDatabase(room_no){

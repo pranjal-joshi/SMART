@@ -73,7 +73,7 @@
     </ul>
 
     <!-- error modal -->
-      <div id="errorModal" class="modal grey lighten-4">
+      <div id="errorModal" class="modal grey lighten-4 bottom-sheet">
         <div class="modal-contnet">
           <center><h5 style="color: red">Oops!</h5>
           <div class="divider"></div>
@@ -95,9 +95,6 @@
       <div class="divider"></div>
       <br>
 
-      <!--
-          **** Add php code for checkbox check property to retrive applied settings by fetching active flag from db and set checkboxes according while loading the webpage.
-      -->
         <form>
             <p>
               <div class="row">
@@ -213,7 +210,7 @@
             </p>
 
             <div class="row">
-            <button class="btn waves-effect waves-light col s4 offset-s2" type="button" onclick="setRoomNames()" id="applyButton">Apply
+            <button class="btn waves-effect waves-light col s4 offset-s2" type="button" onclick="setRoomNames(); getRoomNamesForConfigPage()" id="applyButton">Apply
               <i class="material-icons right">settings</i>
             </button>
             <button class="btn-flat waves-effect waves-light col s4" onclick="goBack()">Cancel
@@ -383,12 +380,31 @@
     </div>
     </div>
 
+    <!--
+          enable room name textbox modal starts
+        -->
+        <div id="enableTextboxModal" class="modal modal-fixed-footer bottom-sheet">
+          <div class="modal-content">
+           <center><h4 style="color: red">Add new room?</h4></center>
+           <div class="divider"></div>
+           <center><p style="color: black">This will add new room to your room configuration. Press Enable to create a new room. You can enable/disable the room again by clicking on the given checkbox.
+           </p></center>
+          </div>
+          <div class="modal-footer">
+            <a href="#!" class="modal-action modal-close waves-effect waves-teal btn" onclick="enableRoomTextbox(enable_textbox_id)">Yes, Enable</a>
+            <a href="#!" class="modal-action modal-close waves-effect waves-teal btn">No, Leave it!</a>
+          </div>
+        </div>
+        <!--
+          enable room name textbox modal ENDS
+        -->
+
     </main>
 
     <footer class="page-footer teal lighten-2">
       <div class="footer-copyright">
         <div class="container">
-         <center>© 2016 S.M.A.R.T, All rights reserved.</center>
+         <center>&copy; 2016 S.M.A.R.T, All rights reserved.</center>
         </div>
       </div>
     </footer>
