@@ -115,9 +115,8 @@ function disableTextbox(chk)
     document.getElementById(txtId).disabled = false;
     document.getElementById(txtId).value = ' ';
   }
-  else
-    document.getElementById(txtId).disabled = true;
-
+  //else
+    //document.getElementById(txtId).disabled = true;
 }
 
 // -------------------- SOCKET HANDLER ----------------
@@ -140,6 +139,7 @@ ws.onmessage = function(evt){
   // handle socket broadcast
   if(msg.name === "webapp" && msg.type === "broadcast"){
     if(msg.data.room === ROOM){
+      try{
       document.getElementById("1").checked = Boolean(msg.data.deviceValues.d1);
       document.getElementById("2").checked = Boolean(msg.data.deviceValues.d2);
       document.getElementById("3").checked = Boolean(msg.data.deviceValues.d3);
@@ -150,6 +150,9 @@ ws.onmessage = function(evt){
       document.getElementById("8").checked = Boolean(msg.data.deviceValues.d8);
       document.getElementById("fan_slider").value = msg.data.speed;
       document.getElementById("motionSwitch").checked = Boolean(msg.data.motionStatus);
+      }
+      catch(err){
+      }
     }
   }
 
@@ -203,7 +206,7 @@ ws.onmessage = function(evt){
           document.getElementById(checkboxName).checked = false;
 
           var txtId = "r" + i.toString();
-          document.getElementById(txtId).disabled = true;
+          //document.getElementById(txtId).disabled = true;
         }
       }
     }
@@ -349,10 +352,10 @@ ws.onmessage = function(evt){
     var k=0;
     var j;
     for(k=1;k<9;k++){
-      j = "d" + k.toString();
-      if(document.getElementById(j).value === "None")
-        document.getElementById(j).value = '';
-    }
+	j = "d" + k.toString();
+	if(document.getElementById(j).value === "None")
+		document.getElementById(j).value = '';
+	}
     }
     catch(err){
       document.getElementById("pdn1").innerHTML = msg.data.deviceNames.d1;  // for profile config page.
@@ -591,7 +594,7 @@ function getRoomNamesForConfigPage(){
       document.getElementById(checkboxName).checked = false;
 
       var txtId = "r" + i.toString();
-      document.getElementById(txtId).disabled = true;
+      //document.getElementById(txtId).disabled = true;
     }
     else
     {
@@ -786,7 +789,7 @@ function setProfile(){
 }
 
 function getProfile(){
-  var room = document.getElementById("profileRoom").value;
+ var room = document.getElementById("profileRoom").value;
   if(room == 0){
     alert("Please select room before selecting profile.");
   }
@@ -801,7 +804,7 @@ function getProfile(){
   });
   ws.send(jsonData); 
   setTimeout(getProfileFromDatabase, 200);
-}
+  }
 }
 
 function getProfileFromDatabase(room_no){
@@ -853,4 +856,11 @@ function getTimers(room){
     }
   });
   ws.send(jsonData);
+}
+
+function checkRoomEnable(id){
+	id = id.split('');
+	id = id[1].toString();
+	var chkId = "room" + id;
+	document.getElementById(chkId).checked = true;
 }

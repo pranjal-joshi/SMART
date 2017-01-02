@@ -73,7 +73,7 @@
     </ul>
 
     <!-- error modal -->
-      <div id="errorModal" class="modal grey lighten-4 bottom-sheet">
+      <div id="errorModal" class="modal grey lighten-4">
         <div class="modal-contnet">
           <center><h5 style="color: red">Oops!</h5>
           <div class="divider"></div>
@@ -93,14 +93,14 @@
       <center>
       <span class="teal-text text-darken"><h5>Set room configuration</h5></span>
       <div class="divider"></div>
+	<p>Tick the checkbox to enable the room.</p>
       <br>
-
         <form>
             <p>
               <div class="row">
 
               <div class="input-field col s8">
-                <input id="r1" type="text" class="validate">
+                <input id="r1" type="text" class="validate" onclick="checkRoomEnable(this.id)">
                 <label for="r1">Room 1</label>
               </div>
 
@@ -115,7 +115,7 @@
               <div class="row">
 
               <div class="input-field col s8">
-                <input id="r2" type="text" class="validate">
+                <input id="r2" type="text" class="validate" onclick="checkRoomEnable(this.id)">
                 <label for="r2">Room 2</label>
               </div>
 
@@ -129,7 +129,7 @@
               <div class="row">
 
               <div class="input-field col s8">
-                <input id="r3" type="text" class="validate">
+                <input id="r3" type="text" class="validate" onclick="checkRoomEnable(this.id)">
                 <label for="r3">Room 3</label>
               </div>
 
@@ -143,7 +143,7 @@
               <div class="row">
 
               <div class="input-field col s8">
-                <input id="r4" type="text" class="validate">
+                <input id="r4" type="text" class="validate" onclick="checkRoomEnable(this.id)">
                 <label for="r4">Room 4</label>
               </div>
 
@@ -157,7 +157,7 @@
               <div class="row">
 
               <div class="input-field col s8">
-                <input id="r5" type="text" class="validate">
+                <input id="r5" type="text" class="validate" onclick="checkRoomEnable(this.id)">
                 <label for="r5">Room 5</label>
               </div>
 
@@ -171,7 +171,7 @@
               <div class="row">
 
               <div class="input-field col s8">
-                <input id="r6" type="text" class="validate">
+                <input id="r6" type="text" class="validate" onclick="checkRoomEnable(this.id)">
                 <label for="r6">Room 6</label>
               </div>
 
@@ -185,7 +185,7 @@
               <div class="row">
 
               <div class="input-field col s8">
-                <input id="r7" type="text" class="validate">
+                <input id="r7" type="text" class="validate" onclick="checkRoomEnable(this.id)">
                 <label for="r7">Room 7</label>
               </div>
 
@@ -199,7 +199,7 @@
               <div class="row">
 
               <div class="input-field col s8">
-                <input id="r8" type="text" class="validate">
+                <input id="r8" type="text" class="validate" onclick="checkRoomEnable(this.id)">
                 <label for="r8">Room 8</label>
               </div>
 
@@ -210,7 +210,7 @@
             </p>
 
             <div class="row">
-            <button class="btn waves-effect waves-light col s4 offset-s2" type="button" onclick="setRoomNames(); getRoomNamesForConfigPage()" id="applyButton">Apply
+            <button class="btn waves-effect waves-light col s4 offset-s2" type="button" onclick="setRoomNames(); setTimeout(getRoomNamesForConfigPage,500);" id="applyButton">Apply
               <i class="material-icons right">settings</i>
             </button>
             <button class="btn-flat waves-effect waves-light col s4" onclick="goBack()">Cancel
