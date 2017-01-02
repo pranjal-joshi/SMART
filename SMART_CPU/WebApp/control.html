@@ -104,7 +104,9 @@
                   <a class="dropdown-button" href="#" data-activates="profileDropdown"><i class="material-icons">person_pin</i></a>
                 </ul>
         
-                <ul id="slide-out" class="side-nav fixed grey lighten-4"><!--fixed: for showing in mobile mode-->      
+                <ul id="slide-out" class="side-nav fixed grey lighten-4"><!--fixed: for showing in mobile mode-->    
+                    <li><center><span class="teal-text text-darken-2" style="font-size:18px">Select room</span></center></li>
+                    <div class="divider"></div>  
                     <li><a href="#!" class="waves-effect"><span class="teal-text text-darken-2"><center style="font-size:18px" onclick="getRoom(this)" id="r1">Room 1</center></span></a></li>
                     <li><a href="#!" class="waves-effect"><span class="teal-text text-darken-2"><center style="font-size:18px" onclick="getRoom(this)" id="r2">Room 2</center></span></a></li>
                     <li><a href="#!" class="waves-effect"><span class="teal-text text-darken-2"><center style="font-size:18px" onclick="getRoom(this)" id="r3">Room 3</center></span></a></li>
@@ -336,7 +338,7 @@
           <!-- shutdown preloader ENDS   -->
 
       <!-- error modal -->
-      <div id="errorModal" class="modal grey lighten-4 modal-fixed-footer">
+      <div id="errorModal" class="modal grey lighten-4 bottom-sheet">
         <div class="modal-contnet">
           <center><h5 style="color: red">Oops!</h5>
           <div class="divider"></div>
@@ -375,7 +377,7 @@
         
         <!------------------------------------------------------------------------------ -->
         
-            <h4>Schedule manager</h4>
+            <center><h4>Schedule manager</h4></center>
             
               <div class="row">
               <div class="col s12 m6 l3"><span class="teal-text text-darken-2"><center>Schedule ON time: </center></span></div>
@@ -413,8 +415,8 @@
       </div>
       
       <div class="modal-footer">
-        <a href="#!" class=" modal-action modal-close waves-effect waves-teal btn" type="submit" id="ts1" onclick="setTimer(this.id)">Apply</a>
-        <a href="#!" class=" modal-action modal-close waves-effect waves-teal btn-flat" id="td1" onclick="disableTimer(this.id)" onclick="disableTimer(this.id)">Disable timer</a>
+        <div class="right"><a href="#!" class=" modal-action modal-close waves-effect waves-teal btn" type="submit" id="ts1" onclick="setTimer(this.id)">Apply</a></div>
+        <div class="left"><a href="#!" class=" modal-action modal-close waves-effect waves-teal btn red" id="td1" onclick="disableTimer(this.id)" onclick="disableTimer(this.id)">Disable timer</a></div>
       </div>
     </div>
 
@@ -422,7 +424,7 @@
     <div id="timerModal2" class="modal bottom-sheet modal-fixed-footer">
       <div class="modal-content">
 
-        <h4>Schedule manager</h4>
+        <center><h4>Schedule manager</h4></center>
             
               <div class="row">
               <div class="col s12 m6 l3"><span class="teal-text text-darken-2"><center>Schedule ON time: </center></span></div>
@@ -458,8 +460,8 @@
       </div>
 
       <div class="modal-footer">
-        <a href="#!" class=" modal-action modal-close waves-effect waves-teal btn" type="submit" id="ts2" onclick="setTimer(this.id)">Apply</a>
-        <a href="#!" class=" modal-action modal-close waves-effect waves-teal btn-flat" id="td2" onclick="disableTimer(this.id)">Disable timer</a>
+        <div class="right"><a href="#!" class=" modal-action modal-close waves-effect waves-teal btn" type="submit" id="ts2" onclick="setTimer(this.id)">Apply</a></div>
+        <div class="left"><a href="#!" class=" modal-action modal-close waves-effect waves-teal btn red" id="td2" onclick="disableTimer(this.id)" onclick="disableTimer(this.id)">Disable timer</a></div>
       </div>
     </div>
 
@@ -468,7 +470,7 @@
     <div id="timerModal3" class="modal bottom-sheet modal-fixed-footer">
       <div class="modal-content">
         
-        <h4>Schedule manager</h4>
+        <center><h4>Schedule manager</h4></center>
             
               <div class="row">
               <div class="col s12 m6 l3"><span class="teal-text text-darken-2"><center>Schedule ON time: </center></span></div>
@@ -504,8 +506,8 @@
       </div>
 
       <div class="modal-footer">
-        <a href="#!" class=" modal-action modal-close waves-effect waves-teal btn" type="submit" id="ts3" onclick="setTimer(this.id)">Apply</a>
-        <a href="#!" class=" modal-action modal-close waves-effect waves-teal btn-flat" id="td3" onclick="disableTimer(this.id)">Disable timer</a>
+        <div class="right"><a href="#!" class=" modal-action modal-close waves-effect waves-teal btn" type="submit" id="ts3" onclick="setTimer(this.id)">Apply</a></div>
+        <div class="left"><a href="#!" class=" modal-action modal-close waves-effect waves-teal btn red" id="td3" onclick="disableTimer(this.id)" onclick="disableTimer(this.id)">Disable timer</a></div>
       </div>
     </div>
     
@@ -514,7 +516,7 @@
     <div id="timerModal4" class="modal bottom-sheet modal-fixed-footer">
       <div class="modal-content">
         
-        <h4>Schedule manager</h4>
+        <center><h4>Schedule manager</h4></center>
             
               <div class="row">
               <div class="col s12 m6 l3"><span class="teal-text text-darken-2"><center>Schedule ON time: </center></span></div>
@@ -550,8 +552,8 @@
       </div>
 
       <div class="modal-footer">
-        <a href="#!" class=" modal-action modal-close waves-effect waves-teal btn" type="submit" id="ts4" onclick="setTimer(this.id)">Apply</a>
-        <a href="#!" class=" modal-action modal-close waves-effect waves-teal btn-flat" id="td4" onclick="disableTimer(this.id)">Disable timer</a>
+        <div class="right"><a href="#!" class=" modal-action modal-close waves-effect waves-teal btn" type="submit" id="ts4" onclick="setTimer(this.id)">Apply</a></div>
+        <div class="left"><a href="#!" class=" modal-action modal-close waves-effect waves-teal btn red" id="td4" onclick="disableTimer(this.id)" onclick="disableTimer(this.id)">Disable timer</a></div>
       </div>
     </div>
 
@@ -560,7 +562,7 @@
     <div id="timerModal5" class="modal bottom-sheet modal-fixed-footer">
       <div class="modal-content">
         
-        <h4>Schedule manager</h4>
+        <center><h4>Schedule manager</h4></center>
             
               <div class="row">
               <div class="col s12 m6 l3"><span class="teal-text text-darken-2"><center>Schedule ON time: </center></span></div>
@@ -596,8 +598,8 @@
       </div>
 
       <div class="modal-footer">
-        <a href="#!" class=" modal-action modal-close waves-effect waves-teal btn" type="submit" id="ts5" onclick="setTimer(this.id)">Apply</a>
-        <a href="#!" class=" modal-action modal-close waves-effect waves-teal btn-flat" id="td5" onclick="disableTimer(this.id)">Disable timer</a>
+        <div class="right"><a href="#!" class=" modal-action modal-close waves-effect waves-teal btn" type="submit" id="ts5" onclick="setTimer(this.id)">Apply</a></div>
+        <div class="left"><a href="#!" class=" modal-action modal-close waves-effect waves-teal btn red" id="td5" onclick="disableTimer(this.id)" onclick="disableTimer(this.id)">Disable timer</a></div>
       </div>
     </div>
 
@@ -605,7 +607,7 @@
     <div id="timerModal6" class="modal bottom-sheet modal-fixed-footer">
       <div class="modal-content">
         
-        <h4>Schedule manager</h4>
+        <center><h4>Schedule manager</h4></center>
             
               <div class="row">
               <div class="col s12 m6 l3"><span class="teal-text text-darken-2"><center>Schedule ON time: </center></span></div>
@@ -641,8 +643,8 @@
       </div>
 
       <div class="modal-footer">
-        <a href="#!" class=" modal-action modal-close waves-effect waves-teal btn" type="submit" id="ts6" onclick="setTimer(this.id)">Apply</a>
-        <a href="#!" class=" modal-action modal-close waves-effect waves-teal btn-flat" id="td6" onclick="disableTimer(this.id)">Disable timer</a>
+        <div class="right"><a href="#!" class=" modal-action modal-close waves-effect waves-teal btn" type="submit" id="ts6" onclick="setTimer(this.id)">Apply</a></div>
+        <div class="left"><a href="#!" class=" modal-action modal-close waves-effect waves-teal btn red" id="td6" onclick="disableTimer(this.id)" onclick="disableTimer(this.id)">Disable timer</a></div>
       </div>
     </div>
 
@@ -651,7 +653,7 @@
     <div id="timerModal7" class="modal bottom-sheet modal-fixed-footer">
       <div class="modal-content">
         
-        <h4>Schedule manager</h4>
+        <center><h4>Schedule manager</h4></center>
             
               <div class="row">
               <div class="col s12 m6 l3"><span class="teal-text text-darken-2"><center>Schedule ON time: </center></span></div>
@@ -687,8 +689,8 @@
       </div>
 
       <div class="modal-footer">
-        <a href="#!" class=" modal-action modal-close waves-effect waves-teal btn" type="submit" id="ts7" onclick="setTimer(this.id)">Apply</a>
-        <a href="#!" class=" modal-action modal-close waves-effect waves-teal btn-flat" id="td7" onclick="disableTimer(this.id)">Disable timer</a>
+        <div class="right"><a href="#!" class=" modal-action modal-close waves-effect waves-teal btn" type="submit" id="ts7" onclick="setTimer(this.id)">Apply</a></div>
+        <div class="left"><a href="#!" class=" modal-action modal-close waves-effect waves-teal btn red" id="td7" onclick="disableTimer(this.id)" onclick="disableTimer(this.id)">Disable timer</a></div>
       </div>
     </div>    
     
@@ -697,7 +699,7 @@
     <div id="timerModal8" class="modal bottom-sheet modal-fixed-footer">
       <div class="modal-content">
         
-        <h4>Schedule manager</h4>
+        <center><h4>Schedule manager</h4></center>
             
               <div class="row">
               <div class="col s12 m6 l3"><span class="teal-text text-darken-2"><center>Schedule ON time: </center></span></div>
@@ -733,8 +735,8 @@
       </div>
 
       <div class="modal-footer">
-        <a href="#!" class=" modal-action modal-close waves-effect waves-teal btn" type="submit" id="ts8" onclick="setTimer(this.id)">Apply</a>
-        <a href="#!" class=" modal-action modal-close waves-effect waves-teal btn-flat" id="td8" onclick="disableTimer(this.id)">Disable timer</a>
+        <div class="right"><a href="#!" class=" modal-action modal-close waves-effect waves-teal btn" type="submit" id="ts8" onclick="setTimer(this.id)">Apply</a></div>
+        <div class="left"><a href="#!" class=" modal-action modal-close waves-effect waves-teal btn red" id="td8" onclick="disableTimer(this.id)" onclick="disableTimer(this.id)">Disable timer</a></div>
       </div>
     </div>
 
