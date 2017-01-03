@@ -28,7 +28,7 @@ PORT = int(SERVER_PORT) - 1
 OTA_URL = "Enter valid OTA url here!"
 
 ROOM_NO = 1								#static-number
-PIR_TIMEOUT = 2*60						#seconds
+PIR_TIMEOUT = 10						#seconds
 RECONNECT_TIMEOUT = 10 					#seconds
 
 ############ PIN CONFIG ###################
@@ -53,10 +53,12 @@ SPEED_OLD = None
 POT_FAN_TIME = None
 APP_FAN_TIME = None
 
-PIR_TIMEOUT_THREAD = None
-
 CON_FLAG = 0
 
+def dummy():
+	pass
+
+PIR_TIMEOUT_THREAD = threading.Timer(1,dummy)
 
 def opened(self):
 	identification = {
@@ -151,15 +153,11 @@ def initGPIO():
 		io.add_event_detect(SWITCHPINS[5], io.BOTH, callback=switchIntr6, bouncetime=250)
 		io.add_event_detect(SWITCHPINS[6], io.BOTH, callback=switchIntr7, bouncetime=250)
 		io.add_event_detect(SWITCHPINS[7], io.BOTH, callback=switchIntr8, bouncetime=250)
-		io.setup(PIR1_PIN, io.IN, pull_up_down=io.PUD_UP)
-		io.setup(PIR2_PIN, io.IN, pull_up_down=io.PUD_UP)
 		io.setup(FANPIN, io.OUT)
-		io.setup(PIR1_PIN, io.IN, pull_up_down=io.PUD_UP)
-		io.setup(PIR2_PIN, io.IN, pull_up_down=io.PUD_UP)
-		#io.add_event_detect(PIR1_PIN, io.RISING, callback=pirRise, bouncetime=250)
-		#io.add_event_detect(PIR2_PIN, io.RISING, callback=pirRise, bouncetime=250)
-		#io.add_event_detect(PIR1_PIN, io.FALLING, callback=pirFall, bouncetime=250)
-		#io.add_event_detect(PIR2_PIN, io.FALLING, callback=pirFall, bouncetime=250)
+		io.setup(PIR1_PIN, io.IN)
+		io.setup(PIR2_PIN, io.IN)
+		io.add_event_detect(PIR1_PIN, io.BOTH, callback=pir1Intr, bouncetime=250)
+		io.add_event_detect(PIR2_PIN, io.BOTH, callback=pir2Intr, bouncetime=250)
 		io.setup(SYNCPIN, io.IN, pull_up_down=io.PUD_UP)
 		io.add_event_detect(SYNCPIN, io.FALLING, callback=syncMains, bouncetime=8)
 		if DEBUG:
@@ -183,7 +181,7 @@ def switchIntr1(self):
 					"type":"toggle",
 					"data":
 					{
-						"room":ROOM_NO,
+						"room":str(ROOM_NO),
 						"device":index,
 						"value":val
 					}
@@ -332,7 +330,43 @@ def startPWM():			### PWM inverted logic ### MOC LED is in common anode configur
 	io.output(FANPIN, False)
 	pass
 
-def pirRise(self):
+def pir1Intr(self):
+	global PIR_TIMEOUT_THREAD
+	print "PIR state: " + str(io.input(PIR1_PIN))
+	if(io.input(PIR1_PIN) == True):				# Logical OR PIR1 & 2s OUTPUTS. <------------
+		try:
+			if(PIR_TIMEOUT_THREAD.isAlive()):
+				PIR_TIMEOUT_THREAD.cancel()
+			presenceReq(1)
+		except Exception as e:
+			presenceReq(1)
+			raise e
+		print "Turning on..."
+	else:
+		PIR_TIMEOUT_THREAD = threading.Timer(PIR_TIMEOUT, presenceReq, '0')
+		PIR_TIMEOUT_THREAD.daemon = True
+		PIR_TIMEOUT_THREAD.start()
+		print "Turning off..."
+
+def pir2Intr(self):
+	global PIR_TIMEOUT_THREAD
+    print "PIR state: " + str(io.input(PIR2_PIN))
+    if(io.input(PIR2_PIN) == True):
+        try:
+            if(PIR_TIMEOUT_THREAD.isAlive()):
+                PIR_TIMEOUT_THREAD.cancel()
+            presenceReq(1)
+        except Exception as e:
+            presenceReq(1)
+            raise e
+            print "Turning on..."
+    else:
+        PIR_TIMEOUT_THREAD = threading.Timer(PIR_TIMEOUT, presenceReq, '0')
+        PIR_TIMEOUT_THREAD.daemon = True
+        PIR_TIMEOUT_THREAD.start()
+        print "Turning off..."
+
+def pirRise1(self):
 	global PIR_TIMEOUT_THREAD
 	try:
 		if(PIR_TIMEOUT_THREAD.isAlive()):
@@ -341,9 +375,23 @@ def pirRise(self):
 	except:
 		presenceReq(1)
 
-def pirFall(self):
+def pirFall1(self):
 	global PIR_TIMEOUT_THREAD
 	PIR_TIMEOUT_THREAD = threading.Timer(PIR_TIMEOUT, presenceReq, 0).start()
+
+def pirRise2(self):
+	global PIR_TIMEOUT_THREAD
+	try:
+		if(PIR_TIMEOUT_THREAD.isAlive()):
+			PIR_TIMEOUT_THREAD.cancel()
+		presenceReq(1)
+	except:
+		presenceReq(1)
+
+def pirFall2(self):
+	global PIR_TIMEOUT_THREAD
+	PIR_TIMEOUT_THREAD = threading.Timer(PIR_TIMEOUT, presenceReq, 0).start()
+
 
 def presenceReq(value):
 	resp = {
@@ -384,12 +432,12 @@ def chargeCap():
 		print "Charging time (ms): " + str(z)
 	return ((end-start)/1e-3)			# return chargin time of RC in millis
 
-def analogRead(self):
+def analogRead():
 	try:
 		global ANALOG_VAL
-		self.dischargeCap()
-		ANALOG_VAL = self.chargeCap()
-		self.fanSpeedController(ANALOG_VAL)
+		dischargeCap()
+		ANALOG_VAL = chargeCap()
+		fanSpeedController(ANALOG_VAL)
 		capThread = threading.Timer(0.5, analogRead)
 		capThread.daemon = True
 		capThread.start()
@@ -486,6 +534,7 @@ try:
 	wsAddr = "ws://" + SERVER_IP + ":" + SERVER_PORT + "/"
 	ws = websocket.WebSocketApp(wsAddr,on_message = received_message,on_close = closed,on_error=error)
 	ws.on_open = opened
+	#analogRead()
 	ws.run_forever()
 except Exception as e:
 	raise e
