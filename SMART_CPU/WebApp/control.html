@@ -16,6 +16,11 @@
       .contents {
         flex: 1;
       }
+
+      .p1 circle {
+            filter: url(#dropshadow);
+
+        }
       </style>
     <title>Control panel</title>
     <link rel="icon" href="control.ico" type="image/x-icon" />
@@ -29,16 +34,21 @@
     <link rel="stylesheet" href="lolliclock.css">
     <!-- Ubuntu Font-->
     <link rel="stylesheet" type="text/css" href="http://fonts.googleapis.com/css?family=Ubuntu:regular,bold&subset=Latin,Cyrillic">
+    <link rel="stylesheet" href="customize-presets.css">
+    <link rel="stylesheet" href="p1.css">
+
     <script type="text/javascript" src="jquery.min.js"></script>
     <script type="text/javascript" src="lolliclock.js"></script>
     <script type="text/javascript" src="jquery.cookie.js"></script>
+    <script type="text/javascript" src="knob-min.js"></script>
+    <script type="text/javascript" src="p1.js"></script>
   
      <!-- Disable caching of browser -->
      <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
      <meta http-equiv="Pragma" content="no-cache" />
      <meta http-equiv="Expires" content="0" />
 
-  
+
 </head>
 
 <body class="controlBody" style="font-family: ubuntu" onload="setTimeout(getRoomNames,700); setTimeout(addClient, 400); setTimeout(getRoom,800,1);" onresize="windowResize()" >
@@ -119,11 +129,65 @@
         
             <a href="#" data-activates="slide-out" class="button-collapse"><i class="material-icons">menu</i></a>
             </div>
+            <svg>
+              <filter id="dropshadow" height="150%" width="150%">
+                  <feGaussianBlur in="SourceAlpha" stdDeviation="2"/>
+                  <feOffset dx="0" dy="3" result="offsetblur"/>
+                  <feMerge>
+                      <feMergeNode/>
+                      <feMergeNode in="SourceGraphic"/>
+                  </feMerge>
+              </filter>
+              <filter id='inner-shadow'>
+
+                  <!-- Shadow Offset -->
+                  <feOffset
+                          dx='0'
+                          dy='5'
+                          />
+
+                  <!-- Shadow Blur -->
+                  <feGaussianBlur
+                          stdDeviation='5'
+                          result='offset-blur'
+                          />
+
+                  <!-- Invert the drop shadow
+                       to create an inner shadow -->
+                  <feComposite
+                          operator='out'
+                          in='SourceGraphic'
+                          in2='offset-blur'
+                          result='inverse'
+                          />
+
+                  <!-- Color & Opacity -->
+                  <feFlood
+                          flood-color='black'
+                          flood-opacity='0.75'
+                          result='color'
+                          />
+
+                  <!-- Clip color inside shadow -->
+                  <feComposite
+                          operator='in'
+                          in='color'
+                          in2='inverse'
+                          result='shadow'
+                          />
+
+                  <!-- Put shadow over original object -->
+                  <feComposite
+                          operator='over'
+                          in='shadow'
+                          in2='SourceGraphic'
+                          />
+              </filter>
+          </svg>
         </nav>
 	</div>
     </div>
     
-  
 
 <div class="row">
     <div class="col m2 l3"></div>
@@ -173,9 +237,7 @@
                     </tr>
                 </tbody>
             </table>    
-        
-        
-                  
+         
         <div class="row">
             <span class="teal-text text-darken-2"><center style="font-size:16px">Fan  <i class="tiny material-icons myFan">toys</i></center></span>
             <!-- script to rotate Fan icon infinitely -->
@@ -218,33 +280,21 @@
               }
             </style>
         </div> 
+
         <div class="row">
             <p class="range-field">
-                <input type="range" id="fan_slider" min="0" max="5" onchange="sliderChange(this.value)"/>
-                <center><label>Slide to change speed</label></center>
+                <!--<input type="range" id="fan_slider" min="0" max="5" onchange="sliderChange(this.value)"/>-->
+                <center><input class="preset1" type="range" data-width="250" data-height="250" data-angleOffset="220" data-angleRange="280" data-labels="0,1,2,3,4,5" id="fan_slider" />
+                <label>Rotate to change speed</label></center>
             </p>
+            <script type="text/javascript">
+               /* var knob = new Knob(document.getElementById('fan_slider'), new Ui.P1());
+                document.getElementById('fan_slider').addEventListener('change', function() {
+                          //knob.update(this.value);
+                          sliderChange(this.value);
+                        })*/
+            </script>
         </div> 
-            
-        <div id="modal1" class="modal bottom-sheet">
-            <div class="modal-content">
-                
-                <p>
-                    <form id="labnol" method="get" action="https://www.google.com/search">
-                    <input type="text" name="q" id="transcript" placeholder="Speak" />              
-                    </form>
-                Listening...
-                </p>
-            </div>
-            <div class="row">
-                <a href="#!" class=" modal-action modal-close waves-effect waves-green btn-flat"><center>Cancel</center></a>
-            </div>
-        </div>
-        
-        
-        
-
-        
-        
         </div>        
     </div>
 </div>
@@ -753,6 +803,12 @@
   <!-- TimerModal end -->  
 <script type="text/javascript" src="materialize.min.js"></script>
 <script type="text/javascript" src="smartSocket.js"></script>
+<script type="text/javascript">
+  var svg = document.getElementsByTagName("svg")[0];
+  var bbox = svg.getBBox();
+  var viewBox = [bbox.x, bbox.y, bbox.width, bbox.height].join(" ");
+  svg.setAttribute("viewBox", viewBox);
+</script>
 
 </body>
 </html>

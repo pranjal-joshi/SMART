@@ -22,6 +22,28 @@ var enable_textbox_id = 0;
 
 var ws = new WebSocket("ws://" + SERVER + ":" + PORT + "/");
 
+try{
+var knob = new Knob(document.getElementById('fan_slider'), new Ui.P1());
+var oldSliderVal = 0;
+var sliderLoopCount = 0;
+document.getElementById('fan_slider').addEventListener('change',function() {
+			  if(sliderLoopCount > 5){
+				sliderLoopCount = 0;
+				return;
+			  }
+                          knob.update(this.value); // this creates infinite loop.. AVOID
+			  sliderLoopCount++;
+			  if(this.value !== oldSliderVal){
+				  oldSliderVal = this.value;
+	                          sliderChange(this.value);
+				  console.log(this.value);
+			  }
+		});
+
+}
+catch(err){
+}
+
 function startDictation() {
  
     if (window.hasOwnProperty('webkitSpeechRecognition')) {
@@ -148,7 +170,8 @@ ws.onmessage = function(evt){
       document.getElementById("6").checked = Boolean(msg.data.deviceValues.d6);
       document.getElementById("7").checked = Boolean(msg.data.deviceValues.d7);
       document.getElementById("8").checked = Boolean(msg.data.deviceValues.d8);
-      document.getElementById("fan_slider").value = msg.data.speed;
+      //document.getElementById("fan_slider").value = msg.data.speed;
+      knob.update(msg.data.speed);
       document.getElementById("motionSwitch").checked = Boolean(msg.data.motionStatus);
       }
       catch(err){
@@ -169,7 +192,7 @@ ws.onmessage = function(evt){
         break;
       case "denied":
         $.cookie('smartLogin','denied',{expires:1, path:'/'});
-        Materialize.toast('Wronge password!', 2000);
+        Materialize.toast('Wrong password!', 2000);
         break;
       default:
         $('#errorModal').openModal();
@@ -385,7 +408,8 @@ ws.onmessage = function(evt){
     document.getElementById("6").checked = Boolean(msg.data.d6);
     document.getElementById("7").checked = Boolean(msg.data.d7);
     document.getElementById("8").checked = Boolean(msg.data.d8);
-    document.getElementById("fan_slider").value = msg.data.speed;
+    //document.getElementById("fan_slider").value = msg.data.speed;
+    knob.update(msg.data.speed);
   }
 
   else if(msg.type === "respGetProfile"){
