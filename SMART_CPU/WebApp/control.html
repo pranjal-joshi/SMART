@@ -56,7 +56,7 @@
       try{
         var x = $.cookie('smartLogin');
         if(x !== "grant"){
-          //location.href="reauth.html";
+          location.href="reauth.html";
         }
     }
       catch(err){}
@@ -125,11 +125,8 @@
                     <li><a href="#!" class="waves-effect"><span class="teal-text text-darken-2"><center style="font-size:18px" onclick="getRoom(this)" id="r6">Room 6</center></span></a></li>
                     <li><a href="#!" class="waves-effect"><span class="teal-text text-darken-2"><center style="font-size:18px" onclick="getRoom(this)" id="r7">Room 7</center></span></a></li>
                     <li><a href="#!" class="waves-effect"><span class="teal-text text-darken-2"><center style="font-size:18px" onclick="getRoom(this)" id="r8">Room 8</center></span></a></li>
-                </ul>
-        
-            <a href="#" data-activates="slide-out" class="button-collapse"><i class="material-icons">menu</i></a>
-            </div>
-            <svg>
+
+                    <svg>
               <filter id="dropshadow" height="150%" width="150%">
                   <feGaussianBlur in="SourceAlpha" stdDeviation="2"/>
                   <feOffset dx="0" dy="3" result="offsetblur"/>
@@ -184,10 +181,15 @@
                           />
               </filter>
           </svg>
+                </ul>
+        
+            <a href="#" data-activates="slide-out" class="button-collapse"><i class="material-icons">menu</i></a>
+            </div>
         </nav>
 	</div>
     </div>
     
+
 
 <div class="row">
     <div class="col m2 l3"></div>
@@ -803,12 +805,6 @@
   <!-- TimerModal end -->  
 <script type="text/javascript" src="materialize.min.js"></script>
 <script type="text/javascript" src="smartSocket.js"></script>
-<script type="text/javascript">
-  var svg = document.getElementsByTagName("svg")[0];
-  var bbox = svg.getBBox();
-  var viewBox = [bbox.x, bbox.y, bbox.width, bbox.height].join(" ");
-  svg.setAttribute("viewBox", viewBox);
-</script>
 
 </body>
 </html>

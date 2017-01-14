@@ -1,4 +1,3 @@
-
 //Author  : Pranjal P. Joshi
 //Date    : 0/11/2016
 //All rights reserved.
@@ -20,6 +19,8 @@ var updateTimer = 0;
 var color_change_var;
 var enable_textbox_id = 0;
 
+var oneTimeUpdate = 1;
+
 var ws = new WebSocket("ws://" + SERVER + ":" + PORT + "/");
 
 try{
@@ -27,18 +28,18 @@ var knob = new Knob(document.getElementById('fan_slider'), new Ui.P1());
 var oldSliderVal = 0;
 var sliderLoopCount = 0;
 document.getElementById('fan_slider').addEventListener('change',function() {
-			  if(sliderLoopCount > 5){
-				sliderLoopCount = 0;
-				return;
-			  }
-                          knob.update(this.value); // this creates infinite loop.. AVOID
-			  sliderLoopCount++;
-			  if(this.value !== oldSliderVal){
-				  oldSliderVal = this.value;
-	                          sliderChange(this.value);
-				  console.log(this.value);
-			  }
-		});
+        if(sliderLoopCount > 5){
+        sliderLoopCount = 0;
+        return;
+        }
+        //knob.update(this.value); // this creates infinite loop.. AVOID
+        sliderLoopCount++;
+        if(this.value !== oldSliderVal){
+          oldSliderVal = this.value;
+                            sliderChange(this.value);
+          console.log(this.value);
+        }
+    });
 
 }
 catch(err){
@@ -171,7 +172,10 @@ ws.onmessage = function(evt){
       document.getElementById("7").checked = Boolean(msg.data.deviceValues.d7);
       document.getElementById("8").checked = Boolean(msg.data.deviceValues.d8);
       //document.getElementById("fan_slider").value = msg.data.speed;
-      knob.update(msg.data.speed);
+      if(oneTimeUpdate){
+            oneTimeUpdate = 0;
+            knob.update(msg.data.speed);
+      }
       document.getElementById("motionSwitch").checked = Boolean(msg.data.motionStatus);
       }
       catch(err){
@@ -375,10 +379,10 @@ ws.onmessage = function(evt){
     var k=0;
     var j;
     for(k=1;k<9;k++){
-	j = "d" + k.toString();
-	if(document.getElementById(j).value === "None")
-		document.getElementById(j).value = '';
-	}
+  j = "d" + k.toString();
+  if(document.getElementById(j).value === "None")
+    document.getElementById(j).value = '';
+  }
     }
     catch(err){
       document.getElementById("pdn1").innerHTML = msg.data.deviceNames.d1;  // for profile config page.
@@ -409,7 +413,10 @@ ws.onmessage = function(evt){
     document.getElementById("7").checked = Boolean(msg.data.d7);
     document.getElementById("8").checked = Boolean(msg.data.d8);
     //document.getElementById("fan_slider").value = msg.data.speed;
-    knob.update(msg.data.speed);
+    if(oneTimeUpdate){
+        oneTimeUpdate = 0;
+        knob.update(msg.data.speed);
+    }
   }
 
   else if(msg.type === "respGetProfile"){
@@ -487,6 +494,7 @@ function getRoomNames(){
 function getRoom(room){
   var roomNo = room.id.split('');
   ROOM = roomNo[1];
+  oneTimeUpdate = 1;      // re-enable knob.update method on selecting new room.
   try{
   document.getElementById("navbarTitle").innerHTML = ROOM_NAMES[ROOM - 1];
   }
@@ -883,8 +891,8 @@ function getTimers(room){
 }
 
 function checkRoomEnable(id){
-	id = id.split('');
-	id = id[1].toString();
-	var chkId = "room" + id;
-	document.getElementById(chkId).checked = true;
+  id = id.split('');
+  id = id[1].toString();
+  var chkId = "room" + id;
+  document.getElementById(chkId).checked = true;
 }
