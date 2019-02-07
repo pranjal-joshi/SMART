@@ -85,17 +85,18 @@ void readWifiConfigFromFileSystem() {
         configFile.readBytes(fileBuf.get(),sz);
         DynamicJsonBuffer jBuf;
         JsonObject& json = jBuf.parseObject(configFile);
+        #ifdef DEBUG
+          Serial.println(F("[+] Parsed " WI_CONFIG_FILE " JSON Output:"));
+          json.printTo(Serial);
+        #endif
         if(json.success()) {
-          #ifdef DEBUG
-            Serial.println(F("[+] Parsed " WI_CONFIG_FILE " JSON Output:"));
-            json.printTo(Serial);
-          #endif
           strcpy(authToken,json["auth"]);
         }
         else {
           #ifdef DEBUG
             Serial.println(F("[+] Failed to load/parse " WI_CONFIG_FILE));
           #endif
+          SPIFFS.format();
         }
         configFile.close();
       }
@@ -120,6 +121,7 @@ void readWifiConfigFromFileSystem() {
       #ifdef DEBUG
         Serial.println(F("[+] Printing auto generated JSON " WI_CONFIG_FILE));
         json.printTo(Serial);
+        Serial.println();
       #endif
       json.printTo(configFile);
       configFile.close();
