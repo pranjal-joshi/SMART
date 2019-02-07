@@ -7,19 +7,19 @@
 
 // CONTROL DEBUG
 #define DEBUG       true
+#define WI_MGR_DBG  true
 #define BLYNK_PRINT Serial
 #define VERSION     "1.0"
 
-// HARDWARE CONFIG
-#define AP_MODE_SW  D3
-
 // WIRELESS CONFIG
 #define CLI_SSID    "The EVIL GENIUS"
-#define CLI_PASS    "samadhan118017"
+#define CLI_PASS    "samadhan1180170000"
 #define AUTH        "c04b185fe0e74f3ea6d6fabc6708a6dd"
 #define AP_SSID     "SMART-Node"
 #define AP_PASS     "node@smart"
-#define CON_TIMEOUT 8000
+#define CON_TIMEOUT 8*60
+#define WI_CONFIG_FILE "/wi_config.json"
+#define WI_SIG_QUALITY  15
 
 // VIRTUAL PINS FOR BLYNK APP
 #define V_TERM      100
