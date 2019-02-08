@@ -9,7 +9,7 @@
 #define DEBUG       1
 #define WI_MGR_DBG  1
 #define BLYNK_DBG   1
-#define RST_WI_MGR  1
+//#define RST_WI_MGR  1
 //#define RST_SPIFFS  1
 #define VERSION     "1.0"
 

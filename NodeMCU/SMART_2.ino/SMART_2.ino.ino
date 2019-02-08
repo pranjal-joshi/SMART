@@ -23,8 +23,8 @@ char deviceName[] = DEVICE_NAME;
 void setup() {
   Serial.begin(9600);
   bootDump();
-  readJsonConfigFromFileSystem();
   initWirelessAP();
+  readJsonConfigFromFileSystem();
   initBlynk();
 }
 
@@ -75,6 +75,7 @@ void initWirelessAP() {
     reboot();
   }
 
+  
   strcpy(authToken, blynkAuthToken.getValue());  
   strcpy(deviceName, blynkDeviceName.getValue()); 
 
@@ -126,7 +127,7 @@ void saveJsonConfigToFileSystem() {
 void readJsonConfigFromFileSystem() {
   if(SPIFFS.begin()) {
     #ifdef RST_SPIFFS
-      //SPIFFS.format();
+      SPIFFS.format();
     #endif
     #ifdef DEBUG
       Serial.println(F("[+] Mounting SPIFFS - readJsonConfig"));
@@ -143,13 +144,14 @@ void readJsonConfigFromFileSystem() {
         DynamicJsonBuffer jBuf;
         JsonObject& json = jBuf.parseObject(fileBuf.get());
         if(json.success()) {
-          strcpy(authToken,json["auth"]);
+          strcpy(authToken, json["auth"]);
+          strcpy(deviceName, json["deviceName"]);
           #ifdef DEBUG
             Serial.println(F("[+] Dumping parsed " WI_CONFIG_FILE " JSON Output:"));
             json.printTo(Serial);
-            Serial.println();
+            Serial.println(sizeof(authToken));
           #endif
-          if(authToken == "") {
+          if(sizeof(authToken) < 10) {
             #ifdef DEBUG
               Serial.println(F("[+] Empty Auth Token detected.. Resetting WiFi Settings for survival.."));
             #endif
