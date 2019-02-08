@@ -6,9 +6,11 @@
  */
 
 // CONTROL DEBUG
-#define DEBUG       true
-#define WI_MGR_DBG  true
-#define BLYNK_PRINT Serial
+#define DEBUG       1
+#define WI_MGR_DBG  1
+#define BLYNK_DBG   1
+#define RST_WI_MGR  1
+//#define RST_SPIFFS  1
 #define VERSION     "1.0"
 
 // WIRELESS CONFIG
@@ -19,6 +21,7 @@
 #define AP_PASS     "node@smart"
 #define CON_TIMEOUT 8*60
 #define WI_CONFIG_FILE "/sys_config.json"
+#define DEVICE_NAME    "ROOM_NAME"
 #define WI_SIG_QUALITY  15
 
 // VIRTUAL PINS FOR BLYNK APP

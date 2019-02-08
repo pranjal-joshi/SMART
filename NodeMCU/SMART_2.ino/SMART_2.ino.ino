@@ -1,4 +1,10 @@
-
+/*
+ * SMART_2.0 NODE
+ * AUTHOR   :   PRANJAL JOSHI
+ * DATE     :   02/06/2019
+ * ALL RIGHTS RESERVED.
+ */
+ 
 #include<FS.h>
 #include<BlynkSimpleEsp8266.h>
 #include<ArduinoJson.h>
@@ -10,18 +16,21 @@
 
 long lastAttemptToConnect = millis();
 bool SAVE_WI_AP_CALLBACK_FLAG = false;
-char authToken[] = AUTH;
+bool DONT_COPY = true;
+char authToken[] = "";
+char deviceName[] = DEVICE_NAME;
 
 void setup() {
   Serial.begin(9600);
   bootDump();
   readJsonConfigFromFileSystem();
   initWirelessAP();
+  initBlynk();
 }
 
 void loop() {
   if(WiFi.status() == WL_CONNECTED) {
-    // run blynk here
+    Blynk.run();
   }
   else {
     if(millis() - lastAttemptToConnect > CON_TIMEOUT/8) {
@@ -47,17 +56,30 @@ void disableLedOnBlynkConnect() {
 void initWirelessAP() {
   WiFiManager wifiMgr;
   WiFiManagerParameter blynkAuthToken("auth","Enter Scanned Key Here..","",32);
-  
-  //wifiMgr.resetSettings();
+  WiFiManagerParameter blynkDeviceName("deviceName","Enter Device Name E.g: Bedroom","",32);
+  #ifdef RST_WI_MGR
+    wifiMgr.resetSettings();
+  #endif
   wifiMgr.setDebugOutput(WI_MGR_DBG);
   wifiMgr.setMinimumSignalQuality(WI_SIG_QUALITY);
   wifiMgr.setTimeout(CON_TIMEOUT);
   wifiMgr.addParameter(&blynkAuthToken);
+  wifiMgr.addParameter(&blynkDeviceName);
+  wifiMgr.setSaveConfigCallback(saveWirelessAPConfigCallback);
+  
   if(!wifiMgr.autoConnect(AP_SSID, AP_PASS)) {
     #ifdef DEBUG
       Serial.println(F("[+] Failed to connect WiFi & Timed out!"));
       delay(2000);
     #endif
+    reboot();
+  }
+
+  strcpy(authToken, blynkAuthToken.getValue());  
+  strcpy(deviceName, blynkDeviceName.getValue()); 
+
+  if(SAVE_WI_AP_CALLBACK_FLAG) {
+    saveJsonConfigToFileSystem();
     reboot();
   }
 }
@@ -69,10 +91,45 @@ void saveWirelessAPConfigCallback() {
   SAVE_WI_AP_CALLBACK_FLAG = true;
 }
 
-void readJsonConfigFromFileSystem() {
+void saveJsonConfigToFileSystem() {
   if(SPIFFS.begin()) {
     #ifdef DEBUG
-      Serial.println(F("[+] Mounting SPIFFS"));
+      Serial.println(F("[+] Mounting SPIFFS - saveJsonConfig"));
+    #endif
+    File configFile = SPIFFS.open(WI_CONFIG_FILE,"w");
+      if(!configFile) {
+        #ifdef DEBUG
+          Serial.println(F("[+] Failed to open " WI_CONFIG_FILE));
+        #endif
+      }
+      DynamicJsonBuffer jBuf;
+      JsonObject& json = jBuf.createObject();
+      json["auth"] = authToken;
+      json["deviceName"] = deviceName;
+      #ifdef DEBUG
+        Serial.println(F("[+] Printing user generated JSON " WI_CONFIG_FILE));
+        json.printTo(Serial);
+        Serial.println();
+      #endif
+      json.printTo(configFile);
+      configFile.close();
+  }
+  else {
+    #ifdef DEBUG
+      Serial.println(F("[+] Failed to mount SPIFFS!"));
+    #endif
+    reboot();
+  }
+  SAVE_WI_AP_CALLBACK_FLAG = false;
+}
+
+void readJsonConfigFromFileSystem() {
+  if(SPIFFS.begin()) {
+    #ifdef RST_SPIFFS
+      //SPIFFS.format();
+    #endif
+    #ifdef DEBUG
+      Serial.println(F("[+] Mounting SPIFFS - readJsonConfig"));
     #endif
     if(SPIFFS.exists(WI_CONFIG_FILE)) {
       #ifdef DEBUG
@@ -92,6 +149,14 @@ void readJsonConfigFromFileSystem() {
             json.printTo(Serial);
             Serial.println();
           #endif
+          if(authToken == "") {
+            #ifdef DEBUG
+              Serial.println(F("[+] Empty Auth Token detected.. Resetting WiFi Settings for survival.."));
+            #endif
+            WiFiManager wifiMgr;
+            wifiMgr.resetSettings();
+            reboot();
+          }
         }
         else {
           #ifdef DEBUG
@@ -144,7 +209,17 @@ void reboot() {
     Serial.println(F("[+] Reboot Requested. Rebooting system in 3 Seconds.."));
   #endif
   delay(3000);
-  ESP.restart();
+  ESP.reset();
+}
+
+void initBlynk() {
+  #ifdef DEBUG
+    Serial.print(F("[+] Connecting to Blynk cloud with token: "));
+    Serial.println(authToken);
+    #define BLYNK_PRINT Serial
+  #endif
+  Blynk.config(authToken);
+  Blynk.connect();
 }
 
 BLYNK_CONNECTED() {
