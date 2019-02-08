@@ -15,7 +15,7 @@ char authToken[] = AUTH;
 void setup() {
   Serial.begin(9600);
   bootDump();
-  readWifiConfigFromFileSystem();
+  readJsonConfigFromFileSystem();
   initWirelessAP();
 }
 
@@ -69,7 +69,7 @@ void saveWirelessAPConfigCallback() {
   SAVE_WI_AP_CALLBACK_FLAG = true;
 }
 
-void readWifiConfigFromFileSystem() {
+void readJsonConfigFromFileSystem() {
   if(SPIFFS.begin()) {
     #ifdef DEBUG
       Serial.println(F("[+] Mounting SPIFFS"));
@@ -84,19 +84,20 @@ void readWifiConfigFromFileSystem() {
         std::unique_ptr<char[]> fileBuf(new char[sz]);
         configFile.readBytes(fileBuf.get(),sz);
         DynamicJsonBuffer jBuf;
-        JsonObject& json = jBuf.parseObject(configFile);
-        #ifdef DEBUG
-          Serial.println(F("[+] Parsed " WI_CONFIG_FILE " JSON Output:"));
-          json.printTo(Serial);
-        #endif
+        JsonObject& json = jBuf.parseObject(fileBuf.get());
         if(json.success()) {
           strcpy(authToken,json["auth"]);
+          #ifdef DEBUG
+            Serial.println(F("[+] Dumping parsed " WI_CONFIG_FILE " JSON Output:"));
+            json.printTo(Serial);
+            Serial.println();
+          #endif
         }
         else {
           #ifdef DEBUG
             Serial.println(F("[+] Failed to load/parse " WI_CONFIG_FILE));
+            Serial.println(F("[+] Formatting SPIFFS partition.. " WI_CONFIG_FILE));
           #endif
-          SPIFFS.format();
         }
         configFile.close();
       }
@@ -107,8 +108,10 @@ void readWifiConfigFromFileSystem() {
       }
     } else {
       #ifdef DEBUG
+        Serial.println(F("[+] Formatting SPIFFS partition.."));
         Serial.println(F("[+] " WI_CONFIG_FILE " not found! Creating.."));
       #endif
+      SPIFFS.format();
       File configFile = SPIFFS.open(WI_CONFIG_FILE,"w");
       if(!configFile) {
         #ifdef DEBUG
@@ -117,7 +120,8 @@ void readWifiConfigFromFileSystem() {
       }
       DynamicJsonBuffer jBuf;
       JsonObject& json = jBuf.createObject();
-      json["auth"] = "AUTO_GENERATED_AUTH_TOKEN";
+      json["auth"] = F("SAVE_BLYNK_AUTH_TOKEN_HERE");
+      json["deviceName"] = F("DEVICE_NAME E.g. Bedroom");
       #ifdef DEBUG
         Serial.println(F("[+] Printing auto generated JSON " WI_CONFIG_FILE));
         json.printTo(Serial);

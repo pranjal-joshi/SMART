@@ -18,7 +18,7 @@
 #define AP_SSID     "SMART-Node"
 #define AP_PASS     "node@smart"
 #define CON_TIMEOUT 8*60
-#define WI_CONFIG_FILE "/wi_config.json"
+#define WI_CONFIG_FILE "/sys_config.json"
 #define WI_SIG_QUALITY  15
 
 // VIRTUAL PINS FOR BLYNK APP
