@@ -25,12 +25,12 @@ void setup() {
   bootDump();
   initWirelessAP();
   readJsonConfigFromFileSystem();
-  initBlynk();
+  //initBlynk();
 }
 
 void loop() {
   if(WiFi.status() == WL_CONNECTED) {
-    Blynk.run();
+    //Blynk.run();
   }
   else {
     if(millis() - lastAttemptToConnect > CON_TIMEOUT/8) {
@@ -146,12 +146,13 @@ void readJsonConfigFromFileSystem() {
         if(json.success()) {
           strcpy(authToken, json["auth"]);
           strcpy(deviceName, json["deviceName"]);
+          String authTokenString(authToken);
           #ifdef DEBUG
             Serial.println(F("[+] Dumping parsed " WI_CONFIG_FILE " JSON Output:"));
             json.printTo(Serial);
-            Serial.println(sizeof(authToken));
+            Serial.println(authTokenString.length());
           #endif
-          if(sizeof(authToken) < 10) {
+          if(authTokenString.length() < 10) {
             #ifdef DEBUG
               Serial.println(F("[+] Empty Auth Token detected.. Resetting WiFi Settings for survival.."));
             #endif
