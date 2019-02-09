@@ -6,6 +6,7 @@
  */
  
 #include<FS.h>
+#include<Blynk.h>
 #include<BlynkSimpleEsp8266.h>
 #include<ArduinoJson.h>
 #include<ESP8266WiFi.h>
@@ -16,8 +17,7 @@
 
 long lastAttemptToConnect = millis();
 bool SAVE_WI_AP_CALLBACK_FLAG = false;
-bool DONT_COPY = true;
-char authToken[] = "";
+char authToken[32];
 char deviceName[] = DEVICE_NAME;
 
 void setup() {
@@ -25,12 +25,12 @@ void setup() {
   bootDump();
   initWirelessAP();
   readJsonConfigFromFileSystem();
-  //initBlynk();
+  initBlynk();
 }
 
 void loop() {
   if(WiFi.status() == WL_CONNECTED) {
-    //Blynk.run();
+    Blynk.run();
   }
   else {
     if(millis() - lastAttemptToConnect > CON_TIMEOUT/8) {
@@ -55,7 +55,7 @@ void disableLedOnBlynkConnect() {
 
 void initWirelessAP() {
   WiFiManager wifiMgr;
-  WiFiManagerParameter blynkAuthToken("auth","Enter Scanned Key Here..","",32);
+  WiFiManagerParameter blynkAuthToken("auth","Enter Scanned Key Here..","",33);
   WiFiManagerParameter blynkDeviceName("deviceName","Enter Device Name E.g: Bedroom","",32);
   #ifdef RST_WI_MGR
     wifiMgr.resetSettings();
@@ -75,7 +75,6 @@ void initWirelessAP() {
     reboot();
   }
 
-  
   strcpy(authToken, blynkAuthToken.getValue());  
   strcpy(deviceName, blynkDeviceName.getValue()); 
 
@@ -222,7 +221,9 @@ void initBlynk() {
     #define BLYNK_PRINT Serial
   #endif
   Blynk.config(authToken);
-  Blynk.connect();
+  while(!Blynk.connected()) {
+    Blynk.connect();
+  }
 }
 
 BLYNK_CONNECTED() {
