@@ -19,6 +19,7 @@ long lastAttemptToConnect = millis();
 bool SAVE_WI_AP_CALLBACK_FLAG = false;
 char authToken[32];
 char deviceName[] = DEVICE_NAME;
+BlynkTimer blynkTimer;
 
 void setup() {
   Serial.begin(9600);
@@ -28,9 +29,11 @@ void setup() {
   initBlynk();
 }
 
+
 void loop() {
   if(WiFi.status() == WL_CONNECTED) {
     Blynk.run();
+    blynkTimer.run();
   }
   else {
     if(millis() - lastAttemptToConnect > CON_TIMEOUT/8) {
@@ -58,6 +61,7 @@ void initWirelessAP() {
   WiFiManagerParameter blynkAuthToken("auth","Enter Scanned Key Here..","",33);
   WiFiManagerParameter blynkDeviceName("deviceName","Enter Device Name E.g: Bedroom","",32);
   #ifdef RST_WI_MGR
+    Serial.println(F("[+] RST_WI_MGR is enabled through program. Resetting WiFi Config. EVERYTIME!! COMMENT THIS LATER"));
     wifiMgr.resetSettings();
   #endif
   wifiMgr.setDebugOutput(WI_MGR_DBG);
@@ -126,6 +130,8 @@ void saveJsonConfigToFileSystem() {
 void readJsonConfigFromFileSystem() {
   if(SPIFFS.begin()) {
     #ifdef RST_SPIFFS
+      Serial.println(F("[+] RST_SPIFFS is enabled through program. Formatting SPIFFS EVERYTIME!! COMMENT THIS LATER!"));
+      Serial.flush();
       SPIFFS.format();
     #endif
     #ifdef DEBUG
@@ -151,7 +157,7 @@ void readJsonConfigFromFileSystem() {
             json.printTo(Serial);
             Serial.println(authTokenString.length());
           #endif
-          if(authTokenString.length() < 10) {
+          if(authTokenString.length() < 32) {
             #ifdef DEBUG
               Serial.println(F("[+] Empty Auth Token detected.. Resetting WiFi Settings for survival.."));
             #endif
