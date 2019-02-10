@@ -16,10 +16,11 @@
 #include "config.h"
 
 long lastAttemptToConnect = millis();
-bool SAVE_WI_AP_CALLBACK_FLAG = false;
 char authToken[32];
 char deviceName[] = DEVICE_NAME;
 BlynkTimer blynkTimer;
+WiFiManagerParameter blynkAuthToken("auth","Enter Scanned Key Here..","",33);
+WiFiManagerParameter blynkDeviceName("deviceName","Enter Device Name E.g: Bedroom","",32);
 
 void setup() {
   Serial.begin(9600);
@@ -58,8 +59,6 @@ void disableLedOnBlynkConnect() {
 
 void initWirelessAP() {
   WiFiManager wifiMgr;
-  WiFiManagerParameter blynkAuthToken("auth","Enter Scanned Key Here..","",33);
-  WiFiManagerParameter blynkDeviceName("deviceName","Enter Device Name E.g: Bedroom","",32);
   #ifdef RST_WI_MGR
     Serial.println(F("[+] RST_WI_MGR is enabled through program. Resetting WiFi Config. EVERYTIME!! COMMENT THIS LATER"));
     wifiMgr.resetSettings();
@@ -78,24 +77,19 @@ void initWirelessAP() {
     #endif
     reboot();
   }
-
-  strcpy(authToken, blynkAuthToken.getValue());  
-  strcpy(deviceName, blynkDeviceName.getValue()); 
-
-  if(SAVE_WI_AP_CALLBACK_FLAG) {
-    saveJsonConfigToFileSystem();
-    reboot();
-  }
 }
 
 void saveWirelessAPConfigCallback() {
   #ifdef DEBUG
     Serial.println(F("[+] SAVE_WI_AP_CALLBACK_TRIGGER"));
   #endif
-  SAVE_WI_AP_CALLBACK_FLAG = true;
+  strcpy(authToken, blynkAuthToken.getValue());  
+  strcpy(deviceName, blynkDeviceName.getValue());
+  saveJsonConfigToFileSystem(authToken, deviceName);
+  reboot();
 }
 
-void saveJsonConfigToFileSystem() {
+void saveJsonConfigToFileSystem(char authTokenLocal[], char deviceNameLocal[]) {
   if(SPIFFS.begin()) {
     #ifdef DEBUG
       Serial.println(F("[+] Mounting SPIFFS - saveJsonConfig"));
@@ -108,8 +102,8 @@ void saveJsonConfigToFileSystem() {
       }
       DynamicJsonBuffer jBuf;
       JsonObject& json = jBuf.createObject();
-      json["auth"] = authToken;
-      json["deviceName"] = deviceName;
+      json["auth"] = authTokenLocal;
+      json["deviceName"] = deviceNameLocal;
       #ifdef DEBUG
         Serial.println(F("[+] Printing user generated JSON " WI_CONFIG_FILE));
         json.printTo(Serial);
@@ -124,7 +118,6 @@ void saveJsonConfigToFileSystem() {
     #endif
     reboot();
   }
-  SAVE_WI_AP_CALLBACK_FLAG = false;
 }
 
 void readJsonConfigFromFileSystem() {
@@ -159,10 +152,11 @@ void readJsonConfigFromFileSystem() {
           #endif
           if(authTokenString.length() < 32) {
             #ifdef DEBUG
-              Serial.println(F("[+] Empty Auth Token detected.. Resetting WiFi Settings for survival.."));
+              Serial.println(F("[+] Empty Auth Token detected.. Resetting WiFi Settings & formatting SPIFFS for survival.."));
             #endif
             WiFiManager wifiMgr;
             wifiMgr.resetSettings();
+            SPIFFS.format();
             reboot();
           }
         }
