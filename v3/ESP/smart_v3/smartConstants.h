@@ -9,10 +9,12 @@
 #ifndef SMARTCONSTANTS_H
 #define SMARTCONSTANTS_H
 
+bool mDebug = true;           // Master debug control
+
 // WiFi Manager constants
-#define AP_SSID "SMART"
+
 #define AP_PASS "12345678"
 #define MIN_SIG 10
-#define CON_TIMEOUT 10*60
+#define CON_TIMEOUT 30 //10*60
 
 #endif
