@@ -10,8 +10,9 @@
 #define SMARTCONSTANTS_H
 
 // WiFi Manager constants
-#define AP_SSID "SMART_"+String(ESP.getChipId())
+#define AP_SSID "SMART"
 #define AP_PASS "12345678"
 #define MIN_SIG 10
+#define CON_TIMEOUT 10*60
 
 #endif
