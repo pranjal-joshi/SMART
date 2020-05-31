@@ -11,25 +11,25 @@
 
 #include <ArduinoJson.h>
 
-typedef enum smartFileSystemFlags {
+typedef enum SmartFileSystemFlags {
   FileWriteOk,
   FileReadOk,
   FileOpenError,
   SPIFFSError,
-}smartFileSystemFlags_t;
+}SmartFileSystemFlags_t;
 
-class smartFileSystem {
+class SmartFileSystem {
   public:
-    smartFileSystem(void);
+    SmartFileSystem(void);
     void setDebug(bool);
     void format(void);
     void remove(const char *fn);
-    smartFileSystemFlags_t saveJsonFile(const JsonDocument&, const char*);
-    smartFileSystemFlags_t readJsonFile(JsonDocument *doc, const char* fn);
-    smartFileSystemFlags_t addConfig(char* key, String val);
-    smartFileSystemFlags_t addConfig(char* key, double val);
-    smartFileSystemFlags_t addConfig(char* key, int val);
-    smartFileSystemFlags_t removeConfig(char* key);
+    SmartFileSystemFlags_t saveJsonFile(const JsonDocument&, const char*);
+    SmartFileSystemFlags_t readJsonFile(JsonDocument *doc, const char* fn);
+    SmartFileSystemFlags_t addConfig(char* key, String val);
+    SmartFileSystemFlags_t addConfig(char* key, double val);
+    SmartFileSystemFlags_t addConfig(char* key, int val);
+    SmartFileSystemFlags_t removeConfig(char* key);
     DynamicJsonDocument readConfigFile(void);
   private:
     bool DEBUG;

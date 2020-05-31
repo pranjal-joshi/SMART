@@ -7,34 +7,34 @@
  */
 
 #include <FS.h>
-#include "smartFilesystem.h"
+#include "SmartFilesystem.h"
 
-#define DBG_FS String("[+] smartFileSystem: ")
+#define DBG_FS String("[+] SmartFileSystem: ")
 #define CONF_FILE "/config.json"
 #define JSON_BUF_SIZE 1024*2
 
 bool DEBUG = false;
 
-smartFileSystem::smartFileSystem(void) {
+SmartFileSystem::SmartFileSystem(void) {
   SPIFFS.begin();
 }
 
-void smartFileSystem::setDebug(bool dbg) {
+void SmartFileSystem::setDebug(bool dbg) {
   DEBUG = dbg;
 }
 
-void smartFileSystem::printDebug(String c) {
+void SmartFileSystem::printDebug(String c) {
   String p = String(c);
   Serial.println(DBG_FS+p);
 }
 
-void smartFileSystem::remove(const char *fn) {
+void SmartFileSystem::remove(const char *fn) {
   SPIFFS.remove(fn);
   if(DEBUG)
     printDebug("INFO: File Removed - " + String(fn));
 }
 
-void smartFileSystem::format(void) {
+void SmartFileSystem::format(void) {
   if(DEBUG)
     printDebug("INFO: Formatting SPIFFS, Please wait!");
   SPIFFS.format();
@@ -42,7 +42,7 @@ void smartFileSystem::format(void) {
     printDebug("INFO: SPIFFS formatted.");
 }
 
-smartFileSystemFlags_t smartFileSystem::saveJsonFile(const JsonDocument& jsonDoc, const char *fn) {
+SmartFileSystemFlags_t SmartFileSystem::saveJsonFile(const JsonDocument& jsonDoc, const char *fn) {
   if(SPIFFS.begin()) {
     char jsonChar[] = "";
     File f = SPIFFS.open(fn,"w");
@@ -72,7 +72,7 @@ smartFileSystemFlags_t smartFileSystem::saveJsonFile(const JsonDocument& jsonDoc
   }
 }
 
-smartFileSystemFlags_t smartFileSystem::readJsonFile(JsonDocument *doc, const char* fn) {
+SmartFileSystemFlags_t SmartFileSystem::readJsonFile(JsonDocument *doc, const char* fn) {
   if(SPIFFS.begin()) {
     uint16_t i;
     char buf[JSON_BUF_SIZE];
@@ -103,7 +103,7 @@ smartFileSystemFlags_t smartFileSystem::readJsonFile(JsonDocument *doc, const ch
   }
 }
 
-smartFileSystemFlags_t smartFileSystem::addConfig(char* key, String val) {
+SmartFileSystemFlags_t SmartFileSystem::addConfig(char* key, String val) {
   DynamicJsonDocument doc(JSON_BUF_SIZE);
   readJsonFile(&doc,CONF_FILE);
   serializeJson(doc,Serial);
@@ -121,7 +121,7 @@ smartFileSystemFlags_t smartFileSystem::addConfig(char* key, String val) {
   return saveJsonFile(doc, CONF_FILE);
 }
 
-smartFileSystemFlags_t smartFileSystem::addConfig(char* key, double val) {
+SmartFileSystemFlags_t SmartFileSystem::addConfig(char* key, double val) {
   DynamicJsonDocument doc(JSON_BUF_SIZE);
   readJsonFile(&doc,CONF_FILE);
   doc[String(key)] = val;
@@ -137,7 +137,7 @@ smartFileSystemFlags_t smartFileSystem::addConfig(char* key, double val) {
   return saveJsonFile(doc, CONF_FILE);
 }
 
-smartFileSystemFlags_t smartFileSystem::addConfig(char* key, int val) {
+SmartFileSystemFlags_t SmartFileSystem::addConfig(char* key, int val) {
   DynamicJsonDocument doc(JSON_BUF_SIZE);
   readJsonFile(&doc,CONF_FILE);
   doc[String(key)] = val;
@@ -153,7 +153,7 @@ smartFileSystemFlags_t smartFileSystem::addConfig(char* key, int val) {
   return saveJsonFile(doc, CONF_FILE);
 }
 
-smartFileSystemFlags_t smartFileSystem::removeConfig(char* key) {
+SmartFileSystemFlags_t SmartFileSystem::removeConfig(char* key) {
   DynamicJsonDocument doc(JSON_BUF_SIZE);
   readJsonFile(&doc,CONF_FILE);
   doc.remove(key);
@@ -169,7 +169,7 @@ smartFileSystemFlags_t smartFileSystem::removeConfig(char* key) {
   return saveJsonFile(doc, CONF_FILE);
 }
 
-DynamicJsonDocument smartFileSystem::readConfigFile(void) {
+DynamicJsonDocument SmartFileSystem::readConfigFile(void) {
   DynamicJsonDocument doc(JSON_BUF_SIZE);
   readJsonFile(&doc, CONF_FILE);
   return doc;
