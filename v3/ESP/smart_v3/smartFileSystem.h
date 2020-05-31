@@ -31,6 +31,7 @@ class SmartFileSystem {
     SmartFileSystemFlags_t addConfig(char* key, int val);
     SmartFileSystemFlags_t removeConfig(char* key);
     DynamicJsonDocument readConfigFile(void);
+    bool isConfigEmpty(void);
   private:
     bool DEBUG;
     void printDebug(String);

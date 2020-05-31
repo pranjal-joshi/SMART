@@ -8,6 +8,7 @@
 
 #include <FS.h>
 #include "SmartFilesystem.h"
+#include "SmartConstants.h"
 
 #define DBG_FS String("[+] SmartFileSystem: ")
 #define CONF_FILE "/config.json"
@@ -61,7 +62,6 @@ SmartFileSystemFlags_t SmartFileSystem::saveJsonFile(const JsonDocument& jsonDoc
       Serial.print("DATA: ");
       serializeJson(jsonDoc, Serial);
       Serial.println();
-      Serial.flush();
     }
     return FileWriteOk;
   }
@@ -92,7 +92,6 @@ SmartFileSystemFlags_t SmartFileSystem::readJsonFile(JsonDocument *doc, const ch
       Serial.print("DATA: ");
       serializeJson(*doc, Serial);
       Serial.println();
-      Serial.flush();
     }
     return FileReadOk;
   }
@@ -116,7 +115,6 @@ SmartFileSystemFlags_t SmartFileSystem::addConfig(char* key, String val) {
     Serial.print(DBG_FS);
     Serial.print("DATA: ");
     Serial.println(val);
-    Serial.flush();
   }
   return saveJsonFile(doc, CONF_FILE);
 }
@@ -132,7 +130,6 @@ SmartFileSystemFlags_t SmartFileSystem::addConfig(char* key, double val) {
     Serial.print(DBG_FS);
     Serial.print("DATA: ");
     Serial.println(val);
-    Serial.flush();
   }
   return saveJsonFile(doc, CONF_FILE);
 }
@@ -148,7 +145,6 @@ SmartFileSystemFlags_t SmartFileSystem::addConfig(char* key, int val) {
     Serial.print(DBG_FS);
     Serial.print("DATA: ");
     Serial.println(val);
-    Serial.flush();
   }
   return saveJsonFile(doc, CONF_FILE);
 }
@@ -164,7 +160,6 @@ SmartFileSystemFlags_t SmartFileSystem::removeConfig(char* key) {
     Serial.print(DBG_FS);
     Serial.print("DATA: ");
     Serial.println(key);
-    Serial.flush();
   }
   return saveJsonFile(doc, CONF_FILE);
 }
@@ -173,4 +168,22 @@ DynamicJsonDocument SmartFileSystem::readConfigFile(void) {
   DynamicJsonDocument doc(JSON_BUF_SIZE);
   readJsonFile(&doc, CONF_FILE);
   return doc;
+}
+
+bool SmartFileSystem::isConfigEmpty(void) {
+  DynamicJsonDocument cf(JSON_BUF_SIZE);
+  SmartFileSystemFlags_t flag = readJsonFile(&cf, CONF_FILE);
+  if(flag == FileOpenError || flag == SPIFFSError)
+    if(DEBUG)
+        printDebug("ERROR: Can't read the config file!");
+    return true;
+  if(cf[CONF_SSID] == NULL || cf[CONF_PASS] == NULL || cf[CONF_USERNAME] == NULL ||
+     cf[CONF_NODENAME] == NULL || cf[CONF_MQTT_IP] == NULL || cf[CONF_MQTT_PORT] == NULL) {
+      if(DEBUG)
+        printDebug("INFO: Config file is Empty!");
+      return true;
+     }
+  if(DEBUG)
+    printDebug("INFO: Config file is not Empty.");
+  return false;
 }
