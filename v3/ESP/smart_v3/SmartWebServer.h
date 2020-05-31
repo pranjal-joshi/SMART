@@ -16,7 +16,7 @@
 
 class SmartWebServer {
   public:
-    smartWebServer(void);
+    SmartWebServer(void);
     void setDebug(bool);
     void begin(String ssid, String pass);
   private:

@@ -46,14 +46,14 @@ void SmartWebServer::setDebug(bool d) {
 
 void SmartWebServer::begin(String ssid, String pass) {
   WiFi.softAP(ssid,pass);
-  while(WiFi.status() != WL_CONNECTED);
   if(SWS_DEBUG) {
     Serial.println(F("[+] SmartWebServer: INFO: Starting SmartWebServer in AP mode."));
-    Serial.print(F("[+] SmartWebServer: IP"));
+    Serial.print(F("[+] SmartWebServer: IP: "));
     Serial.println(WiFi.softAPIP());
   }
   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
     request->send_P(200, "text/html", index_html);
   });
+  // TODO - Handle input text data tutorial -> https://randomnerdtutorials.com/esp32-esp8266-input-data-html-form/
   server.begin();
 }
