@@ -5,13 +5,12 @@
  * ALL RIGHTS RESERVED.
  */
 
+#include <painlessMesh.h>
+#include <PubSubClient.h>
+#include <WiFiClient.h>
 #include "SmartFileSystem.h"
 #include "SmartWebServer.h"
 #include "SmartConstants.h"
-#include <PubSubClient.h>
-#include <WiFiClient.h>
-#include <ArduinoJson.h>
-#include <painlessMesh.h>
 
 bool mDebug = true;
 
@@ -47,9 +46,13 @@ void setup() {
   else {
     confJson = fsys.readConfigFile();
   }
-  
+  Serial.print(F("[+] SMART: INFO -> SSID: "));
+  //serializeJson(confJson[CONF_SSID], Serial);
+  Serial.println(confJson[CONF_SSID].as<const char*>());
+  Serial.print(F("[+] SMART: INFO -> PASS: "));
+  //serializeJson(confJson[CONF_PASS], Serial);
+  Serial.println(confJson[CONF_PASS].as<const char*>());
   WiFi.begin((const char*)confJson[CONF_SSID], (const char*)confJson[CONF_PASS]);
-
   while (WiFi.status() != WL_CONNECTED) {
     delay(500);
     Serial.print(".");
@@ -60,14 +63,11 @@ void setup() {
   Serial.println(WiFi.channel());
   unsigned int ch = WiFi.channel();
   WiFi.disconnect();
-
-  const char *ssid = confJson[CONF_SSID];
-  const char *pass = confJson[CONF_PASS];
   
-  /*mesh.setDebugMsgTypes( ERROR | STARTUP | CONNECTION );
+  mesh.setDebugMsgTypes( ERROR | STARTUP | CONNECTION );
   mesh.init(MESH_SSID,MESH_PASS,MESH_PORT,WIFI_AP_STA,ch);
-  mesh.stationManual(ssid, pass);
-  mesh.setHostname(getSmartSSID());*/
+  mesh.stationManual((const char*)confJson[CONF_SSID], (const char*)confJson[CONF_PASS]);
+  mesh.setHostname(getSmartSSID());
 
   initMqttClient();
 }
