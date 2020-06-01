@@ -18,9 +18,8 @@ class SmartWebServer {
   public:
     SmartWebServer(void);
     void setDebug(bool);
-    void begin(String ssid, String pass);
+    void begin(const char* ssid, const char* pass);
   private:
-    bool SWS_DEBUG;
 };
 
 #endif
