@@ -24,14 +24,37 @@ WiFiClient wiCli;
 IPAddress mqttIpAddress;
 PubSubClient mqtt(wiCli);
 
+DynamicJsonDocument confJson(1024*2);
+
 void setup() {
   Serial.begin(115200);
   Serial.println();
+  
   fsys.setDebug(mDebug);
   if(fsys.isConfigEmpty()) {
     configServer.setDebug(mDebug);
     configServer.begin(getSmartSSID(),AP_PASS);
+    while(fsys.isConfigEmpty()) {
+      // Stay here until config isn't provided!
+      delay(2000);
+      if(mDebug)
+        Serial.println(F("[+] SMART: INFO -> Blocking to obtain config.."));
+    }
   }
+  else {
+    confJson = fsys.readConfigFile();
+  }
+  
+  WiFi.begin((const char*)confJson[CONF_SSID], (const char*)confJson[CONF_PASS]);
+
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+  Serial.println("");
+  Serial.println("WiFi connected");
+  Serial.print("Channel: ");
+  Serial.println(WiFi.channel());
   /*
   mesh.setDebugMsgTypes( ERROR | STARTUP | CONNECTION );
   
@@ -57,9 +80,9 @@ void loop() {
   }*/
 }
 
-char * getSmartSSID() {
-  char n[20] = "";
-  String(String("SMART_")+String(ESP.getChipId(),HEX)).toCharArray(n,13);
+const char * getSmartSSID() {
+  char n[14];
+  snprintf(n, 14, "SMART_%08X", (uint32_t)ESP.getChipId());
   return n;
 }
 
