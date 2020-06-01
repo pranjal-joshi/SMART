@@ -12,17 +12,12 @@
 #include <PubSubClient.h>
 #include <WiFiClient.h>
 
+bool mDebug = true;
+
 SmartFileSystem fsys;
 SmartFileSystemFlags_t flag;
 
 SmartWebServer configServer;
-
-/*WiFiManagerParameter configUserName(CONF_USERNAME,"Registered username..","",32);
-WiFiManagerParameter configNodeName(CONF_NODENAME,"Device name or Room name","",32);
-WiFiManagerParameter configMqttServerIp(CONF_MQTT_IP,"IoT Server IP",MQTT_SERVER_IP,15);
-WiFiManagerParameter configMqttServerPort(CONF_MQTT_PORT,"IoT Server port",MQTT_SERVER_PORT,4);
-WiFiManagerParameter configWifiChannel(CONF_WIFI_CH,"WiFi Channel","6",2);*/
-
 
 void mqttCallback(char* topic, byte* payload, unsigned int length) {}     //write MQTT callback here
 WiFiClient wiCli;
@@ -32,13 +27,11 @@ PubSubClient mqtt(wiCli);
 void setup() {
   Serial.begin(115200);
   Serial.println();
-  fsys.setDebug(true);
+  fsys.setDebug(mDebug);
   if(fsys.isConfigEmpty()) {
-    configServer.setDebug(true);
+    configServer.setDebug(mDebug);
     configServer.begin(getSmartSSID(),AP_PASS);
   }
-  //fsys.addConfig("a","b");
-  fsys.format();
   /*
   mesh.setDebugMsgTypes( ERROR | STARTUP | CONNECTION );
   
@@ -64,10 +57,9 @@ void loop() {
   }*/
 }
 
-String getSmartSSID() {
-  char n[] = "";
-  //String(String("SMART_")+String(ESP.getChipId(),HEX)).toCharArray(n,12);
-  String(String("SMART_")+String(ESP.getChipId(),HEX)).toUpperCase();
+char * getSmartSSID() {
+  char n[20] = "";
+  String(String("SMART_")+String(ESP.getChipId(),HEX)).toCharArray(n,13);
   return n;
 }
 
@@ -76,38 +68,4 @@ String getSmartSSID() {
   mqtt.setCallback(mqttCallback);
   mqtt.connect(getSmartSSID());
   mqtt.publish("smart","[+] SMART: MQTT Client Ready!");
-}*/
-
-/*void initWifiManager() {
-  WiFiManager mgr;
-  //// REMOVE LATER ////
-  //mgr.resetSettings();
-  //fsys.format();
-  ////
-  mgr.setSaveConfigCallback(saveWifiCallback);
-  mgr.setMinimumSignalQuality(MIN_SIG);
-  mgr.setTimeout(CON_TIMEOUT);
-  mgr.addParameter(&configUserName);
-  mgr.addParameter(&configNodeName);
-  mgr.addParameter(&configMqttServerIp);
-  mgr.addParameter(&configMqttServerPort);
-  mgr.addParameter(&configWifiChannel);
-  if(!mgr.autoConnect(getSmartSSID(), AP_PASS)) {
-    if(mDebug)
-      Serial.println("[+] INFO: Timeout occured while waiting for WiFi. Rebooting..");
-    initWifiManager();
-    //ESP.reset(); Rather than resetting, make something recursive here!
-    // TODO - switch to mesh mode if WiFi connection is not available
-  }
-  // TODO - set mesh here so that other nodes can connect, check if network is rooted, if not, make self a root.
-}
-
-void saveWifiCallback() {
-  fsys.addConfig(CONF_USERNAME, configUserName.getValue());
-  fsys.addConfig(CONF_NODENAME, configNodeName.getValue());
-  fsys.addConfig(CONF_MQTT_IP, configMqttServerIp.getValue());
-  fsys.addConfig(CONF_MQTT_PORT, configMqttServerPort.getValue());
-  fsys.addConfig(CONF_WIFI_CH, configWifiChannel.getValue());
-  if(mDebug)
-    Serial.println("[+] INFO: User parameters are stored on the file system.");
 }*/
