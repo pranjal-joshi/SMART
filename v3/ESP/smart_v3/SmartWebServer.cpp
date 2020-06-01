@@ -189,8 +189,6 @@ void SmartWebServer::begin(const char* ssid, const char* pass) {
     Serial.println(ssid);
     Serial.print(F("[+] SmartWebServer: IP: "));
     Serial.println(WiFi.softAPIP());
-    Serial.print(F("[+] SmartWebServer: INFO: Starting DNS server at "));
-    Serial.println(WiFi.softAPIP());
   }
   
   // Handle responses
