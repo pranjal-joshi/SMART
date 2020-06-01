@@ -8,9 +8,10 @@
 #include "SmartFileSystem.h"
 #include "SmartWebServer.h"
 #include "SmartConstants.h"
-//#include <WiFiManager.h>
 #include <PubSubClient.h>
 #include <WiFiClient.h>
+#include <ArduinoJson.h>
+#include <painlessMesh.h>
 
 bool mDebug = true;
 
@@ -18,6 +19,8 @@ SmartFileSystem fsys;
 SmartFileSystemFlags_t flag;
 
 SmartWebServer configServer;
+
+painlessMesh mesh;
 
 void mqttCallback(char* topic, byte* payload, unsigned int length) {}     //write MQTT callback here
 WiFiClient wiCli;
@@ -55,19 +58,24 @@ void setup() {
   Serial.println("WiFi connected");
   Serial.print("Channel: ");
   Serial.println(WiFi.channel());
-  /*
-  mesh.setDebugMsgTypes( ERROR | STARTUP | CONNECTION );
+  unsigned int ch = WiFi.channel();
+  WiFi.disconnect();
+
+  const char *ssid = confJson[CONF_SSID];
+  const char *pass = confJson[CONF_PASS];
   
-  initWifiManager();
-  //mesh.init(MESH_SSID,MESH_PASS,MESH_PORT,WIFI_AP_STA,WiFi.channel());
+  /*mesh.setDebugMsgTypes( ERROR | STARTUP | CONNECTION );
+  mesh.init(MESH_SSID,MESH_PASS,MESH_PORT,WIFI_AP_STA,ch);
+  mesh.stationManual(ssid, pass);
+  mesh.setHostname(getSmartSSID());*/
 
   initMqttClient();
-  */
 }
 
 unsigned long lastMsg=0,value=1; char msg[100];
 void loop() {
-  //mqtt.loop();
+  mqtt.loop();
+  mesh.update();
   /*
   unsigned long now = millis();
   if (now - lastMsg > 3000) {
@@ -86,9 +94,9 @@ const char * getSmartSSID() {
   return n;
 }
 
-/*void initMqttClient() {
+void initMqttClient() {
   mqtt.setServer(MQTT_SERVER_IP,String(MQTT_SERVER_PORT).toInt());
   mqtt.setCallback(mqttCallback);
   mqtt.connect(getSmartSSID());
   mqtt.publish("smart","[+] SMART: MQTT Client Ready!");
-}*/
+}
