@@ -173,14 +173,17 @@ DynamicJsonDocument SmartFileSystem::readConfigFile(void) {
 bool SmartFileSystem::isConfigEmpty(void) {
   DynamicJsonDocument cf(JSON_BUF_SIZE);
   SmartFileSystemFlags_t flag = readJsonFile(&cf, CONF_FILE);
-  if(flag == FileOpenError || flag == SPIFFSError)
-    if(DEBUG)
-        printDebug("ERROR: Can't read the config file!");
+  if(flag == FileOpenError || flag == SPIFFSError) {
+    if(DEBUG) {
+      printDebug("ERROR: Can't read the config file!");
+    }
     return true;
-  if(cf[CONF_SSID] == NULL || cf[CONF_PASS] == NULL || cf[CONF_USERNAME] == NULL ||
-     cf[CONF_NODENAME] == NULL || cf[CONF_MQTT_IP] == NULL || cf[CONF_MQTT_PORT] == NULL) {
-      if(DEBUG)
+  }
+  if(cf[CONF_SSID] == "" || cf[CONF_PASS] == "" || cf[CONF_USERNAME] =="" ||
+     cf[CONF_NODENAME] == "" || cf[CONF_MQTT_IP] == "" || cf[CONF_MQTT_PORT] == "") {
+      if(DEBUG) {
         printDebug("INFO: Config file is Empty!");
+      }
       return true;
      }
   if(DEBUG)
