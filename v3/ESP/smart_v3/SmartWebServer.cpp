@@ -189,7 +189,15 @@ void SmartWebServer::begin(const char* ssid, const char* pass) {
     Serial.println(ssid);
     Serial.print(F("[+] SmartWebServer: IP: "));
     Serial.println(WiFi.softAPIP());
+    Serial.print(F("[+] SmartWebServer: INFO: Starting DNS server at "));
+    Serial.println(WiFi.softAPIP());
   }
+  
+  // Handle responses
+  server.onNotFound( [](AsyncWebServerRequest *request){
+    request->send_P(200, "text/html", index_html);
+  });
+  
   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
     request->send_P(200, "text/html", index_html);
   });
@@ -219,7 +227,6 @@ void SmartWebServer::begin(const char* ssid, const char* pass) {
       Serial.print(F("[+] smartWebServer: PARAM: mqtt_port -> "));
       Serial.println(paramMqttPort);
     }
-    sfs.setDebug(false);
     sfs.addConfig(CONF_SSID,paramSsid);
     sfs.addConfig(CONF_PASS,paramPass);
     sfs.addConfig(CONF_WIFI_CH,paramChannel);
@@ -227,11 +234,19 @@ void SmartWebServer::begin(const char* ssid, const char* pass) {
     sfs.addConfig(CONF_NODENAME,paramNodename);
     sfs.addConfig(CONF_MQTT_IP,paramMqttIp);
     sfs.addConfig(CONF_MQTT_PORT,paramMqttPort);
-    Serial.println(sfs.isConfigEmpty());
-    if(sfs.isConfigEmpty())
+    if(sfs.isConfigEmpty()) {
       request->send_P(200, "text/html", saved_error_html);
-    else
+      if(SWS_DEBUG) {
+        Serial.print(F("[+] smartWebServer: INFO: Attempting to format SPIFFS. "));
+        sfs.setDebug(SWS_DEBUG);
+        sfs.format();
+      }
+    }
+    else {
       request->send_P(200, "text/html", saved_ok_html);
+      delay(200);
+      ESP.reset();
+    }
   });
   server.begin();
 }
