@@ -83,6 +83,7 @@ SmartFileSystemFlags_t SmartFileSystem::readJsonFile(JsonDocument *doc, const ch
     }
     f.readBytes(buf,f.size());
     deserializeJson(*doc, buf);
+    f.close();
     if(DEBUG) {
       Serial.print(DBG_FS);
       Serial.print("INFO: Read following data from file ");
@@ -166,6 +167,7 @@ SmartFileSystemFlags_t SmartFileSystem::removeConfig(char* key) {
 StaticJsonDocument<JSON_BUF_SIZE> SmartFileSystem::readConfigFile(void) {
   DynamicJsonDocument doc(JSON_BUF_SIZE);
   readJsonFile(&doc, CONF_FILE);
+  doc.shrinkToFit();
   return doc;
 }
 
