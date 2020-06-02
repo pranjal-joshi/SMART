@@ -11,6 +11,7 @@
 
 #define MQTT_SERVER_IP    "35.225.15.182"
 #define MQTT_SERVER_PORT  "1883"
+#define MQTT_DELAY        5000U
 
 // WiFi Manager constants
 #define AP_PASS           "12345678"
