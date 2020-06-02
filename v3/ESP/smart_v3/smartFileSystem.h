@@ -11,6 +11,8 @@
 
 #include <ArduinoJson.h>
 
+#define JSON_BUF_SIZE 512u
+
 typedef enum SmartFileSystemFlags {
   FileWriteOk,
   FileReadOk,
@@ -30,7 +32,7 @@ class SmartFileSystem {
     SmartFileSystemFlags_t addConfig(char* key, double val);
     SmartFileSystemFlags_t addConfig(char* key, int val);
     SmartFileSystemFlags_t removeConfig(char* key);
-    DynamicJsonDocument readConfigFile(void);
+    StaticJsonDocument<JSON_BUF_SIZE> readConfigFile(void);
     bool isConfigEmpty(void);
   private:
     bool DEBUG;

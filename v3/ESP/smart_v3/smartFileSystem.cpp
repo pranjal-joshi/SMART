@@ -12,7 +12,6 @@
 
 #define DBG_FS String("[+] SmartFileSystem: ")
 #define CONF_FILE "/config.json"
-#define JSON_BUF_SIZE 1024*2
 
 bool DEBUG = false;
 
@@ -164,7 +163,7 @@ SmartFileSystemFlags_t SmartFileSystem::removeConfig(char* key) {
   return saveJsonFile(doc, CONF_FILE);
 }
 
-DynamicJsonDocument SmartFileSystem::readConfigFile(void) {
+StaticJsonDocument<JSON_BUF_SIZE> SmartFileSystem::readConfigFile(void) {
   DynamicJsonDocument doc(JSON_BUF_SIZE);
   readJsonFile(&doc, CONF_FILE);
   return doc;
