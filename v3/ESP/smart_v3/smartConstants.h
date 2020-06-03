@@ -9,6 +9,8 @@
 #ifndef SMARTCONSTANTS_H
 #define SMARTCONSTANTS_H
 
+#define RST_DLY           3000U
+
 #define MQTT_SERVER_IP    "35.225.15.182"
 #define MQTT_SERVER_PORT  "1883"
 #define MQTT_DELAY        5000U
