@@ -265,13 +265,29 @@ void SmartWebServer::begin(const char* ssid, const char* pass) {
       Serial.print(F("[+] smartWebServer: PARAM: mqtt_port -> "));
       Serial.println(paramMqttPort);
     }
-    sfs.addConfig(CONF_SSID,paramSsid);
+    /*sfs.addConfig(CONF_SSID,paramSsid);
     sfs.addConfig(CONF_PASS,paramPass);
     sfs.addConfig(CONF_WIFI_CH,paramChannel);
     sfs.addConfig(CONF_USERNAME,paramUsername);
     sfs.addConfig(CONF_NODENAME,paramNodename);
     sfs.addConfig(CONF_MQTT_IP,paramMqttIp);
-    sfs.addConfig(CONF_MQTT_PORT,paramMqttPort);
+    sfs.addConfig(CONF_MQTT_PORT,paramMqttPort);*/
+    ///
+    DynamicJsonDocument doc(JSON_BUF_SIZE);
+    doc[CONF_SSID]=paramSsid;
+    doc[CONF_PASS]=paramPass;
+    doc[CONF_WIFI_CH]=paramChannel;
+    doc[CONF_USERNAME]=paramUsername;
+    doc[CONF_NODENAME]=paramNodename;
+    doc[CONF_MQTT_IP]=paramMqttIp;
+    doc[CONF_MQTT_PORT]=paramMqttPort;
+    doc.shrinkToFit();
+    SPIFFS.begin();
+    File f = SPIFFS.open(CONF_FILE,"w");
+    serializeJson(doc, f);
+    f.flush();
+    f.close();
+    /// TODO - Debug memory dump here!!
     if(sfs.isConfigEmpty()) {
       request->send_P(200, "text/html", saved_error_html);
       if(SWS_DEBUG) {
@@ -282,7 +298,7 @@ void SmartWebServer::begin(const char* ssid, const char* pass) {
     }
     else {
       request->send_P(200, "text/html", saved_ok_html);
-      delay(200);
+      delay(3000);
       ESP.reset();
     }
   });
@@ -295,17 +311,18 @@ void SmartWebServer::showWifiNetworks(void) {
       Serial.println(F("[+] SmartWebServer: INFO -> WiFi Scanning completed."));
     for(int i=0;i<WiFi.scanComplete();i++) {
       scanned_networks_html += "<tr onclick='setSSID(this.id)' id='"+WiFi.SSID(i)+"'><td style='text-align: left;'>";
-      scanned_networks_html += WiFi.SSID(i) + "</td><td style='text-align: right;'>";
+      scanned_networks_html += String(i+1) + ". " + WiFi.SSID(i) + "</td><td style='text-align: right;'>";
       if(i>0)      // To fix the bug of % loss due to PROCESSOR_TEMPLATE on alternate iterations.
-        scanned_networks_html += String(map(WiFi.RSSI(i),-90,-30,0, 100)) + " %% </td></tr>";
+        scanned_networks_html += String(map(WiFi.RSSI(i),-90,-30,0, 100)) + " %% (Ch: "+WiFi.channel(i)+") </td></tr>";
       else
-        scanned_networks_html += String(map(WiFi.RSSI(i),-90,-30,0, 100)) + " % </td></tr>";
+        scanned_networks_html += String(map(WiFi.RSSI(i),-90,-30,0, 100)) + " % (Ch: "+WiFi.channel(i)+") </td></tr>";
       if(SWS_DEBUG) {
         Serial.print(F("[+] SmartWebServer: SSID ->"));
         Serial.print(WiFi.SSID(i));
-        Serial.print(F("\t ("));
-        Serial.println(String(map(WiFi.RSSI(i),-90,-20,0, 100))+"%)");
-        Serial.println(scanned_networks_html);
+        Serial.print(F("\t RSSI-> "));
+        Serial.print(String(map(WiFi.RSSI(i),-90,-30,0, 100))+"%\tChannel -> ");
+        Serial.println(WiFi.channel());
+        Serial.flush();
       }
     }
     WiFi.scanDelete();
