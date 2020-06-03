@@ -265,14 +265,7 @@ void SmartWebServer::begin(const char* ssid, const char* pass) {
       Serial.print(F("[+] smartWebServer: PARAM: mqtt_port -> "));
       Serial.println(paramMqttPort);
     }
-    /*sfs.addConfig(CONF_SSID,paramSsid);
-    sfs.addConfig(CONF_PASS,paramPass);
-    sfs.addConfig(CONF_WIFI_CH,paramChannel);
-    sfs.addConfig(CONF_USERNAME,paramUsername);
-    sfs.addConfig(CONF_NODENAME,paramNodename);
-    sfs.addConfig(CONF_MQTT_IP,paramMqttIp);
-    sfs.addConfig(CONF_MQTT_PORT,paramMqttPort);*/
-    ///
+    
     DynamicJsonDocument doc(JSON_BUF_SIZE);
     doc[CONF_SSID]=paramSsid;
     doc[CONF_PASS]=paramPass;
@@ -282,24 +275,20 @@ void SmartWebServer::begin(const char* ssid, const char* pass) {
     doc[CONF_MQTT_IP]=paramMqttIp;
     doc[CONF_MQTT_PORT]=paramMqttPort;
     doc.shrinkToFit();
-    SPIFFS.begin();
-    File f = SPIFFS.open(CONF_FILE,"w");
-    serializeJson(doc, f);
-    f.flush();
-    f.close();
-    /// TODO - Debug memory dump here!!
-    if(sfs.isConfigEmpty()) {
-      request->send_P(200, "text/html", saved_error_html);
-      if(SWS_DEBUG) {
-        Serial.print(F("[+] smartWebServer: INFO: Attempting to format SPIFFS. "));
-        sfs.setDebug(SWS_DEBUG);
-        sfs.format();
-      }
+    if(SPIFFS.begin()) {
+      File f = SPIFFS.open(CONF_FILE,"w");
+      serializeJson(doc, f);
+      f.flush();
+      f.close();
+      // WARNING: Reading JSON here gives a memory dump
+      request->send_P(200, "text/html", saved_ok_html);
+      if(SWS_DEBUG)
+        Serial.println(F("[+] SmartWebServer: INFO -> Config stored on SPIFFS. Auto-Resetting..."));
     }
     else {
-      request->send_P(200, "text/html", saved_ok_html);
-      delay(3000);
-      ESP.reset();
+      request->send_P(200, "text/html", saved_error_html);
+      if(SWS_DEBUG)
+        Serial.println(F("[+] SmartWebServer: ERROR -> Failed to save Config on SPIFFS. Auto-Resetting..."));
     }
   });
   server.begin();
@@ -313,14 +302,14 @@ void SmartWebServer::showWifiNetworks(void) {
       scanned_networks_html += "<tr onclick='setSSID(this.id)' id='"+WiFi.SSID(i)+"'><td style='text-align: left;'>";
       scanned_networks_html += String(i+1) + ". " + WiFi.SSID(i) + "</td><td style='text-align: right;'>";
       if(i>0)      // To fix the bug of % loss due to PROCESSOR_TEMPLATE on alternate iterations.
-        scanned_networks_html += String(map(WiFi.RSSI(i),-90,-30,0, 100)) + " %% (Ch: "+WiFi.channel(i)+") </td></tr>";
+        scanned_networks_html += String(map(WiFi.RSSI(i),-90,-20,0, 100)) + " %% (Ch: "+WiFi.channel(i)+") </td></tr>";
       else
-        scanned_networks_html += String(map(WiFi.RSSI(i),-90,-30,0, 100)) + " % (Ch: "+WiFi.channel(i)+") </td></tr>";
+        scanned_networks_html += String(map(WiFi.RSSI(i),-90,-20,0, 100)) + " % (Ch: "+WiFi.channel(i)+") </td></tr>";
       if(SWS_DEBUG) {
         Serial.print(F("[+] SmartWebServer: SSID ->"));
         Serial.print(WiFi.SSID(i));
         Serial.print(F("\t RSSI-> "));
-        Serial.print(String(map(WiFi.RSSI(i),-90,-30,0, 100))+"%\tChannel -> ");
+        Serial.print(String(map(WiFi.RSSI(i),-90,-20,0, 100))+"%\tChannel -> ");
         Serial.println(WiFi.channel());
         Serial.flush();
       }
