@@ -16,6 +16,8 @@ bool SWS_DEBUG = false;
 
 String paramUsername,paramNodename,paramChannel,paramSsid,paramPass,paramMqttIp,paramMqttPort;
 
+String scanned_networks_html = "";
+
 const char saved_ok_html[] PROGMEM = R"rawliteral(
 <!DOCTYPE HTML><html>
 <title>Config Ok</title>
@@ -122,21 +124,38 @@ const char index_html[] PROGMEM = R"rawliteral(
   </style>
 </head>
 <body>
-  <h3 style="font-weight: bold; font-size: 1.8rem; color: lightblue;">SMART_v3</h3>
+  <h3 style="font-weight: bold; font-size: 1.8rem; color: lightblue; margin-top: 0.2rem;">SMART_v3</h3>
   <h3 style="font-weight: bold; font-size: 1.3rem; color: white;">Configuration Portal</h3>
   <form action="/get">
     <center>
       <table>
         <tr>
+          <td colspan="2" id="tHead">Available Networks (Click to Select)</td>
+        </tr>
+        <tr>
+          <td style="font-size: 1.2rem; text-align: left;">Network SSID</td>
+          <td style="font-size: 1.2rem; text-align: right;">Signal Strength</td>
+        </tr>
+          %SCANNED_NETWORKS%
+      </table>
+      <table>
+        <tr>
+          <td colspan="2" id="tHead">Device Info</td>
+        </tr>
+        <tr>
+          <td>Device ID</td>
+          <td>%GET_SMART_SSID%</td>
+        </tr>
+        <tr>
           <td colspan="2" id="tHead">Wi-Fi Setup</td>
         </tr>
         <tr>
           <td>WiFi SSID:</td>
-          <td><input type="text" name="ssid" placeholder="Network Name" required></td>
+          <td><input type="text" name="ssid" id="ssidBox" placeholder="Network Name" required></td>
         </tr>
         <tr>
           <td>WiFi Password:</td>
-          <td><input type="password" name="pass" required></td>
+          <td><input type="password" name="pass" id="passBox" required></td>
         </tr> 
         <tr>
           <td>WiFi Channel:</td>
@@ -170,11 +189,29 @@ const char index_html[] PROGMEM = R"rawliteral(
     </center>
   </form>
 </body>
+<script>
+  function setSSID(ssid) {
+    document.getElementById("ssidBox").value = ssid;
+    document.getElementById("passBox").focus();
+  }
+</script>
 </html>
 )rawliteral";
 
 SmartWebServer::SmartWebServer(void){
   
+}
+
+String processor(const String& var) {
+  if(var == "GET_SMART_SSID") {
+    char n[14];
+    snprintf(n, 14, "SMART_%08X", (uint32_t)ESP.getChipId());
+    return String(n);
+  }
+  else if(var == "SCANNED_NETWORKS") {
+    return (String)scanned_networks_html;
+  }
+  return String();
 }
 
 void SmartWebServer::setDebug(bool d) {
@@ -190,14 +227,17 @@ void SmartWebServer::begin(const char* ssid, const char* pass) {
     Serial.print(F("[+] SmartWebServer: IP: "));
     Serial.println(WiFi.softAPIP());
   }
+
+  // start scanning for WiFi's in background
+  WiFi.scanNetworks(true);
   
   // Handle responses
   server.onNotFound( [](AsyncWebServerRequest *request){
-    request->send_P(200, "text/html", index_html);
+    request->send_P(200, "text/html", index_html, processor);
   });
   
   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
-    request->send_P(200, "text/html", index_html);
+    request->send_P(200, "text/html", index_html, processor);
   });
   
   // Handle response after submit
@@ -247,4 +287,32 @@ void SmartWebServer::begin(const char* ssid, const char* pass) {
     }
   });
   server.begin();
+}
+
+void SmartWebServer::showWifiNetworks(void) {
+  if(WiFi.scanComplete() > -1) {
+    if(SWS_DEBUG)
+      Serial.println(F("[+] SmartWebServer: INFO -> WiFi Scanning completed."));
+    for(int i=0;i<WiFi.scanComplete();i++) {
+      scanned_networks_html += "<tr onclick='setSSID(this.id)' id='"+WiFi.SSID(i)+"'><td style='text-align: left;'>";
+      scanned_networks_html += WiFi.SSID(i) + "</td><td style='text-align: right;'>";
+      if(i>0)      // To fix the bug of % loss due to PROCESSOR_TEMPLATE on alternate iterations.
+        scanned_networks_html += String(map(WiFi.RSSI(i),-90,-30,0, 100)) + " %% </td></tr>";
+      else
+        scanned_networks_html += String(map(WiFi.RSSI(i),-90,-30,0, 100)) + " % </td></tr>";
+      if(SWS_DEBUG) {
+        Serial.print(F("[+] SmartWebServer: SSID ->"));
+        Serial.print(WiFi.SSID(i));
+        Serial.print(F("\t ("));
+        Serial.println(String(map(WiFi.RSSI(i),-90,-20,0, 100))+"%)");
+        Serial.println(scanned_networks_html);
+      }
+    }
+    WiFi.scanDelete();
+  }
+  else {
+    if(SWS_DEBUG) {
+      Serial.println(F("[+] SmartWebServer: INFO -> WiFi Scanning not completed."));
+    }
+  }
 }

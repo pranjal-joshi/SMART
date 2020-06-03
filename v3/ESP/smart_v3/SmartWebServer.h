@@ -19,6 +19,7 @@ class SmartWebServer {
     SmartWebServer(void);
     void setDebug(bool);
     void begin(const char* ssid, const char* pass);
+    void showWifiNetworks(void);
   private:
 };
 
