@@ -26,7 +26,6 @@ WiFiClient wiCli;
 PubSubClient mqtt(wiCli);
 
 DynamicJsonDocument confJson(JSON_BUF_SIZE);
-//StaticJsonDocument<JSON_BUF_SIZE> confJson;
 
 void setup() {
   Serial.begin(115200);
@@ -40,6 +39,7 @@ void setup() {
     while(fsys.isConfigEmpty()) {
       // Start SmartWebServer and stay here until config isn't provided!
       delay(2000);
+      configServer.showWifiNetworks();
       if(mDebug)
         Serial.println("[+] SMART: INFO -> Blocking to obtain config..");
     }
