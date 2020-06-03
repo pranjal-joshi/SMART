@@ -11,7 +11,6 @@
 #include "SmartConstants.h"
 
 #define DBG_FS String("[+] SmartFileSystem: ")
-#define CONF_FILE "/config.json"
 
 bool DEBUG = false;
 

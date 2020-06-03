@@ -12,6 +12,7 @@
 #include <ArduinoJson.h>
 
 #define JSON_BUF_SIZE 512u
+#define CONF_FILE "/config.json"
 
 typedef enum SmartFileSystemFlags {
   FileWriteOk,
