@@ -81,8 +81,8 @@ SmartFileSystemFlags_t SmartFileSystem::readJsonFile(JsonDocument *doc, const ch
          return FileOpenError;
     }
     f.readBytes(buf,f.size());
-    deserializeJson(*doc, buf);
     f.close();
+    deserializeJson(*doc, buf);
     if(DEBUG) {
       Serial.print(DBG_FS);
       Serial.print("INFO: Read following data from file ");
