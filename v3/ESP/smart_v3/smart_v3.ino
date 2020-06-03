@@ -8,6 +8,7 @@
 #include <painlessMesh.h>
 #include <PubSubClient.h>
 #include <WiFiClient.h>
+#include "SmartMQTTClient.h"
 #include "SmartFileSystem.h"
 #include "SmartWebServer.h"
 #include "SmartConstants.h"
@@ -19,11 +20,13 @@ SmartFileSystemFlags_t flag;
 
 SmartWebServer configServer;
 
+SmartMQTTClient cli;
+
 painlessMesh mesh;
 
 void mqttCallback(char* topic, byte* payload, unsigned int length) {}     //write MQTT callback here
-WiFiClient wiCli;
-PubSubClient mqtt(wiCli);
+/*WiFiClient wiCli;
+PubSubClient mqtt(wiCli);*/
 
 DynamicJsonDocument confJson(JSON_BUF_SIZE);
 
@@ -41,17 +44,25 @@ void setup() {
       delay(2000);
       configServer.showWifiNetworks();
       if(mDebug)
-        Serial.println("[+] SMART: INFO -> Blocking to obtain config..");
+        Serial.println(F("[+] SMART: INFO -> Blocking to obtain config.."));
     }
+    if(fsys.isConfigEmpty()) {
+      if(mDebug)
+        Serial.println(F("[+] SMART: ERROR -> Config file appears empty even after saving.. Auto-Resetting"));
+    }
+    delay(RST_DLY);
+    ESP.reset();
   }
   confJson = fsys.readConfigFile();
 
   // Temporarily connect to given WiFi to get channel
   // TODO - Modify code below to obtain target AP RSSI w/o connect
-  Serial.print("[+] SMART: INFO -> SSID: ");
+  Serial.print(F("[+] SMART: INFO -> TARGET SSID: "));
   Serial.println(confJson[CONF_SSID].as<const char*>());
-  Serial.print("[+] SMART: INFO -> PASS: ");
+  Serial.print(F("[+] SMART: INFO -> TARGET PASS: "));
   Serial.println(confJson[CONF_PASS].as<const char*>());
+  unsigned int channel = getWiFiChannelForSSID((const char*)confJson[CONF_SSID]);
+  /*
   WiFi.begin((const char*)confJson[CONF_SSID], (const char*)confJson[CONF_PASS]);
   while (WiFi.status() != WL_CONNECTED) {
     delay(500);
@@ -63,22 +74,27 @@ void setup() {
   Serial.println(WiFi.channel());
   unsigned int ch = WiFi.channel();
   WiFi.disconnect();
+  */
 
   // Setup mesh network
-  initMesh(ch);
+  initMesh(channel);
+
+  // Setup MQTT client
+  cli.setDebug(mDebug);
+  cli.begin((const char*)confJson[CONF_MQTT_IP],(int)confJson[CONF_MQTT_PORT],mqttCallback);
 }
 
 unsigned long lastMsg=0,value=1; char msg[100];
 void loop() {
-  mqtt.loop();
+  //mqtt.loop();
   mesh.update();
 
   // Never disconnect from the MQTT broker
-  while(!mqtt.connected()) {
+  /*while(!mqtt.connected()) {
     connectMqttClient();
-  }
+  }*/
   
-  unsigned long now = millis();
+  /*unsigned long now = millis();
   if (now - lastMsg > 3000) {
     lastMsg = now;
     ++value;
@@ -86,7 +102,7 @@ void loop() {
     Serial.print("Publish message: ");
     Serial.println(msg);
     mqtt.publish("smart", msg);
-  }
+  }*/
 }
 
 const char * getSmartSSID() {
@@ -114,8 +130,10 @@ void checkMesh() {
   mesh.setContainsRoot(true);
 }
 
-void connectMqttClient() {
-  Serial.println("[+] SMART: INFO -> Attempting to connect MQTT broker.");
+// Connect to MQTT
+/*void connectMqttClient() {
+  if(mDebug)
+    Serial.println(F("[+] SMART: INFO -> Attempting to connect MQTT broker."));
   mqtt.setServer((const char*)confJson[CONF_MQTT_IP],(int)confJson[CONF_MQTT_PORT]);
   mqtt.setCallback(mqttCallback);
   unsigned long oldNow = millis();
@@ -125,20 +143,40 @@ void connectMqttClient() {
       oldNow = millis();
       if(mqtt.connect(getSmartSSID())) {
         if(mDebug) {
-          Serial.println("[+] SMART: INFO -> MQTT broker connected.");
-          Serial.print("[+] SMART: INFO -> MQTT IP: ");
+          Serial.println(F("[+] SMART: INFO -> MQTT broker connected."));
+          Serial.print(F("[+] SMART: INFO -> MQTT IP: "));
           Serial.println(confJson[CONF_MQTT_IP].as<const char*>());
-          Serial.print("[+] SMART: INFO -> MQTT PORT: ");
+          Serial.print(F("[+] SMART: INFO -> MQTT PORT: "));
           Serial.println(confJson[CONF_MQTT_PORT].as<int>());
         }
         mqtt.publish("smart","[+] SMART: MQTT Client Ready!");
+        // TODO - Subscribe here for required topics
       }
       else {
         if(mDebug) {
-          Serial.print("[+] SMART: ERROR -> MQTT broker failed. Error Code -> ");
+          Serial.print(F("[+] SMART: ERROR -> MQTT broker failed. Error Code -> "));
           Serial.println(mqtt.state());
         }
       }
     }
   }
+}*/
+
+// Get the channel of target SSID to be connected to
+unsigned int getWiFiChannelForSSID(const char* ssid) {
+  if(mDebug)
+    Serial.printf("[+] SMART: INFO -> Identifying Channel of SSID: %s",ssid);
+  WiFi.disconnect();
+  WiFi.scanNetworks();
+  int networks = WiFi.scanComplete();
+  for(int i=0;i<networks;i++) {
+    if(WiFi.SSID(i).c_str() == ssid){
+      if(mDebug)
+        Serial.printf("[+] SMART: INFO -> TARGET CHANNEL: -> %d",WiFi.channel(i));
+      WiFi.scanDelete();
+      return WiFi.channel(i);
+    }
+  }
+  WiFi.scanDelete();
+  return 0;
 }
