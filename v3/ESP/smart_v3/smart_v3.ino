@@ -9,6 +9,7 @@
 #include <ESP8266Ping.h>
 #include <PubSubClient.h>
 #include <WiFiClient.h>
+#include <ArduinoOTA.h>
 #include "SmartFileSystem.h"
 #include "SmartWebServer.h"
 #include "SmartConstants.h"
@@ -34,7 +35,12 @@ Task rootCheckTask(5000, TASK_FOREVER, &getRootId, &sched);
 
 void setup() {
   Serial.begin(115200);
-  Serial.println();
+  Serial.println("\n");
+
+  if(mDebug) {
+    Serial.print(F("[+] SMART: INFO -> CHIP ID = "));
+    Serial.println(getSmartSSID());
+  }
 
   // Read config.json file to retrieve login creds
   fsys.setDebug(mDebug);
@@ -56,13 +62,14 @@ void setup() {
     ESP.reset();
   }
   confJson = fsys.readConfigFile();
+  if(mDebug) {
+    Serial.print(F("[+] SMART: INFO -> TARGET SSID: "));
+    Serial.println(confJson[CONF_SSID].as<const char*>());
+    Serial.print(F("[+] SMART: INFO -> TARGET PASS: "));
+    Serial.println(confJson[CONF_PASS].as<const char*>());
+  }
 
-  // Temporarily connect to given WiFi to get channel
-  // TODO - Modify code below to obtain target AP RSSI w/o connect
-  Serial.print(F("[+] SMART: INFO -> TARGET SSID: "));
-  Serial.println(confJson[CONF_SSID].as<const char*>());
-  Serial.print(F("[+] SMART: INFO -> TARGET PASS: "));
-  Serial.println(confJson[CONF_PASS].as<const char*>());
+  // Run a WiFi scan to acquire the channel info of target SSID so that same channel can be used for mesh.
   unsigned int channel = getWiFiChannelForSSID((const char*)confJson[CONF_SSID],(int)confJson[CONF_WIFI_CH]);
 
   // Setup mesh network
@@ -76,29 +83,38 @@ void loop() {
   while(!mqtt.connected()) {
     connectMqttClient();
   }
-  looper();
-  
+  looper(); 
 }
 
 void looper() {
   mqtt.loop();
   mesh.update();
   sched.execute();
+  if(mDebug)
+    ArduinoOTA.handle();
 }
 
 const char * getSmartSSID() {
   char n[14];
-  snprintf(n, 14, "SMART_%08X", (uint32_t)ESP.getChipId());
+  //snprintf(n, 14, "SMART_%08X", (uint32_t)ESP.getChipId());
+  snprintf(n, 14, "SMART_%08X", mesh.getNodeId());
   return n;
 }
 
 void initMesh(uint8_t ch) {
-  mesh.setDebugMsgTypes( ERROR | STARTUP | CONNECTION );
-  mesh.init(MESH_SSID,MESH_PASS,MESH_PORT,WIFI_AP_STA,ch);
+  if(mDebug)
+    mesh.setDebugMsgTypes( ERROR | STARTUP | CONNECTION );
+  mesh.init(MESH_SSID, MESH_PASS, MESH_PORT, WIFI_AP_STA, ch, MESH_HIDDEN);
   #ifndef FORCE_MESH
     mesh.stationManual((const char*)confJson[CONF_SSID], (const char*)confJson[CONF_PASS]);
   #endif
   mesh.setHostname(getSmartSSID());
+  mesh.onChangedConnections(&changedConCallback);
+}
+
+// setup arduino OTA only after device is connected to some network
+void changedConCallback() {
+  setupArduinoOTA();
 }
 
 // TODO - Implement this
@@ -113,7 +129,7 @@ void checkMesh() {
   mesh.setContainsRoot(true);
 }
 
-void getRootId() {
+void getRootId(void) {
   size_t i=0;
   SimpleList<uint32_t> nl = mesh.getNodeList();
   SimpleList<uint32_t>::iterator itr = nl.begin();
@@ -126,6 +142,10 @@ void getRootId() {
     }
     itr++;
   }
+}
+
+void getRootId2(void) {
+  auto layout = mesh.asNodeTree();
 }
 
 // Connect to MQTT
@@ -189,13 +209,21 @@ unsigned int getWiFiChannelForSSID(const char* ssid, int confCh) {
   return confCh;
 }
 
-bool isInternetAvailable() {
+bool isInternetAvailable(void) {
   #ifdef FORCE_MESH
     if(mDebug)
       Serial.println(F("[+] SMART: WARNING --> Node is in FORCE_MESH mode!"));
     return false;
   #endif
   return Ping.ping("www.google.co.in");
+}
+
+void setupArduinoOTA(void) {
+  if(mDebug) {
+    Serial.println(F("[+] SMART: INFO -> Starting ArduinoOTA service..."));
+    ArduinoOTA.setHostname(getSmartSSID()) ;
+    ArduinoOTA.begin();
+  }
 }
 
 void mqttCallback(char* topic, byte* payload, unsigned int length) { //write MQTT callback here
