@@ -14,6 +14,10 @@
 #define MQTT_SERVER_IP    "35.225.15.182"
 #define MQTT_SERVER_PORT  "1883"
 #define MQTT_DELAY        5000U
+#define RETAIN            true
+
+//PubSub topics and subscriptions
+#define TOPIC_TEST          "smart/dev"
 
 // WiFi Manager constants
 #define AP_PASS           "12345678"
@@ -35,5 +39,10 @@
 
 // smartWebServer constants
 #define SMART_PASS        AP_PASS
+
+// System Configs for compile-time setting
+#define SWITCHING_NODE    // Enable for main smart node
+//#define SENSOR_NODE       // Enable for sensor nodes (Mesh Only)
+#define FORCE_MESH          // Enable to force the node in mesh mode
 
 #endif
