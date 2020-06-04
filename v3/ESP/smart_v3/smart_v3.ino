@@ -6,9 +6,9 @@
  */
 
 #include <painlessMesh.h>
+#include <ESP8266Ping.h>
 #include <PubSubClient.h>
 #include <WiFiClient.h>
-#include "SmartMQTTClient.h"
 #include "SmartFileSystem.h"
 #include "SmartWebServer.h"
 #include "SmartConstants.h"
@@ -17,18 +17,20 @@ bool mDebug = true;
 
 SmartFileSystem fsys;
 SmartFileSystemFlags_t flag;
-
 SmartWebServer configServer;
-
-SmartMQTTClient cli;
 
 painlessMesh mesh;
 
-void mqttCallback(char* topic, byte* payload, unsigned int length) {}     //write MQTT callback here
-/*WiFiClient wiCli;
-PubSubClient mqtt(wiCli);*/
+WiFiClient wiCli;
+PubSubClient mqtt(wiCli);
 
 DynamicJsonDocument confJson(JSON_BUF_SIZE);
+bool internetAvailable = false;
+uint32_t rootNodeAddr;
+
+void getRootId(void);
+Scheduler sched;
+Task rootCheckTask(5000, TASK_FOREVER, &getRootId, &sched);
 
 void setup() {
   Serial.begin(115200);
@@ -61,48 +63,27 @@ void setup() {
   Serial.println(confJson[CONF_SSID].as<const char*>());
   Serial.print(F("[+] SMART: INFO -> TARGET PASS: "));
   Serial.println(confJson[CONF_PASS].as<const char*>());
-  unsigned int channel = getWiFiChannelForSSID((const char*)confJson[CONF_SSID]);
-  /*
-  WiFi.begin((const char*)confJson[CONF_SSID], (const char*)confJson[CONF_PASS]);
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
-    Serial.print(".");
-  }
-  Serial.println("");
-  Serial.println("WiFi connected");
-  Serial.print("Channel: ");
-  Serial.println(WiFi.channel());
-  unsigned int ch = WiFi.channel();
-  WiFi.disconnect();
-  */
+  unsigned int channel = getWiFiChannelForSSID((const char*)confJson[CONF_SSID],(int)confJson[CONF_WIFI_CH]);
 
   // Setup mesh network
   initMesh(channel);
 
-  // Setup MQTT client
-  cli.setDebug(mDebug);
-  cli.begin((const char*)confJson[CONF_MQTT_IP],(int)confJson[CONF_MQTT_PORT],mqttCallback);
+  sched.enableAll();
 }
 
-unsigned long lastMsg=0,value=1; char msg[100];
 void loop() {
-  //mqtt.loop();
-  mesh.update();
-
   // Never disconnect from the MQTT broker
-  /*while(!mqtt.connected()) {
+  while(!mqtt.connected()) {
     connectMqttClient();
-  }*/
+  }
+  looper();
   
-  /*unsigned long now = millis();
-  if (now - lastMsg > 3000) {
-    lastMsg = now;
-    ++value;
-    snprintf (msg, 100, "hello world #%ld", value);
-    Serial.print("Publish message: ");
-    Serial.println(msg);
-    mqtt.publish("smart", msg);
-  }*/
+}
+
+void looper() {
+  mqtt.loop();
+  mesh.update();
+  sched.execute();
 }
 
 const char * getSmartSSID() {
@@ -114,7 +95,9 @@ const char * getSmartSSID() {
 void initMesh(uint8_t ch) {
   mesh.setDebugMsgTypes( ERROR | STARTUP | CONNECTION );
   mesh.init(MESH_SSID,MESH_PASS,MESH_PORT,WIFI_AP_STA,ch);
-  mesh.stationManual((const char*)confJson[CONF_SSID], (const char*)confJson[CONF_PASS]);
+  #ifndef FORCE_MESH
+    mesh.stationManual((const char*)confJson[CONF_SSID], (const char*)confJson[CONF_PASS]);
+  #endif
   mesh.setHostname(getSmartSSID());
 }
 
@@ -130,47 +113,70 @@ void checkMesh() {
   mesh.setContainsRoot(true);
 }
 
+void getRootId() {
+  size_t i=0;
+  SimpleList<uint32_t> nl = mesh.getNodeList();
+  SimpleList<uint32_t>::iterator itr = nl.begin();
+  if(mDebug)
+    Serial.print(F("[+] SMART: MeshNode -> Running checkRoot Task..."));
+  while(itr != nl.end()) {
+    if(mDebug) {
+      Serial.print(F("[+] SMART: MeshNode (Chip-ID) -> "));
+      Serial.println(*itr,HEX);
+    }
+    itr++;
+  }
+}
+
 // Connect to MQTT
-/*void connectMqttClient() {
+void connectMqttClient() {
   if(mDebug)
     Serial.println(F("[+] SMART: INFO -> Attempting to connect MQTT broker."));
   mqtt.setServer((const char*)confJson[CONF_MQTT_IP],(int)confJson[CONF_MQTT_PORT]);
   mqtt.setCallback(mqttCallback);
   unsigned long oldNow = millis();
   while(!mqtt.connected()) {
-    mesh.update();
+    looper();
     if(millis() - oldNow > MQTT_DELAY) {
+      internetAvailable = isInternetAvailable();
       oldNow = millis();
-      if(mqtt.connect(getSmartSSID())) {
-        if(mDebug) {
-          Serial.println(F("[+] SMART: INFO -> MQTT broker connected."));
-          Serial.print(F("[+] SMART: INFO -> MQTT IP: "));
-          Serial.println(confJson[CONF_MQTT_IP].as<const char*>());
-          Serial.print(F("[+] SMART: INFO -> MQTT PORT: "));
-          Serial.println(confJson[CONF_MQTT_PORT].as<int>());
+      if(internetAvailable) {
+        if(mqtt.connect(getSmartSSID())) {
+          if(mDebug) {
+            Serial.println(F("[+] SMART: INFO -> MQTT broker connected."));
+            Serial.print(F("[+] SMART: INFO -> MQTT IP: "));
+            Serial.println(confJson[CONF_MQTT_IP].as<const char*>());
+            Serial.print(F("[+] SMART: INFO -> MQTT PORT: "));
+            Serial.println(confJson[CONF_MQTT_PORT].as<int>());
+            mqtt.publish(TOPIC_TEST,"[+] SMART: MQTT Client Ready!",RETAIN);
+            mqtt.subscribe(TOPIC_TEST);
+          }
+          // TODO - Subscribe here for required topics
         }
-        mqtt.publish("smart","[+] SMART: MQTT Client Ready!");
-        // TODO - Subscribe here for required topics
+        else {
+          if(mDebug) {
+            Serial.print(F("[+] SMART: ERROR -> MQTT broker failed. Error Code -> "));
+            Serial.println(mqtt.state());
+          }
+        }
       }
       else {
-        if(mDebug) {
-          Serial.print(F("[+] SMART: ERROR -> MQTT broker failed. Error Code -> "));
-          Serial.println(mqtt.state());
-        }
+        Serial.println(F("[+] SMART: INFO -> Internet not available (Mesh Only Mode Active)"));
       }
     }
   }
-}*/
+}
 
 // Get the channel of target SSID to be connected to
-unsigned int getWiFiChannelForSSID(const char* ssid) {
-  if(mDebug)
-    Serial.printf("[+] SMART: INFO -> Identifying Channel of SSID: %s",ssid);
+unsigned int getWiFiChannelForSSID(const char* ssid, int confCh) {
+  WiFi.mode(WIFI_STA);
   WiFi.disconnect();
-  WiFi.scanNetworks();
-  int networks = WiFi.scanComplete();
-  for(int i=0;i<networks;i++) {
-    if(WiFi.SSID(i).c_str() == ssid){
+  if(mDebug)
+    Serial.printf("[+] SMART: INFO -> Identifying Channel of SSID: %s\n",ssid);
+  delay(100);
+  int networks =  WiFi.scanNetworks();
+  for(int i=0;i<networks;i++) {    
+    if(String(WiFi.SSID(i)) == ssid){
       if(mDebug)
         Serial.printf("[+] SMART: INFO -> TARGET CHANNEL: -> %d",WiFi.channel(i));
       WiFi.scanDelete();
@@ -178,5 +184,25 @@ unsigned int getWiFiChannelForSSID(const char* ssid) {
     }
   }
   WiFi.scanDelete();
-  return 0;
+  if(mDebug)
+    Serial.printf("[+] SMART: INFO -> TARGET CHANNEL FROM CONF: -> %d",confCh);
+  return confCh;
+}
+
+bool isInternetAvailable() {
+  #ifdef FORCE_MESH
+    if(mDebug)
+      Serial.println(F("[+] SMART: WARNING --> Node is in FORCE_MESH mode!"));
+    return false;
+  #endif
+  return Ping.ping("www.google.co.in");
+}
+
+void mqttCallback(char* topic, byte* payload, unsigned int length) { //write MQTT callback here
+  char p[length];
+  for(uint16_t i=0;i<length;i++)
+    p[i] = char(payload[i]);
+    
+  if(mDebug)
+    Serial.printf("[+] SMART: MQTT Callback -> [%s] %s\n",topic,p);
 }
