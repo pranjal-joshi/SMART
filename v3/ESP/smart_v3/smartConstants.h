@@ -36,6 +36,7 @@
 #define MESH_SSID         "SMART-Mesh"
 #define MESH_PASS         "mesh@smart_v3"
 #define MESH_PORT         4321
+#define MESH_HIDDEN       1
 
 // smartWebServer constants
 #define SMART_PASS        AP_PASS
