@@ -1,0 +1,20 @@
+
+# For development
+smart/dev
+-----------------------------------------------------------
+# For remote switching
+smart/user_name/device_id/
+smart/user_name/device_id/state
+smart/user_name/device_id/state/D1_to_Dn/0_or_1
+smart/user_name/device_id/label/D1_to_Dn/deviceName
+-----------------------------------------------------------
+# For timer based switching
+smart/user_name/device_id/timer/D1_to_Dn/enable_or_disable
+smart/user_name/device_id/t_on/D1_to_Dn/time
+smart/user_name/device_id/t_off/D1_to_Dn/time
+-----------------------------------------------------------
+# For sensor integration with node
+smart/user_name/device_id/on_motion_start/D1_to_Dn/action
+smart/user_name/device_id/on_motion_end/D1_to_Dn/action
+smart/user_name/device_id/on_motion_end_timeout/D1_to_Dn/time
+-----------------------------------------------------------
