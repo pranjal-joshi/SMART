@@ -37,13 +37,21 @@
 #define MESH_PASS         "mesh@smart_v3"
 #define MESH_PORT         4321
 #define MESH_HIDDEN       1
+#define MESH_QUALITY_THRESH -75   //dBm
 
 // smartWebServer constants
 #define SMART_PASS        AP_PASS
 
+// JSON constants
+#define JSON_SMARTID      "smartId"
+#define JSON_TYPE         "type"
+#define JSON_DATA         "data"
+#define JSON_STATE        "state"
+
 // System Configs for compile-time setting
-#define SWITCHING_NODE    // Enable for main smart node
-//#define SENSOR_NODE       // Enable for sensor nodes (Mesh Only)
-#define FORCE_MESH          // Enable to force the node in mesh mode
+#define SWITCHING_NODE          // Enable for main smart node
+//#define SENSOR_NODE           // Enable for sensor nodes (this should be work in Mesh Only)
+//#define FORCE_MESH            // Enable to force the node in mesh mode
+#define NO_OF_DEVICES           4
 
 #endif
