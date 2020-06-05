@@ -21,8 +21,8 @@ smart/user_name/device_id/on_motion_end_timeout/D1_to_Dn/time
 
 # JSON Based protocol
 
-smart/username/info			->	{'nodeIds':[array,of,nodeId], 'nodeNames':[array,of,nodeNames]}
-smart/username/					->	{'from':'app', 'to':'nodeId', type':'state', data:[1,0,1,0]}
-smart/username/					->	{'from':'app', 'to':'nodeId', type':'label', data:[a,b,c,d]}
+smart/username/info			->	{'smartIds':[array,of,smartId], 'nodeNames':[array,of,nodeNames]}
+smart/username/					->	{'from':'app', 'to':'smartId', type':'state', data:[1,0,1,0]}
+smart/username/					->	{'from':'app', 'to':'smartId', type':'label', data:[a,b,c,d]}
 
 TODO - Implement for timer and sensor later!
