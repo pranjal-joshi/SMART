@@ -204,9 +204,10 @@ SmartWebServer::SmartWebServer(void){
 
 String processor(const String& var) {
   if(var == "GET_SMART_SSID") {
-    char n[14];
-    snprintf(n, 14, "SMART_%08X", (uint32_t)ESP.getChipId());
-    return String(n);
+    size_t sz = snprintf(NULL, 0, "SMART_%08X", (uint32_t)ESP.getChipId()) + 1;
+    char *ssid = (char*)malloc(sz);
+    snprintf(ssid, 15, "SMART_%08X", (uint32_t)ESP.getChipId());
+    return String(ssid);
   }
   else if(var == "SCANNED_NETWORKS") {
     return (String)scanned_networks_html;
