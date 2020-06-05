@@ -27,7 +27,7 @@ PubSubClient mqtt(wiCli);
 
 void getRootId(void);
 Scheduler sched;
-Task rootCheckTask(5000, TASK_FOREVER, &getRootId, &sched);
+//Task rootCheckTask(5000, TASK_FOREVER, &getRootId, &sched);
 
 // variables
 String smartSsid;
@@ -35,6 +35,8 @@ DynamicJsonDocument confJson(JSON_BUF_SIZE);
 bool internetAvailable = false;
 uint32_t rootNodeAddr;
 byte stateArray[NO_OF_DEVICES];
+int quality;
+uint16_t channel = 1;
 
 void setup() {
   Serial.begin(115200);
@@ -71,8 +73,7 @@ void setup() {
   }
 
   // Run a WiFi scan to acquire the channel info of target SSID so that same channel can be used for mesh.
-  int quality;
-  unsigned int channel = getWiFiChannelForSSID((const char*)confJson[CONF_SSID], (int)confJson[CONF_WIFI_CH], quality);
+  channel = getWiFiChannelForSSID((const char*)confJson[CONF_SSID], (int)confJson[CONF_WIFI_CH], quality);
 
   // Setup mesh network
   initMesh(channel, quality);
@@ -97,10 +98,11 @@ void looper() {
 }
 
 const char* getSmartSSID() {
-  char n[14];
-  snprintf(n, 14, "SMART_%08X", (uint32_t)ESP.getChipId());
-  smartSsid = (const char*)n;
-  return n;
+  size_t sz = snprintf(NULL, 0, "SMART_%08X", (uint32_t)ESP.getChipId()) + 1;
+  char *ssid = (char*)malloc(sz);
+  snprintf(ssid, 15, "SMART_%08X", (uint32_t)ESP.getChipId());
+  smartSsid = String(ssid);
+  return ssid;
 }
 
 void initMesh(uint8_t ch, int qual) {
@@ -235,7 +237,9 @@ bool isInternetAvailable(void) {
       Serial.println(F("[+] SMART: WARNING --> Node is in FORCE_MESH mode!"));
     return false;
   #endif
-  return Ping.ping("www.google.co.in");
+  if(WiFi.SSID() == (const char*)confJson[CONF_SSID])
+    return Ping.ping("www.google.co.in",1);
+  return false;
 }
 
 void setupArduinoOTA(void) {
@@ -252,41 +256,40 @@ const char* getTopicName(String tn) {
 
 // When Mesh receives anything
 void meshReceiveCallback( uint32_t from, String &msg) {
+  if(mDebug)
+    Serial.printf("[+] SMART: Mesh Callback -> %s\n",msg.c_str());
   decisionMaker(msg);
-  pinMode(LED_BUILTIN,OUTPUT);
-  Serial.printf("[+] SMART: Mesh Rx -> %s\n",msg.c_str());
-  if(msg == "1")
-    digitalWrite(LED_BUILTIN,LOW);
-  if(msg == "0")
-    digitalWrite(LED_BUILTIN,HIGH);
 }
 
 void mqttCallback(char* topic, byte* payload, unsigned int length) { //write MQTT callback here
   payload[length] = '\0';
   String p = (char*)payload;
-    
-  mesh.sendBroadcast(p);
-  decisionMaker(p);
-    
   if(mDebug)
     Serial.printf("[+] SMART: MQTT Callback -> [%s] %s\n",topic,payload);
+  mesh.sendBroadcast(p);
+  decisionMaker(p);
 }
 
 void decisionMaker(String p) {
   DynamicJsonDocument doc(JSON_BUF_SIZE + p.length());
   deserializeJson(doc, p);
 
+  if(mDebug) {
+    pinMode(LED_BUILTIN,OUTPUT);
+    if(p == "1")
+      digitalWrite(LED_BUILTIN,LOW);
+    if(p == "0")
+      digitalWrite(LED_BUILTIN,HIGH);
+  }
+
   if(doc.containsKey(JSON_SMARTID)) {
-    Serial.println((const char*)doc[JSON_SMARTID] == smartSsid.c_str());
-    Serial.println((const char*)doc[JSON_SMARTID]);
-    Serial.println(smartSsid);
-    if((const char*)doc[JSON_SMARTID] == smartSsid.c_str()) {
-      Serial.println(doc.containsKey(JSON_TYPE) && ((const char*)doc[JSON_TYPE] == JSON_STATE));
-      if(doc.containsKey(JSON_TYPE) && ((const char*)doc[JSON_TYPE] == JSON_STATE)) {
+    if(String((const char*)doc[JSON_SMARTID]) == smartSsid) {
+      if(doc.containsKey(JSON_TYPE) && (String((const char*)doc[JSON_TYPE]) == JSON_STATE)) {
         JsonArray a = doc[JSON_TYPE].as<JsonArray>();
         byte i=0;
         for(JsonVariant v : a) {
-          stateArray[i] = v.as<byte>();
+          stateArray[i] = v.as<char>();
+          Serial.println(v.as<char>());
           i++;
         }
         if(mDebug) {
