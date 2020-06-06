@@ -14,8 +14,6 @@
 #include "SmartWebServer.h"
 #include "SmartConstants.h"
 
-bool mDebug = true;
-
 SmartFileSystem fsys;
 SmartFileSystemFlags_t flag;
 SmartWebServer configServer;
@@ -25,14 +23,17 @@ painlessMesh mesh;
 WiFiClient wiCli;
 PubSubClient mqtt(wiCli);
 
-void getRootId(void);
 Scheduler sched;
-//Task rootCheckTask(5000, TASK_FOREVER, &getRootId, &sched);
+
+void checkRootNode(void);
+Task rootCheckTask(INTERVAL_ROOT_CHECK*TASK_SECOND, TASK_FOREVER, &checkRootNode, &sched);
 
 // variables
 String smartSsid;
 DynamicJsonDocument confJson(JSON_BUF_SIZE);
 bool internetAvailable = false;
+bool isMeshActive = false;
+bool isOtaActive = false;
 uint32_t rootNodeAddr;
 byte stateArray[NO_OF_DEVICES];
 int quality;
@@ -42,6 +43,12 @@ void setup() {
   Serial.begin(115200);
   Serial.println("\n");
 
+  randomSeed(analogRead(A0));
+  uint16_t bd = random(0,BOOT_DLY);
+  if(mDebug)
+    Serial.printf("[+] SMART: BOOT -> Random Delay = %udmS\n",bd);
+  delay(bd);
+
   if(mDebug)
     Serial.printf("[+] SMART: INFO -> CHIP ID = SMART_%08X\n",ESP.getChipId());
 
@@ -49,7 +56,7 @@ void setup() {
   fsys.setDebug(mDebug);
   if(fsys.isConfigEmpty()) {
     configServer.setDebug(mDebug);
-    configServer.begin(getSmartSSID(),AP_PASS);
+    configServer.begin(getSmartSSID(),SMART_PASS);
     while(fsys.isConfigEmpty()) {
       // Start SmartWebServer and stay here until config isn't provided!
       delay(2000);
@@ -78,6 +85,7 @@ void setup() {
   // Setup mesh network
   initMesh(channel, quality);
 
+  // Start task scheduler to execute tasks
   sched.enableAll();
 }
 
@@ -127,42 +135,57 @@ void initMesh(uint8_t ch, int qual) {
   mesh.setHostname(getSmartSSID());
   mesh.onChangedConnections(&changedConCallback);
   mesh.onReceive(&meshReceiveCallback);
+  #ifdef FORCE_ROOT
+    mesh.setRoot(true);
+    if(mDebug)
+      Serial.println(F("[+] SMART: WARNING --> Node is in FORCE_ROOT mode!"));
+  #endif
+  mesh.setContainsRoot(true);
 }
 
 // setup arduino OTA only after device is connected to some network
 void changedConCallback() {
-  setupArduinoOTA();
-}
-
-// TODO - Implement this
-void checkMesh() {
-  if(!mesh.isRoot()) {
-    mesh.setRoot(true);
-    if(mDebug) {
-      Serial.println("[+] SMART: INFO -> Making this node as ROOT. Hostname = ");
-      Serial.println(getSmartSSID());
-    }
-  }
-  mesh.setContainsRoot(true);
-}
-
-void getRootId(void) {
-  size_t i=0;
-  SimpleList<uint32_t> nl = mesh.getNodeList();
-  SimpleList<uint32_t>::iterator itr = nl.begin();
   if(mDebug)
-    Serial.print(F("[+] SMART: MeshNode -> Running checkRoot Task...\n"));
-  while(itr != nl.end()) {
+    Serial.println(F("[+] SMART: INFO -> Mesh -> Callback trigered -> onChangedConnection"));
+  if(mesh.isConnected(mesh.getNodeId())) {
+    isMeshActive = true;
+  }
+  else {
+    isMeshActive = false;
+  }
+  checkRootNode();
+}
+
+void checkRootNode() {
+  // Get the root node ID, No one is root? AND this connected to internet? -> Make this root
+  if(!mesh.isRoot()) {
     if(mDebug) {
-      Serial.print(F("[+] SMART: MeshNode (Chip-ID) -> "));
-      Serial.println(*itr,HEX);
+      Serial.print(F("[+] SMART: INFO -> checkRootTask -> getRootId = "));
+      Serial.println(getRootId(mesh.asNodeTree()),HEX);
     }
-    itr++;
+    if(getRootId(mesh.asNodeTree()) == 0 && isInternetAvailable()) {
+      mesh.setRoot(true);
+      if(mDebug)
+        Serial.println(F("[+] SMART: INFO -> checkRoottask -> Setting this node as ROOT!"));
+    }
+  }
+  else {
+    if(mDebug) {
+      Serial.print(F("[+] SMART: INFO -> checkRoottask -> This is ROOT! = "));
+      Serial.println(smartSsid);
+    }
   }
 }
 
-void getRootId2(void) {
-  auto layout = mesh.asNodeTree();
+size_t getRootId(painlessmesh::protocol::NodeTree nt) {
+  if(nt.root)
+    return nt.nodeId;
+  for(auto&& s : nt.subs) {
+    auto id = getRootId(s);
+    if(id != 0)
+      return id;
+  }
+  return 0;
 }
 
 // Connect to MQTT
@@ -237,8 +260,13 @@ bool isInternetAvailable(void) {
       Serial.println(F("[+] SMART: WARNING --> Node is in FORCE_MESH mode!"));
     return false;
   #endif
-  if(WiFi.SSID() == (const char*)confJson[CONF_SSID])
-    return Ping.ping("www.google.co.in",1);
+  if(WiFi.SSID() == (const char*)confJson[CONF_SSID]) {
+    if(!isOtaActive) {
+      setupArduinoOTA();
+      isOtaActive = true;
+    }
+    return Ping.ping("www.google.co.in",1); 
+  }
   return false;
 }
 
@@ -285,20 +313,16 @@ void decisionMaker(String p) {
   if(doc.containsKey(JSON_SMARTID)) {
     if(String((const char*)doc[JSON_SMARTID]) == smartSsid) {
       if(doc.containsKey(JSON_TYPE) && (String((const char*)doc[JSON_TYPE]) == JSON_STATE)) {
-        JsonArray a = doc[JSON_TYPE].as<JsonArray>();
+        JsonArray a = (JsonArray)doc[JSON_DATA];
         byte i=0;
         for(JsonVariant v : a) {
-          stateArray[i] = v.as<char>();
-          Serial.println(v.as<char>());
+          stateArray[i] = v.as<byte>();
           i++;
         }
         if(mDebug) {
-          Serial.print(F("[+] SMART: STATE -> State changed to ["));
-          for(byte k=0;k<i;k++) {
-            Serial.print(stateArray[k]);
-            Serial.print(F(", "));
-          }
-          Serial.println(F("]"));
+          Serial.print(F("[+] SMART: STATE -> State changed to "));
+          serializeJson(a,Serial);
+          Serial.println();
         }
       }
     }
