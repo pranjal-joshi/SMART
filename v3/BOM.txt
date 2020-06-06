@@ -1,0 +1,12 @@
+
+# 5VDC Relay (230V-10A)
+Make: Omron
+MPN: G5Q-1-HA DC5
+Mouser: https://www.mouser.in/ProductDetail/Omron-Electronics/G5Q-1-HA-DC5?qs=%2Fha2pyFaduhnM0oDlApp2QhWTd9FBml4SoVu9GQGE8212LbqeMMlrw%3D%3D
+price per unit: 111
+
+# Relay driving transistor
+Make: ON Semi
+MPN: 2N3904TA
+Mouser: https://www.mouser.in/ProductDetail/ON-Semiconductor-Fairchild/2N3904TA?qs=ljbEvF4DwOOn1Ev%2FzRYaoA%3D%3D
+price: 11
