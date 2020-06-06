@@ -33,12 +33,13 @@
 #define CONF_WIFI_CH      "confWifiChannel"
 
 // Mesh constants
-#define MESH_SSID             "SMART-Mesh"
-#define MESH_PASS             "mesh@smart_v3"
-#define MESH_PORT             4321
-#define MESH_HIDDEN           1
-#define MESH_QUALITY_THRESH   -75   // dBm
-#define INTERVAL_ROOT_CHECK   30    // Seconds
+#define MESH_SSID                 "SMART-Mesh"
+#define MESH_PASS                 "mesh@smart_v3"
+#define MESH_PORT                 4321
+#define MESH_HIDDEN               1
+#define MESH_QUALITY_THRESH       -75   // dBm
+#define INTERVAL_ROOT_CHECK       30    // Seconds
+#define INTERVAL_TARGET_SEARCH    60    // Seconds
 
 // smartWebServer constants
 #define SMART_PASS        "12345678"    // Change later
