@@ -25,8 +25,10 @@ PubSubClient mqtt(wiCli);
 
 Scheduler sched;
 
-void checkRootNode(void);
-Task rootCheckTask(INTERVAL_ROOT_CHECK*TASK_SECOND, TASK_FOREVER, &checkRootNode, &sched);
+void taskCheckRootNode(void);
+Task rootCheckTask(INTERVAL_ROOT_CHECK*TASK_SECOND, TASK_FOREVER, &taskCheckRootNode, &sched);
+void taskSearchTargetSSID(void);
+Task searchTargetTask(INTERVAL_TARGET_SEARCH*TASK_SECOND, TASK_ONCE, &taskSearchTargetSSID, &sched);
 
 // variables
 String smartSsid;
@@ -34,10 +36,11 @@ DynamicJsonDocument confJson(JSON_BUF_SIZE);
 bool internetAvailable = false;
 bool isMeshActive = false;
 bool isOtaActive = false;
+bool isTargetSsidFound = false;
 uint32_t rootNodeAddr;
 byte stateArray[NO_OF_DEVICES];
 int quality;
-uint16_t channel = 1;
+uint16_t channel = 0;
 
 void setup() {
   Serial.begin(115200);
@@ -45,12 +48,12 @@ void setup() {
 
   randomSeed(analogRead(A0));
   uint16_t bd = random(0,BOOT_DLY);
-  if(mDebug)
-    Serial.printf("[+] SMART: BOOT -> Random Delay = %udmS\n",bd);
-  delay(bd);
-
-  if(mDebug)
+  if(mDebug) {
+    mesh.setDebugMsgTypes( ERROR | STARTUP | CONNECTION );
     Serial.printf("[+] SMART: INFO -> CHIP ID = SMART_%08X\n",ESP.getChipId());
+    Serial.printf("[+] SMART: BOOT -> Random Delay = %udmS\n",bd);
+  }
+  delay(bd);
 
   // Read config.json file to retrieve login creds
   fsys.setDebug(mDebug);
@@ -85,8 +88,9 @@ void setup() {
   // Setup mesh network
   initMesh(channel, quality);
 
-  // Start task scheduler to execute tasks
-  sched.enableAll();
+  // Start scheduled task execution
+  sched.addTask(rootCheckTask);
+  rootCheckTask.enable();
 }
 
 void loop() {
@@ -113,9 +117,7 @@ const char* getSmartSSID() {
   return ssid;
 }
 
-void initMesh(uint8_t ch, int qual) {
-  if(mDebug)
-    mesh.setDebugMsgTypes( ERROR | STARTUP | CONNECTION );
+void initMesh(uint8_t ch, int qual) {    
   mesh.init(MESH_SSID, MESH_PASS, MESH_PORT, WIFI_AP_STA, ch, MESH_HIDDEN);
   #ifndef FORCE_MESH
     if(qual > MESH_QUALITY_THRESH) {
@@ -153,10 +155,10 @@ void changedConCallback() {
   else {
     isMeshActive = false;
   }
-  checkRootNode();
+  taskCheckRootNode();
 }
 
-void checkRootNode() {
+void taskCheckRootNode() {
   // Get the root node ID, No one is root? AND this connected to internet? -> Make this root
   if(!mesh.isRoot()) {
     if(mDebug) {
@@ -166,13 +168,21 @@ void checkRootNode() {
     if(getRootId(mesh.asNodeTree()) == 0 && isInternetAvailable()) {
       mesh.setRoot(true);
       if(mDebug)
-        Serial.println(F("[+] SMART: INFO -> checkRoottask -> Setting this node as ROOT!"));
+        Serial.println(F("[+] SMART: INFO -> checkRootTask -> Setting this node as ROOT!"));
     }
   }
   else {
     if(mDebug) {
-      Serial.print(F("[+] SMART: INFO -> checkRoottask -> This is ROOT! = "));
+      Serial.print(F("[+] SMART: INFO -> checkRootTask -> This is ROOT! = "));
       Serial.println(smartSsid);
+    }
+  }
+  // if anyone is ROOT, then stop scanning target SSID as the ROOT must be already connected to it!
+  if(getRootId(mesh.asNodeTree()) > 0) {
+    searchTargetTask.disable();
+    sched.deleteTask(searchTargetTask);
+    if(mDebug) {
+      Serial.print(F("[+] SMART: INFO -> checkRootTask -> Disabled searchTargetTask as ROOT is found!"));
     }
   }
 }
@@ -229,6 +239,8 @@ void connectMqttClient() {
 
 // Get the channel of target SSID to be connected to
 unsigned int getWiFiChannelForSSID(const char* ssid, int confCh, int& quality) {
+  if(mesh.isConnected(mesh.getNodeId()))
+    mesh.stop();
   WiFi.mode(WIFI_STA);
   WiFi.disconnect();
   if(mDebug)
@@ -239,6 +251,9 @@ unsigned int getWiFiChannelForSSID(const char* ssid, int confCh, int& quality) {
     if(String(WiFi.SSID(i)) == ssid){
       //quality = map(WiFi.RSSI(i),-90,-20,0, 100);
       quality = WiFi.RSSI(i);
+      isTargetSsidFound = true;
+      searchTargetTask.disable();
+      sched.deleteTask(searchTargetTask);
       if(mDebug) {
         Serial.printf("[+] SMART: INFO -> TARGET CHANNEL: -> %d\n",WiFi.channel(i));
         Serial.printf("[+] SMART: INFO -> TARGET QUALITY: -> %d\n",quality);
@@ -248,10 +263,25 @@ unsigned int getWiFiChannelForSSID(const char* ssid, int confCh, int& quality) {
     }
   }
   WiFi.scanDelete();
-  if(mDebug)
-    Serial.printf("[+] SMART: INFO -> TARGET CHANNEL FROM CONF: -> %d",confCh);
+  if(mDebug) {
+    Serial.println(F("[+] SMART: ERROR -> TARGET SSID not found!"));
+    Serial.printf("[+] SMART: INFO -> TARGET CHANNEL FROM CONF: -> %d\n",confCh);
+  }
   quality = MESH_QUALITY_THRESH;
-  return confCh;
+  isTargetSsidFound = false;
+  searchTargetTask.restartDelayed(INTERVAL_TARGET_SEARCH * TASK_SECOND);
+  //return confCh;
+  return 0;
+}
+
+void taskSearchTargetSSID(void) {
+  if(mDebug)
+    Serial.println(F("[+] SMART: INFO -> taskSearchTargetSSIDTask -> Searching for target.."));
+  mesh.stop();
+  channel = getWiFiChannelForSSID((const char*)confJson[CONF_SSID], (int)confJson[CONF_WIFI_CH], quality);
+  if(mDebug)
+      Serial.print(F("[+] SMART: INFO -> taskSearchTargetSSIDTask -> Task completed, Resuming Mesh!"));
+  initMesh(channel, quality);
 }
 
 bool isInternetAvailable(void) {
