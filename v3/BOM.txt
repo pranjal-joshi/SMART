@@ -3,10 +3,22 @@
 Make: Omron
 MPN: G5Q-1-HA DC5
 Mouser: https://www.mouser.in/ProductDetail/Omron-Electronics/G5Q-1-HA-DC5?qs=%2Fha2pyFaduhnM0oDlApp2QhWTd9FBml4SoVu9GQGE8212LbqeMMlrw%3D%3D
-price per unit: 111
+price: 89
 
 # Relay driving transistor
 Make: ON Semi
 MPN: 2N3904TA
 Mouser: https://www.mouser.in/ProductDetail/ON-Semiconductor-Fairchild/2N3904TA?qs=ljbEvF4DwOOn1Ev%2FzRYaoA%3D%3D
 price: 11
+
+# PCB mounted Fuse holder
+Make: LittleFuse
+MPN: 0PTF0078P
+Mouser: https://www.mouser.in/ProductDetail/Littelfuse/0PTF0078P?qs=Co4VkB5J4%2Fsczy6gG8s%2FsA%3D%3D
+price: 27
+
+# 5mm screw terminal - 3 position
+Make: Amphenol Anytek
+MPN: 20020110-G031A01LF
+Mouser: https://www.mouser.in/ProductDetail/Amphenol-Anytek/20020110-G031A01LF?qs=sGAEpiMZZMvPvGwLNS671ybUUHgGh%2F4ueXA2DhMaqhc%3D
+price: 20
