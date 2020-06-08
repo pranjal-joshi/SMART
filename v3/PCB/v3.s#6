@@ -3962,6 +3962,42 @@ CAP-08070</description>
 <wire x1="-3.65" y1="-2.55" x2="-3.65" y2="2.55" width="0.2" layer="21"/>
 <wire x1="-5.55" y1="2.32" x2="-4" y2="2.32" width="0.2" layer="21"/>
 </package>
+<package name="SOIC127P600X175-16N">
+<description>&lt;b&gt;SOIC-16 CASE751B-05&lt;/b&gt;&lt;br&gt;
+</description>
+<smd name="1" x="-2.725" y="4.445" dx="1.55" dy="0.65" layer="1"/>
+<smd name="2" x="-2.725" y="3.175" dx="1.55" dy="0.65" layer="1"/>
+<smd name="3" x="-2.725" y="1.905" dx="1.55" dy="0.65" layer="1"/>
+<smd name="4" x="-2.725" y="0.635" dx="1.55" dy="0.65" layer="1"/>
+<smd name="5" x="-2.725" y="-0.635" dx="1.55" dy="0.65" layer="1"/>
+<smd name="6" x="-2.725" y="-1.905" dx="1.55" dy="0.65" layer="1"/>
+<smd name="7" x="-2.725" y="-3.175" dx="1.55" dy="0.65" layer="1"/>
+<smd name="8" x="-2.725" y="-4.445" dx="1.55" dy="0.65" layer="1"/>
+<smd name="9" x="2.725" y="-4.445" dx="1.55" dy="0.65" layer="1"/>
+<smd name="10" x="2.725" y="-3.175" dx="1.55" dy="0.65" layer="1"/>
+<smd name="11" x="2.725" y="-1.905" dx="1.55" dy="0.65" layer="1"/>
+<smd name="12" x="2.725" y="-0.635" dx="1.55" dy="0.65" layer="1"/>
+<smd name="13" x="2.725" y="0.635" dx="1.55" dy="0.65" layer="1"/>
+<smd name="14" x="2.725" y="1.905" dx="1.55" dy="0.65" layer="1"/>
+<smd name="15" x="2.725" y="3.175" dx="1.55" dy="0.65" layer="1"/>
+<smd name="16" x="2.725" y="4.445" dx="1.55" dy="0.65" layer="1"/>
+<text x="0" y="0" size="1.27" layer="25" align="center">&gt;NAME</text>
+<text x="0" y="0" size="1.27" layer="27" align="center">&gt;VALUE</text>
+<wire x1="-3.75" y1="5.25" x2="3.75" y2="5.25" width="0.05" layer="51"/>
+<wire x1="3.75" y1="5.25" x2="3.75" y2="-5.25" width="0.05" layer="51"/>
+<wire x1="3.75" y1="-5.25" x2="-3.75" y2="-5.25" width="0.05" layer="51"/>
+<wire x1="-3.75" y1="-5.25" x2="-3.75" y2="5.25" width="0.05" layer="51"/>
+<wire x1="-1.95" y1="4.95" x2="1.95" y2="4.95" width="0.1" layer="51"/>
+<wire x1="1.95" y1="4.95" x2="1.95" y2="-4.95" width="0.1" layer="51"/>
+<wire x1="1.95" y1="-4.95" x2="-1.95" y2="-4.95" width="0.1" layer="51"/>
+<wire x1="-1.95" y1="-4.95" x2="-1.95" y2="4.95" width="0.1" layer="51"/>
+<wire x1="-1.95" y1="3.68" x2="-0.68" y2="4.95" width="0.1" layer="51"/>
+<wire x1="-1.6" y1="4.95" x2="1.6" y2="4.95" width="0.2" layer="21"/>
+<wire x1="1.6" y1="4.95" x2="1.6" y2="-4.95" width="0.2" layer="21"/>
+<wire x1="1.6" y1="-4.95" x2="-1.6" y2="-4.95" width="0.2" layer="21"/>
+<wire x1="-1.6" y1="-4.95" x2="-1.6" y2="4.95" width="0.2" layer="21"/>
+<wire x1="-3.5" y1="5.12" x2="-1.95" y2="5.12" width="0.2" layer="21"/>
+</package>
 </packages>
 <symbols>
 <symbol name="113990105">
@@ -4077,6 +4113,30 @@ CAP-08070</description>
 <pin name="C/A" x="0" y="-2.54" length="middle"/>
 <pin name="C" x="22.86" y="0" length="middle" rot="R180"/>
 <pin name="E" x="22.86" y="-2.54" length="middle" rot="R180"/>
+</symbol>
+<symbol name="MC74HC595ADG">
+<wire x1="5.08" y1="2.54" x2="33.02" y2="2.54" width="0.254" layer="94"/>
+<wire x1="33.02" y1="-20.32" x2="33.02" y2="2.54" width="0.254" layer="94"/>
+<wire x1="33.02" y1="-20.32" x2="5.08" y2="-20.32" width="0.254" layer="94"/>
+<wire x1="5.08" y1="2.54" x2="5.08" y2="-20.32" width="0.254" layer="94"/>
+<text x="34.29" y="7.62" size="1.778" layer="95" align="center-left">&gt;NAME</text>
+<text x="34.29" y="5.08" size="1.778" layer="96" align="center-left">&gt;VALUE</text>
+<pin name="QB" x="0" y="0" length="middle"/>
+<pin name="QC" x="0" y="-2.54" length="middle"/>
+<pin name="QD" x="0" y="-5.08" length="middle"/>
+<pin name="QE" x="0" y="-7.62" length="middle"/>
+<pin name="QF" x="0" y="-10.16" length="middle"/>
+<pin name="QG" x="0" y="-12.7" length="middle"/>
+<pin name="QH" x="0" y="-15.24" length="middle"/>
+<pin name="GND" x="0" y="-17.78" length="middle" direction="pwr"/>
+<pin name="VCC" x="38.1" y="0" length="middle" direction="pwr" rot="R180"/>
+<pin name="QA" x="38.1" y="-2.54" length="middle" rot="R180"/>
+<pin name="A" x="38.1" y="-5.08" length="middle" rot="R180"/>
+<pin name="OUTPUT_ENABLE" x="38.1" y="-7.62" length="middle" direction="out" rot="R180"/>
+<pin name="LATCH_CLOCK" x="38.1" y="-10.16" length="middle" direction="in" rot="R180"/>
+<pin name="SHIFT_CLOCK" x="38.1" y="-12.7" length="middle" direction="in" rot="R180"/>
+<pin name="RESET" x="38.1" y="-15.24" length="middle" rot="R180"/>
+<pin name="SQH" x="38.1" y="-17.78" length="middle" rot="R180"/>
 </symbol>
 </symbols>
 <devicesets>
@@ -4290,6 +4350,45 @@ Source: &lt;a href="https://componentsearchengine.com/Datasheets/1/SFH6206-3.pdf
 <attribute name="MANUFACTURER_PART_NUMBER" value="SFH6206-3" constant="no"/>
 <attribute name="MOUSER_PART_NUMBER" value="782-SFH6206-3" constant="no"/>
 <attribute name="MOUSER_PRICE-STOCK" value="https://www.mouser.com/Search/Refine.aspx?Keyword=782-SFH6206-3" constant="no"/>
+</technology>
+</technologies>
+</device>
+</devices>
+</deviceset>
+<deviceset name="MC74HC595ADG" prefix="IC">
+<description>&lt;b&gt;Shift Register 8-Bit Latch 3State SOIC16 ON Semiconductor MC74HC595ADG, 8-stage, Shift Register, Serial to Serial/Parallel, 2  6 V, 16-Pin SOIC&lt;/b&gt;&lt;p&gt;
+Source: &lt;a href="http://www.onsemi.com/pub/Collateral/MC74HC595A-D.PDF"&gt; Datasheet &lt;/a&gt;</description>
+<gates>
+<gate name="G$1" symbol="MC74HC595ADG" x="0" y="0"/>
+</gates>
+<devices>
+<device name="" package="SOIC127P600X175-16N">
+<connects>
+<connect gate="G$1" pin="A" pad="14"/>
+<connect gate="G$1" pin="GND" pad="8"/>
+<connect gate="G$1" pin="LATCH_CLOCK" pad="12"/>
+<connect gate="G$1" pin="OUTPUT_ENABLE" pad="13"/>
+<connect gate="G$1" pin="QA" pad="15"/>
+<connect gate="G$1" pin="QB" pad="1"/>
+<connect gate="G$1" pin="QC" pad="2"/>
+<connect gate="G$1" pin="QD" pad="3"/>
+<connect gate="G$1" pin="QE" pad="4"/>
+<connect gate="G$1" pin="QF" pad="5"/>
+<connect gate="G$1" pin="QG" pad="6"/>
+<connect gate="G$1" pin="QH" pad="7"/>
+<connect gate="G$1" pin="RESET" pad="10"/>
+<connect gate="G$1" pin="SHIFT_CLOCK" pad="11"/>
+<connect gate="G$1" pin="SQH" pad="9"/>
+<connect gate="G$1" pin="VCC" pad="16"/>
+</connects>
+<technologies>
+<technology name="">
+<attribute name="DESCRIPTION" value="Shift Register 8-Bit Latch 3State SOIC16 ON Semiconductor MC74HC595ADG, 8-stage, Shift Register, Serial to Serial/Parallel, 2  6 V, 16-Pin SOIC" constant="no"/>
+<attribute name="HEIGHT" value="1.75mm" constant="no"/>
+<attribute name="MANUFACTURER_NAME" value="ON Semiconductor" constant="no"/>
+<attribute name="MANUFACTURER_PART_NUMBER" value="MC74HC595ADG" constant="no"/>
+<attribute name="MOUSER_PART_NUMBER" value="863-MC74HC595ADG" constant="no"/>
+<attribute name="MOUSER_PRICE-STOCK" value="https://www.mouser.co.uk/ProductDetail/ON-Semiconductor/MC74HC595ADG?qs=qg33o%252B8vzFqEn75WJUGD8w%3D%3D" constant="no"/>
 </technology>
 </technologies>
 </device>
@@ -12144,6 +12243,7 @@ Source: AVX .. aphvc.pdf</description>
 <part name="C5" library="rcl" library_urn="urn:adsk.eagle:library:334" deviceset="C-US" device="C0805" package3d_urn="urn:adsk.eagle:package:23617/2" value="470nF"/>
 <part name="J1" library="SparkFun-Connectors" deviceset="CONN_04" device="PTH"/>
 <part name="J2" library="SparkFun-Connectors" deviceset="CONN_04" device="PTH"/>
+<part name="IC1" library="SamacSys_Parts" deviceset="MC74HC595ADG" device=""/>
 </parts>
 <sheets>
 <sheet>
@@ -12398,6 +12498,10 @@ Controlls/Reads some pins during boot!!</text>
 <attribute name="VALUE" x="213.36" y="121.666" size="1.778" layer="96" font="vector" rot="R180"/>
 <attribute name="NAME" x="213.36" y="106.172" size="1.778" layer="95" font="vector" rot="R180"/>
 </instance>
+<instance part="IC1" gate="G$1" x="177.8" y="78.74" smashed="yes">
+<attribute name="NAME" x="212.09" y="86.36" size="1.778" layer="95" align="center-left"/>
+<attribute name="VALUE" x="212.09" y="83.82" size="1.778" layer="96" align="center-left"/>
+</instance>
 </instances>
 <busses>
 </busses>
@@ -12504,6 +12608,16 @@ Controlls/Reads some pins during boot!!</text>
 <pinref part="NODEMCU" gate="G$1" pin="GND_2"/>
 <wire x1="33.02" y1="68.58" x2="22.86" y2="68.58" width="0.1524" layer="91"/>
 <label x="22.86" y="68.58" size="1.778" layer="95"/>
+</segment>
+<segment>
+<pinref part="IC1" gate="G$1" pin="GND"/>
+<wire x1="177.8" y1="60.96" x2="167.64" y2="60.96" width="0.1524" layer="91"/>
+<label x="167.64" y="60.96" size="1.778" layer="95"/>
+</segment>
+<segment>
+<pinref part="IC1" gate="G$1" pin="OUTPUT_ENABLE"/>
+<wire x1="215.9" y1="71.12" x2="226.06" y2="71.12" width="0.1524" layer="91"/>
+<label x="226.06" y="71.12" size="1.778" layer="95"/>
 </segment>
 </net>
 <net name="VCC" class="0">
@@ -12648,6 +12762,16 @@ Controlls/Reads some pins during boot!!</text>
 <wire x1="111.76" y1="88.9" x2="124.46" y2="88.9" width="0.1524" layer="91"/>
 <label x="124.46" y="88.9" size="1.778" layer="95"/>
 </segment>
+<segment>
+<pinref part="IC1" gate="G$1" pin="VCC"/>
+<wire x1="215.9" y1="78.74" x2="226.06" y2="78.74" width="0.1524" layer="91"/>
+<label x="226.06" y="78.74" size="1.778" layer="95"/>
+</segment>
+<segment>
+<pinref part="IC1" gate="G$1" pin="RESET"/>
+<wire x1="215.9" y1="63.5" x2="226.06" y2="63.5" width="0.1524" layer="91"/>
+<label x="226.06" y="63.5" size="1.778" layer="95"/>
+</segment>
 </net>
 <net name="QC1" class="0">
 <segment>
@@ -12679,9 +12803,9 @@ Controlls/Reads some pins during boot!!</text>
 <label x="314.96" y="124.46" size="1.778" layer="95"/>
 </segment>
 <segment>
-<pinref part="NODEMCU" gate="G$1" pin="D1_-_GPIO5"/>
-<wire x1="111.76" y1="99.06" x2="124.46" y2="99.06" width="0.1524" layer="91"/>
-<label x="124.46" y="99.06" size="1.778" layer="95"/>
+<pinref part="IC1" gate="G$1" pin="QA"/>
+<wire x1="215.9" y1="76.2" x2="243.84" y2="76.2" width="0.1524" layer="91"/>
+<label x="243.84" y="76.2" size="1.778" layer="95"/>
 </segment>
 </net>
 <net name="LOAD1" class="0">
@@ -12753,9 +12877,9 @@ Controlls/Reads some pins during boot!!</text>
 <label x="439.42" y="124.46" size="1.778" layer="95"/>
 </segment>
 <segment>
-<pinref part="NODEMCU" gate="G$1" pin="D2_-_GPIO4"/>
-<wire x1="111.76" y1="96.52" x2="124.46" y2="96.52" width="0.1524" layer="91"/>
-<label x="124.46" y="96.52" size="1.778" layer="95"/>
+<pinref part="IC1" gate="G$1" pin="QB"/>
+<wire x1="177.8" y1="78.74" x2="167.64" y2="78.74" width="0.1524" layer="91"/>
+<label x="167.64" y="78.74" size="1.778" layer="95"/>
 </segment>
 </net>
 <net name="QC2" class="0">
@@ -12879,9 +13003,9 @@ Controlls/Reads some pins during boot!!</text>
 <label x="439.42" y="63.5" size="1.778" layer="95"/>
 </segment>
 <segment>
-<pinref part="NODEMCU" gate="G$1" pin="D6_-_GPIO12_/_HSPIQ"/>
-<wire x1="111.76" y1="81.28" x2="124.46" y2="81.28" width="0.1524" layer="91"/>
-<label x="124.46" y="81.28" size="1.778" layer="95"/>
+<pinref part="IC1" gate="G$1" pin="QD"/>
+<wire x1="177.8" y1="73.66" x2="167.64" y2="73.66" width="0.1524" layer="91"/>
+<label x="167.64" y="73.66" size="1.778" layer="95"/>
 </segment>
 </net>
 <net name="R3" class="0">
@@ -12891,9 +13015,9 @@ Controlls/Reads some pins during boot!!</text>
 <label x="314.96" y="63.5" size="1.778" layer="95"/>
 </segment>
 <segment>
-<pinref part="NODEMCU" gate="G$1" pin="D5_-_GPIO14_/_HSPICLK"/>
-<wire x1="111.76" y1="83.82" x2="124.46" y2="83.82" width="0.1524" layer="91"/>
-<label x="124.46" y="83.82" size="1.778" layer="95"/>
+<pinref part="IC1" gate="G$1" pin="QC"/>
+<wire x1="177.8" y1="76.2" x2="167.64" y2="76.2" width="0.1524" layer="91"/>
+<label x="167.64" y="76.2" size="1.778" layer="95"/>
 </segment>
 </net>
 <net name="LOAD3" class="0">
@@ -13103,12 +13227,22 @@ Controlls/Reads some pins during boot!!</text>
 <wire x1="203.2" y1="116.84" x2="185.42" y2="116.84" width="0.1524" layer="91"/>
 <label x="185.42" y="116.84" size="1.778" layer="95"/>
 </segment>
+<segment>
+<pinref part="NODEMCU" gate="G$1" pin="D6_-_GPIO12_/_HSPIQ"/>
+<wire x1="111.76" y1="81.28" x2="124.46" y2="81.28" width="0.1524" layer="91"/>
+<label x="124.46" y="81.28" size="1.778" layer="95"/>
+</segment>
 </net>
 <net name="S3" class="0">
 <segment>
 <pinref part="J2" gate="J1" pin="2"/>
 <wire x1="203.2" y1="114.3" x2="185.42" y2="114.3" width="0.1524" layer="91"/>
 <label x="185.42" y="114.3" size="1.778" layer="95"/>
+</segment>
+<segment>
+<pinref part="NODEMCU" gate="G$1" pin="D5_-_GPIO14_/_HSPICLK"/>
+<wire x1="111.76" y1="83.82" x2="124.46" y2="83.82" width="0.1524" layer="91"/>
+<label x="124.46" y="83.82" size="1.778" layer="95"/>
 </segment>
 </net>
 <net name="S2" class="0">
@@ -13117,12 +13251,58 @@ Controlls/Reads some pins during boot!!</text>
 <wire x1="203.2" y1="111.76" x2="185.42" y2="111.76" width="0.1524" layer="91"/>
 <label x="185.42" y="111.76" size="1.778" layer="95"/>
 </segment>
+<segment>
+<pinref part="NODEMCU" gate="G$1" pin="D2_-_GPIO4"/>
+<wire x1="111.76" y1="96.52" x2="124.46" y2="96.52" width="0.1524" layer="91"/>
+<label x="124.46" y="96.52" size="1.778" layer="95"/>
+</segment>
 </net>
 <net name="S1" class="0">
 <segment>
 <pinref part="J2" gate="J1" pin="4"/>
 <wire x1="203.2" y1="109.22" x2="185.42" y2="109.22" width="0.1524" layer="91"/>
 <label x="185.42" y="109.22" size="1.778" layer="95"/>
+</segment>
+<segment>
+<pinref part="NODEMCU" gate="G$1" pin="D1_-_GPIO5"/>
+<wire x1="111.76" y1="99.06" x2="124.46" y2="99.06" width="0.1524" layer="91"/>
+<label x="124.46" y="99.06" size="1.778" layer="95"/>
+</segment>
+</net>
+<net name="DATA_IN" class="0">
+<segment>
+<pinref part="IC1" gate="G$1" pin="A"/>
+<wire x1="215.9" y1="73.66" x2="226.06" y2="73.66" width="0.1524" layer="91"/>
+<label x="226.06" y="73.66" size="1.778" layer="95"/>
+</segment>
+<segment>
+<pinref part="NODEMCU" gate="G$1" pin="D7_-_GPIO13_/_RXD2_/_HSPID"/>
+<wire x1="111.76" y1="78.74" x2="137.16" y2="78.74" width="0.1524" layer="91"/>
+<label x="137.16" y="78.74" size="1.778" layer="95"/>
+</segment>
+</net>
+<net name="LATCH" class="0">
+<segment>
+<pinref part="IC1" gate="G$1" pin="LATCH_CLOCK"/>
+<wire x1="215.9" y1="68.58" x2="226.06" y2="68.58" width="0.1524" layer="91"/>
+<label x="226.06" y="68.58" size="1.778" layer="95"/>
+</segment>
+<segment>
+<pinref part="NODEMCU" gate="G$1" pin="D4_-_GPIO2_/_TXD1"/>
+<wire x1="111.76" y1="91.44" x2="137.16" y2="91.44" width="0.1524" layer="91"/>
+<label x="137.16" y="91.44" size="1.778" layer="95"/>
+</segment>
+</net>
+<net name="CLK" class="0">
+<segment>
+<pinref part="IC1" gate="G$1" pin="SHIFT_CLOCK"/>
+<wire x1="215.9" y1="66.04" x2="226.06" y2="66.04" width="0.1524" layer="91"/>
+<label x="226.06" y="66.04" size="1.778" layer="95"/>
+</segment>
+<segment>
+<pinref part="NODEMCU" gate="G$1" pin="D3_-_GPIO0"/>
+<wire x1="111.76" y1="93.98" x2="137.16" y2="93.98" width="0.1524" layer="91"/>
+<label x="137.16" y="93.98" size="1.778" layer="95"/>
 </segment>
 </net>
 </nets>
