@@ -11308,6 +11308,7 @@ Source: AVX .. aphvc.pdf</description>
 <part name="R15" library="SparkFun-Resistors" deviceset="1KOHM" device="-0603-1/10W-1%" value="10K"/>
 <part name="C5" library="rcl" library_urn="urn:adsk.eagle:library:334" deviceset="C-US" device="C0805" package3d_urn="urn:adsk.eagle:package:23617/2" value="1uF"/>
 <part name="IC1" library="SamacSys_Parts" deviceset="MC74HC595ADG" device=""/>
+<part name="R16" library="SparkFun-Resistors" deviceset="1KOHM" device="-0603-1/10W-1%" value="10K"/>
 </parts>
 <sheets>
 <sheet>
@@ -11552,6 +11553,10 @@ Controlls/Reads some pins during boot!!</text>
 <attribute name="NAME" x="212.09" y="86.36" size="1.778" layer="95" align="center-left"/>
 <attribute name="VALUE" x="212.09" y="83.82" size="1.778" layer="96" align="center-left"/>
 </instance>
+<instance part="R16" gate="G$1" x="256.54" y="71.12" smashed="yes" rot="R90">
+<attribute name="NAME" x="255.016" y="71.12" size="1.778" layer="95" font="vector" rot="R90" align="bottom-center"/>
+<attribute name="VALUE" x="258.064" y="71.12" size="1.778" layer="96" font="vector" rot="R90" align="top-center"/>
+</instance>
 </instances>
 <busses>
 </busses>
@@ -11665,9 +11670,14 @@ Controlls/Reads some pins during boot!!</text>
 <label x="167.64" y="60.96" size="1.778" layer="95"/>
 </segment>
 <segment>
-<pinref part="IC1" gate="G$1" pin="OUTPUT_ENABLE"/>
-<wire x1="215.9" y1="71.12" x2="226.06" y2="71.12" width="0.1524" layer="91"/>
-<label x="226.06" y="71.12" size="1.778" layer="95"/>
+<pinref part="NODEMCU" gate="G$1" pin="GND_1"/>
+<wire x1="33.02" y1="78.74" x2="22.86" y2="78.74" width="0.1524" layer="91"/>
+<label x="22.86" y="78.74" size="1.778" layer="95"/>
+</segment>
+<segment>
+<pinref part="NODEMCU" gate="G$1" pin="GND_3"/>
+<wire x1="111.76" y1="68.58" x2="124.46" y2="68.58" width="0.1524" layer="91"/>
+<label x="124.46" y="68.58" size="1.778" layer="95"/>
 </segment>
 </net>
 <net name="VCC" class="0">
@@ -11821,6 +11831,11 @@ Controlls/Reads some pins during boot!!</text>
 <pinref part="IC1" gate="G$1" pin="RESET"/>
 <wire x1="215.9" y1="63.5" x2="226.06" y2="63.5" width="0.1524" layer="91"/>
 <label x="226.06" y="63.5" size="1.778" layer="95"/>
+</segment>
+<segment>
+<pinref part="R16" gate="G$1" pin="2"/>
+<wire x1="256.54" y1="76.2" x2="256.54" y2="83.82" width="0.1524" layer="91"/>
+<label x="256.54" y="83.82" size="1.778" layer="95"/>
 </segment>
 </net>
 <net name="QC1" class="0">
@@ -12305,6 +12320,18 @@ Controlls/Reads some pins during boot!!</text>
 <pinref part="NODEMCU" gate="G$1" pin="D3_-_GPIO0"/>
 <wire x1="111.76" y1="93.98" x2="137.16" y2="93.98" width="0.1524" layer="91"/>
 <label x="137.16" y="93.98" size="1.778" layer="95"/>
+</segment>
+</net>
+<net name="OE" class="0">
+<segment>
+<pinref part="R16" gate="G$1" pin="1"/>
+<wire x1="256.54" y1="66.04" x2="256.54" y2="58.42" width="0.1524" layer="91"/>
+<label x="256.54" y="58.42" size="1.778" layer="95"/>
+</segment>
+<segment>
+<pinref part="IC1" gate="G$1" pin="OUTPUT_ENABLE"/>
+<wire x1="215.9" y1="71.12" x2="226.06" y2="71.12" width="0.1524" layer="91"/>
+<label x="226.06" y="71.12" size="1.778" layer="95"/>
 </segment>
 </net>
 </nets>

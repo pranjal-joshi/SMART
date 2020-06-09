@@ -12762,6 +12762,16 @@ Controlls/Reads some pins during boot!!</text>
 <wire x1="111.76" y1="88.9" x2="124.46" y2="88.9" width="0.1524" layer="91"/>
 <label x="124.46" y="88.9" size="1.778" layer="95"/>
 </segment>
+<segment>
+<pinref part="IC1" gate="G$1" pin="VCC"/>
+<wire x1="195.58" y1="81.28" x2="205.74" y2="81.28" width="0.1524" layer="91"/>
+<label x="205.74" y="81.28" size="1.778" layer="95"/>
+</segment>
+<segment>
+<pinref part="IC1" gate="G$1" pin="RESET"/>
+<wire x1="195.58" y1="66.04" x2="205.74" y2="66.04" width="0.1524" layer="91"/>
+<label x="205.74" y="66.04" size="1.778" layer="95"/>
+</segment>
 </net>
 <net name="QC1" class="0">
 <segment>
@@ -12796,6 +12806,11 @@ Controlls/Reads some pins during boot!!</text>
 <pinref part="NODEMCU" gate="G$1" pin="D1_-_GPIO5"/>
 <wire x1="111.76" y1="99.06" x2="124.46" y2="99.06" width="0.1524" layer="91"/>
 <label x="124.46" y="99.06" size="1.778" layer="95"/>
+</segment>
+<segment>
+<pinref part="IC1" gate="G$1" pin="QA"/>
+<wire x1="195.58" y1="78.74" x2="223.52" y2="78.74" width="0.1524" layer="91"/>
+<label x="223.52" y="78.74" size="1.778" layer="95"/>
 </segment>
 </net>
 <net name="LOAD1" class="0">
@@ -12870,6 +12885,11 @@ Controlls/Reads some pins during boot!!</text>
 <pinref part="NODEMCU" gate="G$1" pin="D2_-_GPIO4"/>
 <wire x1="111.76" y1="96.52" x2="124.46" y2="96.52" width="0.1524" layer="91"/>
 <label x="124.46" y="96.52" size="1.778" layer="95"/>
+</segment>
+<segment>
+<pinref part="IC1" gate="G$1" pin="QB"/>
+<wire x1="157.48" y1="81.28" x2="147.32" y2="81.28" width="0.1524" layer="91"/>
+<label x="147.32" y="81.28" size="1.778" layer="95"/>
 </segment>
 </net>
 <net name="QC2" class="0">
@@ -12997,6 +13017,11 @@ Controlls/Reads some pins during boot!!</text>
 <wire x1="111.76" y1="81.28" x2="124.46" y2="81.28" width="0.1524" layer="91"/>
 <label x="124.46" y="81.28" size="1.778" layer="95"/>
 </segment>
+<segment>
+<pinref part="IC1" gate="G$1" pin="QD"/>
+<wire x1="157.48" y1="76.2" x2="147.32" y2="76.2" width="0.1524" layer="91"/>
+<label x="147.32" y="76.2" size="1.778" layer="95"/>
+</segment>
 </net>
 <net name="R3" class="0">
 <segment>
@@ -13008,6 +13033,11 @@ Controlls/Reads some pins during boot!!</text>
 <pinref part="NODEMCU" gate="G$1" pin="D5_-_GPIO14_/_HSPICLK"/>
 <wire x1="111.76" y1="83.82" x2="124.46" y2="83.82" width="0.1524" layer="91"/>
 <label x="124.46" y="83.82" size="1.778" layer="95"/>
+</segment>
+<segment>
+<pinref part="IC1" gate="G$1" pin="QC"/>
+<wire x1="157.48" y1="78.74" x2="147.32" y2="78.74" width="0.1524" layer="91"/>
+<label x="147.32" y="78.74" size="1.778" layer="95"/>
 </segment>
 </net>
 <net name="LOAD3" class="0">

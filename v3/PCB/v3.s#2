@@ -11259,7 +11259,6 @@ Source: AVX .. aphvc.pdf</description>
 <part name="FRAME2" library="SparkFun-Aesthetics" deviceset="FRAME-A4L" device=""/>
 <part name="FRAME3" library="SparkFun-Aesthetics" deviceset="FRAME-A4L" device=""/>
 <part name="H1" library="holes" deviceset="MOUNT-HOLE" device="3.3" value="MOUNT-HOLE3.3"/>
-<part name="H2" library="holes" deviceset="MOUNT-HOLE" device="3.3" value="MOUNT-HOLE3.3"/>
 <part name="H3" library="holes" deviceset="MOUNT-HOLE" device="3.3" value="MOUNT-HOLE3.3"/>
 <part name="H4" library="holes" deviceset="MOUNT-HOLE" device="3.3" value="MOUNT-HOLE3.3"/>
 <part name="NODEMCU" library="SamacSys_Parts" deviceset="113990105" device="" value=""/>
@@ -11356,10 +11355,6 @@ Controlls/Reads some pins during boot!!</text>
 <instance part="H1" gate="G$1" x="127" y="22.86" smashed="yes">
 <attribute name="NAME" x="129.032" y="23.4442" size="1.778" layer="95"/>
 <attribute name="VALUE" x="129.032" y="20.3962" size="1.778" layer="96"/>
-</instance>
-<instance part="H2" gate="G$1" x="152.4" y="22.86" smashed="yes">
-<attribute name="NAME" x="154.432" y="23.4442" size="1.778" layer="95"/>
-<attribute name="VALUE" x="154.432" y="20.3962" size="1.778" layer="96"/>
 </instance>
 <instance part="H3" gate="G$1" x="127" y="15.24" smashed="yes">
 <attribute name="NAME" x="129.032" y="15.8242" size="1.778" layer="95"/>
@@ -11673,6 +11668,16 @@ Controlls/Reads some pins during boot!!</text>
 <pinref part="IC1" gate="G$1" pin="OUTPUT_ENABLE"/>
 <wire x1="215.9" y1="71.12" x2="226.06" y2="71.12" width="0.1524" layer="91"/>
 <label x="226.06" y="71.12" size="1.778" layer="95"/>
+</segment>
+<segment>
+<pinref part="NODEMCU" gate="G$1" pin="GND_1"/>
+<wire x1="33.02" y1="78.74" x2="22.86" y2="78.74" width="0.1524" layer="91"/>
+<label x="22.86" y="78.74" size="1.778" layer="95"/>
+</segment>
+<segment>
+<pinref part="NODEMCU" gate="G$1" pin="GND_3"/>
+<wire x1="111.76" y1="68.58" x2="124.46" y2="68.58" width="0.1524" layer="91"/>
+<label x="124.46" y="68.58" size="1.778" layer="95"/>
 </segment>
 </net>
 <net name="VCC" class="0">
