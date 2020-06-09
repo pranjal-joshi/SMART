@@ -12244,6 +12244,7 @@ Source: AVX .. aphvc.pdf</description>
 <part name="J1" library="SparkFun-Connectors" deviceset="CONN_04" device="PTH"/>
 <part name="J2" library="SparkFun-Connectors" deviceset="CONN_04" device="PTH"/>
 <part name="IC1" library="SamacSys_Parts" deviceset="MC74HC595ADG" device=""/>
+<part name="NODEMCU1" library="SamacSys_Parts" deviceset="113990105" device="" value=""/>
 </parts>
 <sheets>
 <sheet>
@@ -12501,6 +12502,10 @@ Controlls/Reads some pins during boot!!</text>
 <instance part="IC1" gate="G$1" x="177.8" y="78.74" smashed="yes">
 <attribute name="NAME" x="212.09" y="86.36" size="1.778" layer="95" align="center-left"/>
 <attribute name="VALUE" x="212.09" y="83.82" size="1.778" layer="96" align="center-left"/>
+</instance>
+<instance part="NODEMCU1" gate="G$1" x="33.02" y="53.34" smashed="yes">
+<attribute name="NAME" x="107.95" y="58.42" size="1.778" layer="95" align="center-left"/>
+<attribute name="VALUE" x="107.95" y="58.42" size="1.778" layer="96" align="center-left"/>
 </instance>
 </instances>
 <busses>

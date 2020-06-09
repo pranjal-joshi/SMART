@@ -12225,22 +12225,22 @@ Source: AVX .. aphvc.pdf</description>
 <part name="R4" library="rcl" library_urn="urn:adsk.eagle:library:334" deviceset="R-US_" device="R1210" package3d_urn="urn:adsk.eagle:package:23554/2" value="15K_1/2W"/>
 <part name="R5" library="rcl" library_urn="urn:adsk.eagle:library:334" deviceset="R-US_" device="R1210" package3d_urn="urn:adsk.eagle:package:23554/2" value="15K_1/2W"/>
 <part name="R6" library="SparkFun-Resistors" deviceset="1KOHM" device="-0603-1/10W-1%" value="10K"/>
-<part name="C2" library="rcl" library_urn="urn:adsk.eagle:library:334" deviceset="C-US" device="C0805" package3d_urn="urn:adsk.eagle:package:23617/2" value="470nF"/>
+<part name="C2" library="rcl" library_urn="urn:adsk.eagle:library:334" deviceset="C-US" device="C0805" package3d_urn="urn:adsk.eagle:package:23617/2" value="1uF"/>
 <part name="Q6" library="SamacSys_Parts" deviceset="SFH6206-3" device=""/>
 <part name="R7" library="rcl" library_urn="urn:adsk.eagle:library:334" deviceset="R-US_" device="R1210" package3d_urn="urn:adsk.eagle:package:23554/2" value="15K_1/2W"/>
 <part name="R8" library="rcl" library_urn="urn:adsk.eagle:library:334" deviceset="R-US_" device="R1210" package3d_urn="urn:adsk.eagle:package:23554/2" value="15K_1/2W"/>
 <part name="R9" library="SparkFun-Resistors" deviceset="1KOHM" device="-0603-1/10W-1%" value="10K"/>
-<part name="C3" library="rcl" library_urn="urn:adsk.eagle:library:334" deviceset="C-US" device="C0805" package3d_urn="urn:adsk.eagle:package:23617/2" value="470nF"/>
+<part name="C3" library="rcl" library_urn="urn:adsk.eagle:library:334" deviceset="C-US" device="C0805" package3d_urn="urn:adsk.eagle:package:23617/2" value="1uF"/>
 <part name="Q7" library="SamacSys_Parts" deviceset="SFH6206-3" device=""/>
 <part name="R10" library="rcl" library_urn="urn:adsk.eagle:library:334" deviceset="R-US_" device="R1210" package3d_urn="urn:adsk.eagle:package:23554/2" value="15K_1/2W"/>
 <part name="R11" library="rcl" library_urn="urn:adsk.eagle:library:334" deviceset="R-US_" device="R1210" package3d_urn="urn:adsk.eagle:package:23554/2" value="15K_1/2W"/>
 <part name="R12" library="SparkFun-Resistors" deviceset="1KOHM" device="-0603-1/10W-1%" value="10K"/>
-<part name="C4" library="rcl" library_urn="urn:adsk.eagle:library:334" deviceset="C-US" device="C0805" package3d_urn="urn:adsk.eagle:package:23617/2" value="470nF"/>
+<part name="C4" library="rcl" library_urn="urn:adsk.eagle:library:334" deviceset="C-US" device="C0805" package3d_urn="urn:adsk.eagle:package:23617/2" value="1uF"/>
 <part name="Q8" library="SamacSys_Parts" deviceset="SFH6206-3" device=""/>
 <part name="R13" library="rcl" library_urn="urn:adsk.eagle:library:334" deviceset="R-US_" device="R1210" package3d_urn="urn:adsk.eagle:package:23554/2" value="15K_1/2W"/>
 <part name="R14" library="rcl" library_urn="urn:adsk.eagle:library:334" deviceset="R-US_" device="R1210" package3d_urn="urn:adsk.eagle:package:23554/2" value="15K_1/2W"/>
 <part name="R15" library="SparkFun-Resistors" deviceset="1KOHM" device="-0603-1/10W-1%" value="10K"/>
-<part name="C5" library="rcl" library_urn="urn:adsk.eagle:library:334" deviceset="C-US" device="C0805" package3d_urn="urn:adsk.eagle:package:23617/2" value="470nF"/>
+<part name="C5" library="rcl" library_urn="urn:adsk.eagle:library:334" deviceset="C-US" device="C0805" package3d_urn="urn:adsk.eagle:package:23617/2" value="1uF"/>
 <part name="J1" library="SparkFun-Connectors" deviceset="CONN_04" device="PTH"/>
 <part name="J2" library="SparkFun-Connectors" deviceset="CONN_04" device="PTH"/>
 <part name="IC1" library="SamacSys_Parts" deviceset="MC74HC595ADG" device=""/>

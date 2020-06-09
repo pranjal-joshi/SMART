@@ -12334,9 +12334,9 @@ Controlls/Reads some pins during boot!!</text>
 <label x="226.06" y="71.12" size="1.778" layer="95"/>
 </segment>
 <segment>
-<pinref part="NODEMCU" gate="G$1" pin="D9_-__RXD0_/_GPIO3"/>
-<wire x1="111.76" y1="73.66" x2="137.16" y2="73.66" width="0.1524" layer="91"/>
-<label x="137.16" y="73.66" size="1.778" layer="95"/>
+<pinref part="NODEMCU" gate="G$1" pin="D0_-_GPIO16"/>
+<wire x1="111.76" y1="101.6" x2="137.16" y2="101.6" width="0.1524" layer="91"/>
+<label x="137.16" y="101.6" size="1.778" layer="95"/>
 </segment>
 </net>
 </nets>
