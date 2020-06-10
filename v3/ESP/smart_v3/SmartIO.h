@@ -18,7 +18,7 @@ class SmartIo {
     SmartIo(byte l, byte c, byte d, byte oe);
     void setDebug(bool);
     bool addInterrupt(byte pin, std::function<void (void)>, int mode);
-    void setState(JsonArray j);
+    void setState(JsonDocument doc);
     StaticJsonDocument<NO_OF_DEVICES> getState(void);
     void enableOutput(bool);
 };

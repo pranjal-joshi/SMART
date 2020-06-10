@@ -54,9 +54,10 @@ bool SmartIo::addInterrupt(byte pin, std::function<void (void)>func, int mode) {
   return false;
 }
 
-void SmartIo::setState(JsonArray j) {
+void SmartIo::setState(JsonDocument doc) {
   byte i=0;
   byte stateVar=0;
+  JsonArray j = (JsonArray)doc.as<JsonArray>();
   for(JsonVariant v : j) {
     if(v.as<byte>() == 1)
       stateVar |= relayArray[i];
