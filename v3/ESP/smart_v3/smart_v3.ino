@@ -12,11 +12,15 @@
 #include <ArduinoOTA.h>
 #include "SmartFileSystem.h"
 #include "SmartWebServer.h"
+#include "SmartIO.h"
 #include "SmartConstants.h"
 
 SmartFileSystem fsys;
 SmartFileSystemFlags_t flag;
 SmartWebServer configServer;
+#if NO_OF_DEVICES == 4
+  SmartIo io(LATCH_PIN, CLK_PIN, DATA_PIN, OE_PIN);
+#endif
 
 painlessMesh mesh;
 
@@ -33,6 +37,7 @@ Task searchTargetTask(INTERVAL_TARGET_SEARCH*TASK_SECOND, TASK_ONCE, &taskSearch
 // variables
 String smartSsid;
 DynamicJsonDocument confJson(JSON_BUF_SIZE);
+DynamicJsonDocument stateJson(NO_OF_DEVICES);
 bool internetAvailable = false;
 bool isMeshActive = false;
 bool isOtaActive = false;
@@ -52,11 +57,21 @@ void setup() {
     mesh.setDebugMsgTypes( ERROR | STARTUP | CONNECTION );
     Serial.printf("[+] SMART: INFO -> CHIP ID = SMART_%08X\n",ESP.getChipId());
     Serial.printf("[+] SMART: BOOT -> Random Delay = %udmS\n",bd);
+    #if NO_OF_DEVICES == 4
+      io.setDebug(mDebug);
+    #endif
+    fsys.setDebug(mDebug);
   }
+
+  #if NO_OF_DEVICES == 4
+    // Critical routine - load last known states ASAP
+    stateJson = fsys.loadState();
+    io.setState(stateJson);
+  #endif
+  
   delay(bd);
 
   // Read config.json file to retrieve login creds
-  fsys.setDebug(mDebug);
   if(fsys.isConfigEmpty()) {
     configServer.setDebug(mDebug);
     configServer.begin(getSmartSSID(),SMART_PASS);
