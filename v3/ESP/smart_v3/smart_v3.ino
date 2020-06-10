@@ -64,7 +64,7 @@ void setup() {
   }
 
   #if NO_OF_DEVICES == 4
-    // Critical routine - load last known states ASAP
+    // Critical routine - load last known states to relays ASAP
     stateJson = fsys.loadState();
     io.setState(stateJson);
   #endif
