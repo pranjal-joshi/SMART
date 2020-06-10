@@ -54,10 +54,10 @@ bool SmartIo::addInterrupt(byte pin, std::function<void (void)>func, int mode) {
   return false;
 }
 
-void SmartIo::setState(JsonDocument doc) {
+void SmartIo::setState(const JsonDocument doc) {
   byte i=0;
   byte stateVar=0;
-  JsonArray j = (JsonArray)doc.as<JsonArray>();
+  JsonArray j = doc.as<JsonArray>();
   for(JsonVariant v : j) {
     if(v.as<byte>() == 1)
       stateVar |= relayArray[i];
@@ -75,8 +75,8 @@ void SmartIo::setState(JsonDocument doc) {
   }
 }
 
-StaticJsonDocument<NO_OF_DEVICES> SmartIo::getState(void) {
-  DynamicJsonDocument doc(NO_OF_DEVICES);
+StaticJsonDocument<JSON_BUF_SIZE> SmartIo::getState(void) {
+  DynamicJsonDocument doc(JSON_BUF_SIZE);
   JsonArray j = doc.to<JsonArray>();
   for(byte i=0;i<_snsPinCnt;i++)
     j.add((byte)digitalRead(snsPinArray[_snsPinCnt]));
