@@ -8,7 +8,6 @@
 
 #include <FS.h>
 #include "SmartFilesystem.h"
-#include "SmartConstants.h"
 
 #define DBG_FS String("[+] SmartFileSystem: ")
 
@@ -189,4 +188,25 @@ bool SmartFileSystem::isConfigEmpty(void) {
   if(DEBUG)
     printDebug("INFO: Config file is not Empty.");
   return false;
+}
+
+SmartFileSystemFlags_t SmartFileSystem::saveState(JsonDocument doc) {
+  if(DEBUG) {
+    Serial.print(F("[+] SmartFileSystem: INFO -> Saving output states to SPIFFS.. -> "));
+    serializeJson(doc, Serial);
+    Serial.println();
+  }
+  return saveJsonFile(doc, STATE_FILE);
+}
+
+StaticJsonDocument<NO_OF_DEVICES> SmartFileSystem::loadState(void) {
+  DynamicJsonDocument doc(NO_OF_DEVICES);
+  readJsonFile(&doc, STATE_FILE);
+  doc.shrinkToFit();
+  if(DEBUG) {
+    Serial.print(F("[+] SmartFileSystem: INFO -> Loading output states to SPIFFS.. -> "));
+    serializeJson(doc, Serial);
+    Serial.println();
+  }
+  return doc;
 }

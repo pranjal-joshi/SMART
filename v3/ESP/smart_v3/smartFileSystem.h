@@ -10,9 +10,10 @@
 #define SMARTFILESYSTEM_H
 
 #include <ArduinoJson.h>
+#include "SmartConstants.h"
 
-#define JSON_BUF_SIZE 512u
 #define CONF_FILE "/config.json"
+#define STATE_FILE "/state.json"
 
 typedef enum SmartFileSystemFlags {
   FileWriteOk,
@@ -35,6 +36,8 @@ class SmartFileSystem {
     SmartFileSystemFlags_t removeConfig(char* key);
     StaticJsonDocument<JSON_BUF_SIZE> readConfigFile(void);
     bool isConfigEmpty(void);
+    SmartFileSystemFlags_t saveState(JsonDocument doc);
+    StaticJsonDocument<NO_OF_DEVICES> loadState(void);
   private:
     bool DEBUG;
     void printDebug(String);
