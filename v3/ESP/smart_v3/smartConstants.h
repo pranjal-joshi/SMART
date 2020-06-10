@@ -12,6 +12,13 @@
 // Master serial debug control
 #define mDebug            true
 
+// System Configs for compile-time setting
+#define SWITCHING_NODE          // Enable for main smart node
+//#define SENSOR_NODE           // Enable for sensor nodes (this should be work in Mesh Only)
+//#define FORCE_MESH            // Enable to force the node in mesh mode
+//#define FORCE_ROOT            // Enable to force the node as ROOT
+#define NO_OF_DEVICES           4
+
 #define RST_DLY           3000U
 #define BOOT_DLY          2000U
 
@@ -45,16 +52,18 @@
 #define SMART_PASS        "12345678"    // Change later
 
 // JSON constants
+#define JSON_BUF_SIZE     512u
 #define JSON_SMARTID      "smartId"
 #define JSON_TYPE         "type"
 #define JSON_DATA         "data"
 #define JSON_STATE        "state"
 
-// System Configs for compile-time setting
-#define SWITCHING_NODE          // Enable for main smart node
-//#define SENSOR_NODE           // Enable for sensor nodes (this should be work in Mesh Only)
-//#define FORCE_MESH            // Enable to force the node in mesh mode
-//#define FORCE_ROOT            // Enable to force the node as ROOT
-#define NO_OF_DEVICES           4
+// IO configuration
+#if NO_OF_DEVICES == 4      // This Configuration is ONLY for 4 Devices
+  #define OE_PIN            D0
+  #define CLK_PIN           D3
+  #define LATCH_PIN         D4
+  #define DATA_PIN         D7
+#endif
 
 #endif
