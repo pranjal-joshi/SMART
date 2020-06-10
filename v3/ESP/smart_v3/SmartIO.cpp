@@ -16,6 +16,9 @@ byte relayArray[8] = {0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80};
 
 byte snsPinArray[NO_OF_DEVICES], snsStateArray[NO_OF_DEVICES];
 
+ICACHE_RAM_ATTR void _isr(void);
+volatile bool isInterrupted = false;
+
 SmartIo::SmartIo(byte l, byte c, byte d, byte oe) {
   _latch = l;
   _clk = c;
@@ -35,32 +38,20 @@ void SmartIo::setDebug(bool d) {
   IO_DEBUG = d;
 }
 
-bool SmartIo::attachInterrupt(byte pin, std::function<void (void)>func, int mode) {
+bool SmartIo::addInterrupt(byte pin, std::function<void (void)>func, int mode) {
   if(_snsPinCnt < NO_OF_DEVICES) {
     snsPinArray[_snsPinCnt] = pin;
     pinMode(pin, INPUT);
     _snsPinCnt++;
     if(IO_DEBUG)
       Serial.printf("[+] SmartIo: INFO -> Added pin %d to as interrupt.",pin);
-    attachInterrupt(digitalPinToInterrupt(pin), func, mode);
+    //attachInterrupt(digitalPinToInterrupt(pin), func, mode);
+    attachInterrupt(digitalPinToInterrupt(pin), _isr, mode);
     return true;
   }
   if(IO_DEBUG)
       Serial.printf("[+] SmartIo: ERROR -> Failed to add pin %d to as interrupt!",pin);
   return false;
-}
-
-void SmartIo::detachInterrupt(byte pin) {
-  detachInterrupt(digitalPinToInterrupt(pin));
-  byte indexToRemove = 0;
-  for(byte i=0;i<NO_OF_DEVICES;i++) {
-    if(snsPinArray[i] == pin) {
-      snsPinArray[i] = 0;
-      if(IO_DEBUG)
-        Serial.printf("[+] SmartIo: INFO -> Removed pin %d to as interrupt.");
-      break;
-    }
-  }
 }
 
 void SmartIo::setState(JsonArray j) {
@@ -99,4 +90,10 @@ StaticJsonDocument<NO_OF_DEVICES> SmartIo::getState(void) {
 
 void SmartIo::enableOutput(bool out) {
   out == true ? digitalWrite(_oe, LOW) : digitalWrite(_oe, HIGH); 
+}
+
+ICACHE_RAM_ATTR void _isr(void) {
+  noInterrupts();
+  isInterrupted = true;
+  interrupts();
 }

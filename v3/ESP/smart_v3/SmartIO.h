@@ -14,10 +14,10 @@
 
 class SmartIo {
   public:
+    volatile bool isInterrupted;
     SmartIo(byte l, byte c, byte d, byte oe);
     void setDebug(bool);
-    bool attachInterrupt(byte pin, std::function<void (void)>, int mode);
-    void detachInterrupt(byte pin);
+    bool addInterrupt(byte pin, std::function<void (void)>, int mode);
     void setState(JsonArray j);
     StaticJsonDocument<NO_OF_DEVICES> getState(void);
     void enableOutput(bool);
