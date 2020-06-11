@@ -190,17 +190,14 @@ bool SmartFileSystem::isConfigEmpty(void) {
   return false;
 }
 
-SmartFileSystemFlags_t SmartFileSystem::saveState(JsonDocument doc) {
-  if(DEBUG) {
-    Serial.print(F("[+] SmartFileSystem: INFO -> Saving output states to SPIFFS.. -> "));
-    serializeJson(doc, Serial);
-    Serial.println();
-  }
-  return saveJsonFile(doc, STATE_FILE);
+SmartFileSystemFlags_t SmartFileSystem::saveState(const char* buf) {
+  DynamicJsonDocument d(JSON_BUF_SIZE);
+  deserializeJson(d, buf);
+  return saveJsonFile(d, STATE_FILE);
 }
 
-StaticJsonDocument<NO_OF_DEVICES> SmartFileSystem::loadState(void) {
-  DynamicJsonDocument doc(NO_OF_DEVICES);
+DynamicJsonDocument SmartFileSystem::loadState(void) {
+  DynamicJsonDocument doc(JSON_BUF_SIZE);
   readJsonFile(&doc, STATE_FILE);
   doc.shrinkToFit();
   if(DEBUG) {

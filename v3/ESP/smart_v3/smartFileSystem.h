@@ -36,8 +36,8 @@ class SmartFileSystem {
     SmartFileSystemFlags_t removeConfig(char* key);
     StaticJsonDocument<JSON_BUF_SIZE> readConfigFile(void);
     bool isConfigEmpty(void);
-    SmartFileSystemFlags_t saveState(JsonDocument doc);
-    StaticJsonDocument<NO_OF_DEVICES> loadState(void);
+    SmartFileSystemFlags_t saveState(const char* buf);
+    DynamicJsonDocument loadState(void);
   private:
     bool DEBUG;
     void printDebug(String);
