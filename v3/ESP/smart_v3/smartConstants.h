@@ -21,6 +21,7 @@
 
 #define RST_DLY           3000U
 #define BOOT_DLY          2000U
+#define DEBOUNCE_DLY      50U   // ms
 
 #define MQTT_SERVER_IP    "35.225.15.182"
 #define MQTT_SERVER_PORT  "1883"
@@ -52,18 +53,31 @@
 #define SMART_PASS        "12345678"    // Change later
 
 // JSON constants
-#define JSON_BUF_SIZE     512u
-#define JSON_SMARTID      "smartId"
-#define JSON_TYPE         "type"
-#define JSON_DATA         "data"
-#define JSON_STATE        "state"
+#define JSON_BUF_SIZE             512u
+#define JSON_TO                   "to"
+#define JSON_TO_GATEWAY           "gateway"
+#define JSON_TO_APP               "app"
+#define JSON_SMARTID              "smartId"
+#define JSON_NODENAME             "nodeName"
+#define JSON_DEVICE_TYPE          "deviceType"
+#define JSON_DEVICE_SWITCH        "switch"
+#define JSON_DEVICE_SENSOR        "sensor"
+#define JSON_TYPE                 "type"
+#define JSON_TYPE_DATA            "data"
+#define JSON_TYPE_STATE           "state"
+#define JSON_TYPE_INFO            "info"
+#define JSON_NoD                  "NoD"
 
 // IO configuration
 #if NO_OF_DEVICES == 4      // This Configuration is ONLY for 4 Devices
   #define OE_PIN            D0
   #define CLK_PIN           D3
   #define LATCH_PIN         D4
-  #define DATA_PIN         D7
+  #define DATA_PIN          D7
+  #define SW1               D1
+  #define SW2               D2
+  #define SW3               D5
+  #define SW4               D6
 #endif
 
 #endif
