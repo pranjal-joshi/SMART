@@ -78,6 +78,10 @@
   #define SW2               D2
   #define SW3               D5
   #define SW4               D6
+  #define SNS1              SW1
+  #define SNS2              SW2
+  #define SNS3              SW3
+  #define SNS4              SW4
 #endif
 
 #endif
