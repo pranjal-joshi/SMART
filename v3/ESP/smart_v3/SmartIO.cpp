@@ -63,25 +63,29 @@ bool SmartIo::addInterrupt(byte pin, int mode) {
   return false;
 }
 
-void SmartIo::setState(JsonVariant doc) {
+void SmartIo::setState(const char* buf) {
   byte i=0;
   byte stateVar=0;
+  DynamicJsonDocument doc(JSON_BUF_SIZE);
+  deserializeJson(doc, buf);
   JsonArray j = doc.as<JsonArray>();
+  if(IO_DEBUG)
+    Serial.print(F("[+] SmartIo: INFO -> Setting output state = "));
   for(JsonVariant v : j) {
     if(v.as<byte>() == 1)
       stateVar |= relayArray[i];
     else
       stateVar &= ~(relayArray[i]);
     i++;
+    if(IO_DEBUG)
+      Serial.print(stateVar,BIN);
   }
+  if(IO_DEBUG)
+      Serial.println();
   digitalWrite(_latch, LOW);
   shiftOut(_data, _clk, MSBFIRST, stateVar);
   digitalWrite(_latch, HIGH);
   digitalWrite(_oe, LOW);
-  if(IO_DEBUG) {
-    Serial.print(F("[+] SmartIo: INFO -> Setting output state = "));
-    Serial.println(stateVar,BIN);
-  }
 }
 
 StaticJsonDocument<JSON_BUF_SIZE> SmartIo::getState(void) {
@@ -90,7 +94,6 @@ StaticJsonDocument<JSON_BUF_SIZE> SmartIo::getState(void) {
   for(byte i=0;i<_snsPinCnt;i++) {
     j.add((byte)digitalRead(snsPinArray[i]));
   }
-  doc.shrinkToFit();
   if(IO_DEBUG) {
     Serial.print(F("[+] SmartIo: INFO -> Read input states: "));
     serializeJson(doc, Serial);

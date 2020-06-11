@@ -18,8 +18,7 @@ class SmartIo {
     void begin(void);
     void setDebug(bool);
     bool addInterrupt(byte pin, int mode);
-    //void setState(const JsonDocument doc);
-    void setState(JsonVariant doc);
+    void setState(const char* buf);
     void setCallback(void (*userDefinedCallback)(void));
     ICACHE_RAM_ATTR void interruptHandler(void);
     StaticJsonDocument<JSON_BUF_SIZE> getState(void);
