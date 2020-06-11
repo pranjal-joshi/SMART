@@ -10,7 +10,6 @@
 #define SMARTIO_H
 
 #include <ArduinoJson.h>
-#include "SmartISR.h"
 #include "SmartConstants.h"
 
 class SmartIo {
@@ -21,8 +20,12 @@ class SmartIo {
     bool addInterrupt(byte pin, int mode);
     //void setState(const JsonDocument doc);
     void setState(JsonVariant doc);
+    void setCallback(void (*userDefinedCallback)(void));
+    ICACHE_RAM_ATTR void interruptHandler(void);
     StaticJsonDocument<JSON_BUF_SIZE> getState(void);
     void enableOutput(bool);
+  private:
+    void (*localPointerToCallback)(void);
 };
 
 #endif

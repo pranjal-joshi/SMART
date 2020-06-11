@@ -16,7 +16,13 @@ byte relayArray[8] = {0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80};
 
 byte snsPinArray[NO_OF_DEVICES], snsStateArray[NO_OF_DEVICES];
 
-ICACHE_RAM_ATTR void _isr(void);
+//ICACHE_RAM_ATTR void _isr(void);
+
+SmartIo *pointerToClass;
+
+ICACHE_RAM_ATTR static void outsideInterruptHandler(void) {
+  pointerToClass->interruptHandler();
+}
 
 SmartIo::SmartIo(byte l, byte c, byte d, byte oe) {
   _latch = l;
@@ -34,6 +40,7 @@ void SmartIo::begin(void) {
   if(IO_DEBUG) {
     Serial.printf("[+] SmartIo: PINS -> Latch: %d, Clk: %d, Data: %d, /OE: %d\n",_latch,_clk,_data,_oe);
   }
+  pointerToClass = this;
 }
 
 void SmartIo::setDebug(bool d) {
@@ -47,7 +54,8 @@ bool SmartIo::addInterrupt(byte pin, int mode) {
     _snsPinCnt++;
     if(IO_DEBUG)
       Serial.printf("[+] SmartIo: INFO -> Added pin %d to as interrupt.\n",pin);
-    attachInterrupt(digitalPinToInterrupt(pin), _isr, mode);
+    //attachInterrupt(digitalPinToInterrupt(pin), _isr, mode);
+    attachInterrupt(digitalPinToInterrupt(pin), outsideInterruptHandler, mode);
     return true;
   }
   if(IO_DEBUG)
@@ -79,8 +87,9 @@ void SmartIo::setState(JsonVariant doc) {
 StaticJsonDocument<JSON_BUF_SIZE> SmartIo::getState(void) {
   DynamicJsonDocument doc(JSON_BUF_SIZE);
   JsonArray j = doc.to<JsonArray>();
-  for(byte i=0;i<_snsPinCnt;i++)
-    j.add((byte)digitalRead(snsPinArray[_snsPinCnt]));
+  for(byte i=0;i<_snsPinCnt;i++) {
+    j.add((byte)digitalRead(snsPinArray[i]));
+  }
   doc.shrinkToFit();
   if(IO_DEBUG) {
     Serial.print(F("[+] SmartIo: INFO -> Read input states: "));
@@ -94,12 +103,10 @@ void SmartIo::enableOutput(bool out) {
   out == true ? digitalWrite(_oe, LOW) : digitalWrite(_oe, HIGH); 
 }
 
-ICACHE_RAM_ATTR void _isr(void) {
-  if(abs(millis()-lastInterrupted) > DEBOUNCE_DLY) {
-    noInterrupts();
-    Serial.println(lastInterrupted);
-    lastInterrupted = millis();
-    isInterrupted = true;
-    interrupts();
-  }
+ICACHE_RAM_ATTR void SmartIo::interruptHandler(void) {
+  localPointerToCallback();
+}
+
+void SmartIo::setCallback(void (*userDefinedCallback)(void)) {
+   localPointerToCallback = userDefinedCallback;
 }
