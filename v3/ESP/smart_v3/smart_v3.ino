@@ -57,17 +57,21 @@ void setup() {
     mesh.setDebugMsgTypes( ERROR | STARTUP | CONNECTION );
     Serial.printf("[+] SMART: INFO -> CHIP ID = SMART_%08X\n",ESP.getChipId());
     Serial.printf("[+] SMART: BOOT -> Random Delay = %udmS\n",bd);
-    #if NO_OF_DEVICES == 4
-      io.setDebug(mDebug);
-    #endif
+    io.setDebug(mDebug);
     fsys.setDebug(mDebug);
   }
 
-  #if NO_OF_DEVICES == 4
+  if(NO_OF_DEVICES == 4) {
     // Critical routine - load last known states to relays ASAP
+    io.begin();
+    io.addInterrupt(SW1, CHANGE);
+    io.addInterrupt(SW2, CHANGE);
+    io.addInterrupt(SW3, CHANGE);
+    io.addInterrupt(SW4, CHANGE);
     stateJson = fsys.loadState();
-    io.setState(stateJson);
-  #endif
+    //io.setState(stateJson.as<JsonVariant>());
+    // TODO - Debug setState JSON passing
+  }
   
   delay(bd);
 
@@ -120,44 +124,17 @@ void looper() {
   mqtt.loop();
   mesh.update();
   sched.execute();
+  if(io.isInterrupted) {
+    stateJson = io.getState();
+    io.isInterrupted = false;
+    if(mDebug) {
+      Serial.print(F("[+] SMART: INTRPT -> States are "));
+      serializeJson(stateJson, Serial);
+      Serial.println();
+    }
+  }
   if(mDebug)
     ArduinoOTA.handle();
-}
-
-const char* getSmartSSID() {
-  size_t sz = snprintf(NULL, 0, "SMART_%08X", (uint32_t)ESP.getChipId()) + 1;
-  char *ssid = (char*)malloc(sz);
-  snprintf(ssid, 15, "SMART_%08X", (uint32_t)ESP.getChipId());
-  smartSsid = String(ssid);
-  return ssid;
-}
-
-void initMesh(uint8_t ch, int qual) {    
-  mesh.init(MESH_SSID, MESH_PASS, MESH_PORT, WIFI_AP_STA, ch, MESH_HIDDEN);
-  #ifndef FORCE_MESH
-    if(qual > MESH_QUALITY_THRESH) {
-      mesh.stationManual((const char*)confJson[CONF_SSID], (const char*)confJson[CONF_PASS]);
-      if(mDebug)
-        Serial.printf("[+] SMART: INFO -> Connecting to Target AP.. Signal Quality: %d %\n",qual);
-    }
-    else {
-      if(mDebug)
-        Serial.printf("[+] SMART: INFO -> Using Mesh-only mode.. Signal Quality: %d %\n",qual);
-    }
-  #endif
-  #ifdef FORCE_MESH
-    if(mDebug)
-      Serial.println(F("[+] SMART: WARNING --> Node is in FORCE_MESH mode, Skipping mannualStation!"));
-  #endif
-  mesh.setHostname(getSmartSSID());
-  mesh.onChangedConnections(&changedConCallback);
-  mesh.onReceive(&meshReceiveCallback);
-  #ifdef FORCE_ROOT
-    mesh.setRoot(true);
-    if(mDebug)
-      Serial.println(F("[+] SMART: WARNING --> Node is in FORCE_ROOT mode!"));
-  #endif
-  mesh.setContainsRoot(true);
 }
 
 // setup arduino OTA only after device is connected to some network
@@ -171,160 +148,37 @@ void changedConCallback() {
     isMeshActive = false;
   }
   taskCheckRootNode();
+
+  // Broadcast info packets in changes in connection
+  mesh.sendBroadcast(getNodeInfo());
 }
 
-void taskCheckRootNode() {
-  // Get the root node ID, No one is root? AND this connected to internet? -> Make this root
-  if(!mesh.isRoot()) {
-    if(mDebug) {
-      Serial.print(F("[+] SMART: INFO -> checkRootTask -> getRootId = "));
-      Serial.println(getRootId(mesh.asNodeTree()),HEX);
-    }
-    if(getRootId(mesh.asNodeTree()) == 0 && isInternetAvailable()) {
-      mesh.setRoot(true);
-      if(mDebug)
-        Serial.println(F("[+] SMART: INFO -> checkRootTask -> Setting this node as ROOT!"));
-    }
-  }
-  else {
-    if(mDebug) {
-      Serial.print(F("[+] SMART: INFO -> checkRootTask -> This is ROOT! = "));
-      Serial.println(smartSsid);
-    }
-  }
-  // if anyone is ROOT, then stop scanning target SSID as the ROOT must be already connected to it!
-  if(getRootId(mesh.asNodeTree()) > 0) {
-    searchTargetTask.disable();
-    sched.deleteTask(searchTargetTask);
-    if(mDebug) {
-      Serial.print(F("[+] SMART: INFO -> checkRootTask -> Disabled searchTargetTask as ROOT is found!"));
-    }
-  }
-}
-
-size_t getRootId(painlessmesh::protocol::NodeTree nt) {
-  if(nt.root)
-    return nt.nodeId;
-  for(auto&& s : nt.subs) {
-    auto id = getRootId(s);
-    if(id != 0)
-      return id;
-  }
-  return 0;
-}
-
-// Connect to MQTT
-void connectMqttClient() {
-  if(mDebug)
-    Serial.println(F("[+] SMART: INFO -> Attempting to connect MQTT broker."));
-  mqtt.setServer((const char*)confJson[CONF_MQTT_IP],(int)confJson[CONF_MQTT_PORT]);
-  mqtt.setCallback(mqttCallback);
-  unsigned long oldNow = millis();
-  while(!mqtt.connected()) {
-    looper();
-    if(millis() - oldNow > MQTT_DELAY) {
-      internetAvailable = isInternetAvailable();
-      oldNow = millis();
-      if(internetAvailable) {
-        if(mqtt.connect(getSmartSSID())) {
-          if(mDebug) {
-            Serial.println(F("[+] SMART: INFO -> MQTT broker connected."));
-            Serial.print(F("[+] SMART: INFO -> MQTT IP: "));
-            Serial.println(confJson[CONF_MQTT_IP].as<const char*>());
-            Serial.print(F("[+] SMART: INFO -> MQTT PORT: "));
-            Serial.println(confJson[CONF_MQTT_PORT].as<int>());
-            mqtt.publish(TOPIC_TEST,"[+] SMART: MQTT Client Ready!",RETAIN);
-            mqtt.subscribe(TOPIC_TEST);
-          }
-          // TODO - Subscribe here for required topics
-        }
-        else {
-          if(mDebug) {
-            Serial.print(F("[+] SMART: ERROR -> MQTT broker failed. Error Code -> "));
-            Serial.println(mqtt.state());
-          }
-        }
-      }
-      else {
-        Serial.println(F("[+] SMART: INFO -> Internet not available (Mesh Only Mode Active)"));
-      }
-    }
-  }
-}
-
-// Get the channel of target SSID to be connected to
-unsigned int getWiFiChannelForSSID(const char* ssid, int confCh, int& quality) {
-  if(mesh.isConnected(mesh.getNodeId()))
-    mesh.stop();
-  WiFi.mode(WIFI_STA);
-  WiFi.disconnect();
-  if(mDebug)
-    Serial.printf("[+] SMART: INFO -> Identifying Channel of SSID: %s\n",ssid);
-  delay(100);
-  int networks =  WiFi.scanNetworks();
-  for(int i=0;i<networks;i++) {    
-    if(String(WiFi.SSID(i)) == ssid){
-      //quality = map(WiFi.RSSI(i),-90,-20,0, 100);
-      quality = WiFi.RSSI(i);
-      isTargetSsidFound = true;
-      searchTargetTask.disable();
-      sched.deleteTask(searchTargetTask);
-      if(mDebug) {
-        Serial.printf("[+] SMART: INFO -> TARGET CHANNEL: -> %d\n",WiFi.channel(i));
-        Serial.printf("[+] SMART: INFO -> TARGET QUALITY: -> %d\n",quality);
-      }
-      WiFi.scanDelete();
-      return WiFi.channel(i);
-    }
-  }
-  WiFi.scanDelete();
-  if(mDebug) {
-    Serial.println(F("[+] SMART: ERROR -> TARGET SSID not found!"));
-    Serial.printf("[+] SMART: INFO -> TARGET CHANNEL FROM CONF: -> %d\n",confCh);
-  }
-  quality = MESH_QUALITY_THRESH;
-  isTargetSsidFound = false;
-  searchTargetTask.restartDelayed(INTERVAL_TARGET_SEARCH * TASK_SECOND);
-  //return confCh;
-  return 0;
-}
-
-void taskSearchTargetSSID(void) {
-  if(mDebug)
-    Serial.println(F("[+] SMART: INFO -> taskSearchTargetSSIDTask -> Searching for target.."));
-  mesh.stop();
-  channel = getWiFiChannelForSSID((const char*)confJson[CONF_SSID], (int)confJson[CONF_WIFI_CH], quality);
-  if(mDebug)
-      Serial.print(F("[+] SMART: INFO -> taskSearchTargetSSIDTask -> Task completed, Resuming Mesh!"));
-  initMesh(channel, quality);
-}
-
-bool isInternetAvailable(void) {
-  #ifdef FORCE_MESH
-    if(mDebug)
-      Serial.println(F("[+] SMART: WARNING --> Node is in FORCE_MESH mode!"));
-    return false;
+// Get Node info in JSON so that App can know what to display
+String getNodeInfo() {
+  DynamicJsonDocument d(JSON_BUF_SIZE);
+  char buf[JSON_BUF_SIZE];
+  if(internetAvailable)
+    d[JSON_TO] = JSON_TO_APP;
+  else
+    d[JSON_TO] = JSON_TO_GATEWAY;
+  d[JSON_SMARTID] = smartSsid;
+  d[JSON_TYPE] = JSON_TYPE_INFO;
+  #ifdef SWITCHING_NODE
+    d[JSON_DEVICE_TYPE] =  JSON_DEVICE_SWITCH;
   #endif
-  if(WiFi.SSID() == (const char*)confJson[CONF_SSID]) {
-    if(!isOtaActive) {
-      setupArduinoOTA();
-      isOtaActive = true;
-    }
-    return Ping.ping("www.google.co.in",1); 
-  }
-  return false;
-}
-
-void setupArduinoOTA(void) {
+  #ifdef SENSOR_NODE
+    d[JSON_DEVICE_TYPE] =  JSON_DEVICE_SENSOR;
+  #endif
+  d[JSON_NODENAME] = confJson[CONF_NODENAME];
+  d[JSON_NoD] = NO_OF_DEVICES;
+  d.shrinkToFit();
   if(mDebug) {
-    Serial.println(F("[+] SMART: INFO -> Starting ArduinoOTA service..."));
-    ArduinoOTA.setHostname(getSmartSSID()) ;
-    ArduinoOTA.begin();
+    Serial.println(F("[+] SMART: INFO -> Info packet generated as follow:"));
+    serializeJson(d, Serial);
+    Serial.println();
   }
-}
-
-const char* getTopicName(String tn) {
-  return String(String("smart/")+String(getSmartSSID())+String("/")+tn).c_str();
+  serializeJson(d, buf);
+  return String(buf);
 }
 
 // When Mesh receives anything
@@ -347,6 +201,24 @@ void decisionMaker(String p) {
   DynamicJsonDocument doc(JSON_BUF_SIZE + p.length());
   deserializeJson(doc, p);
 
+  if(doc.containsKey(JSON_TO) && (String((const char*)doc[JSON_TO]) == JSON_TO_GATEWAY) && internetAvailable) {
+    // Gateway is targeted.. Write control actions here..
+    
+    // route info packet to MQTT if 'this' is gateway
+    if(doc.containsKey(JSON_TYPE) && (String((const char*)doc[JSON_TYPE]) == JSON_TYPE_INFO)) {
+      String s = "smart/"+String((const char*)confJson[CONF_USERNAME])+"/"+String((const char*)doc[JSON_SMARTID])+"/info";
+      const char* topic = s.c_str();
+      char msg[JSON_BUF_SIZE];
+      serializeJson(doc, msg);
+      mqtt.publish(topic, msg, RETAIN);
+      if(mDebug) {
+        Serial.print(F("[+] SMART: INFO -> Forwarding INFO packet from "));
+        serializeJson(doc[JSON_SMARTID], Serial);
+        Serial.println();
+      }
+    }
+  }
+
   if(mDebug) {
     pinMode(LED_BUILTIN,OUTPUT);
     if(p == "1")
@@ -355,10 +227,11 @@ void decisionMaker(String p) {
       digitalWrite(LED_BUILTIN,HIGH);
   }
 
+  // Check if the packet is targeted for 'this' node
   if(doc.containsKey(JSON_SMARTID)) {
     if(String((const char*)doc[JSON_SMARTID]) == smartSsid) {
-      if(doc.containsKey(JSON_TYPE) && (String((const char*)doc[JSON_TYPE]) == JSON_STATE)) {
-        JsonArray a = (JsonArray)doc[JSON_DATA];
+      if(doc.containsKey(JSON_TYPE) && (String((const char*)doc[JSON_TYPE]) == JSON_TYPE_STATE)) {
+        JsonArray a = (JsonArray)doc[JSON_TYPE_DATA];
         byte i=0;
         for(JsonVariant v : a) {
           stateArray[i] = v.as<byte>();
