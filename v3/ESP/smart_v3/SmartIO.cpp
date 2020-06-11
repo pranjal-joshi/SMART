@@ -17,8 +17,6 @@ byte relayArray[8] = {0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80};
 byte snsPinArray[NO_OF_DEVICES], snsStateArray[NO_OF_DEVICES];
 
 ICACHE_RAM_ATTR void _isr(void);
-volatile bool isInterrupted = false;
-volatile unsigned long lastInterrupted = 0;
 
 SmartIo::SmartIo(byte l, byte c, byte d, byte oe) {
   _latch = l;
@@ -99,6 +97,7 @@ void SmartIo::enableOutput(bool out) {
 ICACHE_RAM_ATTR void _isr(void) {
   if(abs(millis()-lastInterrupted) > DEBOUNCE_DLY) {
     noInterrupts();
+    Serial.println(lastInterrupted);
     lastInterrupted = millis();
     isInterrupted = true;
     interrupts();

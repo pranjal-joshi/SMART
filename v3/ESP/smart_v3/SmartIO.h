@@ -10,12 +10,11 @@
 #define SMARTIO_H
 
 #include <ArduinoJson.h>
+#include "SmartISR.h"
 #include "SmartConstants.h"
 
 class SmartIo {
   public:
-    volatile bool isInterrupted;
-    volatile unsigned long lastInterrupted;
     SmartIo(byte l, byte c, byte d, byte oe);
     void begin(void);
     void setDebug(bool);
