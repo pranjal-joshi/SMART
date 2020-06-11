@@ -37,7 +37,8 @@ Task searchTargetTask(INTERVAL_TARGET_SEARCH*TASK_SECOND, TASK_ONCE, &taskSearch
 // variables
 String smartSsid;
 DynamicJsonDocument confJson(JSON_BUF_SIZE);
-DynamicJsonDocument stateJson(NO_OF_DEVICES);
+StaticJsonDocument<JSON_BUF_SIZE> stateJson;
+char stateJsonBuf[JSON_BUF_SIZE];
 bool internetAvailable = false;
 bool isMeshActive = false;
 bool isOtaActive = false;
@@ -46,6 +47,8 @@ uint32_t rootNodeAddr;
 byte stateArray[NO_OF_DEVICES];
 int quality;
 uint16_t channel = 0;
+volatile unsigned long lastInterrupted = 0;
+volatile bool isInterrupted = false;
 
 void setup() {
   Serial.begin(115200);
@@ -68,9 +71,8 @@ void setup() {
     io.addInterrupt(SW2, CHANGE);
     io.addInterrupt(SW3, CHANGE);
     io.addInterrupt(SW4, CHANGE);
+    io.setCallback(ioCallback);
     stateJson = fsys.loadState();
-    //io.setState(stateJson.as<JsonVariant>());
-    // TODO - Debug setState JSON passing
   }
   
   delay(bd);
@@ -126,15 +128,22 @@ void looper() {
   sched.execute();
   if(isInterrupted) {
     stateJson = io.getState();
+    serializeJson(stateJson, stateJsonBuf);
+    io.setState(stateJsonBuf);
+    fsys.saveState(stateJsonBuf);
     isInterrupted = false;
-    if(mDebug) {
-      Serial.print(F("[+] SMART: INTRPT -> States are "));
-      serializeJson(stateJson, Serial);
-      Serial.println();
-    }
   }
   if(mDebug)
     ArduinoOTA.handle();
+}
+
+ICACHE_RAM_ATTR void ioCallback(void) {
+  if(abs(millis()-lastInterrupted) > DEBOUNCE_DLY) {
+    noInterrupts();
+    lastInterrupted = millis();
+    isInterrupted = true;
+    interrupts();
+  }
 }
 
 // setup arduino OTA only after device is connected to some network
@@ -151,34 +160,6 @@ void changedConCallback() {
 
   // Broadcast info packets in changes in connection
   mesh.sendBroadcast(getNodeInfo());
-}
-
-// Get Node info in JSON so that App can know what to display
-String getNodeInfo() {
-  DynamicJsonDocument d(JSON_BUF_SIZE);
-  char buf[JSON_BUF_SIZE];
-  if(internetAvailable)
-    d[JSON_TO] = JSON_TO_APP;
-  else
-    d[JSON_TO] = JSON_TO_GATEWAY;
-  d[JSON_SMARTID] = smartSsid;
-  d[JSON_TYPE] = JSON_TYPE_INFO;
-  #ifdef SWITCHING_NODE
-    d[JSON_DEVICE_TYPE] =  JSON_DEVICE_SWITCH;
-  #endif
-  #ifdef SENSOR_NODE
-    d[JSON_DEVICE_TYPE] =  JSON_DEVICE_SENSOR;
-  #endif
-  d[JSON_NODENAME] = confJson[CONF_NODENAME];
-  d[JSON_NoD] = NO_OF_DEVICES;
-  d.shrinkToFit();
-  if(mDebug) {
-    Serial.println(F("[+] SMART: INFO -> Info packet generated as follow:"));
-    serializeJson(d, Serial);
-    Serial.println();
-  }
-  serializeJson(d, buf);
-  return String(buf);
 }
 
 // When Mesh receives anything
