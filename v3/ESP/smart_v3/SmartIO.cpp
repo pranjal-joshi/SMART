@@ -18,19 +18,23 @@ byte snsPinArray[NO_OF_DEVICES], snsStateArray[NO_OF_DEVICES];
 
 ICACHE_RAM_ATTR void _isr(void);
 volatile bool isInterrupted = false;
+volatile unsigned long lastInterrupted = 0;
 
 SmartIo::SmartIo(byte l, byte c, byte d, byte oe) {
   _latch = l;
   _clk = c;
   _data = d;
   _oe = oe;
+}
+
+void SmartIo::begin(void) {
   pinMode(_oe, OUTPUT);
   digitalWrite(_oe, HIGH);        // Disable OE of latch to avoid flickering
   pinMode(_latch, OUTPUT);
   pinMode(_clk, OUTPUT);
   pinMode(_data, OUTPUT);
   if(IO_DEBUG) {
-    Serial.printf("[+] SmartIo: PINS -> Latch: %d, Clk: %d, Data: %d, /OE: %d\n",_latch,_clk,_data,oe);
+    Serial.printf("[+] SmartIo: PINS -> Latch: %d, Clk: %d, Data: %d, /OE: %d\n",_latch,_clk,_data,_oe);
   }
 }
 
@@ -38,13 +42,13 @@ void SmartIo::setDebug(bool d) {
   IO_DEBUG = d;
 }
 
-bool SmartIo::addInterrupt(byte pin, std::function<void (void)>func, int mode) {
+bool SmartIo::addInterrupt(byte pin, int mode) {
   if(_snsPinCnt < NO_OF_DEVICES) {
     snsPinArray[_snsPinCnt] = pin;
     pinMode(pin, INPUT);
     _snsPinCnt++;
     if(IO_DEBUG)
-      Serial.printf("[+] SmartIo: INFO -> Added pin %d to as interrupt.",pin);
+      Serial.printf("[+] SmartIo: INFO -> Added pin %d to as interrupt.\n",pin);
     //attachInterrupt(digitalPinToInterrupt(pin), func, mode);
     attachInterrupt(digitalPinToInterrupt(pin), _isr, mode);
     return true;
@@ -54,7 +58,7 @@ bool SmartIo::addInterrupt(byte pin, std::function<void (void)>func, int mode) {
   return false;
 }
 
-void SmartIo::setState(const JsonDocument doc) {
+void SmartIo::setState(JsonVariant doc) {
   byte i=0;
   byte stateVar=0;
   JsonArray j = doc.as<JsonArray>();
@@ -95,6 +99,7 @@ void SmartIo::enableOutput(bool out) {
 
 ICACHE_RAM_ATTR void _isr(void) {
   noInterrupts();
+  lastInterrupted = millis();
   isInterrupted = true;
   interrupts();
 }

@@ -15,10 +15,13 @@
 class SmartIo {
   public:
     volatile bool isInterrupted;
+    volatile unsigned long lastInterrupted;
     SmartIo(byte l, byte c, byte d, byte oe);
+    void begin(void);
     void setDebug(bool);
-    bool addInterrupt(byte pin, std::function<void (void)>, int mode);
-    void setState(const JsonDocument doc);
+    bool addInterrupt(byte pin, int mode);
+    //void setState(const JsonDocument doc);
+    void setState(JsonVariant doc);
     StaticJsonDocument<JSON_BUF_SIZE> getState(void);
     void enableOutput(bool);
 };
