@@ -45,11 +45,10 @@ void SmartIo::setDebug(bool d) {
 bool SmartIo::addInterrupt(byte pin, int mode) {
   if(_snsPinCnt < NO_OF_DEVICES) {
     snsPinArray[_snsPinCnt] = pin;
-    pinMode(pin, INPUT);
+    pinMode(pin, INPUT_PULLUP);
     _snsPinCnt++;
     if(IO_DEBUG)
       Serial.printf("[+] SmartIo: INFO -> Added pin %d to as interrupt.\n",pin);
-    //attachInterrupt(digitalPinToInterrupt(pin), func, mode);
     attachInterrupt(digitalPinToInterrupt(pin), _isr, mode);
     return true;
   }
@@ -98,8 +97,10 @@ void SmartIo::enableOutput(bool out) {
 }
 
 ICACHE_RAM_ATTR void _isr(void) {
-  noInterrupts();
-  lastInterrupted = millis();
-  isInterrupted = true;
-  interrupts();
+  if(abs(millis()-lastInterrupted) > DEBOUNCE_DLY) {
+    noInterrupts();
+    lastInterrupted = millis();
+    isInterrupted = true;
+    interrupts();
+  }
 }
