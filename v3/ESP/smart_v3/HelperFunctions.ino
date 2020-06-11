@@ -89,6 +89,34 @@ size_t getRootId(painlessmesh::protocol::NodeTree nt) {
   return 0;
 }
 
+// Get Node info in JSON so that App can know what to display
+String getNodeInfo() {
+  DynamicJsonDocument d(JSON_BUF_SIZE);
+  char buf[JSON_BUF_SIZE];
+  if(internetAvailable)
+    d[JSON_TO] = JSON_TO_APP;
+  else
+    d[JSON_TO] = JSON_TO_GATEWAY;
+  d[JSON_SMARTID] = smartSsid;
+  d[JSON_TYPE] = JSON_TYPE_INFO;
+  #ifdef SWITCHING_NODE
+    d[JSON_DEVICE_TYPE] =  JSON_DEVICE_SWITCH;
+  #endif
+  #ifdef SENSOR_NODE
+    d[JSON_DEVICE_TYPE] =  JSON_DEVICE_SENSOR;
+  #endif
+  d[JSON_NODENAME] = confJson[CONF_NODENAME];
+  d[JSON_NoD] = NO_OF_DEVICES;
+  d.shrinkToFit();
+  if(mDebug) {
+    Serial.println(F("[+] SMART: INFO -> Info packet generated as follow:"));
+    serializeJson(d, Serial);
+    Serial.println();
+  }
+  serializeJson(d, buf);
+  return String(buf);
+}
+
 // Check for internet availability and control ArduinoOTA accordingly
 bool isInternetAvailable(void) {
   #ifdef FORCE_MESH
