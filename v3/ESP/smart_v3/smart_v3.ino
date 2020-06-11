@@ -124,9 +124,9 @@ void looper() {
   mqtt.loop();
   mesh.update();
   sched.execute();
-  if(io.isInterrupted) {
+  if(isInterrupted) {
     stateJson = io.getState();
-    io.isInterrupted = false;
+    isInterrupted = false;
     if(mDebug) {
       Serial.print(F("[+] SMART: INTRPT -> States are "));
       serializeJson(stateJson, Serial);
