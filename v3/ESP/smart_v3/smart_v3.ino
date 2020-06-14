@@ -29,26 +29,28 @@ PubSubClient mqtt(wiCli);
 
 Scheduler sched;
 
-void taskCheckRootNode(void);
-Task rootCheckTask(INTERVAL_ROOT_CHECK*TASK_SECOND, TASK_FOREVER, &taskCheckRootNode, &sched);
-void taskSearchTargetSSID(void);
-Task searchTargetTask(INTERVAL_TARGET_SEARCH*TASK_SECOND, TASK_ONCE, &taskSearchTargetSSID, &sched);
-
 // variables
 String smartSsid;
 DynamicJsonDocument confJson(JSON_BUF_SIZE);
-StaticJsonDocument<JSON_BUF_SIZE> stateJson;
+DynamicJsonDocument stateJson(JSON_BUF_SIZE);
 char stateJsonBuf[JSON_BUF_SIZE];
 bool internetAvailable = false;
 bool isMeshActive = false;
 bool isOtaActive = false;
 bool isTargetSsidFound = false;
+bool isStateChanged = false;
+unsigned long whenStateChanged = 0;
 uint32_t rootNodeAddr;
-byte stateArray[NO_OF_DEVICES];
 int quality;
 uint16_t channel = 0;
 volatile unsigned long lastInterrupted = 0;
 volatile bool isInterrupted = false;
+
+// Task scheduling
+void taskCheckRootNode(void);
+Task rootCheckTask(INTERVAL_ROOT_CHECK*TASK_SECOND, TASK_FOREVER, &taskCheckRootNode, &sched);
+void taskSearchTargetSSID(void);
+Task searchTargetTask(INTERVAL_TARGET_SEARCH*TASK_SECOND, TASK_ONCE, &taskSearchTargetSSID, &sched);
 
 void setup() {
   Serial.begin(115200);
@@ -73,6 +75,8 @@ void setup() {
     io.addInterrupt(SW4, CHANGE);
     io.setCallback(ioCallback);
     stateJson = fsys.loadState();
+    serializeJson(stateJson, stateJsonBuf);
+    io.setState(stateJsonBuf);
   }
   
   delay(bd);
@@ -95,7 +99,7 @@ void setup() {
     delay(RST_DLY);
     ESP.reset();
   }
-  confJson = fsys.readConfigFile();
+  confJson = fsys.readConfigFile();  
   if(mDebug) {
     Serial.print(F("[+] SMART: INFO -> TARGET SSID: "));
     Serial.println(confJson[CONF_SSID].as<const char*>());
@@ -126,12 +130,18 @@ void looper() {
   mqtt.loop();
   mesh.update();
   sched.execute();
+  // Read states when interrupted and update outputs and MQTT about it
   if(isInterrupted) {
-    stateJson = io.getState();
-    serializeJson(stateJson, stateJsonBuf);
+    io.getState().toCharArray(stateJsonBuf, io.getState().length());
     io.setState(stateJsonBuf);
     fsys.saveState(stateJsonBuf);
+    broadcastStateChanged(stateJsonBuf);
     isInterrupted = false;
+  }
+  // When state changed remotely, read sensing lines after sometime and ACK MQTT
+  if(isStateChanged && (abs(millis() - whenStateChanged) > INTERVAL_SWITCHING_TIME)) {
+    broadcastStateChanged(stateJsonBuf);
+    isStateChanged = false;
   }
   if(mDebug)
     ArduinoOTA.handle();
@@ -182,27 +192,80 @@ void decisionMaker(String p) {
   DynamicJsonDocument doc(JSON_BUF_SIZE + p.length());
   deserializeJson(doc, p);
 
+  // Check if the packet is targeted for 'this' node
+  if(doc.containsKey(JSON_SMARTID)) {
+    if(String((const char*)doc[JSON_SMARTID]) == smartSsid) {
+
+      // Set output states as per the received JSON
+      if(doc.containsKey(JSON_TYPE) && (String((const char*)doc[JSON_TYPE]) == JSON_TYPE_STATE)) {
+        JsonArray ja = doc[JSON_TYPE_DATA].as<JsonArray>();
+        serializeJson(ja, stateJsonBuf);
+        io.setState(stateJsonBuf);
+        fsys.saveState(stateJsonBuf);
+        isStateChanged = true;
+        whenStateChanged = millis();
+      }
+
+      // Factory reset 'this' node - erase SPIFFS & reboot
+      else if(doc.containsKey(JSON_TYPE) && (String((const char*)doc[JSON_TYPE]) == JSON_TYPE_FACT_RST)) {
+        if(mDebug)
+          Serial.println(F("[+] SMART: -> WARNING: Executing User requested FACTORY RESET!"));
+        fsys.format();
+        ESP.reset();
+      }
+
+      // Publish states whenever app requests
+      else if(doc.containsKey(JSON_TYPE) && (String((const char*)doc[JSON_TYPE]) == JSON_TYPE_STATE_REQ)) {
+        io.getState().toCharArray(stateJsonBuf, io.getState().length());
+        broadcastStateChanged(stateJsonBuf);
+      }
+    }
+  }
+
+  // Gateway is targeted.. [MeshNode -> Gateway -> App] Write control actions here..
   if(doc.containsKey(JSON_TO) && (String((const char*)doc[JSON_TO]) == JSON_TO_GATEWAY) && (String((const char*)doc[JSON_FROM]) == JSON_TO_NODE) && internetAvailable) {
-    // Gateway is targeted.. [MeshNode -> Gateway -> App] Write control actions here..
     
     // route info packet to MQTT if 'this' is gateway
     if(doc.containsKey(JSON_TYPE) && (String((const char*)doc[JSON_TYPE]) == JSON_TYPE_INFO)) {
-      String s = "smart/"+String((const char*)confJson[CONF_USERNAME])+"/"+String((const char*)doc[JSON_SMARTID])+"/info";
-      const char* topic = s.c_str();
+      /*String s = "smart/"+String((const char*)confJson[CONF_USERNAME])+"/"+String((const char*)doc[JSON_SMARTID])+"/info";
+      const char* topic = s.c_str();*/
       char msg[JSON_BUF_SIZE];
       serializeJson(doc, msg);
-      mqtt.publish(topic, msg, RETAIN);
+      //mqtt.publish(topic, msg, RETAIN);
+      mqtt.publish((const char*)doc[JSON_TOPIC], msg, RETAIN);
       if(mDebug) {
         Serial.print(F("[+] SMART: INFO -> Forwarding INFO packet from "));
         serializeJson(doc[JSON_SMARTID], Serial);
         Serial.println();
       }
     }
+
+    // route stateChanged packet to respective MQTT topic if 'this' is gateway
+    if(doc.containsKey(JSON_TYPE) && (String((const char*)doc[JSON_TYPE]) == JSON_TYPE_STATE)) {      /*String s = "smart/"+String((const char*)confJson[CONF_USERNAME])+"/"+String((const char*)doc[JSON_SMARTID])+"/state";
+      const char* topic = s.c_str();*/
+      char msg[JSON_BUF_SIZE];
+      serializeJson(doc, msg);
+      //mqtt.publish(topic, msg, RETAIN);
+      mqtt.publish((const char*)doc[JSON_TOPIC], msg, RETAIN);
+      if(mDebug) {
+        Serial.print(F("[+] SMART: INFO -> Forwarding STATE packet from "));
+        serializeJson(doc[JSON_SMARTID], Serial);
+        Serial.println();
+      }
+    }
   }
 
+  // Gateway is targeted.. [MeshNode <- Gateway <- App] Write control actions here..
+  // Either for 'this' or broadcast to mesh
   if(doc.containsKey(JSON_TO) && (String((const char*)doc[JSON_TO]) == JSON_TO_GATEWAY) && (String((const char*)doc[JSON_FROM]) == JSON_TO_APP) && internetAvailable) {
-    // Gateway is targeted.. [MeshNode <- Gateway <- App] Write control actions here..
-    // Either for 'this' or broadcast to mesh
+    if(mDebug) {
+      Serial.println(F("[+] SMART: App -> Mesh -> Broadcasting following packet to mesh.."));
+      serializeJson(doc, Serial);
+      Serial.println();
+    }
+    char msgBuf[JSON_BUF_SIZE];
+    serializeJson(doc, msgBuf);
+    mesh.sendBroadcast(msgBuf);
   }
 
   if(mDebug) {
@@ -211,24 +274,5 @@ void decisionMaker(String p) {
       digitalWrite(LED_BUILTIN,LOW);
     if(p == "0")
       digitalWrite(LED_BUILTIN,HIGH);
-  }
-
-  // Check if the packet is targeted for 'this' node
-  if(doc.containsKey(JSON_SMARTID)) {
-    if(String((const char*)doc[JSON_SMARTID]) == smartSsid) {
-      if(doc.containsKey(JSON_TYPE) && (String((const char*)doc[JSON_TYPE]) == JSON_TYPE_STATE)) {
-        JsonArray a = (JsonArray)doc[JSON_TYPE_DATA];
-        byte i=0;
-        for(JsonVariant v : a) {
-          stateArray[i] = v.as<byte>();
-          i++;
-        }
-        if(mDebug) {
-          Serial.print(F("[+] SMART: STATE -> State changed to "));
-          serializeJson(a,Serial);
-          Serial.println();
-        }
-      }
-    }
   }
 }
