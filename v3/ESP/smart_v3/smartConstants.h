@@ -21,7 +21,7 @@
 
 #define RST_DLY           3000U
 #define BOOT_DLY          2000U
-#define DEBOUNCE_DLY      200U   // ms
+#define DEBOUNCE_DLY      100U   // ms
 
 #define MQTT_SERVER_IP    "35.225.15.182"
 #define MQTT_SERVER_PORT  "1883"
@@ -45,12 +45,12 @@
 #define MESH_PASS                 "mesh@smart_v3"
 #define MESH_PORT                 4321
 #define MESH_HIDDEN               1
-#define MESH_QUALITY_THRESH       -75   // dBm
+#define MESH_QUALITY_THRESH       -85   // dBm
 #define INTERVAL_ROOT_CHECK       30    // Seconds
 #define INTERVAL_TARGET_SEARCH    60    // Seconds
 
 // smartWebServer constants
-#define SMART_PASS        "12345678"    // Change later
+#define SMART_PASS                "12345678"    // Change later
 
 // JSON constants
 #define JSON_BUF_SIZE             512u
@@ -69,6 +69,7 @@
 #define JSON_TYPE_STATE           "state"
 #define JSON_TYPE_INFO            "info"
 #define JSON_NoD                  "NoD"
+#define JSON_TOPIC                "topic"
 
 // IO configuration
 #if NO_OF_DEVICES == 4      // This Configuration is ONLY for 4 Devices
