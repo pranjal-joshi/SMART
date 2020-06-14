@@ -35,10 +35,28 @@ smart/username/smartId/info ->
 // App to Node
 smart/username/gateway		->	{'from':'app', 'smartId':'smartId', type':'state', data:[1,0,1,0]}
 {
+	"to": "gateway",
 	"from": "app",
 	"smartId": "SMART_00C30094",
 	"type": "state",
 	"data": [1, 0, 0, 1]
+}
+
+// App to Node
+smart/username/gateway
+{
+	"to": "gateway",
+	"from": "app",
+	"smartId": "SMART_12345",
+	"type": "factory_reset"
+
+// App to Node
+smart/username/gateway
+{
+	"to": "gateway",
+	"from": "app",
+	"smartId": "SMART_12345",
+	"type": "state_req"
 }
 
 // Node to App
