@@ -55,8 +55,10 @@
 // JSON constants
 #define JSON_BUF_SIZE             512u
 #define JSON_TO                   "to"
+#define JSON_FROM                 "from"
 #define JSON_TO_GATEWAY           "gateway"
 #define JSON_TO_APP               "app"
+#define JSON_TO_NODE              "node"
 #define JSON_SMARTID              "smartId"
 #define JSON_NODENAME             "nodeName"
 #define JSON_DEVICE_TYPE          "deviceType"
