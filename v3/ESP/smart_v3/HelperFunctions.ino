@@ -4,6 +4,10 @@ void broadcastStateChanged(const char* stateBuf) {
   char charBuf[JSON_BUF_SIZE];
   deserializeJson(arr, stateBuf);
   arr.shrinkToFit();
+  if(internetAvailable)
+    doc[JSON_TO] = JSON_TO_APP;
+  else
+    doc[JSON_TO] = JSON_TO_GATEWAY;
   doc[JSON_TOPIC] = getTopicName(JSON_TYPE_STATE);
   doc[JSON_FROM] = JSON_TO_NODE;
   doc[JSON_SMARTID] = smartSsid;
@@ -118,6 +122,7 @@ size_t getRootId(painlessmesh::protocol::NodeTree nt) {
 String getNodeInfo() {
   DynamicJsonDocument d(JSON_BUF_SIZE);
   char buf[JSON_BUF_SIZE];
+  d[JSON_TOPIC] = getTopicName(JSON_TYPE_INFO);
   if(internetAvailable)
     d[JSON_TO] = JSON_TO_APP;
   else
