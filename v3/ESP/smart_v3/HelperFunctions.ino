@@ -48,10 +48,11 @@ void connectMqttClient() {
             Serial.println(confJson[CONF_MQTT_IP].as<const char*>());
             Serial.print(F("[+] SMART: INFO -> MQTT PORT: "));
             Serial.println(confJson[CONF_MQTT_PORT].as<int>());
-            mqtt.publish(TOPIC_TEST,"[+] SMART: MQTT Client Ready!",RETAIN);
+            mqtt.publish(TOPIC_TEST,"SMART: MQTT Client Ready!");
             mqtt.subscribe(TOPIC_TEST);
           }
           // TODO - Subscribe here for required topics
+          mqtt.subscribe(String((String)"smart/"+String(confJson[CONF_USERNAME].as<const char*>())+"/gateway").c_str());    // subscribe to smart/username/gateway
           mqtt.publish(getTopicName("info").c_str(), getNodeInfo().c_str(), RETAIN);
         }
         else {
@@ -97,6 +98,7 @@ String getNodeInfo() {
     d[JSON_TO] = JSON_TO_APP;
   else
     d[JSON_TO] = JSON_TO_GATEWAY;
+  d[JSON_FROM] = JSON_TO_NODE;
   d[JSON_SMARTID] = smartSsid;
   d[JSON_TYPE] = JSON_TYPE_INFO;
   #ifdef SWITCHING_NODE
