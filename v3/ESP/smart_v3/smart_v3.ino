@@ -182,8 +182,8 @@ void decisionMaker(String p) {
   DynamicJsonDocument doc(JSON_BUF_SIZE + p.length());
   deserializeJson(doc, p);
 
-  if(doc.containsKey(JSON_TO) && (String((const char*)doc[JSON_TO]) == JSON_TO_GATEWAY) && internetAvailable) {
-    // Gateway is targeted.. Write control actions here..
+  if(doc.containsKey(JSON_TO) && (String((const char*)doc[JSON_TO]) == JSON_TO_GATEWAY) && (String((const char*)doc[JSON_FROM]) == JSON_TO_NODE) && internetAvailable) {
+    // Gateway is targeted.. [MeshNode -> Gateway -> App] Write control actions here..
     
     // route info packet to MQTT if 'this' is gateway
     if(doc.containsKey(JSON_TYPE) && (String((const char*)doc[JSON_TYPE]) == JSON_TYPE_INFO)) {
@@ -198,6 +198,11 @@ void decisionMaker(String p) {
         Serial.println();
       }
     }
+  }
+
+  if(doc.containsKey(JSON_TO) && (String((const char*)doc[JSON_TO]) == JSON_TO_GATEWAY) && (String((const char*)doc[JSON_FROM]) == JSON_TO_APP) && internetAvailable) {
+    // Gateway is targeted.. [MeshNode <- Gateway <- App] Write control actions here..
+    // Either for 'this' or broadcast to mesh
   }
 
   if(mDebug) {
