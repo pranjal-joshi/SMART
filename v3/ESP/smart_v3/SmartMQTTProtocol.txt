@@ -21,9 +21,19 @@ smart/user_name/device_id/on_motion_end_timeout/D1_to_Dn/time
 
 # JSON Based protocol
 
-smart/username/info			->	{'smartIds':[array,of,smartId], 'nodeNames':[array,of,nodeNames]}
+smart/username/smartId/info -> 
+{
+	"to": "app/gateway",
+	"from": "node",
+	"smartId": "SMART_123456",
+	"type": "info",
+	"deviceType": "switch/sensor",
+	"nodeName": "MyRoom",
+	"NoD":"1/2/4",
+}
 
-smart/username/					->	{'from':'app', 'smartId':'smartId', type':'state', data:[1,0,1,0]}
+// App to Node
+smart/username/gateway		->	{'from':'app', 'smartId':'smartId', type':'state', data:[1,0,1,0]}
 {
 	"from": "app",
 	"smartId": "SMART_00C30094",
@@ -31,6 +41,16 @@ smart/username/					->	{'from':'app', 'smartId':'smartId', type':'state', data:[
 	"data": [1, 0, 0, 1]
 }
 
-smart/username/					->	{'from':'app', 'to':'smartId', type':'label', data:[a,b,c,d]}
+// Node to App
+smart/username/smartId/state
+{
+	"topic": "smart/username/smartId/state"
+	"from": "node",
+	"smartId": "SMART_00C30094",
+	"type": "state",
+	"data": [1, 0, 0, 1]
+}
+
+smart/username/gateway					->	{'from':'app', 'to':'smartId', type':'label', data:[a,b,c,d]}
 
 TODO - Implement for timer and sensor later!
