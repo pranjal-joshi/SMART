@@ -1,3 +1,27 @@
+// Brodcast changed states to MQTT or Mesh Gateway
+void broadcastStateChanged(const char* stateBuf) {
+  DynamicJsonDocument doc(JSON_BUF_SIZE), arr(JSON_BUF_SIZE);
+  char charBuf[JSON_BUF_SIZE];
+  deserializeJson(arr, stateBuf);
+  arr.shrinkToFit();
+  doc[JSON_TOPIC] = getTopicName(JSON_TYPE_STATE);
+  doc[JSON_FROM] = JSON_TO_NODE;
+  doc[JSON_SMARTID] = smartSsid;
+  doc[JSON_TYPE] = JSON_TYPE_STATE;
+  doc[JSON_TYPE_DATA] = arr.as<JsonArray>();
+  serializeJson(doc, charBuf);
+  if(mDebug) {
+    Serial.print(F("[+] SMART: INTR -> Broadcasting stateChanged packet: "));
+    serializeJson(doc, Serial);
+    Serial.println();
+  }
+  if(internetAvailable) {
+    mqtt.publish(getTopicName(JSON_TYPE_STATE).c_str(), charBuf, RETAIN);
+  }
+  else {
+    mesh.sendBroadcast(charBuf);
+  }
+}
 
 // Init Mesh network on boot
 void initMesh(uint8_t ch, int qual) {    
