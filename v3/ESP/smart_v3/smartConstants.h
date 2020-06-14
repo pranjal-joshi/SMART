@@ -48,6 +48,7 @@
 #define MESH_QUALITY_THRESH       -85   // dBm
 #define INTERVAL_ROOT_CHECK       30    // Seconds
 #define INTERVAL_TARGET_SEARCH    60    // Seconds
+#define INTERVAL_SWITCHING_TIME   200   // mS
 
 // smartWebServer constants
 #define SMART_PASS                "12345678"    // Change later
@@ -67,7 +68,9 @@
 #define JSON_TYPE                 "type"
 #define JSON_TYPE_DATA            "data"
 #define JSON_TYPE_STATE           "state"
+#define JSON_TYPE_STATE_REQ       "state_req"
 #define JSON_TYPE_INFO            "info"
+#define JSON_TYPE_FACT_RST        "factory_reset"
 #define JSON_NoD                  "NoD"
 #define JSON_TOPIC                "topic"
 
