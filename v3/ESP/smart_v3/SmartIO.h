@@ -21,7 +21,7 @@ class SmartIo {
     void setState(const char* buf);
     void setCallback(void (*userDefinedCallback)(void));
     ICACHE_RAM_ATTR void interruptHandler(void);
-    StaticJsonDocument<JSON_BUF_SIZE> getState(void);
+    String getState(void);
     void enableOutput(bool);
   private:
     void (*localPointerToCallback)(void);

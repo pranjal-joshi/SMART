@@ -8,15 +8,15 @@
 
 #include "SmartIO.h"
 
-byte _latch, _clk, _data, _oe;
-byte _snsPinCnt = 0;
+uint8_t _latch, _clk, _data, _oe;
+uint8_t _snsPinCnt = 0;
 bool IO_DEBUG = false;
 
-byte relayArray[8] = {0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80};
+uint8_t relayArray[8] = {0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80};
 
-byte snsPinArray[NO_OF_DEVICES], snsStateArray[NO_OF_DEVICES];
+uint8_t snsPinArray[NO_OF_DEVICES], snsStateArray[NO_OF_DEVICES];
 
-//ICACHE_RAM_ATTR void _isr(void);
+static uint8_t stateVar=0;
 
 SmartIo *pointerToClass;
 
@@ -54,7 +54,6 @@ bool SmartIo::addInterrupt(byte pin, int mode) {
     _snsPinCnt++;
     if(IO_DEBUG)
       Serial.printf("[+] SmartIo: INFO -> Added pin %d to as interrupt.\n",pin);
-    //attachInterrupt(digitalPinToInterrupt(pin), _isr, mode);
     attachInterrupt(digitalPinToInterrupt(pin), outsideInterruptHandler, mode);
     return true;
   }
@@ -65,31 +64,29 @@ bool SmartIo::addInterrupt(byte pin, int mode) {
 
 void SmartIo::setState(const char* buf) {
   byte i=0;
-  byte stateVar=0;
   DynamicJsonDocument doc(JSON_BUF_SIZE);
   deserializeJson(doc, buf);
-  JsonArray j = doc.as<JsonArray>();
-  if(IO_DEBUG)
-    Serial.print(F("[+] SmartIo: INFO -> Setting output state = "));
+  JsonArray j = doc.as<JsonArray>();    
   for(JsonVariant v : j) {
-    if(v.as<byte>() == 1)
+    if(v.as<uint8_t>() == 1)
       stateVar |= relayArray[i];
     else
       stateVar &= ~(relayArray[i]);
     i++;
-    if(IO_DEBUG)
-      Serial.print(stateVar,BIN);
   }
-  if(IO_DEBUG)
-      Serial.println();
+  if(IO_DEBUG) {
+    Serial.print(F("[+] SmartIo: INFO -> Setting output state = "));
+    Serial.println(stateVar,BIN);
+  }
   digitalWrite(_latch, LOW);
   shiftOut(_data, _clk, MSBFIRST, stateVar);
   digitalWrite(_latch, HIGH);
   digitalWrite(_oe, LOW);
 }
 
-StaticJsonDocument<JSON_BUF_SIZE> SmartIo::getState(void) {
+String SmartIo::getState(void) {
   DynamicJsonDocument doc(JSON_BUF_SIZE);
+  char jBuf[JSON_BUF_SIZE];
   JsonArray j = doc.to<JsonArray>();
   for(byte i=0;i<_snsPinCnt;i++) {
     j.add((byte)digitalRead(snsPinArray[i]));
@@ -99,7 +96,8 @@ StaticJsonDocument<JSON_BUF_SIZE> SmartIo::getState(void) {
     serializeJson(doc, Serial);
     Serial.println();
   }
-  return doc;
+  serializeJson(doc, jBuf);
+  return String(jBuf);
 }
 
 void SmartIo::enableOutput(bool out) {
