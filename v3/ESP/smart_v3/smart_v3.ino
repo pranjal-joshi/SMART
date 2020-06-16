@@ -147,11 +147,6 @@ void looper() {
   mesh.update();
   sched.execute();
   ntp.update();
-
-  if(abs(millis()-lastMillis) > 1000) {
-    lastMillis = millis();
-    Serial.println(ntp.getFormattedTime());
-  }
   
   // Read states when interrupted and update outputs and MQTT about it
   if(isInterrupted) {
@@ -162,11 +157,11 @@ void looper() {
     isInterrupted = false;
   }
   // When state changed remotely, read sensing lines after sometime and ACK MQTT
-  // The following should occur automatically through an INTR - observe & eliminate
+  /*The following should occur automatically through an INTR - observe & eliminate
   if(isStateChanged && (abs(millis() - whenStateChanged) > INTERVAL_SWITCHING_TIME)) {
     broadcastStateChanged(stateJsonBuf);
     isStateChanged = false;
-  }
+  }*/
   if(mDebug)
     ArduinoOTA.handle();
 }
