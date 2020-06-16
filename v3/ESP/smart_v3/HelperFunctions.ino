@@ -69,6 +69,8 @@ void connectMqttClient() {
       internetAvailable = isInternetAvailable();
       oldNow = millis();
       if(internetAvailable) {
+        ntp.begin();
+        ntp.setTimeOffset(OFFSET_INDIA_GMT);
         if(mqtt.connect(getSmartSSID())) {
           if(mDebug) {
             Serial.println(F("[+] SMART: INFO -> MQTT broker connected."));
