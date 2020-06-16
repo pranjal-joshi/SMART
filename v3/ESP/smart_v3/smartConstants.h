@@ -19,9 +19,11 @@
 //#define FORCE_ROOT            // Enable to force the node as ROOT
 #define NO_OF_DEVICES           4
 
-#define RST_DLY           3000U
-#define BOOT_DLY          2000U
-#define DEBOUNCE_DLY      100U   // ms
+#define OFFSET_INDIA_GMT        19800
+
+#define RST_DLY                 3000U
+#define BOOT_DLY                2000U
+#define DEBOUNCE_DLY            100U   // ms
 
 #define MQTT_SERVER_IP    "35.225.15.182"
 #define MQTT_SERVER_PORT  "1883"
