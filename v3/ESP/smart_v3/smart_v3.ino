@@ -8,6 +8,8 @@
 #include <painlessMesh.h>
 #include <ESP8266Ping.h>
 #include <PubSubClient.h>
+#include <NTPClient.h>
+#include <WiFiUdp.h>
 #include <WiFiClient.h>
 #include <ArduinoOTA.h>
 #include "SmartFileSystem.h"
@@ -29,6 +31,9 @@ PubSubClient mqtt(wiCli);
 
 Scheduler sched;
 
+WiFiUDP ntpUdp;
+NTPClient ntp(ntpUdp);
+
 // variables
 String smartSsid;
 DynamicJsonDocument confJson(JSON_BUF_SIZE);
@@ -45,12 +50,17 @@ int quality;
 uint16_t channel = 0;
 volatile unsigned long lastInterrupted = 0;
 volatile bool isInterrupted = false;
+SmartNtpStruct ntpStruct;
 
 // Task scheduling
 void taskCheckRootNode(void);
 Task rootCheckTask(INTERVAL_ROOT_CHECK*TASK_SECOND, TASK_FOREVER, &taskCheckRootNode, &sched);
 void taskSearchTargetSSID(void);
 Task searchTargetTask(INTERVAL_TARGET_SEARCH*TASK_SECOND, TASK_ONCE, &taskSearchTargetSSID, &sched);
+void taskBroadcastNtp(void);
+Task broadcastNtpTask(INTERVAL_NTP_BROADCAST*TASK_SECOND, TASK_ONCE, &taskBroadcastNtp, &sched);
+void taskGetNtp(void);
+Task getNtpTask(INTERVAL_GET_NTP*TASK_SECOND, TASK_ONCE, &taskGetNtp, &sched);
 
 void setup() {
   Serial.begin(115200);
@@ -115,7 +125,11 @@ void setup() {
 
   // Start scheduled task execution
   sched.addTask(rootCheckTask);
+  sched.addTask(broadcastNtpTask);
+  sched.addTask(getNtpTask);
   rootCheckTask.enable();
+  broadcastNtpTask.enable();
+  getNtpTask.enable();
 }
 
 void loop() {
@@ -126,10 +140,19 @@ void loop() {
   looper(); 
 }
 
+unsigned long lastMillis = 0;
+
 void looper() {
   mqtt.loop();
   mesh.update();
   sched.execute();
+  ntp.update();
+
+  if(abs(millis()-lastMillis) > 1000) {
+    lastMillis = millis();
+    Serial.println(ntp.getFormattedTime());
+  }
+  
   // Read states when interrupted and update outputs and MQTT about it
   if(isInterrupted) {
     io.getState().toCharArray(stateJsonBuf, io.getState().length());
@@ -139,6 +162,7 @@ void looper() {
     isInterrupted = false;
   }
   // When state changed remotely, read sensing lines after sometime and ACK MQTT
+  // The following should occur automatically through an INTR - observe & eliminate
   if(isStateChanged && (abs(millis() - whenStateChanged) > INTERVAL_SWITCHING_TIME)) {
     broadcastStateChanged(stateJsonBuf);
     isStateChanged = false;
@@ -179,7 +203,8 @@ void meshReceiveCallback( uint32_t from, String &msg) {
   decisionMaker(msg);
 }
 
-void mqttCallback(char* topic, byte* payload, unsigned int length) { //write MQTT callback here
+// When anything is published to MQTT
+void mqttCallback(char* topic, byte* payload, unsigned int length) {
   payload[length] = '\0';
   String p = (char*)payload;
   if(mDebug)
@@ -188,6 +213,7 @@ void mqttCallback(char* topic, byte* payload, unsigned int length) { //write MQT
   decisionMaker(p);
 }
 
+// Function to parse received JSON and take action
 void decisionMaker(String p) {
   DynamicJsonDocument doc(JSON_BUF_SIZE + p.length());
   deserializeJson(doc, p);
@@ -219,6 +245,19 @@ void decisionMaker(String p) {
         io.getState().toCharArray(stateJsonBuf, io.getState().length());
         broadcastStateChanged(stateJsonBuf);
       }
+    }
+  }
+
+  // Sync broadcasted NTP frames if 'this' is mesh-only node.
+  if(doc.containsKey(JSON_TYPE) && String((const char*)doc[JSON_TYPE]) == JSON_TYPE_NTP && !internetAvailable) {
+    ntpStruct.hour = doc[JSON_NTP_HOUR].as<int>();
+    ntpStruct.minute = doc[JSON_NTP_MINUTE].as<int>();
+    ntpStruct.second = doc[JSON_NTP_SECOND].as<int>();
+    ntpStruct.weekday = doc[JSON_NTP_WEEKDAY].as<int>();
+    if(mDebug) {
+      Serial.print(F("SMART: INFO -> NTP packet synced: "));
+      serializeJson(doc, Serial);
+      Serial.println();
     }
   }
 
