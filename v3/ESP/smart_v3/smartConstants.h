@@ -50,6 +50,8 @@
 #define MESH_QUALITY_THRESH       -85   // dBm
 #define INTERVAL_ROOT_CHECK       30    // Seconds
 #define INTERVAL_TARGET_SEARCH    60    // Seconds
+#define INTERVAL_NTP_BROADCAST    60    // Seconds
+#define INTERVAL_GET_NTP          1
 #define INTERVAL_SWITCHING_TIME   200   // mS
 
 // smartWebServer constants
@@ -73,6 +75,11 @@
 #define JSON_TYPE_STATE_REQ       "state_req"
 #define JSON_TYPE_INFO            "info"
 #define JSON_TYPE_FACT_RST        "factory_reset"
+#define JSON_TYPE_NTP             "ntp"
+#define JSON_NTP_HOUR             "hour"
+#define JSON_NTP_MINUTE           "minute"
+#define JSON_NTP_SECOND           "second"
+#define JSON_NTP_WEEKDAY          "weekday"
 #define JSON_NoD                  "NoD"
 #define JSON_TOPIC                "topic"
 
@@ -91,5 +98,12 @@
   #define SNS3              SW3
   #define SNS4              SW4
 #endif
+
+typedef struct {
+  int hour;
+  int minute;
+  int second;
+  int weekday;
+} SmartNtpStruct;
 
 #endif
