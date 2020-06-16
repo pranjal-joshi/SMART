@@ -1,3 +1,40 @@
+// Broadcast time received by NTP
+void taskBroadcastNtp(void) {
+  if(internetAvailable) {
+    DynamicJsonDocument doc(JSON_BUF_SIZE);
+    char charBuf[JSON_BUF_SIZE];
+    doc[JSON_FROM] = JSON_TO_GATEWAY;
+    doc[JSON_TO] = JSON_TO_NODE;
+    doc[JSON_TYPE] = JSON_TYPE_NTP;
+    taskGetNtp();
+    doc[JSON_NTP_HOUR] = ntpStruct.hour;
+    doc[JSON_NTP_MINUTE] = ntpStruct.minute;
+    doc[JSON_NTP_SECOND] = ntpStruct.second;
+    doc[JSON_NTP_WEEKDAY] = ntpStruct.weekday;
+    doc.shrinkToFit();
+    if(mDebug) {
+      Serial.print(F("[+] SMART: BroadcastNtpTask -> "));
+      serializeJson(doc, Serial);
+      Serial.println();
+    }
+    serializeJson(doc, charBuf);
+    mesh.sendBroadcast(charBuf);
+  }
+  else {
+    if(mDebug)
+      Serial.println(F("[+] SMART: BroadcastNtpTask -> No Internet - Not broadcasting.."));
+  }
+  broadcastNtpTask.restartDelayed((INTERVAL_NTP_BROADCAST - ntpStruct.second)*TASK_SECOND);
+}
+
+// Get NTP data into global variable structure
+void taskGetNtp(void) {
+  ntpStruct.hour = ntp.getHours();
+  ntpStruct.minute = ntp.getMinutes();
+  ntpStruct.second = ntp.getSeconds();
+  ntpStruct.weekday = ntp.getDay();
+}
+
 // Brodcast changed states to MQTT or Mesh Gateway
 void broadcastStateChanged(const char* stateBuf) {
   DynamicJsonDocument doc(JSON_BUF_SIZE), arr(JSON_BUF_SIZE);
