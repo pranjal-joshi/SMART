@@ -77,7 +77,20 @@ smart/username/smartId/state
 	"hour":1,
 	"minute": 2,
 	"second": 3,
-	"day": 0-6
+	"weekday": 0-6
+}
+
+// Alarm Packet
+{
+	"data": [
+						{
+							"hour": [1,2],
+							"minute": [2,4],
+							"second": [3,6],
+							"weekday": [[0,1,2,3,4,5,6],[0,1,2,3,4,5,6]],
+							"status": "enable/disable"
+						},
+	]
 }
 
 smart/username/gateway					->	{'from':'app', 'to':'smartId', type':'label', data:[a,b,c,d]}
