@@ -1,3 +1,13 @@
+// Parse JSON received from PubSub
+void parseTimerJson(const char* buf) {
+  DynamicJsonDocument doc(JSON_BUF_SIZE);
+  deserializeJson(doc, buf);
+  JsonArray arr = doc[JSON_TYPE_DATA].as<JsonArray>();
+  for(byte i=0;i<NO_OF_DEVICES;i++) {
+    // TODO - Implement JSON parsing here
+  }
+}
+
 // Broadcast time received by NTP
 void taskBroadcastNtp(void) {
   if(internetAvailable) {
