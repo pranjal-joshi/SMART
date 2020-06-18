@@ -82,15 +82,13 @@ smart/username/smartId/state
 
 // Alarm Packet
 {
-	"data": [
-						{
-							"hour": [1,2],
-							"minute": [2,4],
-							"second": [3,6],
-							"weekday": [[0,1,2,3,4,5,6],[0,1,2,3,4,5,6]],
-							"status": "enable/disable"
-						},
-	]
+	"smartId": "SMART_12345",
+	"NoD": 1/2/4,
+	"data" : {
+			"time": [[[on_h,m,s],[off_h,m,s]],[[on_h,m,s],[off_h,m,s]],[[on_h,m,s],[off_h,m,s]],[[on_h,m,s],[off_h,m,s]]]
+			"weekday": [[[0,1,2,3,4,5,6],[0,1,2,3,4,5,6]],[[0,1,2,3,4,5,6],[0,1,2,3,4,5,6]],[[0,1,2,3,4,5,6],[0,1,2,3,4,5,6]],[[0,1,2,3,4,5,6],[0,1,2,3,4,5,6]]],
+			"status": ["enable","disable","enable",disable"]
+	}
 }
 
 smart/username/gateway					->	{'from':'app', 'to':'smartId', type':'label', data:[a,b,c,d]}
