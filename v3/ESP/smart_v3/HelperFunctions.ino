@@ -1,6 +1,6 @@
 // Parse JSON received from PubSub
 void parseTimerJson(const char* buf) {
-  DynamicJsonDocument doc(JSON_BUF_SIZE);
+  DynamicJsonDocument doc(JSON_BUF_SIZE*4);
   deserializeJson(doc, buf);
   if(doc.containsKey(JSON_SMARTID)&& String((const char*)doc[JSON_SMARTID]) == smartSsid
   && doc.containsKey(JSON_TYPE) && String((const char*)doc[JSON_TYPE]) == JSON_TYPE_TIMER) {
@@ -97,24 +97,9 @@ void parseTimerJson(const char* buf) {
     timerStruct.statusD3 = data_status[2]; // "enable"
     timerStruct.statusD4 = data_status[3]; // "disable"
 
-    // TODO - add task dynamically to switch devices
-  }
-}
+    fsys.saveTimers(buf);
 
-// Parse NTP packet from Mesh
-void parseNtpJson(const char* buf) {
-  DynamicJsonDocument doc(JSON_BUF_SIZE);
-  deserializeJson(doc, buf);
-  if(mDebug) {
-    Serial.println(F("[+] SMART: SYNC -> NTP packet received.."));
-    serializeJson(doc, Serial);
-    Serial.println();
-  }
-  if(doc.containsKey(JSON_TYPE)&& String((const char*)doc[JSON_TYPE]) == JSON_TYPE_NTP) {
-    ntpStruct.hour = doc[JSON_NTP_HOUR].as<int>();
-    ntpStruct.minute = doc[JSON_NTP_MINUTE].as<int>();
-    ntpStruct.second = doc[JSON_NTP_SECOND].as<int>();
-    ntpStruct.weekday = doc[JSON_NTP_WEEKDAY].as<int>();
+    // TODO - add task dynamically to switch devices
   }
 }
 
@@ -219,6 +204,7 @@ void connectMqttClient() {
     Serial.println(F("[+] SMART: INFO -> Attempting to connect MQTT broker."));
   mqtt.setServer((const char*)confJson[CONF_MQTT_IP],(int)confJson[CONF_MQTT_PORT]);
   mqtt.setCallback(mqttCallback);
+  mqtt.setBufferSize(JSON_BUF_SIZE);
   unsigned long oldNow = millis();
   while(!mqtt.connected()) {
     looper();
