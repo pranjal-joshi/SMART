@@ -51,6 +51,7 @@ uint16_t channel = 0;
 volatile unsigned long lastInterrupted = 0;
 volatile bool isInterrupted = false;
 SmartNtpStruct ntpStruct;
+SmartTimerStruct timerStruct;
 
 // Task scheduling
 void taskCheckRootNode(void);
