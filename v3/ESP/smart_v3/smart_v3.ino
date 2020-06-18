@@ -303,7 +303,6 @@ void decisionMaker(String p) {
     mesh.sendBroadcast(msgBuf);
   }
 
-  parseNtpJson(p.c_str());
   parseTimerJson(p.c_str());
 
   if(mDebug) {
