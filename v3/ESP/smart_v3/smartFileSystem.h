@@ -12,8 +12,9 @@
 #include <ArduinoJson.h>
 #include "SmartConstants.h"
 
-#define CONF_FILE "/config.json"
-#define STATE_FILE "/state.json"
+#define CONF_FILE     "/config.json"
+#define STATE_FILE    "/state.json"
+#define TIMER_FILE    "/timer.json"
 
 typedef enum SmartFileSystemFlags {
   FileWriteOk,
@@ -38,6 +39,8 @@ class SmartFileSystem {
     bool isConfigEmpty(void);
     SmartFileSystemFlags_t saveState(const char* buf);
     DynamicJsonDocument loadState(void);
+    SmartFileSystemFlags_t saveTimers(const char* buf);
+    DynamicJsonDocument loadTimers(void);
   private:
     bool DEBUG;
     void printDebug(String);

@@ -201,7 +201,25 @@ DynamicJsonDocument SmartFileSystem::loadState(void) {
   readJsonFile(&doc, STATE_FILE);
   doc.shrinkToFit();
   if(DEBUG) {
-    Serial.print(F("[+] SmartFileSystem: INFO -> Loading output states to SPIFFS.. -> "));
+    Serial.print(F("[+] SmartFileSystem: INFO -> Loading output states from SPIFFS.. -> "));
+    serializeJson(doc, Serial);
+    Serial.println();
+  }
+  return doc;
+}
+
+SmartFileSystemFlags_t SmartFileSystem::saveTimers(const char* buf) {
+  DynamicJsonDocument d(JSON_BUF_SIZE);
+  deserializeJson(d, buf);
+  return saveJsonFile(d, TIMER_FILE);
+}
+
+DynamicJsonDocument SmartFileSystem::loadTimers(void) {
+  DynamicJsonDocument doc(JSON_BUF_SIZE);
+  readJsonFile(&doc, TIMER_FILE);
+  doc.shrinkToFit();
+  if(DEBUG) {
+    Serial.print(F("[+] SmartFileSystem: INFO -> Loading timer file from SPIFFS.. -> "));
     serializeJson(doc, Serial);
     Serial.println();
   }
