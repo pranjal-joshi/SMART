@@ -2,33 +2,119 @@
 void parseTimerJson(const char* buf) {
   DynamicJsonDocument doc(JSON_BUF_SIZE);
   deserializeJson(doc, buf);
-  if(doc.containsKey(JSON_SMARTID) && String((const char*)doc[JSON_SMARTID]) == smartSsid) {
-    JsonArray timeArray = doc["data"]["time"].as<JsonArray>();
-    JsonArray weekArray = doc["data"]["weekday"].as<JsonArray>();
-    JsonArray statusArray = doc["data"]["status"].as<JsonArray>();
-    byte k;
-    #if NO_OF_DEVICES >= 1
-      for(k=0;k<timeArray[0][0][0].size();k++)
-        timerStruct.onTimeD1[k] = (uint8_t)timeArray[0][0][0][k];
-      for(k=0;k<timeArray[0][0][1].size();k++)
-        timerStruct.offTimeD1[k] = (uint8_t)timeArray[0][0][1][k];
-      for(k=0;k<weekArray[0][0][0].size();k++) {
-        if((uint8_t)weekArray[0][0][0][k] == k)
-          timerStruct.weekdaysD1[k] = 1;
-        else
-          timerStruct.weekdaysD1[k] = 0;
-      }
-      if(String((const char*)statusArray[0]) == JSON_ENABLE)
-        timerStruct.statusD1 = true;
-      else
-        timerStruct.statusD1 = false:
-    #endif
-    #if NO_OF_DEVICES >= 2
-      //TODO - Implement here
-    #endif
-    #if NO_OF_DEVICES >= 4
-      //TODO - Implement here
-    #endif
+  if(doc.containsKey(JSON_SMARTID)&& String((const char*)doc[JSON_SMARTID]) == smartSsid
+  && doc.containsKey(JSON_TYPE) && String((const char*)doc[JSON_TYPE]) == JSON_TYPE_TIMER) {
+    if(mDebug) {
+      Serial.println(F("[+] SMART: INFO -> TIMER packet received.."));
+      serializeJson(doc, Serial);
+      Serial.println();
+    }
+    JsonObject data = doc["data"];
+    
+    JsonArray data_time = data["time"];
+    
+    JsonArray data_time_0_0 = data_time[0][0];
+    timerStruct.onTimeD1[0] = data_time_0_0[0]; // 1
+    timerStruct.onTimeD1[1] = data_time_0_0[1]; // 2
+    timerStruct.onTimeD1[2] = data_time_0_0[2]; // 3
+    
+    JsonArray data_time_0_1 = data_time[0][1];
+    timerStruct.offTimeD1[0] = data_time_0_1[0]; // 1
+    timerStruct.offTimeD1[1] = data_time_0_1[1]; // 2
+    timerStruct.offTimeD1[2] = data_time_0_1[2]; // 3
+    
+    JsonArray data_time_1_0 = data_time[1][0];
+    timerStruct.onTimeD2[0] = data_time_1_0[0]; // 1
+    timerStruct.onTimeD2[1] = data_time_1_0[1]; // 2
+    timerStruct.onTimeD2[2] = data_time_1_0[2]; // 3
+    
+    JsonArray data_time_1_1 = data_time[1][1];
+    timerStruct.offTimeD2[0] = data_time_1_1[0]; // 1
+    timerStruct.offTimeD2[1] = data_time_1_1[1]; // 2
+    timerStruct.offTimeD2[2] = data_time_1_1[2]; // 3
+    
+    JsonArray data_time_2_0 = data_time[2][0];
+    timerStruct.onTimeD3[0] = data_time_2_0[0]; // 1
+    timerStruct.onTimeD3[1] = data_time_2_0[1]; // 2
+    timerStruct.onTimeD3[2] = data_time_2_0[2]; // 3
+    
+    JsonArray data_time_2_1 = data_time[2][1];
+    timerStruct.offTimeD3[0] = data_time_2_1[0]; // 1
+    timerStruct.offTimeD3[1] = data_time_2_1[1]; // 2
+    timerStruct.offTimeD3[2] = data_time_2_1[2]; // 3
+    
+    JsonArray data_time_3_0 = data_time[3][0];
+    timerStruct.onTimeD4[0] = data_time_3_0[0]; // 1
+    timerStruct.onTimeD4[1] = data_time_3_0[1]; // 2
+    timerStruct.onTimeD4[2] = data_time_3_0[2]; // 3
+    
+    JsonArray data_time_3_1 = data_time[3][1];
+    timerStruct.offTimeD4[0] = data_time_3_1[0]; // 1
+    timerStruct.offTimeD4[1] = data_time_3_1[1]; // 2
+    timerStruct.offTimeD4[2] = data_time_3_1[2]; // 3
+    
+    JsonArray data_weekday = data["weekday"];
+
+    JsonArray data_weekday_0 = data_weekday[0];
+    timerStruct.weekdaysD1[0] = data_weekday_0[0]; // 0
+    timerStruct.weekdaysD1[1] = data_weekday_0[1]; // 1
+    timerStruct.weekdaysD1[2] = data_weekday_0[2]; // 2
+    timerStruct.weekdaysD1[3] = data_weekday_0[3]; // 3
+    timerStruct.weekdaysD1[4] = data_weekday_0[4]; // 4
+    timerStruct.weekdaysD1[5] = data_weekday_0[5]; // 5
+    timerStruct.weekdaysD1[6] = data_weekday_0[6]; // 6
+    
+    JsonArray data_weekday_1 = data_weekday[1];
+    timerStruct.weekdaysD2[0] = data_weekday_1[0]; // 0
+    timerStruct.weekdaysD2[1] = data_weekday_1[1]; // 1
+    timerStruct.weekdaysD2[2] = data_weekday_1[2]; // 2
+    timerStruct.weekdaysD2[3] = data_weekday_1[3]; // 3
+    timerStruct.weekdaysD2[4] = data_weekday_1[4]; // 4
+    timerStruct.weekdaysD2[5] = data_weekday_1[5]; // 5
+    timerStruct.weekdaysD2[6] = data_weekday_1[6]; // 6
+    
+    JsonArray data_weekday_2 = data_weekday[2];
+    timerStruct.weekdaysD3[0] = data_weekday_2[0]; // 0
+    timerStruct.weekdaysD3[1] = data_weekday_2[1]; // 1
+    timerStruct.weekdaysD3[2] = data_weekday_2[2]; // 2
+    timerStruct.weekdaysD3[3] = data_weekday_2[3]; // 3
+    timerStruct.weekdaysD3[4] = data_weekday_2[4]; // 4
+    timerStruct.weekdaysD3[5] = data_weekday_2[5]; // 5
+    timerStruct.weekdaysD3[6] = data_weekday_2[6]; // 6
+    
+    JsonArray data_weekday_3 = data_weekday[3];
+    timerStruct.weekdaysD4[0] = data_weekday_0[0]; // 0
+    timerStruct.weekdaysD4[1] = data_weekday_0[1]; // 1
+    timerStruct.weekdaysD4[2] = data_weekday_0[2]; // 2
+    timerStruct.weekdaysD4[3] = data_weekday_0[3]; // 3
+    timerStruct.weekdaysD4[4] = data_weekday_0[4]; // 4
+    timerStruct.weekdaysD4[5] = data_weekday_0[5]; // 5
+    timerStruct.weekdaysD1[6] = data_weekday_0[6]; // 6
+    
+    JsonArray data_status = data["status"];
+    timerStruct.statusD1 = data_status[0]; // "enable"
+    timerStruct.statusD2 = data_status[1]; // "disable"
+    timerStruct.statusD3 = data_status[2]; // "enable"
+    timerStruct.statusD4 = data_status[3]; // "disable"
+
+    // TODO - add task dynamically to switch devices
+  }
+}
+
+// Parse NTP packet from Mesh
+void parseNtpJson(const char* buf) {
+  DynamicJsonDocument doc(JSON_BUF_SIZE);
+  deserializeJson(doc, buf);
+  if(mDebug) {
+    Serial.println(F("[+] SMART: SYNC -> NTP packet received.."));
+    serializeJson(doc, Serial);
+    Serial.println();
+  }
+  if(doc.containsKey(JSON_TYPE)&& String((const char*)doc[JSON_TYPE]) == JSON_TYPE_NTP) {
+    ntpStruct.hour = doc[JSON_NTP_HOUR].as<int>();
+    ntpStruct.minute = doc[JSON_NTP_MINUTE].as<int>();
+    ntpStruct.second = doc[JSON_NTP_SECOND].as<int>();
+    ntpStruct.weekday = doc[JSON_NTP_WEEKDAY].as<int>();
   }
 }
 
@@ -325,7 +411,7 @@ void taskCheckRootNode() {
     rootCheckTask.disable();
     sched.deleteTask(rootCheckTask);
     if(mDebug) {
-      Serial.print(F("[+] SMART: INFO -> checkRootTask -> Disabled searchTargetTask as ROOT is found!"));
+      Serial.println(F("[+] SMART: INFO -> checkRootTask -> Disabled searchTargetTask as ROOT is found!"));
     }
   }
 }
