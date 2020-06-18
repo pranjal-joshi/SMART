@@ -82,6 +82,8 @@
 #define JSON_NTP_WEEKDAY          "weekday"
 #define JSON_NoD                  "NoD"
 #define JSON_TOPIC                "topic"
+#define JSON_ENABLE               "enable"
+#define JSON_DISABLE              "disable"
 
 // IO configuration
 #if NO_OF_DEVICES == 4      // This Configuration is ONLY for 4 Devices
@@ -110,29 +112,25 @@ typedef struct {
   #if (NO_OF_DEVICES >= 1)
     uint8_t onTimeD1[3];        //H,M,S
     uint8_t offTimeD1[3];       //H,M,S
-    uint8_t onWeekdaysD1[7];    //0-6
-    uint8_t offWeekdaysD1[7];   //0-6
-    String statusD1;            //enable/disable
+    uint8_t weekdaysD1[7];    //0-6
+    bool statusD1 = false;            //enable/disable
   #endif
   #if (NO_OF_DEVICES >= 2)
     uint8_t onTimeD2[3];        //H,M,S
     uint8_t offTimeD2[3];       //H,M,S
-    uint8_t onWeekdaysD2[7];    //0-6
-    uint8_t offWeekdaysD2[7];   //0-6
-    String statusD2;            //enable/disable
+    uint8_t weekdaysD2[7];    //0-6
+    bool statusD2 = false;            //enable/disable
   #endif
   #if (NO_OF_DEVICES >= 4)
     uint8_t onTimeD3[3];        //H,M,S
     uint8_t offTimeD3[3];       //H,M,S
-    uint8_t onWeekdaysD3[7];    //0-6
-    uint8_t offWeekdaysD3[7];   //0-6
-    String statusD3;            //enable/disable
+    uint8_t weekdaysD3[7];    //0-6
+    bool statusD3 = false;            //enable/disable
     
     uint8_t onTimeD4[3];        //H,M,S
     uint8_t offTimeD4[3];       //H,M,S
-    uint8_t onWeekdaysD4[7];    //0-6
-    uint8_t offWeekdaysD4[7];   //0-6
-    String statusD4;            //enable/disable
+    uint8_t weekdaysD4[7];    //0-6
+    bool statusD4 = false;            //enable/disable
   #endif
 } SmartTimerStruct;
 
