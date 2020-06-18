@@ -15,7 +15,7 @@
 // System Configs for compile-time setting
 #define SWITCHING_NODE          // Enable for main smart node
 //#define SENSOR_NODE           // Enable for sensor nodes (this should be work in Mesh Only)
-//#define FORCE_MESH            // Enable to force the node in mesh mode
+#define FORCE_MESH            // Enable to force the node in mesh mode
 //#define FORCE_ROOT            // Enable to force the node as ROOT
 #define NO_OF_DEVICES           4
 
@@ -76,6 +76,7 @@
 #define JSON_TYPE_INFO            "info"
 #define JSON_TYPE_FACT_RST        "factory_reset"
 #define JSON_TYPE_NTP             "ntp"
+#define JSON_TYPE_TIMER           "timer"
 #define JSON_NTP_HOUR             "hour"
 #define JSON_NTP_MINUTE           "minute"
 #define JSON_NTP_SECOND           "second"
@@ -109,29 +110,25 @@ typedef struct {
 } SmartNtpStruct;
 
 typedef struct {
-  #if (NO_OF_DEVICES >= 1)
-    uint8_t onTimeD1[3];        //H,M,S
-    uint8_t offTimeD1[3];       //H,M,S
+    uint8_t onTimeD1[3];      //H,M,S
+    uint8_t offTimeD1[3];     //H,M,S
     uint8_t weekdaysD1[7];    //0-6
-    bool statusD1 = false;            //enable/disable
-  #endif
-  #if (NO_OF_DEVICES >= 2)
-    uint8_t onTimeD2[3];        //H,M,S
-    uint8_t offTimeD2[3];       //H,M,S
+    bool statusD1 = false;    //enable/disable
+  
+    uint8_t onTimeD2[3];      //H,M,S
+    uint8_t offTimeD2[3];     //H,M,S
     uint8_t weekdaysD2[7];    //0-6
-    bool statusD2 = false;            //enable/disable
-  #endif
-  #if (NO_OF_DEVICES >= 4)
-    uint8_t onTimeD3[3];        //H,M,S
-    uint8_t offTimeD3[3];       //H,M,S
+    bool statusD2 = false;    //enable/disable
+  
+    uint8_t onTimeD3[3];      //H,M,S
+    uint8_t offTimeD3[3];     //H,M,S
     uint8_t weekdaysD3[7];    //0-6
-    bool statusD3 = false;            //enable/disable
+    bool statusD3 = false;    //enable/disable
     
-    uint8_t onTimeD4[3];        //H,M,S
-    uint8_t offTimeD4[3];       //H,M,S
+    uint8_t onTimeD4[3];      //H,M,S
+    uint8_t offTimeD4[3];     //H,M,S
     uint8_t weekdaysD4[7];    //0-6
-    bool statusD4 = false;            //enable/disable
-  #endif
+    bool statusD4 = false;    //enable/disable
 } SmartTimerStruct;
 
 #endif
