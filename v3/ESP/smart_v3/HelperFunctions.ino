@@ -2,9 +2,33 @@
 void parseTimerJson(const char* buf) {
   DynamicJsonDocument doc(JSON_BUF_SIZE);
   deserializeJson(doc, buf);
-  JsonArray arr = doc[JSON_TYPE_DATA].as<JsonArray>();
-  for(byte i=0;i<NO_OF_DEVICES;i++) {
-    // TODO - Implement JSON parsing here
+  if(doc.containsKey(JSON_SMARTID) && String((const char*)doc[JSON_SMARTID]) == smartSsid) {
+    JsonArray timeArray = doc["data"]["time"].as<JsonArray>();
+    JsonArray weekArray = doc["data"]["weekday"].as<JsonArray>();
+    JsonArray statusArray = doc["data"]["status"].as<JsonArray>();
+    byte k;
+    #if NO_OF_DEVICES >= 1
+      for(k=0;k<timeArray[0][0][0].size();k++)
+        timerStruct.onTimeD1[k] = (uint8_t)timeArray[0][0][0][k];
+      for(k=0;k<timeArray[0][0][1].size();k++)
+        timerStruct.offTimeD1[k] = (uint8_t)timeArray[0][0][1][k];
+      for(k=0;k<weekArray[0][0][0].size();k++) {
+        if((uint8_t)weekArray[0][0][0][k] == k)
+          timerStruct.weekdaysD1[k] = 1;
+        else
+          timerStruct.weekdaysD1[k] = 0;
+      }
+      if(String((const char*)statusArray[0]) == JSON_ENABLE)
+        timerStruct.statusD1 = true;
+      else
+        timerStruct.statusD1 = false:
+    #endif
+    #if NO_OF_DEVICES >= 2
+      //TODO - Implement here
+    #endif
+    #if NO_OF_DEVICES >= 4
+      //TODO - Implement here
+    #endif
   }
 }
 
