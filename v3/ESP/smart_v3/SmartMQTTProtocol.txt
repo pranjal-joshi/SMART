@@ -83,11 +83,23 @@ smart/username/smartId/state
 // Alarm Packet
 {
 	"smartId": "SMART_12345",
+	"type": "timer",
 	"NoD": 1/2/4,
 	"data" : {
 			"time": [[[on_h,m,s],[off_h,m,s]],[[on_h,m,s],[off_h,m,s]],[[on_h,m,s],[off_h,m,s]],[[on_h,m,s],[off_h,m,s]]]
-			"weekday": [[[0,1,2,3,4,5,6],[0,1,2,3,4,5,6]],[[0,1,2,3,4,5,6],[0,1,2,3,4,5,6]],[[0,1,2,3,4,5,6],[0,1,2,3,4,5,6]],[[0,1,2,3,4,5,6],[0,1,2,3,4,5,6]]],
+			"weekday": [[0,1,2,3,4,5,6],[0,1,2,3,4,5,6],[0,1,2,3,4,5,6],[0,1,2,3,4,5,6]],
 			"status": ["enable","disable","enable",disable"]
+	}
+}
+example:
+{
+	"smartId": "SMART_12345",
+	"type": "timer",
+	"NoD": 4,
+	"data" : {
+			"time": [[[1,2,3],[1,2,3]],[[1,2,3],[1,2,3]],[[1,2,3],[1,2,3]],[[1,2,3],[1,2,3]]],
+			"weekday": [[0,1,2,3,4,5,6],[0,1,2,3,4,5,6],[0,1,2,3,4,5,6],[0,1,2,3,4,5,6]],
+			"status": ["enable","disable","enable","disable"]
 	}
 }
 
