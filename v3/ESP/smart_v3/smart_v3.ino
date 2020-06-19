@@ -70,7 +70,7 @@ void setup() {
   randomSeed(analogRead(A0));
   uint16_t bd = random(0,BOOT_DLY);
   if(mDebug) {
-    mesh.setDebugMsgTypes( ERROR | STARTUP | CONNECTION );
+    mesh.setDebugMsgTypes( ERROR | STARTUP | CONNECTION);
     Serial.printf("[+] SMART: INFO -> CHIP ID = SMART_%08X\n",ESP.getChipId());
     Serial.printf("[+] SMART: BOOT -> Random Delay = %udmS\n",bd);
     io.setDebug(mDebug);
