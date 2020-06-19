@@ -58,7 +58,7 @@
 #define SMART_PASS                "12345678"    // Change later
 
 // JSON constants
-#define JSON_BUF_SIZE             512u
+#define JSON_BUF_SIZE             1024u
 #define JSON_TO                   "to"
 #define JSON_FROM                 "from"
 #define JSON_TO_GATEWAY           "gateway"
