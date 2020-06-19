@@ -1,6 +1,6 @@
 // Parse JSON received from PubSub
 void parseTimerJson(const char* buf) {
-  DynamicJsonDocument doc(JSON_BUF_SIZE*4);
+  DynamicJsonDocument doc(JSON_BUF_SIZE*2);
   deserializeJson(doc, buf);
   if(doc.containsKey(JSON_SMARTID)&& String((const char*)doc[JSON_SMARTID]) == smartSsid
   && doc.containsKey(JSON_TYPE) && String((const char*)doc[JSON_TYPE]) == JSON_TYPE_TIMER) {
@@ -170,7 +170,11 @@ void broadcastStateChanged(const char* stateBuf) {
 }
 
 // Init Mesh network on boot
-void initMesh(uint8_t ch, int qual) {    
+void initMesh(uint16_t ch, int qual) {  
+  if(mDebug) {
+    Serial.print(F("[+] SMART: INFO -> Mesh init with channel: "));
+    Serial.println(ch);
+  }
   mesh.init(MESH_SSID, MESH_PASS, MESH_PORT, WIFI_AP_STA, ch, MESH_HIDDEN);
   #ifndef FORCE_MESH
     if(qual > MESH_QUALITY_THRESH) {
@@ -328,7 +332,7 @@ String getTopicName(String tn) {
 unsigned int getWiFiChannelForSSID(const char* ssid, int confCh, int& quality) {
   if(mesh.isConnected(mesh.getNodeId()))
     mesh.stop();
-  WiFi.mode(WIFI_STA);
+  WiFi.mode(WIFI_AP_STA);
   WiFi.disconnect();
   if(mDebug)
     Serial.printf("[+] SMART: INFO -> Identifying Channel of SSID: %s\n",ssid);
@@ -336,7 +340,6 @@ unsigned int getWiFiChannelForSSID(const char* ssid, int confCh, int& quality) {
   int networks =  WiFi.scanNetworks();
   for(int i=0;i<networks;i++) {    
     if(String(WiFi.SSID(i)) == ssid){
-      //quality = map(WiFi.RSSI(i),-90,-20,0, 100);
       quality = WiFi.RSSI(i);
       isTargetSsidFound = true;
       searchTargetTask.disable();
@@ -345,11 +348,9 @@ unsigned int getWiFiChannelForSSID(const char* ssid, int confCh, int& quality) {
         Serial.printf("[+] SMART: INFO -> TARGET CHANNEL: -> %d\n",WiFi.channel(i));
         Serial.printf("[+] SMART: INFO -> TARGET QUALITY: -> %d\n",quality);
       }
-      WiFi.scanDelete();
       return WiFi.channel(i);
     }
   }
-  WiFi.scanDelete();
   if(mDebug) {
     Serial.println(F("[+] SMART: ERROR -> TARGET SSID not found!"));
     Serial.printf("[+] SMART: INFO -> TARGET CHANNEL FROM CONF: -> %d\n",confCh);
