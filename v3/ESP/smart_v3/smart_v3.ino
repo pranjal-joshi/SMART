@@ -61,7 +61,7 @@ Task searchTargetTask(INTERVAL_TARGET_SEARCH*TASK_SECOND, TASK_ONCE, &taskSearch
 void taskBroadcastNtp(void);
 Task broadcastNtpTask(INTERVAL_NTP_BROADCAST*TASK_SECOND, TASK_ONCE, &taskBroadcastNtp, &sched);
 void taskGetNtp(void);
-Task getNtpTask(INTERVAL_GET_NTP*TASK_SECOND, TASK_ONCE, &taskGetNtp, &sched);
+Task getNtpTask(INTERVAL_GET_NTP*TASK_SECOND, TASK_FOREVER, &taskGetNtp, &sched);
 
 void setup() {
   Serial.begin(115200);
@@ -147,7 +147,8 @@ void looper() {
   mqtt.loop();
   mesh.update();
   sched.execute();
-  ntp.update();
+  if(internetAvailable) // Don't call this on Mesh node - Maybe UDP request drops the node out of the mesh!!
+    ntp.update();
   
   // Read states when interrupted and update outputs and MQTT about it
   if(isInterrupted) {
@@ -303,7 +304,7 @@ void decisionMaker(String p) {
     mesh.sendBroadcast(msgBuf);
   }
 
-  parseTimerJson(p.c_str());
+  //parseTimerJson(p.c_str());
 
   if(mDebug) {
     pinMode(LED_BUILTIN,OUTPUT);
