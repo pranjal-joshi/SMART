@@ -277,11 +277,9 @@ void decisionMaker(String p) {
     }
 
     // route stateChanged packet to respective MQTT topic if 'this' is gateway
-    if(doc.containsKey(JSON_TYPE) && (String((const char*)doc[JSON_TYPE]) == JSON_TYPE_STATE)) {      /*String s = "smart/"+String((const char*)confJson[CONF_USERNAME])+"/"+String((const char*)doc[JSON_SMARTID])+"/state";
-      const char* topic = s.c_str();*/
+    if(doc.containsKey(JSON_TYPE) && (String((const char*)doc[JSON_TYPE]) == JSON_TYPE_STATE)) {
       char msg[JSON_BUF_SIZE];
       serializeJson(doc, msg);
-      //mqtt.publish(topic, msg, RETAIN);
       mqtt.publish((const char*)doc[JSON_TOPIC], msg, RETAIN);
       if(mDebug) {
         Serial.print(F("[+] SMART: INFO -> Forwarding STATE packet from "));
