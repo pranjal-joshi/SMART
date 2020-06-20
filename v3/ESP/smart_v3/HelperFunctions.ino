@@ -338,28 +338,48 @@ unsigned int getWiFiChannelForSSID(const char* ssid, int confCh, int& quality) {
     Serial.printf("[+] SMART: INFO -> Identifying Channel of SSID: %s\n",ssid);
   delay(100);
   int networks =  WiFi.scanNetworks();
-  for(int i=0;i<networks;i++) {    
-    if(String(WiFi.SSID(i)) == ssid){
-      quality = WiFi.RSSI(i);
-      isTargetSsidFound = true;
-      searchTargetTask.disable();
-      sched.deleteTask(searchTargetTask);
-      if(mDebug) {
-        Serial.printf("[+] SMART: INFO -> TARGET CHANNEL: -> %d\n",WiFi.channel(i));
-        Serial.printf("[+] SMART: INFO -> TARGET QUALITY: -> %d\n",quality);
+  #ifndef FORCE_MESH
+    for(int i=0;i<networks;i++) {    
+      if(String(WiFi.SSID(i)) == ssid){
+        quality = WiFi.RSSI(i);
+        isTargetSsidFound = true;
+        searchTargetTask.disable();
+        sched.deleteTask(searchTargetTask);
+        if(mDebug) {
+          Serial.printf("[+] SMART: INFO -> TARGET CHANNEL: -> %d\n",WiFi.channel(i));
+          Serial.printf("[+] SMART: INFO -> TARGET QUALITY: -> %d\n",quality);
+        }
+        return WiFi.channel(i);
       }
-      return WiFi.channel(i);
     }
-  }
+  #endif
   if(mDebug) {
     Serial.println(F("[+] SMART: ERROR -> TARGET SSID not found!"));
     Serial.printf("[+] SMART: INFO -> TARGET CHANNEL FROM CONF: -> %d\n",confCh);
+    Serial.println(F("[+] SMART: INFO -> NOW SCANNING FOR MESH SSID & CHANNEL"));
+  }
+  // Scan the MESH SSID & CH if TARGET isn't found
+  WiFi.scanDelete();
+  networks =  WiFi.scanNetworks(false, true);   // scan using blocking method but for HIDDEN SSIDs as well
+  for(int i=0;i<networks;i++) {    
+    if(mDebug)
+      Serial.printf("[+] SMART: SCAN -> %s (%d)\n",WiFi.SSID(i).c_str(),WiFi.channel(i));
+    if(String(WiFi.SSID(i)) == ""){
+      quality = WiFi.RSSI(i);
+      searchTargetTask.restartDelayed(INTERVAL_TARGET_SEARCH * TASK_SECOND);
+      if(mDebug) {
+        Serial.printf("[+] SMART: INFO -> MESH CHANNEL: -> %d\n",WiFi.channel(i));
+        Serial.printf("[+] SMART: INFO -> MESH QUALITY: -> %d\n",quality);
+      }
+      return WiFi.channel(i);
+    }
   }
   quality = MESH_QUALITY_THRESH;
   isTargetSsidFound = false;
   searchTargetTask.restartDelayed(INTERVAL_TARGET_SEARCH * TASK_SECOND);
   //return confCh;
-  return 0;
+  // TODO - Scan and return Channel of MESH SSID if TARGET SSID is unavailable.
+  return 1;
 }
 
 // Task to search for target SSID if it's not observed since boot
@@ -395,8 +415,13 @@ void taskCheckRootNode() {
   }
   // if anyone is ROOT, then stop scanning target SSID as the ROOT must be already connected to it!
   if(getRootId(mesh.asNodeTree()) > 0) {
-    rootCheckTask.disable();
-    sched.deleteTask(rootCheckTask);
+    /*rootCheckTask.disable();
+    sched.deleteTask(rootCheckTask);*/
+    
+    isTargetSsidFound = true;           // Also stop scanning for the target SSID as someone already connected! Yaay!
+    searchTargetTask.disable();
+    sched.deleteTask(searchTargetTask);
+    
     if(mDebug) {
       Serial.println(F("[+] SMART: INFO -> checkRootTask -> Disabled searchTargetTask as ROOT is found!"));
     }
