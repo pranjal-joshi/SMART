@@ -31,16 +31,16 @@
 #define RETAIN                  true
 
 // PubSub topics and subscriptions
-#define TOPIC_TEST          "smart/dev"
+#define TOPIC_TEST              "smart/dev"
 
 // SmartFileSystem JSON key names
-#define CONF_SSID         "confSSID"
-#define CONF_PASS         "confPass"
-#define CONF_USERNAME     "confUserName"
-#define CONF_NODENAME     "confNodeName"
-#define CONF_MQTT_IP      "confMqttIp"
-#define CONF_MQTT_PORT    "confMqttPort"
-#define CONF_WIFI_CH      "confWifiChannel"
+#define CONF_SSID               "confSSID"
+#define CONF_PASS               "confPass"
+#define CONF_USERNAME           "confUserName"
+#define CONF_NODENAME           "confNodeName"
+#define CONF_MQTT_IP            "confMqttIp"
+#define CONF_MQTT_PORT          "confMqttPort"
+#define CONF_WIFI_CH            "confWifiChannel"
 
 // Mesh constants
 #define MESH_SSID                 "SMART-Mesh"
