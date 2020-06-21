@@ -49,7 +49,15 @@ smart/username/gateway
 	"from": "app",
 	"smartId": "SMART_12345",
 	"type": "factory_reset"
+}
 
+// App to Node
+{
+	"to": "gateway",
+	"from": "app",
+	"smartId": "SMART_12345",
+	"type": "soft_reset"
+}
 // App to Node
 smart/username/gateway
 {
