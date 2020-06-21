@@ -108,7 +108,7 @@ void setup() {
         Serial.println(F("[+] SMART: ERROR -> Config file appears empty even after saving.. Auto-Resetting"));
     }
     delay(RST_DLY);
-    ESP.reset();
+    ESP.restart();
   }
   confJson = fsys.readConfigFile();  
   if(mDebug) {
@@ -234,7 +234,14 @@ void decisionMaker(String p) {
         if(mDebug)
           Serial.println(F("[+] SMART: -> WARNING: Executing User requested FACTORY RESET!"));
         fsys.format();
-        ESP.reset();
+        ESP.restart();
+      }
+
+      // Soft reset 'this' node - reboot
+      else if(doc.containsKey(JSON_TYPE) && (String((const char*)doc[JSON_TYPE]) == JSON_TYPE_SOFT_RST)) {
+        if(mDebug)
+          Serial.println(F("[+] SMART: -> INFO: Executing User requested SOFT RESET!"));
+        ESP.restart();
       }
 
       // Publish states whenever app requests

@@ -155,6 +155,7 @@ void broadcastStateChanged(const char* stateBuf) {
   doc[JSON_SMARTID] = smartSsid;
   doc[JSON_TYPE] = JSON_TYPE_STATE;
   doc[JSON_TYPE_DATA] = arr.as<JsonArray>();
+  doc.shrinkToFit();
   serializeJson(doc, charBuf);
   if(mDebug) {
     Serial.print(F("[+] SMART: INTR -> Broadcasting stateChanged packet: "));
@@ -174,9 +175,15 @@ void initMesh(uint16_t ch, int qual) {
   if(mDebug) {
     Serial.print(F("[+] SMART: INFO -> Mesh init with channel: "));
     Serial.println(ch);
+    Serial.print(F("[+] SMART: INFO -> Mesh SSID: "));
+    serializeJson(confJson[CONF_MESH_SSID], Serial);
+    Serial.println();
+    Serial.print(F("[+] SMART: INFO -> Mesh PASS: "));
+    serializeJson(confJson[CONF_MESH_PASS], Serial);
+    Serial.println();
   }
   //mesh.init(MESH_SSID, MESH_PASS, MESH_PORT, WIFI_AP_STA, ch, MESH_HIDDEN);
-  mesh.init((const char*)confJson[CONF_MESH_SSID], (const char*)confJson[CONF_MESH_PASS], MESH_PORT, WIFI_AP_STA, ch);
+  mesh.init(confJson[CONF_MESH_SSID].as<const char*>(), confJson[CONF_MESH_PASS].as<const char*>(), MESH_PORT, WIFI_AP_STA, ch, MESH_VISIBLE);
   #ifndef FORCE_MESH
     if(qual > MESH_QUALITY_THRESH) {
       mesh.stationManual((const char*)confJson[CONF_SSID], (const char*)confJson[CONF_PASS]);
@@ -333,6 +340,7 @@ String getTopicName(String tn) {
 unsigned int getWiFiChannelForSSID(const char* ssid, int confCh, int& quality) {
   if(mesh.isConnected(mesh.getNodeId()))
     mesh.stop();
+  WiFi.scanDelete();
   WiFi.mode(WIFI_AP_STA);
   WiFi.disconnect();
   if(mDebug)
@@ -340,8 +348,10 @@ unsigned int getWiFiChannelForSSID(const char* ssid, int confCh, int& quality) {
   delay(100);
   int networks =  WiFi.scanNetworks();
   #ifndef FORCE_MESH
-    for(int i=0;i<networks;i++) {    
-      if(String(WiFi.SSID(i)) == ssid){
+    for(int i=0;i<networks;i++) {
+      if(mDebug)
+        Serial.printf("[+] SMART: TARGET SCAN -> %s (%d)\n",WiFi.SSID(i).c_str(),WiFi.channel(i)); 
+      if(String(WiFi.SSID(i)) == String(ssid)){
         quality = WiFi.RSSI(i);
         isTargetSsidFound = true;
         searchTargetTask.disable();
@@ -364,8 +374,8 @@ unsigned int getWiFiChannelForSSID(const char* ssid, int confCh, int& quality) {
   networks =  WiFi.scanNetworks(false, true);   // scan using blocking method but for HIDDEN SSIDs as well
   for(int i=0;i<networks;i++) {    
     if(mDebug)
-      Serial.printf("[+] SMART: SCAN -> %s (%d)\n",WiFi.SSID(i).c_str(),WiFi.channel(i));
-    if(String(WiFi.SSID(i)) == ""){
+      Serial.printf("[+] SMART: MESH SCAN -> %s (%d)\n",WiFi.SSID(i).c_str(),WiFi.channel(i));
+    if(String(WiFi.SSID(i)) == "" || String(WiFi.SSID(i)) == confJson[CONF_MESH_SSID].as<const char*>()){
       quality = WiFi.RSSI(i);
       searchTargetTask.restartDelayed(INTERVAL_TARGET_SEARCH * TASK_SECOND);
       if(mDebug) {
@@ -390,7 +400,7 @@ void taskSearchTargetSSID(void) {
   mesh.stop();
   channel = getWiFiChannelForSSID((const char*)confJson[CONF_SSID], (int)confJson[CONF_WIFI_CH], quality);
   if(mDebug)
-      Serial.print(F("[+] SMART: INFO -> taskSearchTargetSSIDTask -> Task completed, Resuming Mesh!"));
+      Serial.println(F("[+] SMART: INFO -> taskSearchTargetSSIDTask -> Task completed, Resuming Mesh!"));
   initMesh(channel, quality);
 }
 
