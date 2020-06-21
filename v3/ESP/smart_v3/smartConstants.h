@@ -41,6 +41,8 @@
 #define CONF_MQTT_IP            "confMqttIp"
 #define CONF_MQTT_PORT          "confMqttPort"
 #define CONF_WIFI_CH            "confWifiChannel"
+#define CONF_MESH_SSID          "confMeshSSID"
+#define CONF_MESH_PASS          "confMeshPass"
 
 // Mesh constants
 #define MESH_SSID                 "SMART-Mesh"
