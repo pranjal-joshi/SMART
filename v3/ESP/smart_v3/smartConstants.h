@@ -49,6 +49,7 @@
 #define MESH_PASS                 "mesh@smart_v3"
 #define MESH_PORT                 4321
 #define MESH_HIDDEN               1
+#define MESH_VISIBLE              0
 #define MESH_QUALITY_THRESH       -85   // dBm
 #define INTERVAL_ROOT_CHECK       30    // Seconds
 #define INTERVAL_TARGET_SEARCH    60    // Seconds
@@ -60,7 +61,7 @@
 #define SMART_PASS                "12345678"    // Change later
 
 // JSON constants
-#define JSON_BUF_SIZE             1024u
+#define JSON_BUF_SIZE             512u
 #define JSON_TO                   "to"
 #define JSON_FROM                 "from"
 #define JSON_TO_GATEWAY           "gateway"
@@ -77,6 +78,7 @@
 #define JSON_TYPE_STATE_REQ       "state_req"
 #define JSON_TYPE_INFO            "info"
 #define JSON_TYPE_FACT_RST        "factory_reset"
+#define JSON_TYPE_SOFT_RST        "soft_reset"
 #define JSON_TYPE_NTP             "ntp"
 #define JSON_TYPE_TIMER           "timer"
 #define JSON_NTP_HOUR             "hour"
