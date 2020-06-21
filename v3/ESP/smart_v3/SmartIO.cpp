@@ -100,6 +100,21 @@ String SmartIo::getState(void) {
   return String(jBuf);
 }
 
+bool SmartIo::getRawState(uint8_t device_no) {
+  return digitalRead(snsPinArray[device_no]);
+}
+
+void SmartIo::setRawState(uint8_t device_no, uint8_t state) {
+  if(state) 
+    stateVar |= relayArray[device_no];
+  else
+    stateVar &= ~(relayArray[device_no]);
+  digitalWrite(_latch, LOW);
+  shiftOut(_data, _clk, MSBFIRST, stateVar);
+  digitalWrite(_latch, HIGH);
+  digitalWrite(_oe, LOW);
+}
+
 void SmartIo::enableOutput(bool out) {
   out == true ? digitalWrite(_oe, LOW) : digitalWrite(_oe, HIGH); 
 }

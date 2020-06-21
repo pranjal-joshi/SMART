@@ -22,6 +22,8 @@ class SmartIo {
     void setCallback(void (*userDefinedCallback)(void));
     ICACHE_RAM_ATTR void interruptHandler(void);
     String getState(void);
+    bool getRawState(uint8_t device_no);
+    void setRawState(uint8_t device_no, uint8_t state);
     void enableOutput(bool);
   private:
     void (*localPointerToCallback)(void);
