@@ -62,6 +62,8 @@ void taskBroadcastNtp(void);
 Task broadcastNtpTask(INTERVAL_NTP_BROADCAST*TASK_SECOND, TASK_ONCE, &taskBroadcastNtp, &sched);
 void taskGetNtp(void);
 Task getNtpTask(INTERVAL_GET_NTP*TASK_SECOND, TASK_FOREVER, &taskGetNtp, &sched);
+void taskTimerSchedulerHandler(void);
+Task timerSchedulerHandlerTask(INTERVAL_TIMER_SCHED*TASK_SECOND, TASK_FOREVER, &taskTimerSchedulerHandler, &sched);
 
 void setup() {
   Serial.begin(115200);
@@ -88,6 +90,7 @@ void setup() {
     stateJson = fsys.loadState();
     serializeJson(stateJson, stateJsonBuf);
     io.setState(stateJsonBuf);
+    //timerStruct = fsys.loadTimers();
   }
   
   delay(bd);
@@ -128,9 +131,11 @@ void setup() {
   sched.addTask(rootCheckTask);
   sched.addTask(broadcastNtpTask);
   sched.addTask(getNtpTask);
+  sched.addTask(timerSchedulerHandlerTask);
   rootCheckTask.enable();
   broadcastNtpTask.enable();
   getNtpTask.enable();
+  timerSchedulerHandlerTask.enable();
 }
 
 void loop() {
@@ -212,7 +217,7 @@ void mqttCallback(char* topic, byte* payload, unsigned int length) {
 
 // Function to parse received JSON and take action
 void decisionMaker(String p) {
-  DynamicJsonDocument doc(JSON_BUF_SIZE + p.length());
+  DynamicJsonDocument doc(JSON_BUF_SIZE*4);
   deserializeJson(doc, p);
 
   // Check if the packet is targeted for 'this' node
@@ -270,8 +275,6 @@ void decisionMaker(String p) {
     
     // route info packet to MQTT if 'this' is gateway
     if(doc.containsKey(JSON_TYPE) && (String((const char*)doc[JSON_TYPE]) == JSON_TYPE_INFO)) {
-      /*String s = "smart/"+String((const char*)confJson[CONF_USERNAME])+"/"+String((const char*)doc[JSON_SMARTID])+"/info";
-      const char* topic = s.c_str();*/
       char msg[JSON_BUF_SIZE];
       serializeJson(doc, msg);
       //mqtt.publish(topic, msg, RETAIN);
@@ -309,7 +312,7 @@ void decisionMaker(String p) {
     mesh.sendBroadcast(msgBuf);
   }
 
-  //parseTimerJson(p.c_str());
+  parseTimerJson(p);
 
   if(mDebug) {
     pinMode(LED_BUILTIN,OUTPUT);
