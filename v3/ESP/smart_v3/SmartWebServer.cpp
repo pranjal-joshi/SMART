@@ -14,7 +14,7 @@ AsyncWebServer server(80);
 SmartFileSystem sfs;
 bool SWS_DEBUG = false;
 
-String paramUsername,paramNodename,paramChannel,paramSsid,paramPass,paramMqttIp,paramMqttPort;
+String paramUsername,paramNodename,paramChannel,paramSsid,paramPass,paramMqttIp,paramMqttPort,paramMeshSsid, paramMeshPass;
 
 String scanned_networks_html = "";
 
@@ -124,8 +124,8 @@ const char index_html[] PROGMEM = R"rawliteral(
   </style>
 </head>
 <body>
-  <h3 style="font-weight: bold; font-size: 1.8rem; color: lightblue; margin-top: 0.2rem;">SMART_v3</h3>
-  <h3 style="font-weight: bold; font-size: 1.3rem; color: white;">Configuration Portal</h3>
+  <br>
+  <h3 style="font-weight: bold; font-size: 1.6rem; color: lightblue; margin-top: 0.2rem;">S.M.A.R.T Configuration Portal</h3>
   <form action="/get">
     <center>
       <table>
@@ -147,6 +147,10 @@ const char index_html[] PROGMEM = R"rawliteral(
           <td>%GET_SMART_SSID%</td>
         </tr>
         <tr>
+          <td>Device Type</td>
+          <td>%GET_SMART_DEVICE_TYPE%</td>
+        </tr>
+        <tr>
           <td colspan="2" id="tHead">Wi-Fi Setup</td>
         </tr>
         <tr>
@@ -159,7 +163,21 @@ const char index_html[] PROGMEM = R"rawliteral(
         </tr> 
         <tr>
           <td>WiFi Channel:</td>
-          <td><input type="number" name="channel" placeholder="1-14"></td>
+          <td><input type="number" name="channel" id="channelBox" placeholder="1-14"></td>
+        </tr>
+        <tr>
+          <td colspan="2" id="tHead">SMART's Internal Network</td>
+        </tr>
+        <tr>
+          <td colspan="2" style="font-size: 0.7rem; font-weight: normal; color: orange;">*You must use exact same SMART SSID & Password<br> for all of the SMART devices in your home to work properly.</td>
+        </tr>
+        <tr>
+          <td>SMART SSID:</td>
+          <td><input type="text" name="mesh_ssid" placeholder="Network name to be created" required></td>
+        </tr>
+        <tr>
+          <td>SMART Password:</td>
+          <td><input type="password" name="mesh_pass" required></td>
         </tr>
         <tr>
           <td colspan="2" id="tHead">Device Setup</td>
@@ -190,8 +208,9 @@ const char index_html[] PROGMEM = R"rawliteral(
   </form>
 </body>
 <script>
-  function setSSID(ssid) {
+  function setSSID(ssid, ch) {
     document.getElementById("ssidBox").value = ssid;
+    document.getElementById("channelBox").value = ch;
     document.getElementById("passBox").focus();
   }
 </script>
@@ -208,6 +227,14 @@ String processor(const String& var) {
     char *ssid = (char*)malloc(sz);
     snprintf(ssid, 15, "SMART_%08X", (uint32_t)ESP.getChipId());
     return String(ssid);
+  }
+  else if(var == "GET_SMART_DEVICE_TYPE") {
+    #ifdef SWITCHING_NODE
+      return String(String(NO_OF_DEVICES) + " Device SwitchBox");
+    #endif
+    #ifdef SENSOR_NODE
+      return String("SMART Sensor");
+    #endif
   }
   else if(var == "SCANNED_NETWORKS") {
     return (String)scanned_networks_html;
@@ -250,6 +277,8 @@ void SmartWebServer::begin(const char* ssid, const char* pass) {
     paramNodename = request->getParam("nodename")->value();
     paramMqttIp = request->getParam("mqtt_ip")->value();
     paramMqttPort = request->getParam("mqtt_port")->value();
+    paramMeshSsid = request->getParam("mesh_ssid")->value();
+    paramMeshPass = request->getParam("mesh_pass")->value();
     if(SWS_DEBUG) {
       Serial.print(F("[+] smartWebServer: PARAM: ssid -> "));
       Serial.println(paramSsid);
@@ -265,6 +294,10 @@ void SmartWebServer::begin(const char* ssid, const char* pass) {
       Serial.println(paramMqttIp);
       Serial.print(F("[+] smartWebServer: PARAM: mqtt_port -> "));
       Serial.println(paramMqttPort);
+      Serial.print(F("[+] smartWebServer: PARAM: mesh_ssid -> "));
+      Serial.println(paramMeshSsid);
+      Serial.print(F("[+] smartWebServer: PARAM: mesh_pass -> "));
+      Serial.println(paramMeshPass);
     }
     
     DynamicJsonDocument doc(JSON_BUF_SIZE);
@@ -275,6 +308,8 @@ void SmartWebServer::begin(const char* ssid, const char* pass) {
     doc[CONF_NODENAME]=paramNodename;
     doc[CONF_MQTT_IP]=paramMqttIp;
     doc[CONF_MQTT_PORT]=paramMqttPort;
+    doc[CONF_MESH_SSID]=paramMeshSsid;
+    doc[CONF_MESH_PASS]=paramMeshPass;
     doc.shrinkToFit();
     if(SPIFFS.begin()) {
       File f = SPIFFS.open(CONF_FILE,"w");
@@ -300,9 +335,9 @@ void SmartWebServer::showWifiNetworks(void) {
     if(SWS_DEBUG)
       Serial.println(F("[+] SmartWebServer: INFO -> WiFi Scanning completed."));
     for(int i=0;i<WiFi.scanComplete();i++) {
-      scanned_networks_html += "<tr onclick='setSSID(this.id)' id='"+WiFi.SSID(i)+"'><td style='text-align: left;'>";
+      scanned_networks_html += "<tr onclick='setSSID(this.id, "+String(WiFi.channel(i))+")' id='"+WiFi.SSID(i)+"'><td style='text-align: left;'>";
       scanned_networks_html += String(i+1) + ". " + WiFi.SSID(i) + "</td><td style='text-align: right;'>";
-      if(i>0)      // To fix the bug of % loss due to PROCESSOR_TEMPLATE on alternate iterations.
+      if(i>-1)      // To fix the bug of % loss due to PROCESSOR_TEMPLATE on alternate iterations.
         scanned_networks_html += String(map(WiFi.RSSI(i),-90,-20,0, 100)) + " %% (Ch: "+WiFi.channel(i)+") </td></tr>";
       else
         scanned_networks_html += String(map(WiFi.RSSI(i),-90,-20,0, 100)) + " % (Ch: "+WiFi.channel(i)+") </td></tr>";
