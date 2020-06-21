@@ -72,7 +72,7 @@ SmartFileSystemFlags_t SmartFileSystem::saveJsonFile(const JsonDocument& jsonDoc
 SmartFileSystemFlags_t SmartFileSystem::readJsonFile(JsonDocument *doc, const char* fn) {
   if(SPIFFS.begin()) {
     uint16_t i;
-    char buf[JSON_BUF_SIZE];
+    char buf[JSON_BUF_SIZE*4];
     File f = SPIFFS.open(fn,"r");
     if(!f) {
       if(DEBUG)
@@ -209,12 +209,12 @@ DynamicJsonDocument SmartFileSystem::loadState(void) {
 }
 
 SmartFileSystemFlags_t SmartFileSystem::saveTimers(const char* buf) {
-  DynamicJsonDocument d(JSON_BUF_SIZE);
+  DynamicJsonDocument d(JSON_BUF_SIZE*4);
   deserializeJson(d, buf);
   return saveJsonFile(d, TIMER_FILE);
 }
 
-DynamicJsonDocument SmartFileSystem::loadTimers(void) {
+/*DynamicJsonDocument SmartFileSystem::loadTimers(void) {
   DynamicJsonDocument doc(JSON_BUF_SIZE);
   readJsonFile(&doc, TIMER_FILE);
   doc.shrinkToFit();
@@ -224,4 +224,108 @@ DynamicJsonDocument SmartFileSystem::loadTimers(void) {
     Serial.println();
   }
   return doc;
+}*/
+
+SmartTimerStruct SmartFileSystem::loadTimers(void) {
+  DynamicJsonDocument doc(JSON_BUF_SIZE*4);
+  readJsonFile(&doc, TIMER_FILE);
+  doc.shrinkToFit();
+  SmartTimerStruct timerStruct;
+  if(doc.containsKey(JSON_TYPE) && String((const char*)doc[JSON_TYPE]) == JSON_TYPE_TIMER) {
+    JsonObject data = doc["data"];
+    
+    JsonArray data_time = data["time"];
+    
+    JsonArray data_time_0_0 = data_time[0][0];
+    timerStruct.onTimeD1[0] = data_time_0_0[0]; // 1
+    timerStruct.onTimeD1[1] = data_time_0_0[1]; // 2
+    timerStruct.onTimeD1[2] = data_time_0_0[2]; // 3
+    
+    JsonArray data_time_0_1 = data_time[0][1];
+    timerStruct.offTimeD1[0] = data_time_0_1[0]; // 1
+    timerStruct.offTimeD1[1] = data_time_0_1[1]; // 2
+    timerStruct.offTimeD1[2] = data_time_0_1[2]; // 3
+    
+    JsonArray data_time_1_0 = data_time[1][0];
+    timerStruct.onTimeD2[0] = data_time_1_0[0]; // 1
+    timerStruct.onTimeD2[1] = data_time_1_0[1]; // 2
+    timerStruct.onTimeD2[2] = data_time_1_0[2]; // 3
+    
+    JsonArray data_time_1_1 = data_time[1][1];
+    timerStruct.offTimeD2[0] = data_time_1_1[0]; // 1
+    timerStruct.offTimeD2[1] = data_time_1_1[1]; // 2
+    timerStruct.offTimeD2[2] = data_time_1_1[2]; // 3
+    
+    JsonArray data_time_2_0 = data_time[2][0];
+    timerStruct.onTimeD3[0] = data_time_2_0[0]; // 1
+    timerStruct.onTimeD3[1] = data_time_2_0[1]; // 2
+    timerStruct.onTimeD3[2] = data_time_2_0[2]; // 3
+    
+    JsonArray data_time_2_1 = data_time[2][1];
+    timerStruct.offTimeD3[0] = data_time_2_1[0]; // 1
+    timerStruct.offTimeD3[1] = data_time_2_1[1]; // 2
+    timerStruct.offTimeD3[2] = data_time_2_1[2]; // 3
+    
+    JsonArray data_time_3_0 = data_time[3][0];
+    timerStruct.onTimeD4[0] = data_time_3_0[0]; // 1
+    timerStruct.onTimeD4[1] = data_time_3_0[1]; // 2
+    timerStruct.onTimeD4[2] = data_time_3_0[2]; // 3
+    
+    JsonArray data_time_3_1 = data_time[3][1];
+    timerStruct.offTimeD4[0] = data_time_3_1[0]; // 1
+    timerStruct.offTimeD4[1] = data_time_3_1[1]; // 2
+    timerStruct.offTimeD4[2] = data_time_3_1[2]; // 3
+    
+    JsonArray data_weekday = data["weekday"];
+
+    JsonArray data_weekday_0 = data_weekday[0];
+    timerStruct.weekdaysD1[0] = data_weekday_0[0]; // 0
+    timerStruct.weekdaysD1[1] = data_weekday_0[1]; // 1
+    timerStruct.weekdaysD1[2] = data_weekday_0[2]; // 2
+    timerStruct.weekdaysD1[3] = data_weekday_0[3]; // 3
+    timerStruct.weekdaysD1[4] = data_weekday_0[4]; // 4
+    timerStruct.weekdaysD1[5] = data_weekday_0[5]; // 5
+    timerStruct.weekdaysD1[6] = data_weekday_0[6]; // 6
+    
+    JsonArray data_weekday_1 = data_weekday[1];
+    timerStruct.weekdaysD2[0] = data_weekday_1[0]; // 0
+    timerStruct.weekdaysD2[1] = data_weekday_1[1]; // 1
+    timerStruct.weekdaysD2[2] = data_weekday_1[2]; // 2
+    timerStruct.weekdaysD2[3] = data_weekday_1[3]; // 3
+    timerStruct.weekdaysD2[4] = data_weekday_1[4]; // 4
+    timerStruct.weekdaysD2[5] = data_weekday_1[5]; // 5
+    timerStruct.weekdaysD2[6] = data_weekday_1[6]; // 6
+    
+    JsonArray data_weekday_2 = data_weekday[2];
+    timerStruct.weekdaysD3[0] = data_weekday_2[0]; // 0
+    timerStruct.weekdaysD3[1] = data_weekday_2[1]; // 1
+    timerStruct.weekdaysD3[2] = data_weekday_2[2]; // 2
+    timerStruct.weekdaysD3[3] = data_weekday_2[3]; // 3
+    timerStruct.weekdaysD3[4] = data_weekday_2[4]; // 4
+    timerStruct.weekdaysD3[5] = data_weekday_2[5]; // 5
+    timerStruct.weekdaysD3[6] = data_weekday_2[6]; // 6
+    
+    JsonArray data_weekday_3 = data_weekday[3];
+    timerStruct.weekdaysD4[0] = data_weekday_0[0]; // 0
+    timerStruct.weekdaysD4[1] = data_weekday_0[1]; // 1
+    timerStruct.weekdaysD4[2] = data_weekday_0[2]; // 2
+    timerStruct.weekdaysD4[3] = data_weekday_0[3]; // 3
+    timerStruct.weekdaysD4[4] = data_weekday_0[4]; // 4
+    timerStruct.weekdaysD4[5] = data_weekday_0[5]; // 5
+    timerStruct.weekdaysD1[6] = data_weekday_0[6]; // 6
+    
+    JsonArray data_status = data["status"];
+    timerStruct.statusD1 = data_status[0]; // "enable"
+    timerStruct.statusD2 = data_status[1]; // "disable"
+    timerStruct.statusD3 = data_status[2]; // "enable"
+    timerStruct.statusD4 = data_status[3]; // "disable"
+
+    if(DEBUG) {
+      Serial.println(F("[+] SmartFileSystem: INFO -> loading timers..."));
+      serializeJson(doc, Serial);
+      Serial.println();
+    }
+      
+  }
+  return timerStruct;
 }

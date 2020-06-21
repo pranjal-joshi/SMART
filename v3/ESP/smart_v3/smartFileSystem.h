@@ -40,7 +40,8 @@ class SmartFileSystem {
     SmartFileSystemFlags_t saveState(const char* buf);
     DynamicJsonDocument loadState(void);
     SmartFileSystemFlags_t saveTimers(const char* buf);
-    DynamicJsonDocument loadTimers(void);
+    //DynamicJsonDocument loadTimers(void);
+    SmartTimerStruct loadTimers(void);
   private:
     bool DEBUG;
     void printDebug(String);
