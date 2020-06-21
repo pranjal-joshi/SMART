@@ -55,6 +55,7 @@
 #define INTERVAL_TARGET_SEARCH    60    // Seconds
 #define INTERVAL_NTP_BROADCAST    60    // Seconds
 #define INTERVAL_GET_NTP          1     // Seconds
+#define INTERVAL_TIMER_SCHED      1     // Seconds
 #define INTERVAL_SWITCHING_TIME   200   // mS
 
 // smartWebServer constants
@@ -114,25 +115,25 @@ typedef struct {
 } SmartNtpStruct;
 
 typedef struct {
-    uint8_t onTimeD1[3];      //H,M,S
-    uint8_t offTimeD1[3];     //H,M,S
-    uint8_t weekdaysD1[7];    //0-6
-    bool statusD1 = false;    //enable/disable
+    uint8_t onTimeD1[3] = {0,0,0};      //H,M,S
+    uint8_t offTimeD1[3] = {0,0,0};     //H,M,S
+    uint8_t weekdaysD1[7] = {0,0,0,0,0,0,0};    //0-6
+    uint8_t statusD1 = 0;    //enable/disable
   
-    uint8_t onTimeD2[3];      //H,M,S
-    uint8_t offTimeD2[3];     //H,M,S
-    uint8_t weekdaysD2[7];    //0-6
-    bool statusD2 = false;    //enable/disable
+    uint8_t onTimeD2[3] = {0,0,0};      //H,M,S
+    uint8_t offTimeD2[3] = {0,0,0};     //H,M,S
+    uint8_t weekdaysD2[7] = {0,0,0,0,0,0,0};    //0-6
+    uint8_t statusD2 = 0;    //enable/disable
   
-    uint8_t onTimeD3[3];      //H,M,S
-    uint8_t offTimeD3[3];     //H,M,S
-    uint8_t weekdaysD3[7];    //0-6
-    bool statusD3 = false;    //enable/disable
+    uint8_t onTimeD3[3] = {0,0,0};      //H,M,S
+    uint8_t offTimeD3[3] = {0,0,0};     //H,M,S
+    uint8_t weekdaysD3[7] = {0,0,0,0,0,0,0};    //0-6
+    uint8_t statusD3 = 0;    //enable/disable
     
-    uint8_t onTimeD4[3];      //H,M,S
-    uint8_t offTimeD4[3];     //H,M,S
-    uint8_t weekdaysD4[7];    //0-6
-    bool statusD4 = false;    //enable/disable
+    uint8_t onTimeD4[3] = {0,0,0};      //H,M,S
+    uint8_t offTimeD4[3] = {0,0,0};     //H,M,S
+    uint8_t weekdaysD4[7] = {0,0,0,0,0,0,0};    //0-6
+    uint8_t statusD4 = 0;    //enable/disable
 } SmartTimerStruct;
 
 #endif
