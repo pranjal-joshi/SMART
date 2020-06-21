@@ -175,7 +175,8 @@ void initMesh(uint16_t ch, int qual) {
     Serial.print(F("[+] SMART: INFO -> Mesh init with channel: "));
     Serial.println(ch);
   }
-  mesh.init(MESH_SSID, MESH_PASS, MESH_PORT, WIFI_AP_STA, ch, MESH_HIDDEN);
+  //mesh.init(MESH_SSID, MESH_PASS, MESH_PORT, WIFI_AP_STA, ch, MESH_HIDDEN);
+  mesh.init((const char*)confJson[CONF_MESH_SSID], (const char*)confJson[CONF_MESH_PASS], MESH_PORT, WIFI_AP_STA, ch);
   #ifndef FORCE_MESH
     if(qual > MESH_QUALITY_THRESH) {
       mesh.stationManual((const char*)confJson[CONF_SSID], (const char*)confJson[CONF_PASS]);
@@ -415,8 +416,8 @@ void taskCheckRootNode() {
   }
   // if anyone is ROOT, then stop scanning target SSID as the ROOT must be already connected to it!
   if(getRootId(mesh.asNodeTree()) > 0) {
-    /*rootCheckTask.disable();
-    sched.deleteTask(rootCheckTask);*/
+    rootCheckTask.disable();
+    sched.deleteTask(rootCheckTask);
     
     isTargetSsidFound = true;           // Also stop scanning for the target SSID as someone already connected! Yaay!
     searchTargetTask.disable();
