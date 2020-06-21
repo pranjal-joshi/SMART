@@ -22,6 +22,7 @@ void taskTimerSchedulerHandler(void) {
   // if timer schedular is enabled for the task on this day
   if(timerStruct.statusD1 > 0 && timerStruct.weekdaysD1[ntpStruct.weekday] > 0 && NO_OF_DEVICES > 0) {
     if(ntpStruct.hour == timerStruct.onTimeD1[0] && ntpStruct.minute == timerStruct.onTimeD1[1] && ntpStruct.second == timerStruct.onTimeD1[2]) {
+      // TODO - Flag system so that task will not be executed for entire 1 minute!! It should be just once to avoid RACE condition!
       if(!io.getRawState(0))
         io.setRawState(0, HIGH);
       if(mDebug)
@@ -216,10 +217,12 @@ void taskBroadcastNtp(void) {
 
 // Get NTP data into global variable structure
 void taskGetNtp(void) {
-  ntpStruct.hour = ntp.getHours();
-  ntpStruct.minute = ntp.getMinutes();
-  ntpStruct.second = ntp.getSeconds();
-  ntpStruct.weekday = ntp.getDay();
+  if(internetAvailable) {
+    ntpStruct.hour = ntp.getHours();
+    ntpStruct.minute = ntp.getMinutes();
+    ntpStruct.second = ntp.getSeconds();
+    ntpStruct.weekday = ntp.getDay();
+  }
 }
 
 // Brodcast changed states to MQTT or Mesh Gateway
