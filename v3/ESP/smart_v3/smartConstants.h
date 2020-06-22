@@ -53,10 +53,11 @@
 #define MESH_QUALITY_THRESH       -85   // dBm
 #define INTERVAL_ROOT_CHECK       30    // Seconds
 #define INTERVAL_TARGET_SEARCH    60    // Seconds
-#define INTERVAL_NTP_BROADCAST    60    // Seconds
+#define INTERVAL_NTP_BROADCAST    61    // Seconds
 #define INTERVAL_GET_NTP          1     // Seconds
-#define INTERVAL_TIMER_SCHED      1     // Seconds
+#define INTERVAL_TIMER_SCHED      0.4   // Seconds
 #define INTERVAL_SWITCHING_TIME   200   // mS
+#define INTERVAL_IGNORE_TIMER     60*1000//mS
 
 // smartWebServer constants
 #define SMART_PASS                "12345678"    // Change later
@@ -119,21 +120,29 @@ typedef struct {
     uint8_t offTimeD1[3] = {0,0,0};     //H,M,S
     uint8_t weekdaysD1[7] = {0,0,0,0,0,0,0};    //0-6
     uint8_t statusD1 = 0;    //enable/disable
+    unsigned long onIgnoreD1 = 0;
+    unsigned long offIgnoreD1 = 0;
   
     uint8_t onTimeD2[3] = {0,0,0};      //H,M,S
     uint8_t offTimeD2[3] = {0,0,0};     //H,M,S
     uint8_t weekdaysD2[7] = {0,0,0,0,0,0,0};    //0-6
     uint8_t statusD2 = 0;    //enable/disable
+    unsigned long onIgnoreD2 = 0;
+    unsigned long offIgnoreD2 = 0;
   
     uint8_t onTimeD3[3] = {0,0,0};      //H,M,S
     uint8_t offTimeD3[3] = {0,0,0};     //H,M,S
     uint8_t weekdaysD3[7] = {0,0,0,0,0,0,0};    //0-6
     uint8_t statusD3 = 0;    //enable/disable
+    unsigned long onIgnoreD3 = 0;
+    unsigned long offIgnoreD3 = 0;
     
     uint8_t onTimeD4[3] = {0,0,0};      //H,M,S
     uint8_t offTimeD4[3] = {0,0,0};     //H,M,S
     uint8_t weekdaysD4[7] = {0,0,0,0,0,0,0};    //0-6
     uint8_t statusD4 = 0;    //enable/disable
+    unsigned long onIgnoreD4 = 0;
+    unsigned long offIgnoreD4 = 0;
 } SmartTimerStruct;
 
 #endif

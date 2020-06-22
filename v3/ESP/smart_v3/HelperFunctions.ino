@@ -1,6 +1,6 @@
 // Check and execute time scheduled tasks
 void taskTimerSchedulerHandler(void) {
-  if(mDebug) {
+  /*if(mDebug) {
     Serial.print(ntpStruct.hour);
     Serial.print(":");
     Serial.print(ntpStruct.minute);
@@ -17,18 +17,19 @@ void taskTimerSchedulerHandler(void) {
       Serial.print(timerStruct.weekdaysD1[k]);
     Serial.print("\t");
     Serial.println(timerStruct.statusD1);    
-  }
+  }*/
   
   // if timer schedular is enabled for the task on this day
   if(timerStruct.statusD1 > 0 && timerStruct.weekdaysD1[ntpStruct.weekday] > 0 && NO_OF_DEVICES > 0) {
-    if(ntpStruct.hour == timerStruct.onTimeD1[0] && ntpStruct.minute == timerStruct.onTimeD1[1] && ntpStruct.second == timerStruct.onTimeD1[2]) {
-      // TODO - Flag system so that task will not be executed for entire 1 minute!! It should be just once to avoid RACE condition!
+    if(ntpStruct.hour == timerStruct.onTimeD1[0] && ntpStruct.minute == timerStruct.onTimeD1[1] && (abs(millis()-timerStruct.onIgnoreD1) > INTERVAL_IGNORE_TIMER)) {
+      timerStruct.onIgnoreD1 = millis();
       if(!io.getRawState(0))
         io.setRawState(0, HIGH);
       if(mDebug)
         Serial.println(F("[+] SMART: INFO -> taskTimerSchedular -> D1 turned ON due to scheduled timer."));
     }
-    if(ntpStruct.hour == timerStruct.offTimeD1[0] && ntpStruct.minute == timerStruct.offTimeD1[1] && ntpStruct.second == timerStruct.offTimeD1[2]) {
+    if(ntpStruct.hour == timerStruct.offTimeD1[0] && ntpStruct.minute == timerStruct.offTimeD1[1] && (abs(millis()-timerStruct.offIgnoreD1) > INTERVAL_IGNORE_TIMER)) {
+      timerStruct.offIgnoreD1 = millis();
       if(io.getRawState(0))
         io.setRawState(0, LOW);
       if(mDebug)
@@ -36,45 +37,51 @@ void taskTimerSchedulerHandler(void) {
     } 
   }
 
-  if(timerStruct.statusD2 && timerStruct.weekdaysD2[ntpStruct.weekday] && NO_OF_DEVICES > 1) {
-    if(ntpStruct.hour == timerStruct.onTimeD2[0] && ntpStruct.minute == timerStruct.onTimeD2[1] && ntpStruct.second == timerStruct.onTimeD2[2]) {
-      if(!io.getRawState(1))
-        io.setRawState(1, HIGH);
+  if(timerStruct.statusD2 > 0 && timerStruct.weekdaysD2[ntpStruct.weekday] > 0 && NO_OF_DEVICES > 1) {
+    if(ntpStruct.hour == timerStruct.onTimeD2[0] && ntpStruct.minute == timerStruct.onTimeD2[1] && (abs(millis()-timerStruct.onIgnoreD2) > INTERVAL_IGNORE_TIMER)) {
+      timerStruct.onIgnoreD2 = millis();
+      if(!io.getRawState(0))
+        io.setRawState(0, HIGH);
       if(mDebug)
         Serial.println(F("[+] SMART: INFO -> taskTimerSchedular -> D2 turned ON due to scheduled timer."));
     }
-    if(ntpStruct.hour == timerStruct.offTimeD2[0] && ntpStruct.minute == timerStruct.offTimeD2[1] && ntpStruct.second == timerStruct.offTimeD2[2]) {
-      if(io.getRawState(1))
-        io.setRawState(1, LOW);
+    if(ntpStruct.hour == timerStruct.offTimeD2[0] && ntpStruct.minute == timerStruct.offTimeD2[1] && (abs(millis()-timerStruct.offIgnoreD2) > INTERVAL_IGNORE_TIMER)) {
+      timerStruct.offIgnoreD2 = millis();
+      if(io.getRawState(0))
+        io.setRawState(0, LOW);
       if(mDebug)
         Serial.println(F("[+] SMART: INFO -> taskTimerSchedular -> D2 turned OFF due to scheduled timer."));
     } 
   }
 
-  if(timerStruct.statusD3 && timerStruct.weekdaysD3[ntpStruct.weekday] && NO_OF_DEVICES > 2) {
-    if(ntpStruct.hour == timerStruct.onTimeD3[0] && ntpStruct.minute == timerStruct.onTimeD3[1] && ntpStruct.second == timerStruct.onTimeD3[2]) {
-      if(!io.getRawState(2))
-        io.setRawState(2, HIGH);
+  if(timerStruct.statusD3 > 0 && timerStruct.weekdaysD3[ntpStruct.weekday] > 0 && NO_OF_DEVICES > 2) {
+    if(ntpStruct.hour == timerStruct.onTimeD3[0] && ntpStruct.minute == timerStruct.onTimeD3[1] && (abs(millis()-timerStruct.onIgnoreD3) > INTERVAL_IGNORE_TIMER)) {
+      timerStruct.onIgnoreD3 = millis();
+      if(!io.getRawState(0))
+        io.setRawState(0, HIGH);
       if(mDebug)
         Serial.println(F("[+] SMART: INFO -> taskTimerSchedular -> D3 turned ON due to scheduled timer."));
     }
-    if(ntpStruct.hour == timerStruct.offTimeD3[0] && ntpStruct.minute == timerStruct.offTimeD3[1] && ntpStruct.second == timerStruct.offTimeD3[2]) {
-      if(io.getRawState(2))
-        io.setRawState(2, LOW);
+    if(ntpStruct.hour == timerStruct.offTimeD3[0] && ntpStruct.minute == timerStruct.offTimeD3[1] && (abs(millis()-timerStruct.offIgnoreD3) > INTERVAL_IGNORE_TIMER)) {
+      timerStruct.offIgnoreD3 = millis();
+      if(io.getRawState(0))
+        io.setRawState(0, LOW);
       if(mDebug)
         Serial.println(F("[+] SMART: INFO -> taskTimerSchedular -> D3 turned OFF due to scheduled timer."));
     } 
   }
-  if(timerStruct.statusD4 && timerStruct.weekdaysD4[ntpStruct.weekday] && NO_OF_DEVICES > 2) {
-    if(ntpStruct.hour == timerStruct.onTimeD4[0] && ntpStruct.minute == timerStruct.onTimeD4[1] && ntpStruct.second == timerStruct.onTimeD4[2]) {
-      if(!io.getRawState(3))
-        io.setRawState(3, HIGH);
+  if(timerStruct.statusD4 > 0 && timerStruct.weekdaysD4[ntpStruct.weekday] > 0 && NO_OF_DEVICES > 2) {
+    if(ntpStruct.hour == timerStruct.onTimeD4[0] && ntpStruct.minute == timerStruct.onTimeD4[1] && (abs(millis()-timerStruct.onIgnoreD4) > INTERVAL_IGNORE_TIMER)) {
+      timerStruct.onIgnoreD4 = millis();
+      if(!io.getRawState(0))
+        io.setRawState(0, HIGH);
       if(mDebug)
         Serial.println(F("[+] SMART: INFO -> taskTimerSchedular -> D4 turned ON due to scheduled timer."));
     }
-    if(ntpStruct.hour == timerStruct.offTimeD4[0] && ntpStruct.minute == timerStruct.offTimeD4[1] && ntpStruct.second == timerStruct.offTimeD4[2]) {
-      if(io.getRawState(3))
-        io.setRawState(3, LOW);
+    if(ntpStruct.hour == timerStruct.offTimeD4[0] && ntpStruct.minute == timerStruct.offTimeD4[1] && (abs(millis()-timerStruct.offIgnoreD4) > INTERVAL_IGNORE_TIMER)) {
+      timerStruct.offIgnoreD4 = millis();
+      if(io.getRawState(0))
+        io.setRawState(0, LOW);
       if(mDebug)
         Serial.println(F("[+] SMART: INFO -> taskTimerSchedular -> D4 turned OFF due to scheduled timer."));
     } 
