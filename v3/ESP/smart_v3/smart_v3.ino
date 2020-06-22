@@ -69,6 +69,7 @@ void setup() {
   Serial.begin(115200);
   Serial.println("\n");
 
+  smartSsid = getSmartSSID();
   randomSeed(analogRead(A0));
   uint16_t bd = random(0,BOOT_DLY);
   if(mDebug) {
@@ -90,7 +91,26 @@ void setup() {
     stateJson = fsys.loadState();
     serializeJson(stateJson, stateJsonBuf);
     io.setState(stateJsonBuf);
-    //timerStruct = fsys.loadTimers();
+
+    // load timer JSON from SPIFFS... using SmartFileSystem here causes ESP to go PANIC!
+    if(SPIFFS.begin()) {
+      File f = SPIFFS.open(TIMER_FILE,"r");
+      if(f) {
+        char *buf = (char*)malloc(JSON_BUF_SIZE*4*sizeof(char));
+        f.readBytes(buf,f.size());
+        f.close();
+        parseTimerJson(String(buf));
+        if(mDebug) {
+          Serial.println(F("[+] SMART: INFO -> Timer file loaded.."));
+          Serial.println(buf);
+        }
+        free(buf);
+      }
+      else {
+        if(mDebug)
+          Serial.println(F("[+] SMART: ERROR -> Timer file not found!"));
+      }
+    } 
   }
   
   delay(bd);
