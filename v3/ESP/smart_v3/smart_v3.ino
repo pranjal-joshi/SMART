@@ -52,6 +52,10 @@ NTPClient ntp(ntpUdp);
 String smartSsid;
 DynamicJsonDocument confJson(JSON_BUF_SIZE);
 DynamicJsonDocument stateJson(JSON_BUF_SIZE);
+DynamicJsonDocument linkJson1(JSON_BUF_SIZE*2);
+DynamicJsonDocument linkJson2(JSON_BUF_SIZE*2);
+DynamicJsonDocument linkJson3(JSON_BUF_SIZE*2);
+DynamicJsonDocument linkJson4(JSON_BUF_SIZE*2);
 char stateJsonBuf[JSON_BUF_SIZE];
 bool internetAvailable = false;
 bool isMeshActive = false;
@@ -222,7 +226,7 @@ void looper() {
     conditionalBroadcastSensorData();
     if(flagMotionIsr) {
       if(digitalRead(MOTION_PIN)) {
-        // TODO - after detecting motion
+        broadcastSensorData();
       }
       else {
         // TODO - maybe start motion timeout here & bla bla...
@@ -377,7 +381,16 @@ void decisionMaker(String p) {
     mesh.sendBroadcast(msgBuf);
   }
 
+  // If broadcast received from sensor
+  if(doc.containsKey(JSON_DEVICE_TYPE) && (String((const char*)doc[JSON_DEVICE_TYPE]) == JSON_DEVICE_SENSOR)
+  && doc.containsKey(JSON_TYPE) && (String((const char*)doc[JSON_TYPE]) == JSON_TYPE_BROADCAST)) {
+    if(linkJson1[JSON_TYPE_DATA][JSON_TYPE_STATE] == 1) {
+      // TODO - write control action here along with locking flag to avoid RACE condition!
+    }
+  }
+
   parseTimerJson(p);
+  parseSensorLinkJson(p);
 
   if(mDebug) {
     pinMode(LED_BUILTIN,OUTPUT);
