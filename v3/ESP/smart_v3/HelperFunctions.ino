@@ -1,5 +1,7 @@
 // Check and execute time scheduled tasks
 void taskTimerSchedulerHandler(void) {
+
+  #ifdef SWITCHING_NODE   // Execute only for SWITCHES, not SENSORS
   /*if(mDebug) {
     Serial.print(ntpStruct.hour);
     Serial.print(":");
@@ -86,6 +88,7 @@ void taskTimerSchedulerHandler(void) {
         Serial.println(F("[+] SMART: INFO -> taskTimerSchedular -> D4 turned OFF due to scheduled timer."));
     } 
   }
+  #endif
 }
 
 // Parse JSON received from PubSub
@@ -329,8 +332,8 @@ void connectMqttClient() {
             mqtt.subscribe(TOPIC_TEST);
           }
           // TODO - Subscribe here for required topics
-          mqtt.subscribe(String((String)"smart/"+String(confJson[CONF_USERNAME].as<const char*>())+"/gateway").c_str());    // subscribe to smart/username/gateway
-          mqtt.publish(getTopicName("info").c_str(), getNodeInfo().c_str(), RETAIN);
+          mqtt.subscribe(String((String)"smart/"+String(confJson[CONF_USERNAME].as<const char*>())+"/"+TOPIC_GATEWAY).c_str());    // subscribe to smart/username/gateway
+          mqtt.publish(getTopicName(TOPIC_INFO).c_str(), getNodeInfo().c_str(), RETAIN);
         }
         else {
           if(mDebug) {
