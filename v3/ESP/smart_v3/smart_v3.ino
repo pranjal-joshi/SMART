@@ -17,12 +17,26 @@
 #include "SmartIO.h"
 #include "SmartConstants.h"
 
+#ifdef SWITCHING_NODE
+  #if NO_OF_DEVICES == 4
+    SmartIo io(LATCH_PIN, CLK_PIN, DATA_PIN, OE_PIN);
+  #endif
+#endif
+
+#ifdef SENSOR_NODE
+  
+  #include "DHT.h"
+
+  DHT dht(DHT_PIN, DHT11);
+  float dhtTemp, dhtHum, dhtTempLast, dhtHumLast;
+  uint16_t light, lightRaw, lightLast;
+  byte motionState = LOW;
+  volatile bool flagMotionIsr = false;
+#endif
+
 SmartFileSystem fsys;
 SmartFileSystemFlags_t flag;
 SmartWebServer configServer;
-#if NO_OF_DEVICES == 4
-  SmartIo io(LATCH_PIN, CLK_PIN, DATA_PIN, OE_PIN);
-#endif
 
 painlessMesh mesh;
 
@@ -64,6 +78,10 @@ void taskGetNtp(void);
 Task getNtpTask(INTERVAL_GET_NTP*TASK_SECOND, TASK_FOREVER, &taskGetNtp, &sched);
 void taskTimerSchedulerHandler(void);
 Task timerSchedulerHandlerTask(INTERVAL_TIMER_SCHED*TASK_SECOND, TASK_FOREVER, &taskTimerSchedulerHandler, &sched);
+#ifdef SENSOR_NODE
+  void taskGetSensorValues(void);
+  Task getSensorValueTask(INTERVAL_GET_SENSOR*TASK_SECOND, TASK_FOREVER, &taskGetSensorValues, &sched);
+#endif
 
 void setup() {
   Serial.begin(115200);
@@ -76,42 +94,51 @@ void setup() {
     mesh.setDebugMsgTypes( ERROR | STARTUP | CONNECTION);
     Serial.printf("[+] SMART: INFO -> CHIP ID = SMART_%08X\n",ESP.getChipId());
     Serial.printf("[+] SMART: BOOT -> Random Delay = %udmS\n",bd);
-    io.setDebug(mDebug);
+    #ifdef SWITCHING_NODE
+      io.setDebug(mDebug);
+    #endif
     fsys.setDebug(mDebug);
   }
 
-  if(NO_OF_DEVICES == 4) {
-    // Critical routine - load last known states to relays ASAP
-    io.begin();
-    io.addInterrupt(SW1, CHANGE);
-    io.addInterrupt(SW2, CHANGE);
-    io.addInterrupt(SW3, CHANGE);
-    io.addInterrupt(SW4, CHANGE);
-    io.setCallback(ioCallback);
-    stateJson = fsys.loadState();
-    serializeJson(stateJson, stateJsonBuf);
-    io.setState(stateJsonBuf);
-
-    // load timer JSON from SPIFFS... using SmartFileSystem here causes ESP to go PANIC!
-    if(SPIFFS.begin()) {
-      File f = SPIFFS.open(TIMER_FILE,"r");
-      if(f) {
-        char *buf = (char*)malloc(JSON_BUF_SIZE*4*sizeof(char));
-        f.readBytes(buf,f.size());
-        f.close();
-        parseTimerJson(String(buf));
-        if(mDebug) {
-          Serial.println(F("[+] SMART: INFO -> Timer file loaded.."));
-          Serial.println(buf);
+  #ifdef SWITCHING_NODE
+    if(NO_OF_DEVICES == 4) {
+      // Critical routine - load last known states to relays ASAP
+      io.begin();
+      io.addInterrupt(SW1, CHANGE);
+      io.addInterrupt(SW2, CHANGE);
+      io.addInterrupt(SW3, CHANGE);
+      io.addInterrupt(SW4, CHANGE);
+      io.setCallback(ioCallback);
+      stateJson = fsys.loadState();
+      serializeJson(stateJson, stateJsonBuf);
+      io.setState(stateJsonBuf);
+  
+      // load timer JSON from SPIFFS... using SmartFileSystem here causes ESP to go PANIC!
+      if(SPIFFS.begin()) {
+        File f = SPIFFS.open(TIMER_FILE,"r");
+        if(f) {
+          char *buf = (char*)malloc(JSON_BUF_SIZE*4*sizeof(char));
+          f.readBytes(buf,f.size());
+          f.close();
+          parseTimerJson(String(buf));
+          if(mDebug) {
+            Serial.println(F("[+] SMART: INFO -> Timer file loaded.."));
+            Serial.println(buf);
+          }
+          free(buf);
         }
-        free(buf);
-      }
-      else {
-        if(mDebug)
-          Serial.println(F("[+] SMART: ERROR -> Timer file not found!"));
-      }
-    } 
-  }
+        else {
+          if(mDebug)
+            Serial.println(F("[+] SMART: ERROR -> Timer file not found!"));
+        }
+      } 
+    }
+  #endif
+  #ifdef SENSOR_NODE
+    initSensorHardware();
+    sched.addTask(getSensorValueTask);
+    getSensorValueTask.enable();
+  #endif
   
   delay(bd);
 
@@ -176,19 +203,33 @@ void looper() {
     ntp.update();
   
   // Read states when interrupted and update outputs and MQTT about it
-  if(isInterrupted) {
-    io.getState().toCharArray(stateJsonBuf, io.getState().length());
-    io.setState(stateJsonBuf);
-    fsys.saveState(stateJsonBuf);
-    broadcastStateChanged(stateJsonBuf);
-    isInterrupted = false;
-  }
-  // When state changed remotely, read sensing lines after sometime and ACK MQTT
+  #ifdef SWITCHING_NODE
+    if(isInterrupted) {
+      io.getState().toCharArray(stateJsonBuf, io.getState().length());
+      io.setState(stateJsonBuf);
+      fsys.saveState(stateJsonBuf);
+      broadcastStateChanged(stateJsonBuf);
+      isInterrupted = false;
+    }
+    // When state changed remotely, read sensing lines after sometime and ACK MQTT
   /*The following should occur automatically through an INTR - observe & eliminate
   if(isStateChanged && (abs(millis() - whenStateChanged) > INTERVAL_SWITCHING_TIME)) {
     broadcastStateChanged(stateJsonBuf);
     isStateChanged = false;
   }*/
+  #endif
+  #ifdef SENSOR_NODE
+    conditionalBroadcastSensorData();
+    if(flagMotionIsr) {
+      if(digitalRead(MOTION_PIN)) {
+        // TODO - after detecting motion
+      }
+      else {
+        // TODO - maybe start motion timeout here & bla bla...
+      }
+      flagMotionIsr = false;
+    }
+  #endif
   if(mDebug)
     ArduinoOTA.handle();
 }
@@ -246,12 +287,14 @@ void decisionMaker(String p) {
 
       // Set output states as per the received JSON
       if(doc.containsKey(JSON_TYPE) && (String((const char*)doc[JSON_TYPE]) == JSON_TYPE_STATE)) {
-        JsonArray ja = doc[JSON_TYPE_DATA].as<JsonArray>();
-        serializeJson(ja, stateJsonBuf);
-        io.setState(stateJsonBuf);
-        fsys.saveState(stateJsonBuf);
-        isStateChanged = true;
-        whenStateChanged = millis();
+        #ifdef SWITCHING_NODE
+          JsonArray ja = doc[JSON_TYPE_DATA].as<JsonArray>();
+          serializeJson(ja, stateJsonBuf);
+          io.setState(stateJsonBuf);
+          fsys.saveState(stateJsonBuf);
+          isStateChanged = true;
+          whenStateChanged = millis();
+        #endif
       }
 
       // Factory reset 'this' node - erase SPIFFS & reboot
@@ -271,8 +314,10 @@ void decisionMaker(String p) {
 
       // Publish states whenever app requests
       else if(doc.containsKey(JSON_TYPE) && (String((const char*)doc[JSON_TYPE]) == JSON_TYPE_STATE_REQ)) {
-        io.getState().toCharArray(stateJsonBuf, io.getState().length());
-        broadcastStateChanged(stateJsonBuf);
+        #ifdef SWITCHING_NODE
+          io.getState().toCharArray(stateJsonBuf, io.getState().length());
+          broadcastStateChanged(stateJsonBuf);
+        #endif
       }
     }
   }
