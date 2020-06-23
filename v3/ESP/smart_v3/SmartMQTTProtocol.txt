@@ -111,6 +111,15 @@ example:
 	}
 }
 
+Sensor Packet:
+smart/username/smartId/sensor/values
+{
+	"smartId": "SMART_12345",
+	"deviceType": "sensor",
+	"type": "data",
+	"light": 50,
+	"temp": 25,
+	"hum": 50,
+	"motion": 1/0
+}
 smart/username/gateway					->	{'from':'app', 'to':'smartId', type':'label', data:[a,b,c,d]}
-
-TODO - Implement for timer and sensor later!
