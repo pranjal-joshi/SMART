@@ -116,10 +116,27 @@ smart/username/smartId/sensor/values
 {
 	"smartId": "SMART_12345",
 	"deviceType": "sensor",
-	"type": "data",
+	"type": "bcast",
 	"light": 50,
 	"temp": 25,
 	"hum": 50,
 	"motion": 1/0
 }
+
+Sensor linking
+smart/username/smartId/link/1-2-3-4
+{
+	"smartId": "SMART_12345",
+	"type": "link",
+	"no": 1/2/3/4,		// device_no
+	"data" : {
+		"state": 0/1 en/disable
+		"motion": 0/1
+		"timeout": minutes,
+		"light": 50,
+		"temp": 35,
+		"hum": 40
+	}
+}
+
 smart/username/gateway					->	{'from':'app', 'to':'smartId', type':'label', data:[a,b,c,d]}
