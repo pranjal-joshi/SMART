@@ -32,6 +32,10 @@
 
 // PubSub topics and subscriptions
 #define TOPIC_TEST              "smart/dev"
+#define TOPIC_GATEWAY           "gateway"
+#define TOPIC_INFO              "info"
+#define TOPIC_SENSOR_VALUE      "sensor/value"
+#define TOPIC_USERNAME_WILD     "#"
 
 // SmartFileSystem JSON key names
 #define CONF_SSID               "confSSID"
@@ -58,6 +62,7 @@
 #define INTERVAL_TIMER_SCHED      0.4   // Seconds
 #define INTERVAL_SWITCHING_TIME   200   // mS
 #define INTERVAL_IGNORE_TIMER     60*1000//mS
+#define INTERVAL_GET_SENSOR       10    // Seconds
 
 // smartWebServer constants
 #define SMART_PASS                "12345678"    // Change later
@@ -74,8 +79,10 @@
 #define JSON_DEVICE_TYPE          "deviceType"
 #define JSON_DEVICE_SWITCH        "switch"
 #define JSON_DEVICE_SENSOR        "sensor"
+#define JSON_DEVICE_NO            "no"
 #define JSON_TYPE                 "type"
 #define JSON_TYPE_DATA            "data"
+#define JSON_TYPE_BROADCAST       "bcast"
 #define JSON_TYPE_STATE           "state"
 #define JSON_TYPE_STATE_REQ       "state_req"
 #define JSON_TYPE_INFO            "info"
@@ -83,6 +90,7 @@
 #define JSON_TYPE_SOFT_RST        "soft_reset"
 #define JSON_TYPE_NTP             "ntp"
 #define JSON_TYPE_TIMER           "timer"
+#define JSON_TYPE_LINK            "link"
 #define JSON_NTP_HOUR             "hour"
 #define JSON_NTP_MINUTE           "minute"
 #define JSON_NTP_SECOND           "second"
@@ -91,23 +99,39 @@
 #define JSON_TOPIC                "topic"
 #define JSON_ENABLE               "enable"
 #define JSON_DISABLE              "disable"
+#define JSON_SENSOR_LIGHT         "light"
+#define JSON_SENSOR_TEMP          "temp"
+#define JSON_SENSOR_HUM           "hum"
+#define JSON_SENSOR_MOTION        "motion"
 
-// IO configuration
-#if NO_OF_DEVICES == 4      // This Configuration is ONLY for 4 Devices
-  #define OE_PIN            D0
-  #define CLK_PIN           D3
-  #define LATCH_PIN         D4
-  #define DATA_PIN          D7
-  #define SW1               D1
-  #define SW2               D2
-  #define SW3               D5
-  #define SW4               D6
-  #define SNS1              SW1
-  #define SNS2              SW2
-  #define SNS3              SW3
-  #define SNS4              SW4
+// Switching IO configuration
+#ifdef SWITCHING_NODE
+  #if NO_OF_DEVICES == 4      // This Configuration is ONLY for 4 Devices
+    #define OE_PIN            D0
+    #define CLK_PIN           D3
+    #define LATCH_PIN         D4
+    #define DATA_PIN          D7
+    #define SW1               D1
+    #define SW2               D2
+    #define SW3               D5
+    #define SW4               D6
+    #define SNS1              SW1
+    #define SNS2              SW2
+    #define SNS3              SW3
+    #define SNS4              SW4
+  #endif
 #endif
 
+// Sensor IO configuration
+#ifdef SENSOR_NODE
+  #define DHT_PIN                   D8
+  #define LIGHT_PIN                 A0
+  #define MOTION_PIN                D1
+
+  #define THRESH_LIGHT_CHANGE        5   // percentage
+  #define THRESH_TEMP_CHANGE         1   // degree
+  #define THRESH_HUM_CHANGE          1   // RH
+#endif
 typedef struct {
   int hour;
   int minute;
