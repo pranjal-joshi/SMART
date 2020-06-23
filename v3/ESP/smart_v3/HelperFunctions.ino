@@ -91,6 +91,29 @@ void taskTimerSchedulerHandler(void) {
   #endif
 }
 
+// Parse Sensor Linking JSON from PubSub
+void parseSensorLinkJson(String buf) {
+  DynamicJsonDocument doc(JSON_BUF_SIZE*2);
+  deserializeJson(doc, buf);
+  doc.shrinkToFit();
+  if(doc.containsKey(JSON_SMARTID)&& String((const char*)doc[JSON_SMARTID]) == smartSsid
+  && doc.containsKey(JSON_TYPE) && String((const char*)doc[JSON_TYPE]) == JSON_TYPE_LINK) {
+    if(doc[JSON_DEVICE_NO].as<int>() == 1)
+      linkJson1 = doc;
+    else if(doc[JSON_DEVICE_NO].as<int>() == 2)
+      linkJson2 = doc;
+    else if(doc[JSON_DEVICE_NO].as<int>() == 3)
+      linkJson3 = doc;
+    else if(doc[JSON_DEVICE_NO].as<int>() == 4)
+      linkJson4 = doc;
+    if(mDebug) {
+      Serial.println(F("[+] SMART: INFO -> SensorLink JSON parsed as follow."));
+      serializeJson(doc, Serial);
+      Serial.println();
+    }
+  }
+}
+
 // Parse JSON received from PubSub
 void parseTimerJson(String buf) {
   DynamicJsonDocument doc(JSON_BUF_SIZE*4);
