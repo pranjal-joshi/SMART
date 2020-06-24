@@ -25,6 +25,8 @@ class SmartIo {
     bool getRawState(uint8_t device_no);
     void setRawState(uint8_t device_no, uint8_t state);
     void enableOutput(bool);
+    void setBySensor(uint8_t dn, bool s);
+    bool getBySensor(uint8_t dn);
   private:
     void (*localPointerToCallback)(void);
 };

@@ -16,6 +16,8 @@ uint8_t relayArray[8] = {0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80};
 
 uint8_t snsPinArray[NO_OF_DEVICES], snsStateArray[NO_OF_DEVICES];
 
+bool setBySensorArray[4] = {false,false,false,false};
+
 static uint8_t stateVar=0;
 
 SmartIo *pointerToClass;
@@ -101,14 +103,14 @@ String SmartIo::getState(void) {
 }
 
 bool SmartIo::getRawState(uint8_t device_no) {
-  return digitalRead(snsPinArray[device_no]);
+  return digitalRead(snsPinArray[device_no-1]);
 }
 
 void SmartIo::setRawState(uint8_t device_no, uint8_t state) {
   if(state) 
-    stateVar |= relayArray[device_no];
+    stateVar |= relayArray[device_no-1];
   else
-    stateVar &= ~(relayArray[device_no]);
+    stateVar &= ~(relayArray[device_no-1]);
   digitalWrite(_latch, LOW);
   shiftOut(_data, _clk, MSBFIRST, stateVar);
   digitalWrite(_latch, HIGH);
@@ -125,4 +127,12 @@ ICACHE_RAM_ATTR void SmartIo::interruptHandler(void) {
 
 void SmartIo::setCallback(void (*userDefinedCallback)(void)) {
    localPointerToCallback = userDefinedCallback;
+}
+
+void SmartIo::setBySensor(uint8_t device_no, bool state) {
+  setBySensorArray[device_no-1] = state;
+}
+
+bool SmartIo::getBySensor(uint8_t device_no) {
+  return setBySensorArray[device_no-1];
 }
