@@ -82,6 +82,10 @@ void taskGetNtp(void);
 Task getNtpTask(INTERVAL_GET_NTP*TASK_SECOND, TASK_FOREVER, &taskGetNtp, &sched);
 void taskTimerSchedulerHandler(void);
 Task timerSchedulerHandlerTask(INTERVAL_TIMER_SCHED*TASK_SECOND, TASK_FOREVER, &taskTimerSchedulerHandler, &sched);
+
+void offTimeoutD1(void);
+Task offTimeoutD1Task();
+
 #ifdef SENSOR_NODE
   void taskGetSensorValues(void);
   Task getSensorValueTask(INTERVAL_GET_SENSOR*TASK_SECOND, TASK_FOREVER, &taskGetSensorValues, &sched);
@@ -284,6 +288,36 @@ void mqttCallback(char* topic, byte* payload, unsigned int length) {
 void decisionMaker(String p) {
   DynamicJsonDocument doc(JSON_BUF_SIZE*4);
   deserializeJson(doc, p);
+
+  // Get sensor broadcast packet and perform a control action
+  #ifdef SWITCHING_NODE
+    if(String((const char*)doc[JSON_DEVICE_TYPE]) == JSON_DEVICE_SENSOR && String((const char*)doc[JSON_TYPE]) == JSON_TYPE_BROADCAST) {
+      uint16_t l,t,h,m;
+      l = doc[JSON_SENSOR_LIGHT].as<uint16_t>();
+      t = doc[JSON_SENSOR_TEMP].as<uint16_t>();
+      h = doc[JSON_SENSOR_HUM].as<uint16_t>();
+      m = doc[JSON_SENSOR_MOTION].as<uint16_t>();
+      if((int)linkJson1[JSON_TYPE_DATA][JSON_TYPE_STATE] == 1) {
+        // TODO - Implement for Light, Temp/Hum later..
+        if(mDebug)
+            Serial.println(F("[+] SMART: INFO -> MOTION trigger for D1"));
+        if(m == 1) {
+          if(!io.getRawState(1)) {
+            io.setRawState(1, HIGH);
+            io.setBySensor(1, true);
+          }
+        }
+        else {
+          if(io.getBySensor(1)) {
+            offTimeoutD1Task.setCallback(&offTimeoutD1);
+            offTimeoutD1Task.setTimeout((int)linkJson1[JSON_TYPE_DATA][JSON_SENSOR_TIMEOUT]*TASK_MINUTE);
+            sched.addTask(offTimeoutD1Task);
+            offTimeoutD1Task.enable();
+          }
+        }
+      }
+    }
+  #endif
 
   // Check if the packet is targeted for 'this' node
   if(doc.containsKey(JSON_SMARTID)) {

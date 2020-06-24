@@ -103,6 +103,7 @@
 #define JSON_SENSOR_TEMP          "temp"
 #define JSON_SENSOR_HUM           "hum"
 #define JSON_SENSOR_MOTION        "motion"
+#define JSON_SENSOR_TIMEOUT       "timeout"
 
 // Switching IO configuration
 #ifdef SWITCHING_NODE
