@@ -17,6 +17,7 @@ uint8_t relayArray[8] = {0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80};
 uint8_t snsPinArray[NO_OF_DEVICES], snsStateArray[NO_OF_DEVICES];
 
 bool setBySensorArray[4] = {false,false,false,false};
+bool setByTimerArray[4] = {false,false,false,false};
 
 static uint8_t stateVar=0;
 
@@ -135,4 +136,12 @@ void SmartIo::setBySensor(uint8_t device_no, bool state) {
 
 bool SmartIo::getBySensor(uint8_t device_no) {
   return setBySensorArray[device_no-1];
+}
+
+void SmartIo::setByTimer(uint8_t device_no, bool state) {
+  setByTimerArray[device_no-1] = state;
+}
+
+bool SmartIo::getByTimer(uint8_t device_no) {
+  return setByTimerArray[device_no-1];
 }

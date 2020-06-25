@@ -27,6 +27,8 @@ class SmartIo {
     void enableOutput(bool);
     void setBySensor(uint8_t dn, bool s);
     bool getBySensor(uint8_t dn);
+    void setByTimer(uint8_t dn, bool s);
+    bool getByTimer(uint8_t dn);
   private:
     void (*localPointerToCallback)(void);
 };
