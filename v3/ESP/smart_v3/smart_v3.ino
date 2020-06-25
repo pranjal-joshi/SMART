@@ -24,12 +24,6 @@
 #endif
 
 #ifdef SENSOR_NODE
-  
-  #include "DHT.h"
-
-  DHT dht(DHT_PIN, DHT11);
-  float dhtTemp, dhtHum, dhtTempLast, dhtHumLast;
-  uint16_t light, lightRaw, lightLast;
   byte motionState = LOW;
   volatile bool flagMotionIsr = false;
 #endif
@@ -52,10 +46,10 @@ NTPClient ntp(ntpUdp);
 String smartSsid;
 DynamicJsonDocument confJson(JSON_BUF_SIZE);
 DynamicJsonDocument stateJson(JSON_BUF_SIZE);
-DynamicJsonDocument linkJson1(JSON_BUF_SIZE*2);
-DynamicJsonDocument linkJson2(JSON_BUF_SIZE*2);
-DynamicJsonDocument linkJson3(JSON_BUF_SIZE*2);
-DynamicJsonDocument linkJson4(JSON_BUF_SIZE*2);
+DynamicJsonDocument linkJson1(JSON_BUF_SIZE);
+DynamicJsonDocument linkJson2(JSON_BUF_SIZE);
+DynamicJsonDocument linkJson3(JSON_BUF_SIZE);
+DynamicJsonDocument linkJson4(JSON_BUF_SIZE);
 char stateJsonBuf[JSON_BUF_SIZE];
 bool internetAvailable = false;
 bool isMeshActive = false;
@@ -80,11 +74,20 @@ void taskBroadcastNtp(void);
 Task broadcastNtpTask(INTERVAL_NTP_BROADCAST*TASK_SECOND, TASK_ONCE, &taskBroadcastNtp, &sched);
 void taskGetNtp(void);
 Task getNtpTask(INTERVAL_GET_NTP*TASK_SECOND, TASK_FOREVER, &taskGetNtp, &sched);
-void taskTimerSchedulerHandler(void);
-Task timerSchedulerHandlerTask(INTERVAL_TIMER_SCHED*TASK_SECOND, TASK_FOREVER, &taskTimerSchedulerHandler, &sched);
 
-void offTimeoutD1(void);
-Task offTimeoutD1Task();
+#ifdef SWITCHING_NODE
+  void taskTimerSchedulerHandler(void);
+  Task timerSchedulerHandlerTask(INTERVAL_TIMER_SCHED*TASK_SECOND, TASK_FOREVER, &taskTimerSchedulerHandler, &sched);
+  
+  void offTimeoutD1(void);
+  void offTimeoutD2(void);
+  void offTimeoutD3(void);
+  void offTimeoutD4(void);
+  Task offTimeoutD1Task(0, TASK_ONCE, &offTimeoutD1, &sched, false);
+  Task offTimeoutD2Task(0, TASK_ONCE, &offTimeoutD2, &sched, false);
+  Task offTimeoutD3Task(0, TASK_ONCE, &offTimeoutD3, &sched, false);
+  Task offTimeoutD4Task(0, TASK_ONCE, &offTimeoutD4, &sched, false);
+#endif
 
 #ifdef SENSOR_NODE
   void taskGetSensorValues(void);
@@ -139,13 +142,13 @@ void setup() {
           if(mDebug)
             Serial.println(F("[+] SMART: ERROR -> Timer file not found!"));
         }
-      } 
+      }
+      // Load sensor link conf from SPIFFS!
+      linkJson1 = fsys.loadSensorLink(LINK_SENSOR_1_FILE);
+      linkJson2 = fsys.loadSensorLink(LINK_SENSOR_2_FILE);
+      linkJson3 = fsys.loadSensorLink(LINK_SENSOR_3_FILE);
+      linkJson4 = fsys.loadSensorLink(LINK_SENSOR_4_FILE);
     }
-  #endif
-  #ifdef SENSOR_NODE
-    initSensorHardware();
-    sched.addTask(getSensorValueTask);
-    getSensorValueTask.enable();
   #endif
   
   delay(bd);
@@ -182,15 +185,23 @@ void setup() {
   // Setup mesh network
   initMesh(channel, quality);
 
+  #ifdef SENSOR_NODE
+    initSensorHardware();
+    sched.addTask(getSensorValueTask);
+    getSensorValueTask.enable();
+  #endif
+  
   // Start scheduled task execution
   sched.addTask(rootCheckTask);
   sched.addTask(broadcastNtpTask);
   sched.addTask(getNtpTask);
-  sched.addTask(timerSchedulerHandlerTask);
   rootCheckTask.enable();
   broadcastNtpTask.enable();
   getNtpTask.enable();
-  timerSchedulerHandlerTask.enable();
+  #ifdef SWITCHING_NODE
+    sched.addTask(timerSchedulerHandlerTask);
+    timerSchedulerHandlerTask.enable();
+  #endif
 }
 
 void loop() {
@@ -220,21 +231,15 @@ void looper() {
       isInterrupted = false;
     }
     // When state changed remotely, read sensing lines after sometime and ACK MQTT
-  /*The following should occur automatically through an INTR - observe & eliminate
+  /*TODO: The following should occur automatically through an INTR - observe & eliminate
   if(isStateChanged && (abs(millis() - whenStateChanged) > INTERVAL_SWITCHING_TIME)) {
     broadcastStateChanged(stateJsonBuf);
     isStateChanged = false;
   }*/
   #endif
   #ifdef SENSOR_NODE
-    conditionalBroadcastSensorData();
     if(flagMotionIsr) {
-      if(digitalRead(MOTION_PIN)) {
-        broadcastSensorData();
-      }
-      else {
-        // TODO - maybe start motion timeout here & bla bla...
-      }
+      taskGetSensorValues();
       flagMotionIsr = false;
     }
   #endif
@@ -289,36 +294,6 @@ void decisionMaker(String p) {
   DynamicJsonDocument doc(JSON_BUF_SIZE*4);
   deserializeJson(doc, p);
 
-  // Get sensor broadcast packet and perform a control action
-  #ifdef SWITCHING_NODE
-    if(String((const char*)doc[JSON_DEVICE_TYPE]) == JSON_DEVICE_SENSOR && String((const char*)doc[JSON_TYPE]) == JSON_TYPE_BROADCAST) {
-      uint16_t l,t,h,m;
-      l = doc[JSON_SENSOR_LIGHT].as<uint16_t>();
-      t = doc[JSON_SENSOR_TEMP].as<uint16_t>();
-      h = doc[JSON_SENSOR_HUM].as<uint16_t>();
-      m = doc[JSON_SENSOR_MOTION].as<uint16_t>();
-      if((int)linkJson1[JSON_TYPE_DATA][JSON_TYPE_STATE] == 1) {
-        // TODO - Implement for Light, Temp/Hum later..
-        if(mDebug)
-            Serial.println(F("[+] SMART: INFO -> MOTION trigger for D1"));
-        if(m == 1) {
-          if(!io.getRawState(1)) {
-            io.setRawState(1, HIGH);
-            io.setBySensor(1, true);
-          }
-        }
-        else {
-          if(io.getBySensor(1)) {
-            offTimeoutD1Task.setCallback(&offTimeoutD1);
-            offTimeoutD1Task.setTimeout((int)linkJson1[JSON_TYPE_DATA][JSON_SENSOR_TIMEOUT]*TASK_MINUTE);
-            sched.addTask(offTimeoutD1Task);
-            offTimeoutD1Task.enable();
-          }
-        }
-      }
-    }
-  #endif
-
   // Check if the packet is targeted for 'this' node
   if(doc.containsKey(JSON_SMARTID)) {
     if(String((const char*)doc[JSON_SMARTID]) == smartSsid) {
@@ -329,7 +304,7 @@ void decisionMaker(String p) {
           JsonArray ja = doc[JSON_TYPE_DATA].as<JsonArray>();
           serializeJson(ja, stateJsonBuf);
           io.setState(stateJsonBuf);
-          fsys.saveState(stateJsonBuf);
+          fsys.saveState(stateJsonBuf);     // This may be automatically triggered in ISR - TODO: observe and eliminate
           isStateChanged = true;
           whenStateChanged = millis();
         #endif
@@ -380,7 +355,6 @@ void decisionMaker(String p) {
     if(doc.containsKey(JSON_TYPE) && (String((const char*)doc[JSON_TYPE]) == JSON_TYPE_INFO)) {
       char msg[JSON_BUF_SIZE];
       serializeJson(doc, msg);
-      //mqtt.publish(topic, msg, RETAIN);
       mqtt.publish((const char*)doc[JSON_TOPIC], msg, RETAIN);
       if(mDebug) {
         Serial.print(F("[+] SMART: INFO -> Forwarding INFO packet from "));
@@ -415,18 +389,11 @@ void decisionMaker(String p) {
     mesh.sendBroadcast(msgBuf);
   }
 
-  // If broadcast received from sensor
-  if(doc.containsKey(JSON_DEVICE_TYPE) && (String((const char*)doc[JSON_DEVICE_TYPE]) == JSON_DEVICE_SENSOR)
-  && doc.containsKey(JSON_TYPE) && (String((const char*)doc[JSON_TYPE]) == JSON_TYPE_BROADCAST)) {
-    if(linkJson1[JSON_TYPE_DATA][JSON_TYPE_STATE] == 1) {
-      // TODO - write control action here along with locking flag to avoid RACE condition!
-    }
-  }
-
   parseTimerJson(p);
   parseSensorLinkJson(p);
+  parseSensorBroadcast(p);
 
-  if(mDebug) {
+  if(mDebug) {                          // TODO: REMOVE THIS LATER
     pinMode(LED_BUILTIN,OUTPUT);
     if(p == "1")
       digitalWrite(LED_BUILTIN,LOW);
