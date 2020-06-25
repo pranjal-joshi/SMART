@@ -23,119 +23,139 @@ smart/user_name/device_id/on_motion_end_timeout/D1_to_Dn/time
 
 smart/username/smartId/info -> 
 {
-	"to": "app/gateway",
-	"from": "node",
-	"smartId": "SMART_123456",
-	"type": "info",
-	"deviceType": "switch/sensor",
-	"nodeName": "MyRoom",
-	"NoD":"1/2/4",
+	'to': 'app/gateway',
+	'from': 'node',
+	'smartId': 'SMART_123456',
+	'type': 'info',
+	'deviceType': 'switch/sensor',
+	'nodeName': 'MyRoom',
+	'NoD':'1/2/4',
 }
 
 // App to Node
 smart/username/gateway		->	{'from':'app', 'smartId':'smartId', type':'state', data:[1,0,1,0]}
 {
-	"to": "gateway",
-	"from": "app",
-	"smartId": "SMART_00C30094",
-	"type": "state",
-	"data": [1, 0, 0, 1]
+	'to': 'gateway',
+	'from': 'app',
+	'smartId': 'SMART_00C30094',
+	'type': 'state',
+	'data': [1, 0, 0, 1]
 }
 
 // App to Node
 smart/username/gateway
 {
-	"to": "gateway",
-	"from": "app",
-	"smartId": "SMART_12345",
-	"type": "factory_reset"
+	'to': 'gateway',
+	'from': 'app',
+	'smartId': 'SMART_12345',
+	'type': 'factory_reset'
 }
 
 // App to Node
 {
-	"to": "gateway",
-	"from": "app",
-	"smartId": "SMART_12345",
-	"type": "soft_reset"
+	'to': 'gateway',
+	'from': 'app',
+	'smartId': 'SMART_12345',
+	'type': 'soft_reset'
 }
 // App to Node
 smart/username/gateway
 {
-	"to": "gateway",
-	"from": "app",
-	"smartId": "SMART_12345",
-	"type": "state_req"
+	'to': 'gateway',
+	'from': 'app',
+	'smartId': 'SMART_12345',
+	'type': 'state_req'
 }
 
 // Node to App
 smart/username/smartId/state
 {
-	"topic": "smart/username/smartId/state"
-	"from": "node",
-	"smartId": "SMART_00C30094",
-	"type": "state",
-	"data": [1, 0, 0, 1]
+	'topic': 'smart/username/smartId/state'
+	'from': 'node',
+	'smartId': 'SMART_00C30094',
+	'type': 'state',
+	'data': [1, 0, 0, 1]
 }
 
 // Gateway to Mesh
 {
-	"from": "gateway",
-	"to": "node"
-	"type":"ntp",
-	"hour":1,
-	"minute": 2,
-	"second": 3,
-	"weekday": 0-6
+	'from': 'gateway',
+	'to': 'node'
+	'type':'ntp',
+	'hour':1,
+	'minute': 2,
+	'second': 3,
+	'weekday': 0-6
 }
 
 // Alarm Packet
 {
-	"smartId": "SMART_12345",
-	"type": "timer",
-	"NoD": 1/2/4,
-	"data" : {
-			"time": [[[on_h,m,s],[off_h,m,s]],[[on_h,m,s],[off_h,m,s]],[[on_h,m,s],[off_h,m,s]],[[on_h,m,s],[off_h,m,s]]]
-			"weekday": [[0,1,2,3,4,5,6],[0,1,2,3,4,5,6],[0,1,2,3,4,5,6],[0,1,2,3,4,5,6]],
-			"status": ["enable","disable","enable",disable"]
+	'smartId': 'SMART_12345',
+	'type': 'timer',
+	'NoD': 1/2/4,
+	'data' : {
+			'time': [[[on_h,m,s],[off_h,m,s]],[[on_h,m,s],[off_h,m,s]],[[on_h,m,s],[off_h,m,s]],[[on_h,m,s],[off_h,m,s]]]
+			'weekday': [[0,1,2,3,4,5,6],[0,1,2,3,4,5,6],[0,1,2,3,4,5,6],[0,1,2,3,4,5,6]],
+			'status': ['enable','disable','enable',disable']
 	}
 }
 example:
 {
-	"smartId": "SMART_12345",
-	"type": "timer",
-	"NoD": 4,
-	"data" : {
-			"time": [[[1,2,3],[1,2,3]],[[1,2,3],[1,2,3]],[[1,2,3],[1,2,3]],[[1,2,3],[1,2,3]]],
-			"weekday": [[0,1,2,3,4,5,6],[0,1,2,3,4,5,6],[0,1,2,3,4,5,6],[0,1,2,3,4,5,6]],
-			"status": ["enable","disable","enable","disable"]
+	'smartId': 'SMART_12345',
+	'type': 'timer',
+	'NoD': 4,
+	'data' : {
+			'time': [[[1,2,3],[1,2,3]],[[1,2,3],[1,2,3]],[[1,2,3],[1,2,3]],[[1,2,3],[1,2,3]]],
+			'weekday': [[0,1,2,3,4,5,6],[0,1,2,3,4,5,6],[0,1,2,3,4,5,6],[0,1,2,3,4,5,6]],
+			'status': ['enable','disable','enable','disable']
 	}
 }
 
 Sensor Packet:
 smart/username/smartId/sensor/values
 {
-	"smartId": "SMART_12345",
-	"deviceType": "sensor",
-	"type": "bcast",
-	"light": 50,
-	"temp": 25,
-	"hum": 50,
-	"motion": 1/0
+	'smartId': 'SMART_12345',
+	'deviceType': 'sensor',
+	'type': 'bcast',
+	'motion': 1/0
+}
+example:
+{
+	'smartId': 'SMART_12345',
+	'deviceType': 'sensor',
+	'type': 'bcast',
+	'motion': 1
 }
 
 Sensor linking
 smart/username/smartId/link/1-2-3-4
 {
-	"smartId": "SMART_12345",
-	"type": "link",
-	"no": 1/2/3/4,		// device_no
-	"data" : {
-		"state": 0/1 en/disable
-		"motion": 0/1
-		"timeout": minutes,
-		"light": 50,
-		"temp": 35,
-		"hum": 40
+	'smartId': 'SMART_00DCCBB8',
+	'type': 'link',
+	'no': 1/2/3/4,		// device_no
+	'data' : {
+		'from': 'SENSOR_ID',
+		'state': enable/disable
+		'timeout': minutes,
+		'eh': Hr,
+		'em': min,
+		'dh': Hr,
+		'dm': min,
+	}
+}
+example:
+{
+	'smartId': 'SMART_00DCCBB8',
+	'type': 'link',
+	'no': 1,
+	'data' : {
+		'state': 'enable',
+		'motion': 1,
+		'timeout': 1,
+		'eh': 18,
+		'em': 30,
+		'dh': 6,
+		'dm': 30
 	}
 }
 
