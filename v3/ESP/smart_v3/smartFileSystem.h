@@ -12,9 +12,13 @@
 #include <ArduinoJson.h>
 #include "SmartConstants.h"
 
-#define CONF_FILE     "/config.json"
-#define STATE_FILE    "/state.json"
-#define TIMER_FILE    "/timer.json"
+#define CONF_FILE             "/config.json"
+#define STATE_FILE            "/state.json"
+#define TIMER_FILE            "/timer.json"
+#define LINK_SENSOR_1_FILE    "/link_sensor_1.json"
+#define LINK_SENSOR_2_FILE    "/link_sensor_2.json"
+#define LINK_SENSOR_3_FILE    "/link_sensor_3.json"
+#define LINK_SENSOR_4_FILE    "/link_sensor_4.json"
 
 typedef enum SmartFileSystemFlags {
   FileWriteOk,
@@ -38,10 +42,11 @@ class SmartFileSystem {
     StaticJsonDocument<JSON_BUF_SIZE> readConfigFile(void);
     bool isConfigEmpty(void);
     SmartFileSystemFlags_t saveState(const char* buf);
-    DynamicJsonDocument loadState(void);
+    StaticJsonDocument<JSON_BUF_SIZE> loadState(void);
     SmartFileSystemFlags_t saveTimers(const char* buf);
-    //DynamicJsonDocument loadTimers(void);
     SmartTimerStruct loadTimers(void);
+    SmartFileSystemFlags_t saveSensorLink(const char* buf, const char* fn);
+    StaticJsonDocument<JSON_BUF_SIZE> loadSensorLink(const char* fn);
   private:
     bool DEBUG;
     void printDebug(String);

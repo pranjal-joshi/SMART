@@ -196,7 +196,7 @@ SmartFileSystemFlags_t SmartFileSystem::saveState(const char* buf) {
   return saveJsonFile(d, STATE_FILE);
 }
 
-DynamicJsonDocument SmartFileSystem::loadState(void) {
+StaticJsonDocument<JSON_BUF_SIZE> SmartFileSystem::loadState(void) {
   DynamicJsonDocument doc(JSON_BUF_SIZE);
   readJsonFile(&doc, STATE_FILE);
   doc.shrinkToFit();
@@ -213,18 +213,6 @@ SmartFileSystemFlags_t SmartFileSystem::saveTimers(const char* buf) {
   deserializeJson(d, buf);
   return saveJsonFile(d, TIMER_FILE);
 }
-
-/*DynamicJsonDocument SmartFileSystem::loadTimers(void) {
-  DynamicJsonDocument doc(JSON_BUF_SIZE);
-  readJsonFile(&doc, TIMER_FILE);
-  doc.shrinkToFit();
-  if(DEBUG) {
-    Serial.print(F("[+] SmartFileSystem: INFO -> Loading timer file from SPIFFS.. -> "));
-    serializeJson(doc, Serial);
-    Serial.println();
-  }
-  return doc;
-}*/
 
 SmartTimerStruct SmartFileSystem::loadTimers(void) {
   DynamicJsonDocument doc(JSON_BUF_SIZE*4);
@@ -328,4 +316,18 @@ SmartTimerStruct SmartFileSystem::loadTimers(void) {
       
   }
   return timerStruct;
+}
+
+SmartFileSystemFlags_t SmartFileSystem::saveSensorLink(const char* buf, const char* fn) {
+  DynamicJsonDocument d(JSON_BUF_SIZE);
+  deserializeJson(d, buf);
+  d.shrinkToFit();
+  return saveJsonFile(d, fn);
+}
+
+StaticJsonDocument<JSON_BUF_SIZE> SmartFileSystem::loadSensorLink(const char* fn) {
+  DynamicJsonDocument doc(JSON_BUF_SIZE);
+  readJsonFile(&doc, fn);
+  doc.shrinkToFit();
+  return doc;
 }
