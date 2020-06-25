@@ -99,11 +99,12 @@
 #define JSON_TOPIC                "topic"
 #define JSON_ENABLE               "enable"
 #define JSON_DISABLE              "disable"
-#define JSON_SENSOR_LIGHT         "light"
-#define JSON_SENSOR_TEMP          "temp"
-#define JSON_SENSOR_HUM           "hum"
 #define JSON_SENSOR_MOTION        "motion"
 #define JSON_SENSOR_TIMEOUT       "timeout"
+#define JSON_SENSOR_EN_HR         "eh"
+#define JSON_SENSOR_EN_MIN        "em"
+#define JSON_SENSOR_DS_HR         "dh"
+#define JSON_SENSOR_DS_MIN        "dm"
 
 // Switching IO configuration
 #ifdef SWITCHING_NODE
@@ -125,13 +126,7 @@
 
 // Sensor IO configuration
 #ifdef SENSOR_NODE
-  #define DHT_PIN                   D8
-  #define LIGHT_PIN                 A0
   #define MOTION_PIN                D1
-
-  #define THRESH_LIGHT_CHANGE        5   // percentage
-  #define THRESH_TEMP_CHANGE         1   // degree
-  #define THRESH_HUM_CHANGE          1   // RH
 #endif
 typedef struct {
   int hour;

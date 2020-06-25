@@ -1,30 +1,112 @@
+// Get sensor broadcast packet and perform a control action
+void parseSensorBroadcast(String p) {
+  DynamicJsonDocument doc(JSON_BUF_SIZE*4);
+  deserializeJson(doc, p);
+  #ifdef SWITCHING_NODE
+    if(String((const char*)doc[JSON_DEVICE_TYPE]) == JSON_DEVICE_SENSOR && String((const char*)doc[JSON_TYPE]) == JSON_TYPE_BROADCAST) {
+      
+      if(linkJson1[JSON_TYPE_DATA][JSON_TYPE_STATE].as<uint8_t>() == 1
+      && String((const char*)doc[JSON_SMARTID]) == String((const char*)linkJson1[JSON_TYPE_DATA][JSON_FROM])
+      && !io.getByTimer(1)) {
+        if(mDebug)
+            Serial.println(F("[+] SMART: INFO -> MOTION trigger for D1"));
+        if(!checkTimeForMotion(
+          linkJson1[JSON_TYPE_DATA][JSON_SENSOR_EN_HR].as<uint8_t>(),linkJson1[JSON_TYPE_DATA][JSON_SENSOR_EN_MIN].as<uint8_t>(),
+          linkJson1[JSON_TYPE_DATA][JSON_SENSOR_DS_HR].as<uint8_t>(),linkJson1[JSON_TYPE_DATA][JSON_SENSOR_DS_MIN].as<uint8_t>()
+        )) {
+          return;
+        }
+        if(doc[JSON_SENSOR_MOTION].as<uint8_t>() == 1) {
+          if(!io.getRawState(1)) {
+            io.setBySensor(1, true);
+            io.setRawState(1, HIGH);
+          }
+        }
+        else {
+          offTimeoutD1Task.enableIfNot();
+          offTimeoutD1Task.restartDelayed(linkJson1[JSON_TYPE_DATA][JSON_SENSOR_TIMEOUT].as<unsigned long>()*TASK_MINUTE);
+        }
+      }
+      if(linkJson2[JSON_TYPE_DATA][JSON_TYPE_STATE].as<uint8_t>() == 1
+      && String((const char*)doc[JSON_SMARTID]) == String((const char*)linkJson2[JSON_TYPE_DATA][JSON_FROM])
+      && !io.getByTimer(2)) {
+        if(mDebug)
+            Serial.println(F("[+] SMART: INFO -> MOTION trigger for D2"));
+        if(!checkTimeForMotion(
+          linkJson2[JSON_TYPE_DATA][JSON_SENSOR_EN_HR].as<uint8_t>(),linkJson2[JSON_TYPE_DATA][JSON_SENSOR_EN_MIN].as<uint8_t>(),
+          linkJson2[JSON_TYPE_DATA][JSON_SENSOR_DS_HR].as<uint8_t>(),linkJson2[JSON_TYPE_DATA][JSON_SENSOR_DS_MIN].as<uint8_t>()
+        )) {
+          return;
+        }
+        if(doc[JSON_SENSOR_MOTION].as<uint8_t>() == 1) {
+          if(!io.getRawState(2)) {
+            io.setBySensor(2, true);
+            io.setRawState(2, HIGH);
+          }
+        }
+        else {
+          offTimeoutD2Task.enableIfNot();
+          offTimeoutD2Task.restartDelayed(linkJson2[JSON_TYPE_DATA][JSON_SENSOR_TIMEOUT].as<unsigned long>()*TASK_MINUTE);
+        }
+      }
+      if(linkJson3[JSON_TYPE_DATA][JSON_TYPE_STATE].as<uint8_t>() == 1
+      && String((const char*)doc[JSON_SMARTID]) == String((const char*)linkJson3[JSON_TYPE_DATA][JSON_FROM])
+      && !io.getByTimer(3)) {
+        if(mDebug)
+            Serial.println(F("[+] SMART: INFO -> MOTION trigger for D3"));
+        if(!checkTimeForMotion(
+          linkJson3[JSON_TYPE_DATA][JSON_SENSOR_EN_HR].as<uint8_t>(),linkJson3[JSON_TYPE_DATA][JSON_SENSOR_EN_MIN].as<uint8_t>(),
+          linkJson3[JSON_TYPE_DATA][JSON_SENSOR_DS_HR].as<uint8_t>(),linkJson3[JSON_TYPE_DATA][JSON_SENSOR_DS_MIN].as<uint8_t>()
+        )) {
+          return;
+        }
+        if(doc[JSON_SENSOR_MOTION].as<uint8_t>() == 1) {
+          if(!io.getRawState(3)) {
+            io.setBySensor(3, true);
+            io.setRawState(3, HIGH);
+          }
+        }
+        else {
+          offTimeoutD3Task.enableIfNot();
+          offTimeoutD3Task.restartDelayed(linkJson3[JSON_TYPE_DATA][JSON_SENSOR_TIMEOUT].as<unsigned long>()*TASK_MINUTE);
+        }
+      }
+      if(linkJson4[JSON_TYPE_DATA][JSON_TYPE_STATE].as<uint8_t>() == 1
+      && String((const char*)doc[JSON_SMARTID]) == String((const char*)linkJson4[JSON_TYPE_DATA][JSON_FROM])
+      && !io.getByTimer(4)) {
+        if(mDebug)
+            Serial.println(F("[+] SMART: INFO -> MOTION trigger for D4"));
+        if(!checkTimeForMotion(
+          linkJson4[JSON_TYPE_DATA][JSON_SENSOR_EN_HR].as<uint8_t>(),linkJson4[JSON_TYPE_DATA][JSON_SENSOR_EN_MIN].as<uint8_t>(),
+          linkJson4[JSON_TYPE_DATA][JSON_SENSOR_DS_HR].as<uint8_t>(),linkJson4[JSON_TYPE_DATA][JSON_SENSOR_DS_MIN].as<uint8_t>()
+        )) {
+          return;
+        }
+        if(doc[JSON_SENSOR_MOTION].as<uint8_t>() == 1) {
+          if(!io.getRawState(4)) {
+            io.setBySensor(4, true);
+            io.setRawState(4, HIGH);
+          }
+        }
+        else {
+          offTimeoutD4Task.enableIfNot();
+          offTimeoutD4Task.restartDelayed(linkJson4[JSON_TYPE_DATA][JSON_SENSOR_TIMEOUT].as<unsigned long>()*TASK_MINUTE);
+        }
+      }
+    }
+  #endif
+}
+
 // Check and execute time scheduled tasks
 void taskTimerSchedulerHandler(void) {
 
   #ifdef SWITCHING_NODE   // Execute only for SWITCHES, not SENSORS
-  /*if(mDebug) {
-    Serial.print(ntpStruct.hour);
-    Serial.print(":");
-    Serial.print(ntpStruct.minute);
-    Serial.print(":");
-    Serial.print(ntpStruct.second);
-    Serial.println(F("\tTicker running.... "));
-    Serial.print(timerStruct.onTimeD1[0]);
-    Serial.print(":");
-    Serial.print(timerStruct.onTimeD1[1]);
-    Serial.print(":");
-    Serial.print(timerStruct.onTimeD1[2]);
-    Serial.print("\t");
-    for(byte k=0;k<7;k++)
-      Serial.print(timerStruct.weekdaysD1[k]);
-    Serial.print("\t");
-    Serial.println(timerStruct.statusD1);    
-  }*/
   
   // if timer schedular is enabled for the task on this day
   if(timerStruct.statusD1 > 0 && timerStruct.weekdaysD1[ntpStruct.weekday] > 0 && NO_OF_DEVICES > 0) {
     if(ntpStruct.hour == timerStruct.onTimeD1[0] && ntpStruct.minute == timerStruct.onTimeD1[1] && (abs(millis()-timerStruct.onIgnoreD1) > INTERVAL_IGNORE_TIMER)) {
       timerStruct.onIgnoreD1 = millis();
+      io.setByTimer(1, true);
       if(!io.getRawState(1))
         io.setRawState(1, HIGH);
       if(mDebug)
@@ -32,6 +114,7 @@ void taskTimerSchedulerHandler(void) {
     }
     if(ntpStruct.hour == timerStruct.offTimeD1[0] && ntpStruct.minute == timerStruct.offTimeD1[1] && (abs(millis()-timerStruct.offIgnoreD1) > INTERVAL_IGNORE_TIMER)) {
       timerStruct.offIgnoreD1 = millis();
+      io.setByTimer(1, false);
       if(io.getRawState(1))
         io.setRawState(1, LOW);
       if(mDebug)
@@ -42,6 +125,7 @@ void taskTimerSchedulerHandler(void) {
   if(timerStruct.statusD2 > 0 && timerStruct.weekdaysD2[ntpStruct.weekday] > 0 && NO_OF_DEVICES > 1) {
     if(ntpStruct.hour == timerStruct.onTimeD2[0] && ntpStruct.minute == timerStruct.onTimeD2[1] && (abs(millis()-timerStruct.onIgnoreD2) > INTERVAL_IGNORE_TIMER)) {
       timerStruct.onIgnoreD2 = millis();
+      io.setByTimer(2, true);
       if(!io.getRawState(2))
         io.setRawState(2, HIGH);
       if(mDebug)
@@ -49,6 +133,7 @@ void taskTimerSchedulerHandler(void) {
     }
     if(ntpStruct.hour == timerStruct.offTimeD2[0] && ntpStruct.minute == timerStruct.offTimeD2[1] && (abs(millis()-timerStruct.offIgnoreD2) > INTERVAL_IGNORE_TIMER)) {
       timerStruct.offIgnoreD2 = millis();
+      io.setByTimer(2, false);
       if(io.getRawState(2))
         io.setRawState(2, LOW);
       if(mDebug)
@@ -59,6 +144,7 @@ void taskTimerSchedulerHandler(void) {
   if(timerStruct.statusD3 > 0 && timerStruct.weekdaysD3[ntpStruct.weekday] > 0 && NO_OF_DEVICES > 2) {
     if(ntpStruct.hour == timerStruct.onTimeD3[0] && ntpStruct.minute == timerStruct.onTimeD3[1] && (abs(millis()-timerStruct.onIgnoreD3) > INTERVAL_IGNORE_TIMER)) {
       timerStruct.onIgnoreD3 = millis();
+      io.setByTimer(3, true);
       if(!io.getRawState(3))
         io.setRawState(3, HIGH);
       if(mDebug)
@@ -66,6 +152,7 @@ void taskTimerSchedulerHandler(void) {
     }
     if(ntpStruct.hour == timerStruct.offTimeD3[0] && ntpStruct.minute == timerStruct.offTimeD3[1] && (abs(millis()-timerStruct.offIgnoreD3) > INTERVAL_IGNORE_TIMER)) {
       timerStruct.offIgnoreD3 = millis();
+      io.setByTimer(3, false);
       if(io.getRawState(3))
         io.setRawState(3, LOW);
       if(mDebug)
@@ -75,6 +162,7 @@ void taskTimerSchedulerHandler(void) {
   if(timerStruct.statusD4 > 0 && timerStruct.weekdaysD4[ntpStruct.weekday] > 0 && NO_OF_DEVICES > 2) {
     if(ntpStruct.hour == timerStruct.onTimeD4[0] && ntpStruct.minute == timerStruct.onTimeD4[1] && (abs(millis()-timerStruct.onIgnoreD4) > INTERVAL_IGNORE_TIMER)) {
       timerStruct.onIgnoreD4 = millis();
+      io.setByTimer(4, true);
       if(!io.getRawState(4))
         io.setRawState(4, HIGH);
       if(mDebug)
@@ -82,6 +170,7 @@ void taskTimerSchedulerHandler(void) {
     }
     if(ntpStruct.hour == timerStruct.offTimeD4[0] && ntpStruct.minute == timerStruct.offTimeD4[1] && (abs(millis()-timerStruct.offIgnoreD4) > INTERVAL_IGNORE_TIMER)) {
       timerStruct.offIgnoreD4 = millis();
+      io.setByTimer(4, false);
       if(io.getRawState(4))
         io.setRawState(4, LOW);
       if(mDebug)
@@ -98,18 +187,34 @@ void parseSensorLinkJson(String buf) {
   doc.shrinkToFit();
   if(doc.containsKey(JSON_SMARTID)&& String((const char*)doc[JSON_SMARTID]) == smartSsid
   && doc.containsKey(JSON_TYPE) && String((const char*)doc[JSON_TYPE]) == JSON_TYPE_LINK) {
-    if(doc[JSON_DEVICE_NO].as<int>() == 1)
-      linkJson1 = doc;
-    else if(doc[JSON_DEVICE_NO].as<int>() == 2)
-      linkJson2 = doc;
-    else if(doc[JSON_DEVICE_NO].as<int>() == 3)
-      linkJson3 = doc;
-    else if(doc[JSON_DEVICE_NO].as<int>() == 4)
-      linkJson4 = doc;
     if(mDebug) {
       Serial.println(F("[+] SMART: INFO -> SensorLink JSON parsed as follow."));
       serializeJson(doc, Serial);
       Serial.println();
+    }
+    if(doc[JSON_DEVICE_NO].as<int>() == 1) {
+      char buf[JSON_BUF_SIZE];
+      linkJson1 = doc;
+      serializeJson(doc, buf);
+      fsys.saveSensorLink(buf, LINK_SENSOR_1_FILE);
+    }
+    else if(doc[JSON_DEVICE_NO].as<int>() == 2) {
+      char buf[JSON_BUF_SIZE];
+      linkJson2 = doc;
+      serializeJson(doc, buf);
+      fsys.saveSensorLink(buf, LINK_SENSOR_2_FILE);
+    }
+    else if(doc[JSON_DEVICE_NO].as<int>() == 3) {
+      char buf[JSON_BUF_SIZE];
+      linkJson3 = doc;
+      serializeJson(doc, buf);
+      fsys.saveSensorLink(buf, LINK_SENSOR_3_FILE);
+    }
+    else if(doc[JSON_DEVICE_NO].as<int>() == 4) {
+      char buf[JSON_BUF_SIZE];
+      linkJson4 = doc;
+      serializeJson(doc, buf);
+      fsys.saveSensorLink(buf, LINK_SENSOR_4_FILE);
     }
   }
 }
@@ -214,8 +319,6 @@ void parseTimerJson(String buf) {
     timerStruct.statusD4 = data_status[3]; // "disable"
 
     fsys.saveTimers(buf.c_str());
-
-    // TODO - add task dynamically to switch devices
   }
 }
 
@@ -507,7 +610,6 @@ unsigned int getWiFiChannelForSSID(const char* ssid, int confCh, int& quality) {
   isTargetSsidFound = false;
   searchTargetTask.restartDelayed(INTERVAL_TARGET_SEARCH * TASK_SECOND);
   //return confCh;
-  // TODO - Scan and return Channel of MESH SSID if TARGET SSID is unavailable.
   return 1;
 }
 
@@ -557,9 +659,66 @@ void taskCheckRootNode() {
   }
 }
 
-void offTimeoutD1(void) {
-  if(io.getRawState(1))
-    io.setRawState(1, LOW);
+// Check wether the NTP time is in range with user setted time to take motion related control action
+bool checkTimeForMotion(uint8_t en_hr, uint8_t en_min, uint8_t ds_hr, uint8_t ds_min) {
+  if(ntpStruct.hour >= en_hr || ntpStruct.hour <= ds_hr) {
+    if(ntpStruct.hour == en_hr) {
+      if(ntpStruct.minute >= en_min) {
+        if(mDebug)
+          Serial.println(F("[+] SMART: INFO -> CheckTimeForMotion - Within Time Limits!"));
+        return true;
+      }
+    }
+    if(ntpStruct.hour == ds_hr) {
+      if(ntpStruct.minute <= ds_min) {
+        if(mDebug)
+          Serial.println(F("[+] SMART: INFO -> CheckTimeForMotion - Within Time Limits!"));
+        return true;
+      }
+    }
+    if(mDebug)
+      Serial.println(F("[+] SMART: INFO -> CheckTimeForMotion - Within Time Limits!"));
+    return true;
+  }
   if(mDebug)
-    Serial.println(F("[+] SMART: INFO -> D1 MOTION timed out!"));
+    Serial.println(F("[+] SMART: INFO -> CheckTimeForMotion - NOT within Time Limits!"));
+  return false;
 }
+
+#ifdef SWITCHING_NODE
+  void offTimeoutD1(void) {
+    if(io.getRawState(1)) {
+      io.setBySensor(1, false);
+      io.setRawState(1, LOW);
+    }
+    if(mDebug)
+      Serial.println(F("[+] SMART: INFO -> D1 MOTION timed out!"));
+  }
+  
+  void offTimeoutD2(void) {
+    if(io.getRawState(2)) {
+      io.setBySensor(2, false);
+      io.setRawState(2, LOW);
+    }
+    if(mDebug)
+      Serial.println(F("[+] SMART: INFO -> D2 MOTION timed out!"));
+  }
+  
+  void offTimeoutD3(void) {
+    if(io.getRawState(3)) {
+      io.setBySensor(3, false);
+      io.setRawState(3, LOW);
+    }
+    if(mDebug)
+      Serial.println(F("[+] SMART: INFO -> D3 MOTION timed out!"));
+  }
+  
+  void offTimeoutD4(void) {
+    if(io.getRawState(4)) {
+      io.setBySensor(4, false);
+      io.setRawState(4, LOW);
+    }
+    if(mDebug)
+      Serial.println(F("[+] SMART: INFO -> D4 MOTION timed out!"));
+  }
+#endif
