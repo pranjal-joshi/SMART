@@ -258,8 +258,10 @@ ICACHE_RAM_ATTR void ioCallback(void) {
 
 // setup arduino OTA only after device is connected to some network
 void changedConCallback() {
-  if(mDebug)
+  if(mDebug) {
     Serial.println(F("[+] SMART: INFO -> Mesh -> Callback trigered -> onChangedConnection"));
+    Serial.println(mesh.subConnectionJson());
+  }
   if(mesh.isConnected(mesh.getNodeId())) {
     isMeshActive = true;
   }
