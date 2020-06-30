@@ -154,7 +154,28 @@ void setup() {
   delay(bd);
 
   // Read and manage OTA config file
-  handleOtaUpdate();
+  DynamicJsonDocument otaJson(JSON_BUF_SIZE);
+  otaJson = fsys.loadOta();
+  if(otaJson.containsKey(JSON_TYPE_OTA) && String((const char*)otaJson[JSON_TYPE_OTA]) == JSON_ENABLE) {
+    otaJson.clear();
+    otaJson[JSON_TYPE_OTA] = JSON_DISABLE;
+    otaJson.shrinkToFit();
+    char buf[JSON_BUF_SIZE];
+    serializeJson(otaJson, buf);
+    fsys.saveOta(buf);
+    configServer.beginOta();
+    unsigned long timeout = millis();
+    if(mDebug)
+      Serial.println(F("[+] SMART: INFO -> OTA MODE ACTIVE! Waiting for client to Push OTA update.."));
+    while(abs(millis()-timeout) < INTERVAL_OTA_WAIT) {
+      configServer.loop();
+      delay(1);
+    }
+    if(mDebug)
+      Serial.println(F("[+] SMART: INFO -> OTA Timeout reached! Exitting OTA mode.."));
+    ESP.restart();
+  }
+  otaJson.clear();
 
   // Read config.json file to retrieve login creds
   if(fsys.isConfigEmpty()) {
