@@ -114,6 +114,7 @@ example:
 Sensor Packet:
 smart/username/smartId/sensor/values
 {
+	'topic': 'smart/username/smartId/sensor/values',
 	'smartId': 'SMART_12345',
 	'deviceType': 'sensor',
 	'type': 'bcast',
@@ -121,6 +122,7 @@ smart/username/smartId/sensor/values
 }
 example:
 {
+	'topic': 'smart/MyUser/SMART_12345/sensor/values',
 	'smartId': 'SMART_12345',
 	'deviceType': 'sensor',
 	'type': 'bcast',
