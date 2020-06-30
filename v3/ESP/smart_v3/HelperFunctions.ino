@@ -2,9 +2,15 @@
 void parseSensorBroadcast(String p) {
   DynamicJsonDocument doc(JSON_BUF_SIZE*4);
   deserializeJson(doc, p);
-  #ifdef SWITCHING_NODE
-    if(String((const char*)doc[JSON_DEVICE_TYPE]) == JSON_DEVICE_SENSOR && String((const char*)doc[JSON_TYPE]) == JSON_TYPE_BROADCAST) {
-      
+  if(String((const char*)doc[JSON_DEVICE_TYPE]) == JSON_DEVICE_SENSOR && String((const char*)doc[JSON_TYPE]) == JSON_TYPE_BROADCAST) {
+
+    // Publish Sensor values to MQTT if 'this' is gateway
+    if(internetAvailable && mqtt.connected()) {
+      mqtt.publish((const char*)doc[JSON_TOPIC], p.c_str(), RETAIN);
+    }
+
+    #ifdef SWITCHING_NODE     // Execute only if SWITCHING_NODE
+      // Control action as per the sensor broadcast packet
       if(linkJson1[JSON_TYPE_DATA][JSON_TYPE_STATE].as<uint8_t>() == 1
       && String((const char*)doc[JSON_SMARTID]) == String((const char*)linkJson1[JSON_TYPE_DATA][JSON_FROM])
       && !io.getByTimer(1)) {
@@ -93,8 +99,8 @@ void parseSensorBroadcast(String p) {
           offTimeoutD4Task.restartDelayed(linkJson4[JSON_TYPE_DATA][JSON_SENSOR_TIMEOUT].as<unsigned long>()*TASK_MINUTE);
         }
       }
-    }
-  #endif
+    #endif
+  }
 }
 
 // Check and execute time scheduled tasks

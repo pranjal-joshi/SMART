@@ -19,6 +19,7 @@ void taskGetSensorValues(void) {
 
 void broadcastSensorData(void) {
   DynamicJsonDocument doc(JSON_BUF_SIZE);
+  doc[JSON_TOPIC] = getTopicName(TOPIC_SENSOR_VALUE);
   doc[JSON_SMARTID] = smartSsid;
   doc[JSON_DEVICE_TYPE] = JSON_DEVICE_SENSOR;
   doc[JSON_TYPE] = JSON_TYPE_BROADCAST;
