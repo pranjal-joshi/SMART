@@ -153,6 +153,9 @@ void setup() {
   
   delay(bd);
 
+  // Read and manage OTA config file
+  handleOtaUpdate();
+
   // Read config.json file to retrieve login creds
   if(fsys.isConfigEmpty()) {
     configServer.setDebug(mDebug);
@@ -202,6 +205,7 @@ void setup() {
     sched.addTask(timerSchedulerHandlerTask);
     timerSchedulerHandlerTask.enable();
   #endif
+  configServer.beginOta();
 }
 
 void loop() {
@@ -218,6 +222,7 @@ void looper() {
   mqtt.loop();
   mesh.update();
   sched.execute();
+  configServer.loop();
   if(internetAvailable) // Don't call this on Mesh node - Maybe UDP request drops the node out of the mesh!!
     ntp.update();
   
@@ -333,6 +338,23 @@ void decisionMaker(String p) {
           io.getState().toCharArray(stateJsonBuf, io.getState().length());
           broadcastStateChanged(stateJsonBuf);
         #endif
+      }
+
+      // Manage OTA packet
+      else if(doc.containsKey(JSON_TYPE) && (String((const char*)doc[JSON_TYPE]) == JSON_TYPE_OTA) && (String((const char*)doc[JSON_TYPE_STATE]) == JSON_ENABLE)) {
+        DynamicJsonDocument otaJson(JSON_BUF_SIZE);
+        otaJson[JSON_TYPE_OTA] = JSON_ENABLE;
+        otaJson.shrinkToFit();
+        char buf[JSON_BUF_SIZE];
+        serializeJson(otaJson, buf);
+        fsys.saveOta(buf);
+        otaJson.clear();
+        if(mDebug) {
+          Serial.println(F("[+] SMART: INFO -> OTA Packet received, Resetting Node in OTA mode!"));
+          serializeJson(doc, Serial);
+          Serial.println();
+        }
+        ESP.restart();
       }
     }
   }
