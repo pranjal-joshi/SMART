@@ -331,3 +331,17 @@ StaticJsonDocument<JSON_BUF_SIZE> SmartFileSystem::loadSensorLink(const char* fn
   doc.shrinkToFit();
   return doc;
 }
+
+SmartFileSystemFlags_t SmartFileSystem::saveOta(const char* buf) {
+  DynamicJsonDocument d(JSON_BUF_SIZE);
+  deserializeJson(d, buf);
+  d.shrinkToFit();
+  return saveJsonFile(d, OTA_FILE);
+}
+
+StaticJsonDocument<JSON_BUF_SIZE> SmartFileSystem::loadOta(void) {
+  DynamicJsonDocument doc(JSON_BUF_SIZE);
+  readJsonFile(&doc, OTA_FILE);
+  doc.shrinkToFit();
+  return doc;
+}

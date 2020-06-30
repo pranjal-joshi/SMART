@@ -15,6 +15,7 @@
 #define CONF_FILE             "/config.json"
 #define STATE_FILE            "/state.json"
 #define TIMER_FILE            "/timer.json"
+#define OTA_FILE              "/ota.json"
 #define LINK_SENSOR_1_FILE    "/link_sensor_1.json"
 #define LINK_SENSOR_2_FILE    "/link_sensor_2.json"
 #define LINK_SENSOR_3_FILE    "/link_sensor_3.json"
@@ -47,6 +48,8 @@ class SmartFileSystem {
     SmartTimerStruct loadTimers(void);
     SmartFileSystemFlags_t saveSensorLink(const char* buf, const char* fn);
     StaticJsonDocument<JSON_BUF_SIZE> loadSensorLink(const char* fn);
+    SmartFileSystemFlags_t saveOta(const char* buf);
+    StaticJsonDocument<JSON_BUF_SIZE> loadOta(void);
   private:
     bool DEBUG;
     void printDebug(String);
