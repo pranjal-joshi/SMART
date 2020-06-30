@@ -10,7 +10,7 @@
 #define SMARTWEBSERVER_H
 
 #include <ESP8266WiFi.h>
-#include <Hash.h>
+//#include <Hash.h>
 #include <ESPAsyncTCP.h>
 #include <ESPAsyncWebServer.h>
 
@@ -20,6 +20,8 @@ class SmartWebServer {
     void setDebug(bool);
     void begin(const char* ssid, const char* pass);
     void showWifiNetworks(void);
+    void beginOta(void);
+    void loop(void);
   private:
 };
 

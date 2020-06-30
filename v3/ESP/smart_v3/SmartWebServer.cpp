@@ -10,6 +10,8 @@
 #include "SmartConstants.h"
 #include "SmartFileSystem.h"
 
+#include <AsyncElegantOTA.h>
+
 AsyncWebServer server(80);
 SmartFileSystem sfs;
 bool SWS_DEBUG = false;
@@ -357,4 +359,13 @@ void SmartWebServer::showWifiNetworks(void) {
       Serial.println(F("[+] SmartWebServer: INFO -> WiFi Scanning not completed."));
     }
   }
+}
+
+void SmartWebServer::beginOta(void) {
+  AsyncElegantOTA.begin(&server);     // begin OTA
+  server.begin();
+}
+
+void SmartWebServer::loop(void) {
+  AsyncElegantOTA.loop();
 }
