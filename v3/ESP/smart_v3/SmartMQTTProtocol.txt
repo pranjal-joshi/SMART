@@ -161,4 +161,14 @@ example:
 	}
 }
 
+# to boot that node into OTA
+smart/username/gateway
+{
+	'to': 'gateway',
+	'from': 'app',
+	'smartId': 'SMART_00DCCBB8',
+	'type': 'ota',
+	'state': 'enable/disable'
+}
+
 smart/username/gateway					->	{'from':'app', 'to':'smartId', type':'label', data:[a,b,c,d]}

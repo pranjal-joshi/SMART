@@ -15,7 +15,7 @@
 // System Configs for compile-time setting
 #define SWITCHING_NODE          // Enable for main smart node
 //#define SENSOR_NODE           // Enable for sensor nodes (this should be work in Mesh Only)
-//#define FORCE_MESH            // Enable to force the node in mesh mode
+#define FORCE_MESH            // Enable to force the node in mesh mode
 //#define FORCE_ROOT            // Enable to force the node as ROOT
 #define NO_OF_DEVICES           4
 
@@ -36,6 +36,12 @@
 #define TOPIC_INFO              "info"
 #define TOPIC_SENSOR_VALUE      "sensor/value"
 #define TOPIC_USERNAME_WILD     "#"
+
+// OTA Update config
+#define OTA_USER                "smart_admin"
+#define OTA_PASS                "smart_pass"
+#define OTA_PATH                "ota"
+#define OTA_PORT                80
 
 // SmartFileSystem JSON key names
 #define CONF_SSID               "confSSID"
@@ -63,6 +69,7 @@
 #define INTERVAL_SWITCHING_TIME   200   // mS
 #define INTERVAL_IGNORE_TIMER     60*1000//mS
 #define INTERVAL_GET_SENSOR       10    // Seconds
+#define INTERVAL_OTA_WAIT         10*60*1000  // 10 Minutes
 
 // smartWebServer constants
 #define SMART_PASS                "12345678"    // Change later
@@ -91,6 +98,7 @@
 #define JSON_TYPE_NTP             "ntp"
 #define JSON_TYPE_TIMER           "timer"
 #define JSON_TYPE_LINK            "link"
+#define JSON_TYPE_OTA             "ota"
 #define JSON_NTP_HOUR             "hour"
 #define JSON_NTP_MINUTE           "minute"
 #define JSON_NTP_SECOND           "second"
