@@ -497,6 +497,10 @@ String setSmartStatus(const char* msg) {
   DynamicJsonDocument doc(JSON_BUF_SIZE);
   char buf[JSON_BUF_SIZE];
   doc[JSON_TOPIC] = getTopicName(TOPIC_STATUS);
+  if(internetAvailable)
+    doc[JSON_TO] = JSON_TO_APP;
+  else
+    doc[JSON_TO] = JSON_TO_GATEWAY;
   doc[JSON_FROM] = JSON_TO_NODE;
   doc[JSON_SMARTID] = smartSsid;
   doc[JSON_TYPE] = JSON_TYPE_STATUS;

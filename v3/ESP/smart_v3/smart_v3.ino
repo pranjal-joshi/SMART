@@ -434,6 +434,18 @@ void decisionMaker(String p) {
         Serial.println();
       }
     }
+
+    // route STATUS packet to respective MQTT topic if 'this' is gateway
+    if(doc.containsKey(JSON_TYPE) && (String((const char*)doc[JSON_TYPE]) == JSON_TYPE_STATUS)) {
+      char msg[JSON_BUF_SIZE];
+      serializeJson(doc, msg);
+      mqtt.publish((const char*)doc[JSON_TOPIC], msg, RETAIN);
+      if(mDebug) {
+        Serial.print(F("[+] SMART: INFO -> Forwarding STATUS packet from "));
+        serializeJson(doc[JSON_SMARTID], Serial);
+        Serial.println();
+      }
+    }
   }
 
   // Gateway is targeted.. [MeshNode <- Gateway <- App] Write control actions here..
