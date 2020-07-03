@@ -166,7 +166,7 @@ smart/username/gateway
 {
 	'to': 'gateway',
 	'from': 'app',
-	'smartId': 'SMART_00DCCBB8',
+	'smartId': 'SMART_00DCCA33',
 	'type': 'ota',
 	'state': 'enable/disable'
 }
