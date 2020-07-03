@@ -454,7 +454,7 @@ void connectMqttClient() {
         ntp.begin();
         ntp.setTimeOffset(OFFSET_INDIA_GMT);
         //if(mqtt.connect(getSmartSSID())) {
-        if(mqtt.connect(getSmartSSID(),getTopicName(TOPIC_STATUS).c_str(),1,RETAIN,setSmartStatus(JSON_STATUS_OFFLINE))) {    // Will Msg implemented - MQTT
+        if(mqtt.connect(getSmartSSID(),getTopicName(TOPIC_STATUS).c_str(),1,RETAIN,setSmartStatus(JSON_STATUS_OFFLINE).c_str())) {    // Will Msg implemented - MQTT
           if(mDebug) {
             Serial.println(F("[+] SMART: INFO -> MQTT broker connected."));
             Serial.print(F("[+] SMART: INFO -> MQTT IP: "));
@@ -467,7 +467,7 @@ void connectMqttClient() {
           // TODO - Subscribe here for required topics
           mqtt.subscribe(String((String)"smart/"+String(confJson[CONF_USERNAME].as<const char*>())+"/"+TOPIC_GATEWAY).c_str());    // subscribe to smart/username/gateway
           mqtt.publish(getTopicName(TOPIC_INFO).c_str(), getNodeInfo().c_str(), RETAIN);
-          mqtt.publish(getTopicName(TOPIC_STATUS).c_str(), setSmartStatus(JSON_STATUS_ONLINE), RETAIN);
+          mqtt.publish(getTopicName(TOPIC_STATUS).c_str(), setSmartStatus(JSON_STATUS_ONLINE).c_str(), RETAIN);
         }
         else {
           if(mDebug) {
@@ -493,7 +493,7 @@ const char* getSmartSSID() {
 }
 
 // set Smart Status for MQTT Will and to help app
-const char* setSmartStatus(const char* msg) {
+String setSmartStatus(const char* msg) {
   DynamicJsonDocument doc(JSON_BUF_SIZE);
   char buf[JSON_BUF_SIZE];
   doc[JSON_TOPIC] = getTopicName(TOPIC_STATUS);
@@ -509,7 +509,7 @@ const char* setSmartStatus(const char* msg) {
   else {
     mesh.sendBroadcast(buf);
   }
-  return buf;
+  return String(buf);
 }
 
 // returns the nodeId of Root node in painlessMesh format
