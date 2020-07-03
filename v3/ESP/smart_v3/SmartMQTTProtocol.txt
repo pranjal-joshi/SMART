@@ -77,6 +77,16 @@ smart/username/smartId/state
 	'data': [1, 0, 0, 1]
 }
 
+// Node to App - will message
+smart/username/smartId/state
+{
+	'topic': 'smart/username/smartId/status'
+	'from': 'node',
+	'smartId': 'SMART_00C30094',
+	'type': 'status',
+	'status': 'online/offline/busy'
+}
+
 // Gateway to Mesh
 {
 	'from': 'gateway',

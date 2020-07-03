@@ -38,6 +38,7 @@
 #define TOPIC_INFO              "info"
 #define TOPIC_SENSOR_VALUE      "sensor/value"
 #define TOPIC_USERNAME_WILD     "#"
+#define TOPIC_STATUS            "status"
 
 // OTA Update config
 #define OTA_USER                "smart_admin"
@@ -101,6 +102,7 @@
 #define JSON_TYPE_TIMER           "timer"
 #define JSON_TYPE_LINK            "link"
 #define JSON_TYPE_OTA             "ota"
+#define JSON_TYPE_STATUS          "status"
 #define JSON_NTP_HOUR             "hour"
 #define JSON_NTP_MINUTE           "minute"
 #define JSON_NTP_SECOND           "second"
@@ -115,6 +117,9 @@
 #define JSON_SENSOR_EN_MIN        "em"
 #define JSON_SENSOR_DS_HR         "dh"
 #define JSON_SENSOR_DS_MIN        "dm"
+#define JSON_STATUS_ONLINE        "online"
+#define JSON_STATUS_OFFLINE       "offline"
+#define JSON_STATUS_BUSY          "busy"
 
 // Switching IO configuration
 #ifdef SWITCHING_NODE
