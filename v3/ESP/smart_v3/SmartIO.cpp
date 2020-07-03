@@ -35,14 +35,23 @@ SmartIo::SmartIo(byte l, byte c, byte d, byte oe) {
 }
 
 void SmartIo::begin(void) {
-  pinMode(_oe, OUTPUT);
-  digitalWrite(_oe, HIGH);        // Disable OE of latch to avoid flickering
-  pinMode(_latch, OUTPUT);
-  pinMode(_clk, OUTPUT);
-  pinMode(_data, OUTPUT);
-  if(IO_DEBUG) {
-    Serial.printf("[+] SmartIo: PINS -> Latch: %d, Clk: %d, Data: %d, /OE: %d\n",_latch,_clk,_data,_oe);
-  }
+  #if NO_OF_DEVICES == 4
+    pinMode(_oe, OUTPUT);
+    digitalWrite(_oe, HIGH);        // Disable OE of latch to avoid flickering
+    pinMode(_latch, OUTPUT);
+    pinMode(_clk, OUTPUT);
+    pinMode(_data, OUTPUT);
+    if(IO_DEBUG) {
+      Serial.printf("[+] SmartIo: PINS -> Latch: %d, Clk: %d, Data: %d, /OE: %d\n",_latch,_clk,_data,_oe);
+    }
+  #endif
+  #if NO_OF_DEVICES == 2
+    pinMode(SW1, INPUT_PULLUP);
+    pinMode(SW2, FUNCTION_3);
+  #endif
+  #if NO_OF_DEVICES == 1
+    pinMode(SW1, INPUT_PULLUP);
+  #endif
   pointerToClass = this;
 }
 
@@ -81,10 +90,19 @@ void SmartIo::setState(const char* buf) {
     Serial.print(F("[+] SmartIo: INFO -> Setting output state = "));
     Serial.println(stateVar,BIN);
   }
-  digitalWrite(_latch, LOW);
-  shiftOut(_data, _clk, MSBFIRST, stateVar);
-  digitalWrite(_latch, HIGH);
-  digitalWrite(_oe, LOW);
+  #if NO_OF_DEVICES == 4
+    digitalWrite(_latch, LOW);
+    shiftOut(_data, _clk, MSBFIRST, stateVar);
+    digitalWrite(_latch, HIGH);
+    digitalWrite(_oe, LOW);
+  #endif
+  #if NO_OF_DEVICES == 2
+    digitalWrite(R1, bitRead(stateVar,0));
+    digitalWrite(R2, bitRead(stateVar,1));
+  #endif
+  #if NO_OF_DEVICES == 1
+    digitalWrite(R1, bitRead(stateVar,0));
+  #endif
 }
 
 String SmartIo::getState(void) {
@@ -112,10 +130,19 @@ void SmartIo::setRawState(uint8_t device_no, uint8_t state) {
     stateVar |= relayArray[device_no-1];
   else
     stateVar &= ~(relayArray[device_no-1]);
-  digitalWrite(_latch, LOW);
-  shiftOut(_data, _clk, MSBFIRST, stateVar);
-  digitalWrite(_latch, HIGH);
-  digitalWrite(_oe, LOW);
+  #if NO_OF_DEVICES == 4
+    digitalWrite(_latch, LOW);
+    shiftOut(_data, _clk, MSBFIRST, stateVar);
+    digitalWrite(_latch, HIGH);
+    digitalWrite(_oe, LOW);
+  #endif
+  #if NO_OF_DEVICES == 2
+    digitalWrite(R1, bitRead(stateVar,0));
+    digitalWrite(R2, bitRead(stateVar,1));
+  #endif
+  #if NO_OF_DEVICES == 1
+    digitalWrite(R1, bitRead(stateVar,0));
+  #endif
 }
 
 void SmartIo::enableOutput(bool out) {
