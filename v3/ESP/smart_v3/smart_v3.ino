@@ -65,6 +65,11 @@ int quality;
 uint16_t channel = 0;
 volatile unsigned long lastInterrupted = 0;
 volatile bool isInterrupted = false;
+
+std::vector<uint32_t> nodeIdVector;
+std::vector<String> smartIdVector;
+painlessmesh::protocol::NodeTree meshTree;
+
 SmartNtpStruct ntpStruct;
 SmartTimerStruct timerStruct;
 
@@ -313,6 +318,9 @@ void changedConCallback() {
 
   // Broadcast info packets in changes in connection
   mesh.sendBroadcast(getNodeInfo());
+
+  // Broadcast Vector Link to Mesh
+  broadcastVectorLink();
 }
 
 // When Mesh receives anything
@@ -464,6 +472,7 @@ void decisionMaker(String p) {
   parseTimerJson(p);
   parseSensorLinkJson(p);
   parseSensorBroadcast(p);
+  parseVectorLink(p);
 
   if(mDebug) {                          // TODO: REMOVE THIS LATER
     pinMode(LED_BUILTIN,OUTPUT);

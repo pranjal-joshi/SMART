@@ -1,3 +1,28 @@
+// Add vector linking of mesh nodeId & smartId
+void parseVectorLink(String p) {
+  DynamicJsonDocument doc(JSON_BUF_SIZE);
+  deserializeJson(doc, p);
+  // todo - implement checking and updating STATUS TOPIC when node disconnects
+  if(String((const char*)doc[JSON_TYPE]) == JSON_TYPE_VECTOR_LINK) {
+    if (std::find(nodeIdVector.begin(), nodeIdVector.end(), doc[JSON_NODEID].as<uint32_t>()) == nodeIdVector.end()) {
+      nodeIdVector.push_back(doc[JSON_NODEID].as<uint32_t>());
+      smartIdVector.push_back(String(doc[JSON_NODEID].as<const char*>()));
+    }
+  }
+}
+
+// Broadcast vector linking for MESH
+void broadcastVectorLink(void) {
+  DynamicJsonDocument doc(JSON_BUF_SIZE);
+  doc[JSON_NODEID] = mesh.getNodeId();
+  doc[JSON_SMARTID] = smartSsid;
+  doc[JSON_TYPE] = JSON_TYPE_VECTOR_LINK;
+  doc.shrinkToFit();
+  char buf[JSON_BUF_SIZE];
+  serializeJson(doc, buf);
+  mesh.sendBroadcast(buf);
+}
+
 // Get sensor broadcast packet and perform a control action
 void parseSensorBroadcast(String p) {
   DynamicJsonDocument doc(JSON_BUF_SIZE*4);

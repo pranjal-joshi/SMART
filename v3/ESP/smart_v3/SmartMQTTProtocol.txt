@@ -121,6 +121,13 @@ example:
 	}
 }
 
+//Sync NodeId with SmartID - MESH ONLY
+{
+	'nodeId': mesh.getNodeId(),
+	'smartId': 'SMART_12345',
+	'type': 'vector_link'
+}
+
 Sensor Packet:
 smart/username/smartId/sensor/values
 {
