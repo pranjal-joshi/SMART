@@ -95,8 +95,10 @@ Task getNtpTask(INTERVAL_GET_NTP*TASK_SECOND, TASK_FOREVER, &taskGetNtp, &sched)
 #endif
 
 void setup() {
-  Serial.begin(115200);
-  Serial.println("\n");
+  if(mDebug) {
+    Serial.begin(115200);
+    Serial.println("\n");
+  }
 
   smartSsid = getSmartSSID();
   randomSeed(analogRead(A0));

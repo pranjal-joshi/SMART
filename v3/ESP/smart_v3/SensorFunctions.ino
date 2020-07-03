@@ -2,7 +2,7 @@
 #ifdef SENSOR_NODE
 
 void initSensorHardware(void) {
-  pinMode(MOTION_PIN, INPUT);
+  pinMode(MOTION_PIN, INPUT_PULLUP);
   attachInterrupt(MOTION_PIN, motionIsr, CHANGE);
 }
 
@@ -12,8 +12,11 @@ ICACHE_RAM_ATTR void motionIsr(void) {
 
 void taskGetSensorValues(void) {
   motionState = digitalRead(MOTION_PIN);
-  if(mDebug)
+  if(mDebug) {
+    sensorInitDebug();
     Serial.printf("[+] SMART: getSensorValuesTask -> Motion: %d",motionState);
+    sensorEndDebug();
+  }
   broadcastSensorData();
 }
 
@@ -33,9 +36,24 @@ void broadcastSensorData(void) {
   }
   mesh.sendBroadcast(buf);
   if(mDebug) {
+    sensorInitDebug();
     Serial.println(F("[+] SMART: INFO -> Broadcasting following SENSOR packet.."));
     Serial.println(buf);
+    sensorEndDebug();
   }
+}
+
+void sensorInitDebug(void) {
+  pinMode(1, FUNCTION_0);
+  pinMode(3, FUNCTION_0);
+  Serial.begin(115200);
+}
+
+void sensorEndDebug(void) {
+  Serial.end();
+  pinMode(1, FUNCTION_3);
+  pinMode(3, FUNCTION_4);
+  pinMode(MOTION_PIN, INPUT_PULLUP);
 }
 
 #endif
