@@ -21,6 +21,9 @@
   #if NO_OF_DEVICES == 4
     SmartIo io(LATCH_PIN, CLK_PIN, DATA_PIN, OE_PIN);
   #endif
+  #if NO_OF_DEVICES < 4
+    SmartIo io(0,0,0,0);      // Pass dummy params as GPIOs used directly instead of ShiftReg
+  #endif
 #endif
 
 #ifdef SENSOR_NODE
@@ -114,13 +117,18 @@ void setup() {
   }
 
   #ifdef SWITCHING_NODE
-    if(NO_OF_DEVICES == 4) {
       // Critical routine - load last known states to relays ASAP
       io.begin();
-      io.addInterrupt(SW1, CHANGE);
-      io.addInterrupt(SW2, CHANGE);
-      io.addInterrupt(SW3, CHANGE);
-      io.addInterrupt(SW4, CHANGE);
+      #if NO_OF_DEVICES > 0
+        io.addInterrupt(SW1, CHANGE);
+      #endif
+      #if NO_OF_DEVICES > 1
+        io.addInterrupt(SW2, CHANGE);
+      #endif
+      #if NO_OF_DEVICES > 2
+        io.addInterrupt(SW3, CHANGE);
+        io.addInterrupt(SW4, CHANGE);
+      #endif
       io.setCallback(ioCallback);
       stateJson = fsys.loadState();
       serializeJson(stateJson, stateJsonBuf);
@@ -146,11 +154,16 @@ void setup() {
         }
       }
       // Load sensor link conf from SPIFFS!
-      linkJson1 = fsys.loadSensorLink(LINK_SENSOR_1_FILE);
-      linkJson2 = fsys.loadSensorLink(LINK_SENSOR_2_FILE);
-      linkJson3 = fsys.loadSensorLink(LINK_SENSOR_3_FILE);
-      linkJson4 = fsys.loadSensorLink(LINK_SENSOR_4_FILE);
-    }
+      #if NO_OF_DEVICES > 0
+        linkJson1 = fsys.loadSensorLink(LINK_SENSOR_1_FILE);
+      #endif
+      #if NO_OF_DEVICES > 1
+        linkJson2 = fsys.loadSensorLink(LINK_SENSOR_2_FILE);
+      #endif
+      #if NO_OF_DEVICES > 2
+        linkJson3 = fsys.loadSensorLink(LINK_SENSOR_3_FILE);
+        linkJson4 = fsys.loadSensorLink(LINK_SENSOR_4_FILE);
+      #endif
   #endif
   
   delay(bd);
