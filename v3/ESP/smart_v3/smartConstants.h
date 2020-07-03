@@ -14,7 +14,9 @@
 
 // System Configs for compile-time setting
 #define SWITCHING_NODE          // Enable for main smart node
-//#define SENSOR_NODE           // Enable for sensor nodes (this should be work in Mesh Only)
+#ifndef SWITCHING_NODE
+  #define SENSOR_NODE           // Enable for sensor nodes (this should be work in Mesh Only)
+#endif
 //#define FORCE_MESH            // Enable to force the node in mesh mode
 //#define FORCE_ROOT            // Enable to force the node as ROOT
 #define NO_OF_DEVICES           4
@@ -134,7 +136,7 @@
 
 // Sensor IO configuration
 #ifdef SENSOR_NODE
-  #define MOTION_PIN                D1
+  #define MOTION_PIN          3 // RX of ESP01 as GPIO (FUNCTION_3) - NOT digitalPin
 #endif
 typedef struct {
   int hour;
