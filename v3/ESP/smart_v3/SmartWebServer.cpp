@@ -362,6 +362,10 @@ void SmartWebServer::showWifiNetworks(void) {
 }
 
 void SmartWebServer::beginOta(void) {
+  size_t sz = snprintf(NULL, 0, "SMART_%08X", (uint32_t)ESP.getChipId()) + 1;
+  char *ssid = (char*)malloc(sz);
+  snprintf(ssid, 15, "SMART_%08X", (uint32_t)ESP.getChipId());
+  AsyncElegantOTA.setID(ssid);
   AsyncElegantOTA.begin(&server);     // begin OTA
   server.begin();
 }
