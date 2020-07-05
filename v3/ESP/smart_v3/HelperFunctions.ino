@@ -6,7 +6,14 @@ void parseVectorLink(String p) {
   if(String((const char*)doc[JSON_TYPE]) == JSON_TYPE_VECTOR_LINK) {
     if (std::find(nodeIdVector.begin(), nodeIdVector.end(), doc[JSON_NODEID].as<uint32_t>()) == nodeIdVector.end()) {
       nodeIdVector.push_back(doc[JSON_NODEID].as<uint32_t>());
-      smartIdVector.push_back(String(doc[JSON_NODEID].as<const char*>()));
+      smartIdVector.push_back(String(doc[JSON_SMARTID].as<const char*>()));
+      if(mDebug) {
+        Serial.print(F("[+] SMART: INFO -> New VECTOR LINK added:\tNodeID: "));
+        serializeJson(doc[JSON_NODEID], Serial);
+        Serial.print(F("\t SmartID: "));
+        serializeJson(doc[JSON_SMARTID], Serial);
+        Serial.println();
+      }
     }
   }
 }
@@ -452,8 +459,9 @@ void initMesh(uint16_t ch, int qual) {
       Serial.println(F("[+] SMART: WARNING --> Node is in FORCE_MESH mode, Skipping mannualStation!"));
   #endif
   mesh.setHostname(getSmartSSID());
-  mesh.onChangedConnections(&changedConCallback);
   mesh.onReceive(&meshReceiveCallback);
+  mesh.onChangedConnections(&changedConCallback);
+  mesh.onDroppedConnection(&meshDroppedCallback);
   #ifdef FORCE_ROOT
     mesh.setRoot(true);
     if(mDebug)

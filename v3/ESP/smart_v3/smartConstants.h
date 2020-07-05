@@ -15,7 +15,7 @@
 // System Configs for compile-time setting
 #define SWITCHING_NODE          // Enable for main smart node
 #ifndef SWITCHING_NODE
-  #define SENSOR_NODE           // Enable for sensor nodes (this should be work in Mesh Only)
+  #define SENSOR_NODE           // Enable for sensor nodes
 #endif
 //#define FORCE_MESH            // Enable to force the node in mesh mode
 //#define FORCE_ROOT            // Enable to force the node as ROOT

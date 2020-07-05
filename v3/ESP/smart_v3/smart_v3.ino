@@ -55,7 +55,6 @@ DynamicJsonDocument linkJson3(JSON_BUF_SIZE);
 DynamicJsonDocument linkJson4(JSON_BUF_SIZE);
 char stateJsonBuf[JSON_BUF_SIZE];
 bool internetAvailable = false;
-bool isMeshActive = false;
 bool isOtaActive = false;
 bool isTargetSsidFound = false;
 bool isStateChanged = false;
@@ -302,22 +301,21 @@ ICACHE_RAM_ATTR void ioCallback(void) {
   }
 }
 
-// setup arduino OTA only after device is connected to some network
+// Broadcast about 'this' when something changes in the mesh
 void changedConCallback() {
   if(mDebug) {
     Serial.println(F("[+] SMART: INFO -> Mesh -> Callback trigered -> onChangedConnection"));
     Serial.println(mesh.subConnectionJson());
   }
-  if(mesh.isConnected(mesh.getNodeId())) {
-    isMeshActive = true;
-  }
-  else {
-    isMeshActive = false;
-  }
+
+  // Check for root as something is changed!
   taskCheckRootNode();
 
   // Broadcast info packets in changes in connection
   mesh.sendBroadcast(getNodeInfo());
+
+  // Set STATUS ONLINE to MQTT
+  setSmartStatus(JSON_STATUS_ONLINE);
 
   // Broadcast Vector Link to Mesh
   broadcastVectorLink();
@@ -328,6 +326,38 @@ void meshReceiveCallback( uint32_t from, String &msg) {
   if(mDebug)
     Serial.printf("[+] SMART: Mesh Callback -> %s\n",msg.c_str());
   decisionMaker(msg);
+}
+
+// When any nodes dropped from the mesh - Gateway should report STATUS OFFLINE to MQTT
+void meshDroppedCallback(uint32_t nodeId) {
+  std::vector<uint32_t>::iterator it = std::find(nodeIdVector.begin(), nodeIdVector.end(), nodeId);
+  if(it != nodeIdVector.end()) {
+    uint8_t index = std::distance(nodeIdVector.begin(),it);
+    String dcSsid = smartIdVector[index];
+    String topic = String((String)"smart/"+String(confJson[CONF_USERNAME].as<const char*>())+"/"+dcSsid+"/"+TOPIC_STATUS);
+    char payload[JSON_BUF_SIZE];
+    DynamicJsonDocument doc(JSON_BUF_SIZE);
+    doc[JSON_FROM] = JSON_TO_NODE;
+    doc[JSON_SMARTID] = dcSsid;
+    doc[JSON_TYPE] = JSON_TYPE_STATUS;
+    doc[JSON_TYPE_STATUS] = JSON_STATUS_OFFLINE;
+    doc.shrinkToFit();
+    serializeJson(doc, payload);
+    if(mqtt.connected()) {
+      mqtt.publish(topic.c_str(), payload, RETAIN);
+    }
+    if(mDebug) {
+      Serial.printf("[+] SMART: Mesh DROPPED Callback -> SSID = %s\n",dcSsid.c_str());
+      serializeJson(doc, Serial);
+      Serial.println();
+    }
+    nodeIdVector.erase(nodeIdVector.begin()+index);
+    smartIdVector.erase(smartIdVector.begin()+index);
+  }
+  else {
+    if(mDebug)
+      Serial.println(F("[+] SMART: Mesh DROPPED Callback -> NodeID Not Found in Vector!"));
+  }
 }
 
 // When anything is published to MQTT
