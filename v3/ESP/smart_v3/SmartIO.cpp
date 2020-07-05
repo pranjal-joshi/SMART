@@ -97,11 +97,11 @@ void SmartIo::setState(const char* buf) {
     digitalWrite(_oe, LOW);
   #endif
   #if NO_OF_DEVICES == 2
-    digitalWrite(R1, bitRead(stateVar,0));
-    digitalWrite(R2, bitRead(stateVar,1));
+    digitalWrite(R1, bitRead(~stateVar,0));
+    digitalWrite(R2, bitRead(~stateVar,1));
   #endif
   #if NO_OF_DEVICES == 1
-    digitalWrite(R1, bitRead(stateVar,0));
+    digitalWrite(R1, bitRead(~stateVar,0));
   #endif
 }
 
@@ -137,11 +137,11 @@ void SmartIo::setRawState(uint8_t device_no, uint8_t state) {
     digitalWrite(_oe, LOW);
   #endif
   #if NO_OF_DEVICES == 2
-    digitalWrite(R1, bitRead(stateVar,0));
-    digitalWrite(R2, bitRead(stateVar,1));
+    digitalWrite(R1, bitRead(~stateVar,0));
+    digitalWrite(R2, bitRead(~stateVar,1));
   #endif
   #if NO_OF_DEVICES == 1
-    digitalWrite(R1, bitRead(stateVar,0));
+    digitalWrite(R1, bitRead(~stateVar,0));
   #endif
 }
 
