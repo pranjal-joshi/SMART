@@ -13,7 +13,7 @@
 #define mDebug            true
 
 // System Configs for compile-time setting
-#define SWITCHING_NODE          // Enable for main smart node
+//#define SWITCHING_NODE          // Enable for main smart node
 #ifndef SWITCHING_NODE
   #define SENSOR_NODE           // Enable for sensor nodes
 #endif
@@ -63,7 +63,7 @@
 #define MESH_PORT                 4321
 #define MESH_HIDDEN               1
 #define MESH_VISIBLE              0
-#define MESH_QUALITY_THRESH       -85   // dBm
+#define MESH_QUALITY_THRESH       -75   // dBm
 #define INTERVAL_ROOT_CHECK       30    // Seconds
 #define INTERVAL_TARGET_SEARCH    60    // Seconds
 #define INTERVAL_NTP_BROADCAST    61    // Seconds
@@ -71,7 +71,7 @@
 #define INTERVAL_TIMER_SCHED      0.4   // Seconds
 #define INTERVAL_SWITCHING_TIME   200   // mS
 #define INTERVAL_IGNORE_TIMER     60*1000//mS
-#define INTERVAL_GET_SENSOR       10    // Seconds
+#define INTERVAL_GET_SENSOR       30    // Seconds
 #define INTERVAL_OTA_WAIT         10*60*1000  // 10 Minutes
 
 // smartWebServer constants
@@ -156,7 +156,7 @@
 
 // Sensor IO configuration
 #ifdef SENSOR_NODE
-  #define MOTION_PIN          3 // RX of ESP01 as GPIO (FUNCTION_3) - NOT digitalPin
+  #define MOTION_PIN          2
 #endif
 typedef struct {
   int hour;
