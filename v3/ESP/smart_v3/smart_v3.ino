@@ -227,12 +227,6 @@ void setup() {
 
   // Setup mesh network
   initMesh(channel, quality);
-
-  #ifdef SENSOR_NODE
-    initSensorHardware();
-    sched.addTask(getSensorValueTask);
-    getSensorValueTask.enable();
-  #endif
   
   // Start scheduled task execution
   sched.addTask(rootCheckTask);
@@ -245,7 +239,11 @@ void setup() {
     sched.addTask(timerSchedulerHandlerTask);
     timerSchedulerHandlerTask.enable();
   #endif
-  configServer.beginOta();
+  #ifdef SENSOR_NODE
+    initSensorHardware();
+    sched.addTask(getSensorValueTask);
+    getSensorValueTask.enable();
+  #endif
 }
 
 void loop() {
@@ -504,11 +502,13 @@ void decisionMaker(String p) {
   parseSensorBroadcast(p);
   parseVectorLink(p);
 
-  if(mDebug) {                          // TODO: REMOVE THIS LATER
-    pinMode(LED_BUILTIN,OUTPUT);
-    if(p == "1")
-      digitalWrite(LED_BUILTIN,LOW);
-    if(p == "0")
-      digitalWrite(LED_BUILTIN,HIGH);
-  }
+  #ifdef SWITCHING_NODE
+    if(mDebug) {                          // TODO: REMOVE THIS LATER
+      pinMode(LED_BUILTIN,OUTPUT);
+      if(p == "1")
+        digitalWrite(LED_BUILTIN,LOW);
+      if(p == "0")
+        digitalWrite(LED_BUILTIN,HIGH);
+    }
+  #endif
 }
