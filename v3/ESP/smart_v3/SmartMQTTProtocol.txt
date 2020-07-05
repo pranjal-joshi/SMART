@@ -154,7 +154,7 @@ smart/username/smartId/link/1-2-3-4
 	'no': 1/2/3/4,		// device_no
 	'data' : {
 		'from': 'SENSOR_ID',
-		'state': enable/disable
+		'state': 1/0 (enable/disable),
 		'timeout': minutes,
 		'eh': Hr,
 		'em': min,
