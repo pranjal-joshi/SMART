@@ -14,7 +14,7 @@ void taskGetSensorValues(void) {
   motionState = digitalRead(MOTION_PIN);
   if(mDebug) {
     sensorInitDebug();
-    Serial.printf("[+] SMART: getSensorValuesTask -> Motion: %d",motionState);
+    Serial.printf("[+] SMART: getSensorValuesTask -> Motion: %d\n",motionState);
     sensorEndDebug();
   }
   broadcastSensorData();
@@ -50,6 +50,7 @@ void sensorInitDebug(void) {
 }
 
 void sensorEndDebug(void) {
+  Serial.flush();
   Serial.end();
   pinMode(1, FUNCTION_3);
   pinMode(3, FUNCTION_4);
