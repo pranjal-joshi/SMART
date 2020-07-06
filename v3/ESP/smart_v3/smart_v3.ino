@@ -173,6 +173,7 @@ void setup() {
   delay(bd);
 
   // Read and manage OTA config file
+  // curl -u otaAdmin:otaPass -F "image=@filename.bin" 192.168.4.1/ota
   DynamicJsonDocument otaJson(JSON_BUF_SIZE);
   otaJson = fsys.loadOta();
   if(otaJson.containsKey(JSON_TYPE_OTA) && String((const char*)otaJson[JSON_TYPE_OTA]) == JSON_ENABLE) {
