@@ -10,10 +10,10 @@
 #define SMARTCONSTANTS_H
 
 // Master serial debug control
-#define mDebug            true
+#define mDebug                  true
 
 // System Configs for compile-time setting
-//#define SWITCHING_NODE          // Enable for main smart node
+#define SWITCHING_NODE          // Enable for main smart node
 #ifndef SWITCHING_NODE
   #define SENSOR_NODE           // Enable for sensor nodes
 #endif
@@ -156,7 +156,7 @@
 
 // Sensor IO configuration
 #ifdef SENSOR_NODE
-  #define MOTION_PIN          2
+  #define MOTION_PIN          3     // GPIO 3 issue with RCWL-0516 PULL_DOWN
 #endif
 typedef struct {
   int hour;
