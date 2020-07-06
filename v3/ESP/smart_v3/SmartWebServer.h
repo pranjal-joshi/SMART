@@ -9,8 +9,11 @@
 #ifndef SMARTWEBSERVER_H
 #define SMARTWEBSERVER_H
 
+#define WEBSERVER_H         // This avoids Redeclaration Error in ESPAsyncWebServer.h
+
+#include <ESP8266mDNS.h>
+#include <ESP8266HTTPUpdateServer.h>
 #include <ESP8266WiFi.h>
-//#include <Hash.h>
 #include <ESPAsyncTCP.h>
 #include <ESPAsyncWebServer.h>
 

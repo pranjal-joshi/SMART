@@ -10,7 +10,8 @@
 #include "SmartConstants.h"
 #include "SmartFileSystem.h"
 
-#include <AsyncElegantOTA.h>
+ESP8266WebServer httpServer(80);
+ESP8266HTTPUpdateServer httpUpdater;
 
 AsyncWebServer server(80);
 SmartFileSystem sfs;
@@ -362,14 +363,17 @@ void SmartWebServer::showWifiNetworks(void) {
 }
 
 void SmartWebServer::beginOta(void) {
-  size_t sz = snprintf(NULL, 0, "SMART_%08X", (uint32_t)ESP.getChipId()) + 1;
+  /*size_t sz = snprintf(NULL, 0, "SMART_%08X", (uint32_t)ESP.getChipId()) + 1;
   char *ssid = (char*)malloc(sz);
   snprintf(ssid, 15, "SMART_%08X", (uint32_t)ESP.getChipId());
   AsyncElegantOTA.setID(ssid);
   AsyncElegantOTA.begin(&server);     // begin OTA
-  server.begin();
+  server.begin();*/
+  httpUpdater.setup(&httpServer, OTA_PATH, OTA_USER, OTA_PASS);
+  httpServer.begin();
 }
 
 void SmartWebServer::loop(void) {
-  AsyncElegantOTA.loop();
+  //AsyncElegantOTA.loop();
+  httpServer.handleClient();
 }
