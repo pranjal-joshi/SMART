@@ -11,6 +11,7 @@
 
 // Master serial debug control
 #define mDebug                  true
+#define VERSION                 "1.0.0"
 
 // System Configs for compile-time setting
 #define SWITCHING_NODE          // Enable for main smart node
@@ -41,9 +42,9 @@
 #define TOPIC_STATUS            "status"
 
 // OTA Update config
-#define OTA_USER                "smart_admin"
-#define OTA_PASS                "smart_pass"
-#define OTA_PATH                "ota"
+#define OTA_USER                "otaAdmin"
+#define OTA_PASS                "otaPass"
+#define OTA_PATH                "/ota"
 #define OTA_PORT                80
 
 // SmartFileSystem JSON key names
@@ -87,6 +88,7 @@
 #define JSON_NODEID               "nodeId"
 #define JSON_SMARTID              "smartId"
 #define JSON_NODENAME             "nodeName"
+#define JSON_VERSION              "version"
 #define JSON_DEVICE_TYPE          "deviceType"
 #define JSON_DEVICE_SWITCH        "switch"
 #define JSON_DEVICE_SENSOR        "sensor"
