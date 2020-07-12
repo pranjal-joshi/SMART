@@ -142,12 +142,12 @@
     #define SNS4              SW4
   #endif
   #if NO_OF_DEVICES == 2
-    #define SW1               5       // GPIO - ESP01
+    #define SW1               2       // GPIO - ESP01
     #define SW2               3       // GPIO - ESP01 - FUNCTION_3 (RX)
     #define SNS1              SW1
     #define SNS2              SW2
-    #define R1                1       // GPIO - ESP01 - Relay Active Low - LOW = BOOT FAILS - FUNCTION_3 (TX)
-    #define R2                2       // GPIO - ESP01 - Relay Active Low - LOW = BOOT FAILS
+    #define R1                0       // GPIO - ESP01 - Relay Active Low - LOW = BOOT FAILS
+    #define R2                1       // GPIO - ESP01 - Relay Active Low - LOW = BOOT FAILS - FUNCTION_3 (TX)
   #endif
   #if NO_OF_DEVICES == 1
     #define SW1               5       // GPIO - ESP01
