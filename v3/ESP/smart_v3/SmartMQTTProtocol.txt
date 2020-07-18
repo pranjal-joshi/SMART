@@ -30,6 +30,7 @@ smart/username/smartId/info ->
 	'deviceType': 'switch/sensor',
 	'nodeName': 'MyRoom',
 	'NoD':'1/2/4',
+	'version': '1.0.0'
 }
 
 // App to Node
@@ -37,7 +38,7 @@ smart/username/gateway		->	{'from':'app', 'smartId':'smartId', type':'state', da
 {
 	'to': 'gateway',
 	'from': 'app',
-	'smartId': 'SMART_00C30094',
+	'smartId': SMART_00DCCFC8',
 	'type': 'state',
 	'data': [1, 0, 0, 1]
 }
@@ -72,7 +73,7 @@ smart/username/smartId/state
 {
 	'topic': 'smart/username/smartId/state'
 	'from': 'node',
-	'smartId': 'SMART_00C30094',
+	'smartId': 'SMART_00DCCFC8',
 	'type': 'state',
 	'data': [1, 0, 0, 1]
 }
@@ -164,10 +165,11 @@ smart/username/smartId/link/1-2-3-4
 }
 example:
 {
-	'smartId': 'SMART_00DCCBB8',
+	'smartId': 'SMART_00DCCFC8',
 	'type': 'link',
 	'no': 1,
 	'data' : {
+		'from': 'SMART_12345'
 		'state': 'enable',
 		'motion': 1,
 		'timeout': 1,
