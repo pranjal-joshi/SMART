@@ -107,18 +107,18 @@ smart/username/smartId/state
 	'data' : {
 			'time': [[[on_h,m,s],[off_h,m,s]],[[on_h,m,s],[off_h,m,s]],[[on_h,m,s],[off_h,m,s]],[[on_h,m,s],[off_h,m,s]]]
 			'weekday': [[0,1,2,3,4,5,6],[0,1,2,3,4,5,6],[0,1,2,3,4,5,6],[0,1,2,3,4,5,6]],
-			'status': ['enable','disable','enable',disable']
+			'status': [1,0,1,0]
 	}
 }
 example:
 {
-	'smartId': 'SMART_12345',
+	'smartId': 'SMART_00DCCBB8',
 	'type': 'timer',
 	'NoD': 4,
 	'data' : {
 			'time': [[[1,2,3],[1,2,3]],[[1,2,3],[1,2,3]],[[1,2,3],[1,2,3]],[[1,2,3],[1,2,3]]],
 			'weekday': [[0,1,2,3,4,5,6],[0,1,2,3,4,5,6],[0,1,2,3,4,5,6],[0,1,2,3,4,5,6]],
-			'status': ['enable','disable','enable','disable']
+			'status': [1,0,0,0]
 	}
 }
 
@@ -165,18 +165,17 @@ smart/username/smartId/link/1-2-3-4
 }
 example:
 {
-	'smartId': 'SMART_00DCCFC8',
+	'smartId': 'SMART_00DCCBB8',
 	'type': 'link',
 	'no': 1,
 	'data' : {
-		'from': 'SMART_12345'
-		'state': 'enable',
-		'motion': 1,
+		'from': 'SMART_12345',
+		'state': 1,
 		'timeout': 1,
-		'eh': 18,
-		'em': 30,
-		'dh': 6,
-		'dm': 30
+		'eh': 0,
+		'em': 0,
+		'dh': 23,
+		'dm': 59
 	}
 }
 
