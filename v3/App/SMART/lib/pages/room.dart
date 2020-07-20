@@ -1,27 +1,17 @@
-import 'package:SMART/widgets/ProfileCard.dart';
-import 'package:SMART/widgets/SmartAppBar.dart';
 import 'package:flutter/material.dart';
 import '../models/SmartConstants.dart';
+import '../models/SmartProfile.dart';
 import '../widgets/SmartAppBar.dart';
+import '../widgets/ProfileCard.dart';
+import '../widgets/CreateProfileCard.dart';
+import '../widgets/SwitchboardCard.dart';
 
 class Room extends StatelessWidget {
-  final List<Map<String, Object>> profileList = const [
-    {
-      "profileName": "Party",
-      "profileIcon": Icons.blur_circular,
-    },
-    {
-      "profileName": "Chill",
-      "profileIcon": Icons.music_note,
-    },
-    {
-      "profileName": "Sleeping",
-      "profileIcon": Icons.brightness_3,
-    },
-    {
-      "profileName": "Movie",
-      "profileIcon": Icons.movie,
-    }
+  final List<SmartProfile> profileList = [
+    SmartProfile(profileName: "Party", profileIcon: Icons.blur_circular),
+    SmartProfile(profileName: "Chill", profileIcon: Icons.music_note),
+    SmartProfile(profileName: "Sleep", profileIcon: Icons.brightness_3),
+    SmartProfile(profileName: "Movie", profileIcon: Icons.movie),
   ];
 
   @override
@@ -33,6 +23,7 @@ class Room extends StatelessWidget {
         title: "Room Name",
         helper: helper,
       ),
+      backgroundColor: helper.getCardBackgroudColor,
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
@@ -74,11 +65,41 @@ class Room extends StatelessWidget {
               child: Container(
                 height: double.infinity,
                 width: double.infinity,
-                child: Card(
-                  child: Text(
-                    "List of Device Switches",
-                    textAlign: TextAlign.center,
-                  ),
+                padding: EdgeInsets.only(top: 12),
+                child: Column(
+                  children: <Widget>[
+                    /*Card(
+                      elevation: 24,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(helper.screenWidth * 0.1),
+                          topRight: Radius.circular(helper.screenWidth * 0.1),
+                        ),
+                      ),
+                      color: helper.getCardBackgroudColor,
+                      child: Text(
+                        "List of Device Switches",
+                        textAlign: TextAlign.center,
+                      ),
+                    ),*/
+                    Padding(
+                      padding: EdgeInsets.fromLTRB(16, 0, 8, 8),
+                      child: Container(
+                        width: double.infinity,
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          "Switch Board",
+                          textAlign: TextAlign.start,
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 26,
+                            color: helper.getTextHeadingColor,
+                          ),
+                        ),
+                      ),
+                    ),
+                    SwitchboardCard(),
+                  ],
                 ),
               ),
             ),
@@ -88,29 +109,29 @@ class Room extends StatelessWidget {
     );
   }
 
-  Widget getProfileCards(
-      {List<Map<String, Object>> profileList, SmartHelper helper}) {
+  Widget getProfileCards({
+    List<SmartProfile> profileList,
+    SmartHelper helper,
+  }) {
     return Expanded(
       child: Container(
         child: ListView.builder(
           scrollDirection: Axis.horizontal,
-          itemCount: profileList.length+1,
+          itemCount: profileList.length + 1,
           itemBuilder: (context, index) {
             try {
               return Padding(
                 padding: EdgeInsets.all(8),
                 child: ProfileCard(
-                  helper: helper,
-                  profileIcon: profileList[index]['profileIcon'],
-                  profileName: profileList[index]['profileName'],
+                  profileIcon: profileList[index].profileIcon,
+                  profileName: profileList[index].profileName,
                 ),
               );
             } catch (e) {
-              return ProfileCard(
-                  helper: helper,
-                  profileIcon: Icons.add_circle_outline,
-                  profileName: "Create\nNew",
-                );
+              return Padding(
+                padding: EdgeInsets.all(8),
+                child: CreateProfileCard(),
+              );
             }
           },
         ),

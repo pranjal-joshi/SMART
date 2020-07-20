@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 
-final color_accent = Colors.red[700];
+final color_accent = Colors.red[700].withOpacity(0.8);
 final color_accent_dark = Colors.red[400];
 
 const String route_room = '/room';
@@ -96,10 +96,17 @@ class SmartHelper {
   }
 
   List<Color> get profileCardGradientColors {
-    if(!isDarkModeActive) {
+    if (!isDarkModeActive) {
       return [Colors.blue[400], Colors.deepOrange[300]];
     }
-    return [Colors.blue[400], Colors.deepOrange[300]];
+    return [Colors.blue[400].withOpacity(0.85), Colors.deepOrange[300].withOpacity(0.85)];
   }
 
+  void showSnackbarText(String text) {
+    Scaffold.of(_context).showSnackBar(
+      SnackBar(
+        content: Text(text),
+      ),
+    );
+  }
 }

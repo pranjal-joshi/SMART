@@ -2,21 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 
 import '../models/SmartConstants.dart';
-import '../models/SmartPopupMenu.dart';
 
-class ProfileCard extends StatelessWidget {
-  final String profileName;
-  final IconData profileIcon;
-
-  ProfileCard({
-    @required this.profileName,
-    @required this.profileIcon,
-  });
-
-  final List<SmartPopupMenu> menuList = [
-    SmartPopupMenu(title: 'Edit', icon: Icons.edit),
-    SmartPopupMenu(title: 'Delete', icon: Icons.delete)
-  ];
+class CreateProfileCard extends StatelessWidget {
+  CreateProfileCard();
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +19,7 @@ class ProfileCard extends StatelessWidget {
       elevation: 6,
       child: Container(
         height: double.infinity,
-        width: helper.screenWidth / 3,
+        width: helper.screenWidth / 2.3,
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: helper.profileCardGradientColors,
@@ -52,11 +40,10 @@ class ProfileCard extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: <Widget>[
                     Expanded(
-                      flex: 7,
                       child: Padding(
                         padding: EdgeInsets.fromLTRB(10, 4, 0, 0),
                         child: Text(
-                          profileName,
+                          "Create New\nProfile",
                           overflow: TextOverflow.fade,
                           textAlign: TextAlign.start,
                           softWrap: false,
@@ -68,57 +55,22 @@ class ProfileCard extends StatelessWidget {
                         ),
                       ),
                     ),
-                    Expanded(
-                      flex: 3,
-                      child: Padding(
-                        padding: EdgeInsets.fromLTRB(0, 10, 4, 0),
-                        child: PopupMenuButton(
-                          elevation: 4,
-                          color: helper.getCardBackgroudColor,
-                          onCanceled: () => print("Popup Dismissed!"),
-                          onSelected: (val) => print("Selected: ${val.title}"),
-                          itemBuilder: (context) {
-                            return menuList.map((SmartPopupMenu choice) {
-                              return PopupMenuItem(
-                                value: choice,
-                                child: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: <Widget>[
-                                    Text(
-                                      choice.title,
-                                      style: TextStyle(
-                                        color: helper.getTextBodyColor,
-                                      ),
-                                    ),
-                                    Icon(
-                                      choice.icon,
-                                      color: helper.getTextBodyColor,
-                                    ),
-                                  ],
-                                ),
-                              );
-                            }).toList();
-                          },
-                        ),
-                      ),
-                    ),
                   ],
                 ),
               ),
               Expanded(
-                flex: 2,
+                flex: 1,
                 child: Container(
                   width: double.infinity,
                   padding: EdgeInsets.all(8),
                   child: IconButton(
                     icon: Icon(
-                      profileIcon,
+                      Icons.add_circle_outline,
                       size: helper.screenWidth * 0.16,
                       color: Colors.black.withOpacity(0.8),
                     ),
                     onPressed: () {
-                      helper.showSnackbarText('$profileName Selected!');
+                      helper.showSnackbarText('Create New Profile');
                     },
                   ),
                 ),
