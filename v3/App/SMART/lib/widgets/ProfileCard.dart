@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 
 import '../models/SmartConstants.dart';
+import '../models/SmartPopupMenu.dart';
 
 class ProfileCard extends StatelessWidget {
   final SmartHelper helper;
@@ -13,6 +14,11 @@ class ProfileCard extends StatelessWidget {
     @required this.profileName,
     @required this.profileIcon,
   });
+
+  final List<SmartPopupMenu> menuList = [
+    SmartPopupMenu(title: 'Edit', icon: Icons.edit),
+    SmartPopupMenu(title: 'Delete', icon: Icons.delete)
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -35,45 +41,86 @@ class ProfileCard extends StatelessWidget {
       child: Container(
         height: double.infinity,
         width: helper.screenWidth / 3,
-        color: helper.isDarkModeActive
-            ? Colors.grey[900]
-            : helper.getCardBackgroudColor,
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: helper.profileCardGradientColors,
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
         child: Container(
           width: double.infinity,
           height: double.infinity,
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               Expanded(
-                flex: 3,
-                child: Container(
-                  width: double.infinity,
-                  child: IconButton(
-                    icon: Icon(
-                      profileIcon,
-                      size: helper.screenWidth * 0.20,
-                      color: helper.getTextHeadingColor,
+                flex: 1,
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    Expanded(
+                      flex: 7,
+                      child: Padding(
+                        padding: EdgeInsets.fromLTRB(12, 16, 0, 0),
+                        child: Text(
+                          profileName,
+                          overflow: TextOverflow.fade,
+                          textAlign: TextAlign.start,
+                          softWrap: false,
+                          style: TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: helper.getTextBodyColor,
+                          ),
+                        ),
+                      ),
                     ),
-                    onPressed: () => print('Pressed $profileName'),
-                  ),
+                    Expanded(
+                      flex: 3,
+                      child: Padding(
+                        padding: EdgeInsets.fromLTRB(0, 18, 12, 0),
+                        child: PopupMenuButton(
+                          elevation: 4,
+                          color: helper.getCardBackgroudColor,
+                          onCanceled: () => print("Popup Dismissed!"),
+                          onSelected: (val) => print("Selected: ${val.title}"),
+                          itemBuilder: (context) {
+                            return menuList.map((SmartPopupMenu choice) {
+                              return PopupMenuItem(
+                                value: choice,
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: <Widget>[
+                                    Text(
+                                      choice.title,
+                                    ),
+                                    Icon(choice.icon),
+                                  ],
+                                ),
+                              );
+                            }).toList();
+                          },
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
               Expanded(
-                flex: 1,
-                child: Padding(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: 8,
-                  ),
-                  child: Text(
-                    profileName,
-                    overflow: TextOverflow.fade,
-                    textAlign: TextAlign.center,
-                    softWrap: false,
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: helper.getTextBodyColor,
+                flex: 2,
+                child: Container(
+                  width: double.infinity,
+                  padding: EdgeInsets.all(8),
+                  child: IconButton(
+                    icon: Icon(
+                      profileIcon,
+                      size: helper.screenWidth * 0.16,
+                      color: helper.getTextBodyColor.withOpacity(0.8),
                     ),
+                    onPressed: () => print('Pressed $profileName'),
                   ),
                 ),
               ),

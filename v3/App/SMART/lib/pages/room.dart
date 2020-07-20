@@ -5,8 +5,7 @@ import '../models/SmartConstants.dart';
 import '../widgets/SmartAppBar.dart';
 
 class Room extends StatelessWidget {
-
-  final List<Map<String,Object>> profileList = const [
+  final List<Map<String, Object>> profileList = const [
     {
       "profileName": "Party",
       "profileIcon": Icons.blur_circular,
@@ -35,100 +34,85 @@ class Room extends StatelessWidget {
         helper: helper,
       ),
       body: SafeArea(
-        child: Container(
-          width: double.infinity,
-          height: double.infinity,
-          color: helper.getBackgroundColor,
-          padding: EdgeInsets.symmetric(
-            vertical: 8,
-            horizontal: 8,
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: <Widget>[
-              Flexible(
-                flex: 1,
-                child: Container(
-                  height: double.infinity,
-                  width: double.infinity,
-                  child: Card(
-                    clipBehavior: Clip.antiAliasWithSaveLayer,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    elevation: 8,
-                    color: helper.getCardBackgroudColor,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        Padding(
-                          padding: EdgeInsets.fromLTRB(12, 8, 8, 0),
-                          child: Text(
-                            "Profiles",
-                            textAlign: TextAlign.start,
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 26,
-                              color: helper.getTextHeadingColor,
-                            ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: <Widget>[
+            Flexible(
+              flex: 1,
+              child: Container(
+                height: double.infinity,
+                width: double.infinity,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: <Widget>[
+                    Padding(
+                      padding: EdgeInsets.fromLTRB(16, 8, 8, 0),
+                      child: Container(
+                        width: double.infinity,
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          "Profiles",
+                          textAlign: TextAlign.start,
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 26,
+                            color: helper.getTextHeadingColor,
                           ),
                         ),
-                        Expanded(
-                          child: Container(
-                            /*child: ListView(
-                              scrollDirection: Axis.horizontal,
-                              children: <Widget>[
-                                Padding(
-                                  padding: EdgeInsets.all(8),
-                                  child: Card(
-                                    elevation: 8,
-                                    child: Container(
-                                      height: double.infinity,
-                                      width: helper.screenWidth / 3,
-                                      color: helper.getCardBackgroudColor,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),*/
-                            child: ListView.builder(
-                              scrollDirection: Axis.horizontal,
-                              itemCount: profileList.length,
-                              itemBuilder: (context, index) {
-                                return Padding(
-                                  padding: EdgeInsets.all(8),
-                                  child: ProfileCard(
-                                    helper: helper,
-                                    // profileIcon: Icons.lightbulb_outline,
-                                    // profileName: "Profile Name",
-                                    profileIcon: profileList[index]['profileIcon'],
-                                    profileName: profileList[index]['profileName'],
-                                  ),
-                                );
-                              },
-                            ),
-                          ),
-                        ),
-                      ],
+                      ),
                     ),
+                    getProfileCards(
+                      helper: helper,
+                      profileList: profileList,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            Flexible(
+              flex: 2,
+              child: Container(
+                height: double.infinity,
+                width: double.infinity,
+                child: Card(
+                  child: Text(
+                    "List of Device Switches",
+                    textAlign: TextAlign.center,
                   ),
                 ),
               ),
-              Flexible(
-                flex: 2,
-                child: Container(
-                  height: double.infinity,
-                  width: double.infinity,
-                  child: Card(
-                    child: Text(
-                      "List of Device Switches",
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget getProfileCards(
+      {List<Map<String, Object>> profileList, SmartHelper helper}) {
+    return Expanded(
+      child: Container(
+        child: ListView.builder(
+          scrollDirection: Axis.horizontal,
+          itemCount: profileList.length+1,
+          itemBuilder: (context, index) {
+            try {
+              return Padding(
+                padding: EdgeInsets.all(8),
+                child: ProfileCard(
+                  helper: helper,
+                  profileIcon: profileList[index]['profileIcon'],
+                  profileName: profileList[index]['profileName'],
                 ),
-              ),
-            ],
-          ),
+              );
+            } catch (e) {
+              return ProfileCard(
+                  helper: helper,
+                  profileIcon: Icons.add_circle_outline,
+                  profileName: "Create\nNew",
+                );
+            }
+          },
         ),
       ),
     );
