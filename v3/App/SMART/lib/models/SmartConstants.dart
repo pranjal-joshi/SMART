@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 
-final color_accent = Colors.purple[600];
-final color_accent_dark = Colors.purple[400];
+final color_accent = Colors.red[700];
+final color_accent_dark = Colors.red[400];
 
 const String route_room = '/room';
 
@@ -93,6 +93,13 @@ class SmartHelper {
 
   double get screenHeight {
     return MediaQuery.of(_context).size.height;
+  }
+
+  List<Color> get profileCardGradientColors {
+    if(!isDarkModeActive) {
+      return [Colors.blue[400], Colors.deepOrange[300]];
+    }
+    return [Colors.blue[400], Colors.deepOrange[300]];
   }
 
 }
