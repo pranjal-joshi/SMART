@@ -28,7 +28,7 @@
 #define BOOT_DLY                2000U
 #define DEBOUNCE_DLY            100U   // ms
 
-#define MQTT_SERVER_IP          "35.225.15.182"
+#define MQTT_SERVER_IP          "35.222.110.118"
 #define MQTT_SERVER_PORT        "1883"
 #define MQTT_DELAY              5000U
 #define RETAIN                  true
