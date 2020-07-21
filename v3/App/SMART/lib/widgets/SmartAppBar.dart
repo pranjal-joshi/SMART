@@ -27,7 +27,6 @@ class SmartAppBar extends StatelessWidget implements PreferredSizeWidget {
         ),
       ),
       backgroundColor: helper.getAppBarBackgroundColor,
-      elevation: 8,
       leading: showBackButton(context),
     );
   }

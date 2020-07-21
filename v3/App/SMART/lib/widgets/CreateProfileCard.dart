@@ -15,7 +15,6 @@ class CreateProfileCard extends StatelessWidget {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(helper.screenWidth * 0.08),
       ),
-      color: helper.getCardBackgroudColor,
       elevation: 6,
       child: Container(
         height: double.infinity,

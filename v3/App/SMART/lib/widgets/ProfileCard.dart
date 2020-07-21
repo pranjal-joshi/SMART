@@ -73,7 +73,6 @@ class ProfileCard extends StatelessWidget {
                       child: Padding(
                         padding: EdgeInsets.fromLTRB(0, 10, 4, 0),
                         child: PopupMenuButton(
-                          elevation: 4,
                           color: helper.getCardBackgroudColor,
                           onCanceled: () => print("Popup Dismissed!"),
                           onSelected: (val) => print("Selected: ${val.title}"),
@@ -87,13 +86,14 @@ class ProfileCard extends StatelessWidget {
                                   children: <Widget>[
                                     Text(
                                       choice.title,
-                                      style: TextStyle(
-                                        color: helper.getTextBodyColor,
-                                      ),
+                                      style:
+                                          Theme.of(context).textTheme.bodyText2,
                                     ),
                                     Icon(
                                       choice.icon,
-                                      color: helper.getTextBodyColor,
+                                      color: helper.isDarkModeActive
+                                          ? color_white_dark
+                                          : Colors.black,
                                     ),
                                   ],
                                 ),

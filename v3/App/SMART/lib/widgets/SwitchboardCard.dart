@@ -26,7 +26,8 @@ class _SwitchboardCardState extends State<SwitchboardCard> {
                 topRight: Radius.circular(helper.screenWidth * 0.1),
               ),
             ),
-            color: helper.getCardBackgroudColor,
+            //color: helper.getCardBackgroudColor,
+            color: Theme.of(context).cardColor,
             child: Column(
               children: <Widget>[
                 TabBar(
