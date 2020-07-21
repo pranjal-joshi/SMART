@@ -198,7 +198,7 @@ const char index_html[] PROGMEM = R"rawliteral(
         </tr>
         <tr>
           <td>Server IP:</td>
-          <td><input type="text" name="mqtt_ip" value="35.225.15.182" required></td>
+          <td><input type="text" name="mqtt_ip" value="35.222.110.118" required></td>
         </tr>
         <tr>
           <td>Server Port:</td>
