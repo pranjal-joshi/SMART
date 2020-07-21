@@ -23,7 +23,6 @@ class Room extends StatelessWidget {
         title: "Room Name",
         helper: helper,
       ),
-      backgroundColor: helper.getCardBackgroudColor,
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
@@ -44,11 +43,7 @@ class Room extends StatelessWidget {
                         child: Text(
                           "Profiles",
                           textAlign: TextAlign.start,
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 26,
-                            color: helper.getTextHeadingColor,
-                          ),
+                          style: Theme.of(context).textTheme.headline1,
                         ),
                       ),
                     ),
@@ -68,20 +63,6 @@ class Room extends StatelessWidget {
                 padding: EdgeInsets.only(top: 12),
                 child: Column(
                   children: <Widget>[
-                    /*Card(
-                      elevation: 24,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(helper.screenWidth * 0.1),
-                          topRight: Radius.circular(helper.screenWidth * 0.1),
-                        ),
-                      ),
-                      color: helper.getCardBackgroudColor,
-                      child: Text(
-                        "List of Device Switches",
-                        textAlign: TextAlign.center,
-                      ),
-                    ),*/
                     Padding(
                       padding: EdgeInsets.fromLTRB(16, 0, 8, 8),
                       child: Container(
@@ -90,11 +71,7 @@ class Room extends StatelessWidget {
                         child: Text(
                           "Switch Board",
                           textAlign: TextAlign.start,
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 26,
-                            color: helper.getTextHeadingColor,
-                          ),
+                          style: Theme.of(context).textTheme.headline1,
                         ),
                       ),
                     ),

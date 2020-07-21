@@ -17,10 +17,8 @@ class SmartApp extends StatelessWidget {
       locale: Locale("en-IN"),
       initialRoute: route_room,
       themeMode: ThemeMode.system,
-      theme: ThemeData(
-        accentColor: color_accent,
-        fontFamily: 'ProductSans',
-      ),
+      theme: helper.themeLight,
+      darkTheme: helper.themeDark,
     );
   }
 }

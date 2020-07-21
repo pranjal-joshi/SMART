@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 
 final color_accent = Colors.red[700].withOpacity(0.8);
 final color_accent_dark = Colors.red[400];
+final color_white_dark = Colors.grey[200];
 
 const String route_room = '/room';
 
@@ -40,14 +41,14 @@ class SmartHelper {
 
   Color get getBackgroundColor {
     if (isDarkModeActive) {
-      return Colors.grey[900];
+      return Colors.black;
     }
     return Colors.grey[200];
   }
 
   Color get getAppBarBackgroundColor {
     if (isDarkModeActive) {
-      return Colors.black87;
+      return Colors.grey[900];
     }
     return color_accent;
   }
@@ -61,7 +62,7 @@ class SmartHelper {
 
   Color get getCardBackgroudColor {
     if (isDarkModeActive) {
-      return Colors.black;
+      return Colors.grey[900];
     }
     return Colors.white;
   }
@@ -99,8 +100,66 @@ class SmartHelper {
     if (!isDarkModeActive) {
       return [Colors.blue[400], Colors.deepOrange[300]];
     }
-    return [Colors.blue[400].withOpacity(0.85), Colors.deepOrange[300].withOpacity(0.85)];
+    return [
+      Colors.blue[400].withOpacity(0.7),
+      Colors.deepOrange[300].withOpacity(0.7)
+    ];
   }
+
+  final ThemeData themeLight = ThemeData(
+    primarySwatch: Colors.red,
+    fontFamily: 'ProductSans',
+    cardColor: Colors.grey[100],
+    accentColor: Colors.red[700].withOpacity(0.8),
+    scaffoldBackgroundColor: Colors.grey[200],
+    textTheme: TextTheme(
+      headline1: TextStyle(
+        fontWeight: FontWeight.bold,
+        fontSize: 26,
+        color: Colors.red[700].withOpacity(0.8),
+      ),
+      bodyText2: TextStyle(
+        color: Colors.black,
+      ),
+    ),
+    iconTheme: IconThemeData(
+      color: Colors.black,
+    ),
+    snackBarTheme: SnackBarThemeData(
+      contentTextStyle: TextStyle(
+        fontWeight: FontWeight.bold,
+        fontFamily: "ProductSans",
+        fontSize: 18,
+      ),
+    ),
+  );
+
+  final ThemeData themeDark = ThemeData(
+    primarySwatch: Colors.red,
+    fontFamily: 'ProductSans',
+    cardColor: Colors.grey[900],
+    accentColor: Colors.red[400],
+    scaffoldBackgroundColor: Colors.black,
+    textTheme: TextTheme(
+      headline1: TextStyle(
+        fontWeight: FontWeight.bold,
+        fontSize: 26,
+        color: Colors.red[400],
+      ),
+      bodyText2: TextStyle(
+        color: Colors.grey[200],
+      ),
+    ),
+    snackBarTheme: SnackBarThemeData(
+      backgroundColor: color_accent_dark.withOpacity(0.8),
+      contentTextStyle: TextStyle(
+        color: Colors.black,
+        fontWeight: FontWeight.bold,
+        fontFamily: "ProductSans",
+        fontSize: 18,
+      ),
+    ),
+  );
 
   void showSnackbarText(String text) {
     Scaffold.of(_context).showSnackBar(
