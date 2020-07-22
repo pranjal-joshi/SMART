@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+
 import '../models/SmartConstants.dart';
 import '../models/SmartProfile.dart';
+import '../models/SwitchboardRow.dart';
+
 import '../widgets/SmartAppBar.dart';
 import '../widgets/ProfileCard.dart';
 import '../widgets/CreateProfileCard.dart';
@@ -12,6 +15,24 @@ class Room extends StatelessWidget {
     SmartProfile(profileName: "Chill", profileIcon: Icons.music_note),
     SmartProfile(profileName: "Sleep", profileIcon: Icons.brightness_3),
     SmartProfile(profileName: "Movie", profileIcon: Icons.movie),
+  ];
+
+  final List<SwitchboardRow> switchList = [
+    SwitchboardRow(
+      deviceName: "Device 1",
+      deviceState: true,
+      deviceIcon: Icons.ac_unit,
+    ),
+    SwitchboardRow(
+      deviceName: "Device 2",
+      deviceState: false,
+      deviceIcon: Icons.lightbulb_outline,
+    ),
+    SwitchboardRow(
+      deviceName: "Device 3",
+      deviceState: true,
+      deviceIcon: Icons.nature,
+    ),
   ];
 
   @override
@@ -75,7 +96,14 @@ class Room extends StatelessWidget {
                         ),
                       ),
                     ),
-                    SwitchboardCard(),
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.only(bottom: 6),
+                        child: SwitchboardCard(
+                          switchboardList: switchList,
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -98,7 +126,7 @@ class Room extends StatelessWidget {
           itemBuilder: (context, index) {
             try {
               return Padding(
-                padding: EdgeInsets.all(8),
+                padding: EdgeInsets.all(6),
                 child: ProfileCard(
                   profileIcon: profileList[index].profileIcon,
                   profileName: profileList[index].profileName,
@@ -106,7 +134,7 @@ class Room extends StatelessWidget {
               );
             } catch (e) {
               return Padding(
-                padding: EdgeInsets.all(8),
+                padding: EdgeInsets.fromLTRB(8, 10, 16, 10),
                 child: CreateProfileCard(),
               );
             }

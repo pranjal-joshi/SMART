@@ -1,12 +1,20 @@
 import 'package:flutter/material.dart';
+
 import '../models/SmartConstants.dart';
+import '../widgets/SwitchboardTile.dart';
+import '../models/SwitchboardRow.dart';
 
 class SwitchboardCard extends StatefulWidget {
+  final List<SwitchboardRow> switchboardList;
+
+  SwitchboardCard({@required this.switchboardList});
+
   @override
   _SwitchboardCardState createState() => _SwitchboardCardState();
 }
 
-class _SwitchboardCardState extends State<SwitchboardCard> {
+class _SwitchboardCardState extends State<SwitchboardCard>
+    with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     SmartHelper helper = SmartHelper(context: context);
@@ -19,7 +27,7 @@ class _SwitchboardCardState extends State<SwitchboardCard> {
         length: 2,
         child: Container(
           child: Card(
-            elevation: 24,
+            elevation: 8,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.only(
                 topLeft: Radius.circular(helper.screenWidth * 0.1),
@@ -31,19 +39,39 @@ class _SwitchboardCardState extends State<SwitchboardCard> {
             child: Column(
               children: <Widget>[
                 TabBar(
-                  labelColor: helper.getTextHeadingColor,
-                  labelStyle: TextStyle(
-                    fontFamily: 'ProductSans',
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                  ),
+                  isScrollable: false,
+                  labelColor: Theme.of(context).textTheme.headline2.color,
+                  labelStyle: Theme.of(context).textTheme.headline2,
                   tabs: [
                     Tab(text: "Switches"),
                     Tab(text: "Devices"),
                   ],
                 ),
-                SizedBox(height: 24,),
-                Text("Add Switch List Here"),
+                Expanded(
+                  child: TabBarView(
+                    children: [
+                      // ListView(
+                      //   children: <Widget>[
+                      //     SwitchboardTile(
+                      //       deviceName: "My Device",
+                      //       deviceIcon: Icons.ac_unit,
+                      //       deviceState: true,
+                      //       helper: helper,
+                      //     ),
+                      //   ],
+                      // ),
+                      ListView.builder(
+                        itemCount: widget.switchboardList.length,
+                        itemBuilder: (ctx, index) {
+                          return SwitchboardTile(
+                            row: widget.switchboardList[index],
+                          );
+                        },
+                      ),
+                      Text("Add Switch List Here 2"),
+                    ],
+                  ),
+                ),
               ],
             ),
           ),
