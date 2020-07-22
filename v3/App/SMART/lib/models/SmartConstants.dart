@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 final color_accent = Colors.red[700].withOpacity(0.8);
 final color_accent_dark = Colors.red[400];
 final color_white_dark = Colors.grey[200];
+final color_material_dark = Colors.grey[900];
 
 const String route_room = '/room';
 
@@ -48,23 +49,23 @@ class SmartHelper {
 
   Color get getAppBarBackgroundColor {
     if (isDarkModeActive) {
-      return Colors.grey[900];
+      return color_material_dark;
     }
     return color_accent;
   }
 
   Color get getAppBarTextColor {
     if (isDarkModeActive) {
-      return color_accent_dark;
+      return Colors.redAccent;
     }
     return Colors.white;
   }
 
   Color get getCardBackgroudColor {
     if (isDarkModeActive) {
-      return Colors.grey[900];
+      return color_material_dark;
     }
-    return Colors.white;
+    return Colors.grey[50];
   }
 
   Color get getCardBorderColor {
@@ -118,6 +119,15 @@ class SmartHelper {
         fontSize: 26,
         color: Colors.red[700].withOpacity(0.8),
       ),
+      headline2: TextStyle(
+        fontWeight: FontWeight.bold,
+        fontSize: 18,
+        color: Colors.red[400],
+      ),
+      headline3: TextStyle(
+        fontSize: 18,
+        color: Colors.black,
+      ),
       bodyText2: TextStyle(
         color: Colors.black,
       ),
@@ -132,12 +142,17 @@ class SmartHelper {
         fontSize: 18,
       ),
     ),
+    appBarTheme: AppBarTheme(
+      brightness: Brightness.dark,
+      elevation: 8,
+      color: color_accent,
+    ),
   );
 
   final ThemeData themeDark = ThemeData(
     primarySwatch: Colors.red,
     fontFamily: 'ProductSans',
-    cardColor: Colors.grey[900],
+    cardColor: color_material_dark,
     accentColor: Colors.red[400],
     scaffoldBackgroundColor: Colors.black,
     textTheme: TextTheme(
@@ -145,6 +160,15 @@ class SmartHelper {
         fontWeight: FontWeight.bold,
         fontSize: 26,
         color: Colors.red[400],
+      ),
+      headline2: TextStyle(
+        fontWeight: FontWeight.bold,
+        fontSize: 18,
+        color: Colors.red[400],
+      ),
+      headline3: TextStyle(
+        fontSize: 16,
+        color: color_white_dark,
       ),
       bodyText2: TextStyle(
         color: Colors.grey[200],
@@ -158,6 +182,11 @@ class SmartHelper {
         fontFamily: "ProductSans",
         fontSize: 18,
       ),
+    ),
+    appBarTheme: AppBarTheme(
+      brightness: Brightness.dark,
+      elevation: 8,
+      color: color_material_dark,
     ),
   );
 

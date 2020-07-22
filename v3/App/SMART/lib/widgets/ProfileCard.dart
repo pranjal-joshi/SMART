@@ -75,7 +75,7 @@ class ProfileCard extends StatelessWidget {
                         child: PopupMenuButton(
                           color: helper.getCardBackgroudColor,
                           onCanceled: () => print("Popup Dismissed!"),
-                          onSelected: (val) => print("Selected: ${val.title}"),
+                          onSelected: (val) => helper.showSnackbarText("Selected: ${val.title}"),
                           itemBuilder: (context) {
                             return menuList.map((SmartPopupMenu choice) {
                               return PopupMenuItem(

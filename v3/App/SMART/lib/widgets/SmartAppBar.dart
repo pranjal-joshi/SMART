@@ -22,11 +22,11 @@ class SmartAppBar extends StatelessWidget implements PreferredSizeWidget {
         title,
         style: TextStyle(
           fontWeight: FontWeight.bold,
-          fontSize: 24,
+          fontSize: 28,
           color: helper.getAppBarTextColor,
         ),
       ),
-      backgroundColor: helper.getAppBarBackgroundColor,
+      // backgroundColor: helper.getAppBarBackgroundColor,
       leading: showBackButton(context),
     );
   }
