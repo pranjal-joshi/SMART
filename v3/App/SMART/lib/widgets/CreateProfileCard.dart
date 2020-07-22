@@ -14,7 +14,6 @@ class CreateProfileCard extends StatelessWidget {
 
     return DottedBorder(
       borderType: BorderType.RRect,
-      // color: helper.isDarkModeActive ? color_white_dark : Colors.black,
       color: Theme.of(context).textTheme.bodyText2.color,
       radius: Radius.circular(radius),
       strokeWidth: 2,
@@ -37,7 +36,7 @@ class CreateProfileCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 Expanded(
-                  flex: 5,
+                  flex: 3,
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -46,12 +45,12 @@ class CreateProfileCard extends StatelessWidget {
                         child: Padding(
                           padding: EdgeInsets.fromLTRB(10, 4, 0, 0),
                           child: Text(
-                            "Create New\nProfile",
+                            "Create Profile",
                             overflow: TextOverflow.fade,
                             textAlign: TextAlign.start,
                             softWrap: false,
                             style: TextStyle(
-                              fontSize: 24,
+                              fontSize: 22,
                               fontWeight: FontWeight.bold,
                               color: Theme.of(context).textTheme.bodyText2.color,
                             ),
@@ -62,7 +61,7 @@ class CreateProfileCard extends StatelessWidget {
                   ),
                 ),
                 Expanded(
-                  flex: 7,
+                  flex: 6,
                   child: Container(
                     width: double.infinity,
                     padding: EdgeInsets.all(8),
@@ -70,7 +69,6 @@ class CreateProfileCard extends StatelessWidget {
                       icon: Icon(
                         Icons.add_circle_outline,
                         size: helper.screenWidth * 0.16,
-                        // color: Colors.black.withOpacity(0.8),
                         color: Theme.of(context).textTheme.bodyText2.color,
                       ),
                       onPressed: () {

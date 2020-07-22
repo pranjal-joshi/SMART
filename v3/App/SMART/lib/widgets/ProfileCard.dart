@@ -27,7 +27,6 @@ class ProfileCard extends StatelessWidget {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(helper.screenWidth * 0.08),
       ),
-      color: helper.getCardBackgroudColor,
       elevation: 6,
       child: Container(
         height: double.infinity,
@@ -73,7 +72,6 @@ class ProfileCard extends StatelessWidget {
                       child: Padding(
                         padding: EdgeInsets.fromLTRB(0, 10, 4, 0),
                         child: PopupMenuButton(
-                          color: helper.getCardBackgroudColor,
                           onCanceled: () => print("Popup Dismissed!"),
                           onSelected: (val) => helper.showSnackbarText("Selected: ${val.title}"),
                           itemBuilder: (context) {
