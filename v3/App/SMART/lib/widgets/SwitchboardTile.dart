@@ -14,12 +14,22 @@ class SwitchboardTile extends StatefulWidget {
 }
 
 class _SwitchboardTileState extends State<SwitchboardTile> {
+  bool _switchState;
 
-bool _switchState = true;
+  @override
+  void initState() {
+    super.initState();
+    _switchState = widget.row.deviceState;
+  }
+
+  @override
+  void dispose() {
+    _switchState = null;
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-
     SmartHelper helper = SmartHelper(context: context);
 
     return Padding(
@@ -27,8 +37,8 @@ bool _switchState = true;
         vertical: 4,
       ),
       child: ListTile(
-        onLongPress: () => helper
-            .showSnackbarText("Long Tap to Edit Switchboard Tile!"),
+        onLongPress: () =>
+            helper.showSnackbarText("Long Tap to Edit Switchboard Tile!"),
         leading: Icon(
           widget.row.deviceIcon,
           color: Theme.of(context).primaryColorDark,
