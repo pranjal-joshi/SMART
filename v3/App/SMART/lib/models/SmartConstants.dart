@@ -40,13 +40,6 @@ class SmartHelper {
     return false;
   }
 
-  Color get getBackgroundColor {
-    if (isDarkModeActive) {
-      return Colors.black;
-    }
-    return Colors.grey[200];
-  }
-
   Color get getAppBarBackgroundColor {
     if (isDarkModeActive) {
       return color_material_dark;
@@ -57,34 +50,6 @@ class SmartHelper {
   Color get getAppBarTextColor {
     if (isDarkModeActive) {
       return Colors.redAccent;
-    }
-    return Colors.white;
-  }
-
-  Color get getCardBackgroudColor {
-    if (isDarkModeActive) {
-      return color_material_dark;
-    }
-    return Colors.grey[50];
-  }
-
-  Color get getCardBorderColor {
-    if (!isDarkModeActive) {
-      return Colors.black;
-    }
-    return color_accent_dark;
-  }
-
-  Color get getTextHeadingColor {
-    if (isDarkModeActive) {
-      return color_accent_dark;
-    }
-    return color_accent;
-  }
-
-  Color get getTextBodyColor {
-    if (!isDarkModeActive) {
-      return Colors.black;
     }
     return Colors.white;
   }
@@ -102,8 +67,8 @@ class SmartHelper {
       return [Colors.blue[400], Colors.deepOrange[300]];
     }
     return [
-      Colors.blue[400].withOpacity(0.7),
-      Colors.deepOrange[300].withOpacity(0.7)
+      Colors.blue[400].withOpacity(0.8),
+      Colors.deepOrange[300].withOpacity(0.8)
     ];
   }
 
@@ -127,6 +92,10 @@ class SmartHelper {
       headline3: TextStyle(
         fontSize: 18,
         color: Colors.black,
+      ),
+      subtitle1: TextStyle(
+        fontSize: 14,
+        color: Colors.grey[600]
       ),
       bodyText2: TextStyle(
         color: Colors.black,
@@ -167,8 +136,12 @@ class SmartHelper {
         color: Colors.red[400],
       ),
       headline3: TextStyle(
-        fontSize: 16,
+        fontSize: 18,
         color: color_white_dark,
+      ),
+      subtitle1: TextStyle(
+        fontSize: 14,
+        color: Colors.grey[600]
       ),
       bodyText2: TextStyle(
         color: Colors.grey[200],

@@ -20,18 +20,27 @@ class Room extends StatelessWidget {
   final List<SwitchboardRow> switchList = [
     SwitchboardRow(
       deviceName: "Device 1",
+      deviceDescription: "Description for Device 1",
       deviceState: true,
       deviceIcon: Icons.ac_unit,
     ),
     SwitchboardRow(
       deviceName: "Device 2",
+      deviceDescription: "Description for Device 2",
       deviceState: false,
       deviceIcon: Icons.lightbulb_outline,
     ),
     SwitchboardRow(
       deviceName: "Device 3",
+      deviceDescription: "Description for Device 3",
       deviceState: true,
       deviceIcon: Icons.nature,
+    ),
+    SwitchboardRow(
+      deviceName: "Device 4",
+      deviceDescription: "Description for Device 4",
+      deviceState: false,
+      deviceIcon: Icons.desktop_windows,
     ),
   ];
 
@@ -49,7 +58,7 @@ class Room extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
             Flexible(
-              flex: 1,
+              flex: 4,
               child: Container(
                 height: double.infinity,
                 width: double.infinity,
@@ -77,7 +86,7 @@ class Room extends StatelessWidget {
               ),
             ),
             Flexible(
-              flex: 2,
+              flex: 9,
               child: Container(
                 height: double.infinity,
                 width: double.infinity,
