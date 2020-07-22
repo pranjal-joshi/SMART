@@ -15,6 +15,9 @@ class SwitchboardCard extends StatefulWidget {
 
 class _SwitchboardCardState extends State<SwitchboardCard>
     with TickerProviderStateMixin {
+  
+  int _selectedTile = -1;
+
   @override
   Widget build(BuildContext context) {
     SmartHelper helper = SmartHelper(context: context);
@@ -28,13 +31,13 @@ class _SwitchboardCardState extends State<SwitchboardCard>
         child: Container(
           child: Card(
             elevation: 8,
+            clipBehavior: Clip.antiAliasWithSaveLayer,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.only(
                 topLeft: Radius.circular(helper.screenWidth * 0.1),
                 topRight: Radius.circular(helper.screenWidth * 0.1),
               ),
             ),
-            //color: helper.getCardBackgroudColor,
             color: Theme.of(context).cardColor,
             child: Column(
               children: <Widget>[
@@ -44,27 +47,20 @@ class _SwitchboardCardState extends State<SwitchboardCard>
                   labelStyle: Theme.of(context).textTheme.headline2,
                   tabs: [
                     Tab(text: "Switches"),
-                    Tab(text: "Devices"),
+                    Tab(text: "Nodes"),
                   ],
                 ),
                 Expanded(
                   child: TabBarView(
                     children: [
-                      // ListView(
-                      //   children: <Widget>[
-                      //     SwitchboardTile(
-                      //       deviceName: "My Device",
-                      //       deviceIcon: Icons.ac_unit,
-                      //       deviceState: true,
-                      //       helper: helper,
-                      //     ),
-                      //   ],
-                      // ),
                       ListView.builder(
                         itemCount: widget.switchboardList.length,
                         itemBuilder: (ctx, index) {
                           return SwitchboardTile(
                             row: widget.switchboardList[index],
+                            isExpanded: _selectedTile == index,
+                            index: index,
+                            onExpansionChangedMethod: onExpansionTileStateChange,
                           );
                         },
                       ),
@@ -78,5 +74,22 @@ class _SwitchboardCardState extends State<SwitchboardCard>
         ),
       ),
     );
+  }
+
+  void onExpansionTileStateChange(bool expanded, int index) {
+    // TODO: Implement logic so that only 1 tile is expanded at a time
+    // Pass this to SwitchboardTile constructor
+    // TODO: CHANGE TO ExpansionPanelList if required
+    if(expanded) {
+      setState(() {
+        _selectedTile = index;
+      });
+    }
+    else {
+      setState(() {
+        _selectedTile = -1;
+      });
+    }
+    print("Triggered $expanded $index $_selectedTile");
   }
 }
