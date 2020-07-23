@@ -54,6 +54,13 @@ class SmartHelper {
     return Colors.white;
   }
 
+  Color get getSplashColor {
+    if (isDarkModeActive) {
+      return color_accent_dark;
+    }
+    return color_accent;
+  }
+
   double get screenWidth {
     return MediaQuery.of(_context).size.width;
   }

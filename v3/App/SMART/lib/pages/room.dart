@@ -42,6 +42,12 @@ class Room extends StatelessWidget {
       deviceState: false,
       deviceIcon: Icons.desktop_windows,
     ),
+    SwitchboardRow(
+      deviceName: "Device 5",
+      deviceDescription: "Description for Device 5",
+      deviceState: true,
+      deviceIcon: Icons.accessibility,
+    ),
   ];
 
   @override
