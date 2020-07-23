@@ -55,12 +55,10 @@ class _SwitchboardCardState extends State<SwitchboardCard>
                     children: [
                       ListView.builder(
                         itemCount: widget.switchboardList.length,
+                        key: Key('builder ${_selectedTile.toString()}'),
                         itemBuilder: (ctx, index) {
                           return SwitchboardTile(
                             row: widget.switchboardList[index],
-                            isExpanded: _selectedTile == index,
-                            index: index,
-                            onExpansionChangedMethod: onExpansionTileStateChange,
                           );
                         },
                       ),
@@ -74,22 +72,5 @@ class _SwitchboardCardState extends State<SwitchboardCard>
         ),
       ),
     );
-  }
-
-  void onExpansionTileStateChange(bool expanded, int index) {
-    // TODO: Implement logic so that only 1 tile is expanded at a time
-    // Pass this to SwitchboardTile constructor
-    // TODO: CHANGE TO ExpansionPanelList if required
-    if(expanded) {
-      setState(() {
-        _selectedTile = index;
-      });
-    }
-    else {
-      setState(() {
-        _selectedTile = -1;
-      });
-    }
-    print("Triggered $expanded $index $_selectedTile");
   }
 }

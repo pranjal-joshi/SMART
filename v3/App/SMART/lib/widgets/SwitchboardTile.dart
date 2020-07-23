@@ -1,20 +1,15 @@
-import 'package:SMART/models/SmartConstants.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
+import 'package:flutter_iconpicker/flutter_iconpicker.dart';
 
 import '../models/SmartConstants.dart';
 import '../models/SwitchboardRow.dart';
 
 class SwitchboardTile extends StatefulWidget {
   final SwitchboardRow row;
-  final bool isExpanded;
-  final Function onExpansionChangedMethod;
-  final int index;
 
   SwitchboardTile({
     @required this.row,
-    @required this.isExpanded,
-    @required this.onExpansionChangedMethod,
-    @required this.index,
   });
 
   @override
@@ -23,11 +18,18 @@ class SwitchboardTile extends StatefulWidget {
 
 class _SwitchboardTileState extends State<SwitchboardTile> {
   bool _switchState;
+  Icon _icon;
+  TextEditingController _nameController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
     _switchState = widget.row.deviceState;
+    _icon = Icon(
+      widget.row.deviceIcon,
+      color: color_accent,
+      size: 32,
+    );
   }
 
   @override
@@ -45,11 +47,12 @@ class _SwitchboardTileState extends State<SwitchboardTile> {
         vertical: 4,
       ),
       child: ExpansionTile(
-        leading: Icon(
-          widget.row.deviceIcon,
-          color: Theme.of(context).primaryColorDark,
-          size: 32,
-        ),
+        // leading: Icon(
+        //   widget.row.deviceIcon,
+        //   color: Theme.of(context).primaryColorDark,
+        //   size: 32,
+        // ),
+        leading: _icon,
         title: Text(
           widget.row.deviceName,
           style: Theme.of(context).textTheme.headline3,
@@ -67,12 +70,51 @@ class _SwitchboardTileState extends State<SwitchboardTile> {
           },
         ),
         backgroundColor: Theme.of(context).primaryColor.withOpacity(0.05),
-        initiallyExpanded: widget.isExpanded,
-        key: GlobalKey(),
-        onExpansionChanged: (exp) =>
-            widget.onExpansionChangedMethod(exp, widget.index),
         children: <Widget>[
-          Text("Expanded 1"),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: <Widget>[
+              IconButton(
+                icon: _icon,
+                splashColor: helper.getSplashColor,
+                padding: EdgeInsets.symmetric(horizontal: 16),
+                onPressed: () async {
+                  IconData iconData = await FlutterIconPicker.showIconPicker(
+                      context,
+                      iconPackMode: IconPack.material);
+                  if (iconData != null) {
+                    _icon = Icon(
+                      iconData,
+                      color: Theme.of(context).primaryColorDark,
+                      size: 32,
+                    );
+                    setState(() {});
+                  }
+                },
+              ),
+              SizedBox(
+                width: 8,
+              ),
+              Expanded(
+                child: TextField(
+                  style: Theme.of(context).textTheme.headline3,
+                  maxLines: 1,
+                  textCapitalization: TextCapitalization.words,
+                  controller: _nameController,
+                  decoration: InputDecoration(
+                    labelText: "Device Name",
+                    contentPadding: EdgeInsets.all(4),
+                  ),
+                  onSubmitted: (str){
+                    helper.showSnackbarText('Submited: $str');
+                  },
+                ),
+              ),
+              SizedBox(
+                width: 16,
+              ),
+            ],
+          ),
           Text("Expanded 2"),
           Text("Expanded 3"),
         ],
