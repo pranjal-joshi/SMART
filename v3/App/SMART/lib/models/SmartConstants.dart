@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 
+const String TEST_SMARTID = 'SMART_00DCCBB8';
+const String TEST_USERNAME = 'joshi.pranjal5@gmail.com';
+
 final color_accent = Colors.red[700].withOpacity(0.8);
 final color_accent_dark = Colors.red[400];
 final color_white_dark = Colors.grey[200];
@@ -178,3 +181,49 @@ class SmartHelper {
     );
   }
 }
+
+// Json Constants
+const String JSON_TO                  = "to";
+const String JSON_FROM                = "from";
+const String JSON_TO_GATEWAY          = "gateway";
+const String JSON_TO_APP              = "app";
+const String JSON_TO_NODE             = "node";
+const String JSON_NODEID              = "nodeId";
+const String JSON_SMARTID             = "smartId";
+const String JSON_NODENAME            = "nodeName";
+const String JSON_VERSION             = "version";
+const String JSON_DEVICE_TYPE         = "deviceType";
+const String JSON_DEVICE_SWITCH       = "switch";
+const String JSON_DEVICE_SENSOR       = "sensor";
+const String JSON_DEVICE_NO           = "no";
+const String JSON_TYPE                = "type";
+const String JSON_TYPE_DATA           = "data";
+const String JSON_TYPE_BROADCAST      = "bcast";
+const String JSON_TYPE_STATE          = "state";
+const String JSON_TYPE_STATE_REQ      = "state_req";
+const String JSON_TYPE_INFO           = "info";
+const String JSON_TYPE_FACT_RST       = "factory_reset";
+const String JSON_TYPE_SOFT_RST       = "soft_reset";
+const String JSON_TYPE_NTP            = "ntp";
+const String JSON_TYPE_TIMER          = "timer";
+const String JSON_TYPE_LINK           = "link";
+const String JSON_TYPE_OTA            = "ota";
+const String JSON_TYPE_STATUS         = "status";
+const String JSON_TYPE_VECTOR_LINK    = "vector_link";
+const String JSON_NTP_HOUR            = "hour";
+const String JSON_NTP_MINUTE          = "minute";
+const String JSON_NTP_SECOND          = "second";
+const String JSON_NTP_WEEKDAY         = "weekday";
+const String JSON_NoD                 = "NoD";
+const String JSON_TOPIC               = "topic";
+const String JSON_ENABLE              = "enable";
+const String JSON_DISABLE             = "disable";
+const String JSON_SENSOR_MOTION       = "motion";
+const String JSON_SENSOR_TIMEOUT      = "timeout";
+const String JSON_SENSOR_EN_HR        = "eh";
+const String JSON_SENSOR_EN_MIN       = "em";
+const String JSON_SENSOR_DS_HR        = "dh";
+const String JSON_SENSOR_DS_MIN       = "dm";
+const String JSON_STATUS_ONLINE       = "online";
+const String JSON_STATUS_OFFLINE      = "offline";
+const String JSON_STATUS_BUSY         = "busy";
