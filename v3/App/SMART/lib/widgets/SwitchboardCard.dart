@@ -20,24 +20,26 @@ class SwitchboardCard extends StatefulWidget {
 class _SwitchboardCardState extends State<SwitchboardCard>
     with TickerProviderStateMixin {
   SmartHelper helper;
-
-  MqttClient client;
-  MqttConnectionState connectionState;
-  StreamSubscription subscription;
   SmartMqtt mqtt;
 
+  JsonNodeToAppSwitchState switchStates;
+
   List<int> switchStatesList = [];
+
+  String _switchStateTopic;
 
   @override
   void initState() {
     mqtt = SmartMqtt(
-      client: client,
-      connectionState: connectionState,
-      subscription: subscription,
       onDisconnected: onMqttDisconnect,
       onReceive: onMqttReceive,
       onConnected: onMqttConnect,
       onAutoReconnect: onMqttReconnect,
+    );
+    _switchStateTopic = mqtt.getTopic(
+      username: TEST_USERNAME,
+      smartId: TEST_SMARTID,
+      type: SmartMqtt.typeSwitchStateNodeToApp,
     );
     mqtt.connect();
     initSwitchStateList();
@@ -103,13 +105,9 @@ class _SwitchboardCardState extends State<SwitchboardCard>
 
   @override
   void dispose() {
-    mqtt.disconnect();
-    try {
-      connectionState = client.connectionStatus.state;
-      client = null;
-      subscription.cancel();
-      subscription = null;
-    } catch (e) {}
+    print("[SwitchboardCard] - Disposing..");
+    mqtt.unsubscribe(_switchStateTopic);
+    //mqtt.disconnect();
     super.dispose();
   }
 
@@ -142,17 +140,12 @@ class _SwitchboardCardState extends State<SwitchboardCard>
         smartId: TEST_SMARTID,
         dataList: switchStatesList,
       ).toJsonString(),
+      retain: true,
     );
   }
 
   void onMqttConnect() {
-    mqtt.subscribe(mqtt.getTopic(
-      username: TEST_USERNAME,
-      smartId: TEST_SMARTID,
-      type: SmartMqtt.typeSwitchStateNodeToApp,
-    ));
-
-    // Implement Switch widgets freez/unfreez here!
+    mqtt.subscribe(_switchStateTopic);
   }
 
   void onMqttReconnect() {
@@ -166,7 +159,8 @@ class _SwitchboardCardState extends State<SwitchboardCard>
   }
 
   void onMqttReceive(String msg) {
-    helper.showSnackbarText(msg);
-    print(msg);
+    print('[SwitchboardCard] - $msg');
+    // Implement Switch widgets freez/unfreez here!
+    switchStates = JsonNodeToAppSwitchState.fromJsonString(msg);
   }
 }

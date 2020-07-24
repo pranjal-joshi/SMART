@@ -11,8 +11,8 @@ class SmartMqtt {
   MqttClient client;
   MqttConnectionState connectionState;
   StreamSubscription subscription;
-  final Function onDisconnected;
-  final Function onReceive;
+  Function onDisconnected;
+  Function onReceive;
   Function onSubscribed;
   Function onConnected;
   Function onAutoReconnect;
@@ -20,9 +20,6 @@ class SmartMqtt {
   SmartMqtt({
     this.ip = "35.222.110.118",
     this.port = 1883,
-    @required this.client,
-    @required this.connectionState,
-    @required this.subscription,
     @required this.onDisconnected,
     @required this.onReceive,
     @required this.onConnected,
@@ -81,11 +78,15 @@ class SmartMqtt {
   void subscribe(String topic) {
     client.subscribe(topic, MqttQos.exactlyOnce);
   }
+  
+  void unsubscribe(String topic) {
+    client.unsubscribe(topic);
+  }
 
-  void publish({@required String topic, @required String message}) {
+  void publish({@required String topic, @required String message, bool retain = false}) {
     final MqttClientPayloadBuilder builder = MqttClientPayloadBuilder();
     builder.addString(message);
-    client.publishMessage(topic, MqttQos.exactlyOnce, builder.payload);
+    client.publishMessage(topic, MqttQos.exactlyOnce, builder.payload, retain: retain);
   }
 
   String getTopic({
@@ -99,6 +100,9 @@ class SmartMqtt {
         break;
       case typeSwitchStateNodeToApp:
         return 'smart/$username/+/state';
+        break;
+      case typeNodeInfo:
+        return 'smart/$username/+/info';
         break;
       default:
         return 'smart/$username/gateway';
@@ -119,4 +123,5 @@ class SmartMqtt {
   // Static properties for types of topic for topic generation
   static const int typeSwitchStateAppToNode = 1;
   static const int typeSwitchStateNodeToApp = 2;
+  static const int typeNodeInfo = 3;
 }

@@ -1,15 +1,31 @@
+import 'dart:async';
+import 'package:SMART/models/JsonModel.dart';
 import 'package:flutter/material.dart';
+import 'package:mqtt_client/mqtt_client.dart';
 
 import '../models/SmartConstants.dart';
 import '../models/SmartProfile.dart';
 import '../models/SwitchboardRow.dart';
+import '../controllers/SmartMqtt.dart';
 
 import '../widgets/SmartAppBar.dart';
 import '../widgets/ProfileCard.dart';
 import '../widgets/CreateProfileCard.dart';
 import '../widgets/SwitchboardCard.dart';
 
-class Room extends StatelessWidget {
+class Room extends StatefulWidget {
+  @override
+  _RoomState createState() => _RoomState();
+}
+
+class _RoomState extends State<Room> {
+  SmartHelper helper;
+  SmartMqtt mqtt;
+
+  JsonNodeInfo nodeInfo;
+
+  String _roomName = 'Room Name';
+
   final List<SmartProfile> profileList = [
     SmartProfile(profileName: "Party", profileIcon: Icons.blur_circular),
     SmartProfile(profileName: "Chill", profileIcon: Icons.music_note),
@@ -45,12 +61,24 @@ class Room extends StatelessWidget {
   ];
 
   @override
+  void initState() {
+    mqtt = SmartMqtt(
+      onDisconnected: onMqttDisconnect,
+      onReceive: onMqttReceive,
+      onConnected: onMqttConnect,
+      onAutoReconnect: onMqttReconnect,
+    );
+    mqtt.connect();
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    SmartHelper helper = SmartHelper(context: context);
+    helper = SmartHelper(context: context);
 
     return Scaffold(
       appBar: SmartAppBar(
-        title: "Room Name",
+        title: _roomName,
         helper: helper,
       ),
       body: SafeArea(
@@ -151,5 +179,29 @@ class Room extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  void onMqttConnect() {
+    mqtt.subscribe(mqtt.getTopic(
+      username: TEST_USERNAME,
+      smartId: TEST_SMARTID,
+      type: SmartMqtt.typeNodeInfo,
+    ));
+    mqtt.subscribe("smart/test");
+    mqtt.subscribe("smart/test2");
+    // Implement Switch widgets freez/unfreez here!
+  }
+
+  void onMqttReconnect() {
+    print("[Room.dart] - MQTT Reconnected!");
+  }
+
+  void onMqttDisconnect() {
+    print("[Room.dart] - MQTT Disconnected!");
+  }
+
+  void onMqttReceive(String msg) {
+    nodeInfo = JsonNodeInfo.fromJsonString(msg);
+    print(msg);
   }
 }
