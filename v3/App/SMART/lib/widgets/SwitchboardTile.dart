@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:flutter_iconpicker/flutter_iconpicker.dart';
 
 import '../models/SmartConstants.dart';
@@ -7,9 +6,13 @@ import '../models/SwitchboardRow.dart';
 
 class SwitchboardTile extends StatefulWidget {
   final SwitchboardRow row;
+  final int index;
+  final Function onSwitchStateChanged;
 
   SwitchboardTile({
     @required this.row,
+    @required this.index,
+    @required this.onSwitchStateChanged,
   });
 
   @override
@@ -65,7 +68,7 @@ class _SwitchboardTileState extends State<SwitchboardTile> {
           value: _switchState,
           activeColor: Colors.blue[400],
           onChanged: (state) {
-            helper.showSnackbarText('Switch State toggled to $state');
+            widget.onSwitchStateChanged(widget.index, state);
             setState(() => _switchState = state);
           },
         ),
@@ -105,7 +108,7 @@ class _SwitchboardTileState extends State<SwitchboardTile> {
                     labelText: "Device Name",
                     contentPadding: EdgeInsets.all(4),
                   ),
-                  onSubmitted: (str){
+                  onSubmitted: (str) {
                     helper.showSnackbarText('Submited: $str');
                   },
                 ),
