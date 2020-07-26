@@ -67,7 +67,7 @@ class JsonNodeInfo {
       from = json[JSON_FROM];
       deviceType = json[JSON_DEVICE_TYPE];
       nodeName = json[JSON_NODENAME];
-      nod = json[JSON_NoD];
+      nod = int.parse(json[JSON_NoD]);
       version = json[JSON_VERSION];
       to = json[JSON_TO];
       smartId = json[JSON_SMARTID];

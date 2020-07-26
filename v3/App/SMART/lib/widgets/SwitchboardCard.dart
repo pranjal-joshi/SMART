@@ -35,27 +35,26 @@ class _SwitchboardCardState extends State<SwitchboardCard>
       type: SmartMqtt.typeSwitchStateNodeToApp,
     );
     mqtt.connect();
-    //mqtt.subscribe(_switchStateTopic);
-    /*mqtt.stream.asBroadcastStream().listen((msg) {
+    mqtt.subscribe(_switchStateTopic);
+    print(_switchStateTopic);
+    mqtt.stream.asBroadcastStream().listen((msg) {
       if (msg is String) {
         print("[STREAM-SwitchboardCard] $msg");
         JsonNodeToAppSwitchState statePacket =
             JsonNodeToAppSwitchState.fromJsonString(msg);
         if (statePacket.type == JSON_TYPE_STATE) {
-          if (statePacket.smartId == widget.switchboardList[0].smartId) {
-            int i = 0;
-            statePacket.dataList.forEach((element) {
-              if (element == 1)
-                widget.switchboardList[i].deviceState = true;
-              else
-                widget.switchboardList[i].deviceState = false;
-              i++;
-            });
-            setState(() {});
-          }
+          int i = 0;
+          statePacket.dataList.forEach((element) {
+            if (element == 1)
+              widget.switchboardList[i].deviceState = true;
+            else
+              widget.switchboardList[i].deviceState = false;
+            i++;
+          });
+          setState(() {});
         }
       }
-    });*/
+    });
     super.initState();
   }
 
