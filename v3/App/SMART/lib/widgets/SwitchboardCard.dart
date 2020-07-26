@@ -56,13 +56,33 @@ class _SwitchboardCardState extends State<SwitchboardCard>
         }
       }
     });*/
-    initSwitchStateList();
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
     helper = SmartHelper(context: context);
+    initSwitchStateList();
+
+    if (widget.switchboardList.length == 0) {
+      return Expanded(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisSize: MainAxisSize.max,
+          children: <Widget>[
+            CircularProgressIndicator(),
+            Padding(
+              padding: EdgeInsets.only(top: 16),
+              child: Text(
+                "Just a moment..",
+                style: Theme.of(context).textTheme.headline1,
+              ),
+            )
+          ],
+        ),
+      );
+    }
 
     return Padding(
       padding: EdgeInsets.symmetric(
@@ -128,6 +148,7 @@ class _SwitchboardCardState extends State<SwitchboardCard>
 
   // Initialize switchState list like [1,0,1,0] for MQTT
   void initSwitchStateList() {
+    print("LIST SIZE = ${widget.switchboardList.length}");
     widget.switchboardList.forEach((element) {
       if (element.deviceState) {
         switchStatesList.add(1);

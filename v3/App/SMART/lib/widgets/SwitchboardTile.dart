@@ -49,6 +49,20 @@ class _SwitchboardTileState extends State<SwitchboardTile> {
         type: SmartMqtt.typeSwitchStateNodeToApp,
       ),
     );
+    mqtt.stream.asBroadcastStream().listen((msg) {
+      if (msg is String) {
+        JsonNodeToAppSwitchState statePacket =
+            JsonNodeToAppSwitchState.fromJsonString(msg);
+        if (statePacket.type == JSON_TYPE_STATE) {
+          setState(() {
+            if (statePacket.dataList[widget.index] == 1)
+              _switchState = true;
+            else
+              _switchState = false;
+          });
+        }
+      }
+    });
   }
 
   @override
@@ -60,21 +74,6 @@ class _SwitchboardTileState extends State<SwitchboardTile> {
   @override
   Widget build(BuildContext context) {
     SmartHelper helper = SmartHelper(context: context);
-
-    mqtt.stream.asBroadcastStream().listen((msg) {
-      if (msg is String) {
-        JsonNodeToAppSwitchState statePacket =
-            JsonNodeToAppSwitchState.fromJsonString(msg);
-        if (widget.row.smartId == statePacket.smartId) {
-          setState(() {
-            if (statePacket.dataList[widget.index] == 1)
-              _switchState = true;
-            else
-              _switchState = false;
-          });
-        }
-      }
-    });
 
     return Padding(
       padding: EdgeInsets.symmetric(
