@@ -1,92 +1,123 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:SMART/models/SmartConstants.dart';
 import 'package:device_info/device_info.dart';
 import 'package:flutter/material.dart';
 import 'package:mqtt_client/mqtt_client.dart';
 import 'package:mqtt_client/mqtt_server_client.dart';
 
 class SmartMqtt {
-  final String ip;
-  final int port;
+  String ip;
+  int port;
+  bool debug;
+
   MqttClient client;
   MqttConnectionState connectionState;
   StreamSubscription subscription;
-  Function onDisconnected;
-  Function onReceive;
-  Function onSubscribed;
-  Function onConnected;
-  Function onAutoReconnect;
+  bool isConnected = false;
 
-  SmartMqtt({
-    this.ip = "35.222.110.118",
-    this.port = 1883,
-    @required this.onDisconnected,
-    @required this.onReceive,
-    @required this.onConnected,
-    this.onSubscribed,
-    this.onAutoReconnect,
-  });
+  final StreamController _controller = StreamController<dynamic>.broadcast();
+  Stream<dynamic> get stream => _controller.stream;
+
+  final StreamController _subscriptionController = StreamController<String>();
+  final StreamController _unsubscriptionController = StreamController<String>();
+
+
+  static final SmartMqtt _instance = SmartMqtt._internal();
+  SmartMqtt._internal();
+  
+  factory SmartMqtt({
+    String ip = BROKER_IP,
+    int port = BROKER_PORT,
+    bool debug = false,
+  }) {
+    _instance.ip = ip;
+    _instance.port = port;
+    _instance.debug = debug;
+    return _instance;
+  }
 
   void connect() async {
-    client = MqttServerClient.withPort(ip, '', port);
-    client.logging(on: false);
-    client.keepAlivePeriod = 30;
-    client.autoReconnect = true;
-    client.onAutoReconnect = this.onAutoReconnect;
-    client.onConnected = this.onConnected;
-    client.onDisconnected = this.onDisconnected;
-    client.onSubscribed = this.onSubscribed;
+    if (!isConnected) {
+      isConnected = true;
+      client = MqttServerClient.withPort(ip, '', port);
+      client.logging(on: false);
+      client.keepAlivePeriod = 30;
+      client.autoReconnect = true;
+      client.onConnected = () {
+        _subscriptionController.stream.listen((topic) {
+          client.subscribe(topic, MqttQos.exactlyOnce);
+          if(debug)
+            print('[SmartMqtt] Subscribed -> $topic');
+        });
+        _unsubscriptionController.stream.listen((topic) {
+          client.unsubscribe(topic);
+          if(debug)
+            print('[SmartMqtt] Unsubscribed -> $topic');
+        });
+      };
+      client.onDisconnected = () {
+        _controller.sink.add(client.connectionStatus.state);
+        isConnected = false;
+      };
+      client.onAutoReconnect =
+          () => _controller.sink.add(client.connectionStatus.state);
 
-    // use UniqueID for only 1 connection per device
-    // use DateTime as UID  to get multiple connections from same device
-    final MqttConnectMessage connectMessage = MqttConnectMessage()
-        .keepAliveFor(30)
-        // .withClientIdentifier(await _getUniqueId())
-        .withClientIdentifier(DateTime.now().toString())
-        .withWillQos(MqttQos.atMostOnce);
-    print("[+] SmartMqtt -> MQTT Client connecting...");
-    client.connectionMessage = connectMessage;
+      // use UniqueID for only 1 connection per device
+      // use DateTime as UID  to get multiple connections from same device
+      final MqttConnectMessage connectMessage = MqttConnectMessage()
+          .keepAliveFor(30)
+          .withClientIdentifier(await _getUniqueId())
+          //.withClientIdentifier(DateTime.now().toString())
+          .withWillQos(MqttQos.atMostOnce);
+      if(debug)
+        print("[SmartMqtt] -> MQTT Client connecting...");
+      client.connectionMessage = connectMessage;
 
-    try {
-      await client.connect();
-    } catch (e) {
-      print(e);
-      disconnect();
-    }
+      try {
+        await client.connect();
+      } catch (e) {
+        print(e);
+        disconnect();
+      }
 
-    if (client.connectionStatus.state == MqttConnectionState.connected) {
-      print("[+] SmartMqtt -> MQTT Connected!");
-      subscription = client.updates.listen((event) {
-        final MqttPublishMessage recMessage =
-            event[0].payload as MqttPublishMessage;
-        final String msg = MqttPublishPayload.bytesToStringAsString(
-            recMessage.payload.message);
-        onReceive(msg);
-      });
-    } else {
-      print(
-          "[+] SmartMqtt -> Failed to Connect. RC = ${client.connectionStatus.returnCode}");
-      disconnect();
+      if (client.connectionStatus.state == MqttConnectionState.connected) {
+        if(debug)
+          print("[SmartMqtt] -> MQTT Connected!");
+        subscription = client.updates.listen((event) {
+          final MqttPublishMessage recMessage =
+              event[0].payload as MqttPublishMessage;
+          final String msg = MqttPublishPayload.bytesToStringAsString(
+              recMessage.payload.message);
+          _controller.sink.add(msg);
+        });
+      } else {
+        print(
+            "[SmartMqtt] -> Failed to Connect. RC -> ${client.connectionStatus.returnCode}");
+        disconnect();
+      }
     }
   }
 
   void disconnect() {
     client.disconnect();
-    onDisconnected();
+    isConnected = false;
   }
 
   void subscribe(String topic) {
-    client.subscribe(topic, MqttQos.exactlyOnce);
-  }
-  
-  void unsubscribe(String topic) {
-    client.unsubscribe(topic);
+    _subscriptionController.sink.add(topic);
   }
 
-  void publish({@required String topic, @required String message, bool retain = false}) {
+  void unsubscribe(String topic) {
+    _unsubscriptionController.sink.add(topic);
+  }
+
+  void publish(
+      {@required String topic, @required String message, bool retain = false}) {
     final MqttClientPayloadBuilder builder = MqttClientPayloadBuilder();
     builder.addString(message);
-    client.publishMessage(topic, MqttQos.exactlyOnce, builder.payload, retain: retain);
+    client.publishMessage(topic, MqttQos.exactlyOnce, builder.payload,
+        retain: retain);
   }
 
   String getTopic({
