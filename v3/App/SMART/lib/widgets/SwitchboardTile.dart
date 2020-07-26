@@ -3,17 +3,22 @@ import 'package:flutter_iconpicker/flutter_iconpicker.dart';
 
 import '../models/SmartConstants.dart';
 import '../models/SwitchboardRow.dart';
+import '../models/JsonModel.dart';
+import '../controllers/SmartMqtt.dart';
 
 class SwitchboardTile extends StatefulWidget {
   final SwitchboardRow row;
   final int index;
   final Function onSwitchStateChanged;
+  // final Key key;
 
   SwitchboardTile({
+    // @required this.key,
     @required this.row,
     @required this.index,
     @required this.onSwitchStateChanged,
   });
+  // }) : super(key: key);
 
   @override
   _SwitchboardTileState createState() => _SwitchboardTileState();
@@ -22,6 +27,7 @@ class SwitchboardTile extends StatefulWidget {
 class _SwitchboardTileState extends State<SwitchboardTile> {
   bool _switchState;
   Icon _icon;
+  SmartMqtt mqtt;
   TextEditingController _nameController = TextEditingController();
 
   @override
@@ -32,6 +38,16 @@ class _SwitchboardTileState extends State<SwitchboardTile> {
       widget.row.deviceIcon,
       color: color_accent,
       size: 32,
+    );
+
+    mqtt = SmartMqtt();
+    mqtt.connect();
+    mqtt.subscribe(
+      mqtt.getTopic(
+        username: TEST_USERNAME,
+        smartId: TEST_SMARTID,
+        type: SmartMqtt.typeSwitchStateNodeToApp,
+      ),
     );
   }
 
@@ -44,6 +60,21 @@ class _SwitchboardTileState extends State<SwitchboardTile> {
   @override
   Widget build(BuildContext context) {
     SmartHelper helper = SmartHelper(context: context);
+
+    mqtt.stream.asBroadcastStream().listen((msg) {
+      if (msg is String) {
+        JsonNodeToAppSwitchState statePacket =
+            JsonNodeToAppSwitchState.fromJsonString(msg);
+        if (widget.row.smartId == statePacket.smartId) {
+          setState(() {
+            if (statePacket.dataList[widget.index] == 1)
+              _switchState = true;
+            else
+              _switchState = false;
+          });
+        }
+      }
+    });
 
     return Padding(
       padding: EdgeInsets.symmetric(
@@ -66,7 +97,7 @@ class _SwitchboardTileState extends State<SwitchboardTile> {
         ),
         trailing: Switch.adaptive(
           value: _switchState,
-          activeColor: Colors.blue[400],
+          activeColor: Theme.of(context).primaryColorDark,
           onChanged: (state) {
             widget.onSwitchStateChanged(widget.index, state);
             setState(() => _switchState = state);

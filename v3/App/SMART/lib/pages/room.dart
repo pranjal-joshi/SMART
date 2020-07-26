@@ -37,13 +37,13 @@ class _RoomState extends State<Room> {
     SwitchboardRow(
       deviceName: "Device 1",
       deviceDescription: "Description for Device 1",
-      deviceState: true,
+      deviceState: false,
       deviceIcon: Icons.ac_unit,
     ),
     SwitchboardRow(
       deviceName: "Device 2",
       deviceDescription: "Description for Device 2",
-      deviceState: false,
+      deviceState: true,
       deviceIcon: Icons.lightbulb_outline,
     ),
     SwitchboardRow(
@@ -62,13 +62,28 @@ class _RoomState extends State<Room> {
 
   @override
   void initState() {
-    mqtt = SmartMqtt(
-      onDisconnected: onMqttDisconnect,
-      onReceive: onMqttReceive,
-      onConnected: onMqttConnect,
-      onAutoReconnect: onMqttReconnect,
-    );
+    mqtt = SmartMqtt();
     mqtt.connect();
+    mqtt.stream.asBroadcastStream().listen((msg) {
+      if (msg is MqttConnectionState)
+        print("CONNECTION EVEN HAPPENING");
+      else {
+        print("[STREAM-Room] $msg");
+        JsonNodeInfo infoPacket = JsonNodeInfo.fromJsonString(msg);
+        if(infoPacket.type == JSON_TYPE_INFO) {
+          setState(() {
+            _roomName = infoPacket.smartId;
+          });
+        }
+      }
+    });
+    mqtt.subscribe(
+      mqtt.getTopic(
+        username: TEST_USERNAME,
+        smartId: TEST_SMARTID,
+        type: SmartMqtt.typeNodeInfo,
+      ),
+    );
     super.initState();
   }
 
@@ -182,13 +197,11 @@ class _RoomState extends State<Room> {
   }
 
   void onMqttConnect() {
-    mqtt.subscribe(mqtt.getTopic(
-      username: TEST_USERNAME,
-      smartId: TEST_SMARTID,
-      type: SmartMqtt.typeNodeInfo,
-    ));
-    mqtt.subscribe("smart/test");
-    mqtt.subscribe("smart/test2");
+    // mqtt.subscribe(mqtt.getTopic(
+    //   username: TEST_USERNAME,
+    //   smartId: TEST_SMARTID,
+    //   type: SmartMqtt.typeNodeInfo,
+    // ));
     // Implement Switch widgets freez/unfreez here!
   }
 

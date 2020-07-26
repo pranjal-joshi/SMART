@@ -1,6 +1,4 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:mqtt_client/mqtt_client.dart';
 
 import '../models/SmartConstants.dart';
 import '../models/SwitchboardRow.dart';
@@ -30,18 +28,34 @@ class _SwitchboardCardState extends State<SwitchboardCard>
 
   @override
   void initState() {
-    mqtt = SmartMqtt(
-      onDisconnected: onMqttDisconnect,
-      onReceive: onMqttReceive,
-      onConnected: onMqttConnect,
-      onAutoReconnect: onMqttReconnect,
-    );
+    mqtt = SmartMqtt();
     _switchStateTopic = mqtt.getTopic(
       username: TEST_USERNAME,
       smartId: TEST_SMARTID,
       type: SmartMqtt.typeSwitchStateNodeToApp,
     );
     mqtt.connect();
+    //mqtt.subscribe(_switchStateTopic);
+    /*mqtt.stream.asBroadcastStream().listen((msg) {
+      if (msg is String) {
+        print("[STREAM-SwitchboardCard] $msg");
+        JsonNodeToAppSwitchState statePacket =
+            JsonNodeToAppSwitchState.fromJsonString(msg);
+        if (statePacket.type == JSON_TYPE_STATE) {
+          if (statePacket.smartId == widget.switchboardList[0].smartId) {
+            int i = 0;
+            statePacket.dataList.forEach((element) {
+              if (element == 1)
+                widget.switchboardList[i].deviceState = true;
+              else
+                widget.switchboardList[i].deviceState = false;
+              i++;
+            });
+            setState(() {});
+          }
+        }
+      }
+    });*/
     initSwitchStateList();
     super.initState();
   }
@@ -85,6 +99,7 @@ class _SwitchboardCardState extends State<SwitchboardCard>
                         itemCount: widget.switchboardList.length,
                         itemBuilder: (ctx, index) {
                           return SwitchboardTile(
+                            //key: UniqueKey(),
                             row: widget.switchboardList[index],
                             index: index,
                             onSwitchStateChanged: updateSwitchStates,
@@ -113,13 +128,12 @@ class _SwitchboardCardState extends State<SwitchboardCard>
 
   // Initialize switchState list like [1,0,1,0] for MQTT
   void initSwitchStateList() {
-    widget.switchboardList.every((element) {
+    widget.switchboardList.forEach((element) {
       if (element.deviceState) {
         switchStatesList.add(1);
       } else {
         switchStatesList.add(0);
       }
-      return true;
     });
   }
 
@@ -142,25 +156,5 @@ class _SwitchboardCardState extends State<SwitchboardCard>
       ).toJsonString(),
       retain: true,
     );
-  }
-
-  void onMqttConnect() {
-    mqtt.subscribe(_switchStateTopic);
-  }
-
-  void onMqttReconnect() {
-    print("MQTT Reconnected!");
-    helper.showSnackbarText("Reconnected");
-  }
-
-  void onMqttDisconnect() {
-    print("MQTT Disconnected!");
-    helper.showSnackbarText("Disconnected From server!");
-  }
-
-  void onMqttReceive(String msg) {
-    print('[SwitchboardCard] - $msg');
-    // Implement Switch widgets freez/unfreez here!
-    switchStates = JsonNodeToAppSwitchState.fromJsonString(msg);
   }
 }
