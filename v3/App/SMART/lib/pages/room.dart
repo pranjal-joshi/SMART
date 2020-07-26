@@ -20,11 +20,13 @@ class Room extends StatefulWidget {
 
 class _RoomState extends State<Room> {
   SmartHelper helper;
-  SmartMqtt mqtt;
-
+  SmartMqtt mqtt = SmartMqtt();
   JsonNodeInfo nodeInfo;
 
   String _roomName = 'Room Name';
+
+  List<String> _nodesInRoomList = [];
+  int _devicesInRoom = 0;
 
   final List<SmartProfile> profileList = [
     SmartProfile(profileName: "Party", profileIcon: Icons.blur_circular),
@@ -33,7 +35,7 @@ class _RoomState extends State<Room> {
     SmartProfile(profileName: "Movie", profileIcon: Icons.movie),
   ];
 
-  final List<SwitchboardRow> switchList = [
+  /*final List<SwitchboardRow> switchList = [
     SwitchboardRow(
       deviceName: "Device 1",
       deviceDescription: "Description for Device 1",
@@ -58,25 +60,12 @@ class _RoomState extends State<Room> {
       deviceState: false,
       deviceIcon: Icons.desktop_windows,
     ),
-  ];
+  ];*/
+  List<SwitchboardRow> switchList = [];
 
   @override
   void initState() {
-    mqtt = SmartMqtt();
     mqtt.connect();
-    mqtt.stream.asBroadcastStream().listen((msg) {
-      if (msg is MqttConnectionState)
-        print("CONNECTION EVEN HAPPENING");
-      else {
-        print("[STREAM-Room] $msg");
-        JsonNodeInfo infoPacket = JsonNodeInfo.fromJsonString(msg);
-        if(infoPacket.type == JSON_TYPE_INFO) {
-          setState(() {
-            _roomName = infoPacket.smartId;
-          });
-        }
-      }
-    });
     mqtt.subscribe(
       mqtt.getTopic(
         username: TEST_USERNAME,
@@ -90,6 +79,34 @@ class _RoomState extends State<Room> {
   @override
   Widget build(BuildContext context) {
     helper = SmartHelper(context: context);
+
+    mqtt.stream.asBroadcastStream().listen((msg) {
+      if (msg is MqttConnectionState)
+        print("CONNECTION EVEN HAPPENING");
+      else {
+        print("[STREAM-Room] $msg");
+        JsonNodeInfo infoPacket = JsonNodeInfo.fromJsonString(msg);
+        if (infoPacket.type == JSON_TYPE_INFO) {
+          _roomName = infoPacket.nodeName;
+          _devicesInRoom += infoPacket.nod;
+          if (!_nodesInRoomList.contains(infoPacket.smartId))
+            _nodesInRoomList.add(infoPacket.smartId);
+          for (int i = 1; i <= _devicesInRoom; i++) {
+            switchList.add(
+              SwitchboardRow(
+                deviceName: 'Device $i',
+                deviceState: false,
+                deviceDescription: 'Description for Device $i',
+                deviceIcon: Icons.android,
+              ),
+            );
+          }
+          var x = switchList.map((e) => e.toJsonString()).toList();
+          print(x.toString());
+          setState(() {});
+        }
+      }
+    });
 
     return Scaffold(
       appBar: SmartAppBar(
