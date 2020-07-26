@@ -31,8 +31,8 @@ class JsonAppToNodeSwitchState {
 
 class JsonNodeToAppSwitchState {
   String topic;
-  final String from = JSON_TO_NODE;
-  final String type = JSON_TYPE_STATE;
+  String from;
+  String type;
   String smartId;
   List<int> dataList;
 
@@ -40,6 +40,8 @@ class JsonNodeToAppSwitchState {
     try {
       rawJson = rawJson.replaceAll('\'', '\"');
       Map<String, dynamic> json = jsonDecode(rawJson);
+      type = json[JSON_TYPE];
+      from = json[JSON_FROM];
       topic = json[JSON_TOPIC];
       smartId = json[JSON_SMARTID];
       dataList = json[JSON_TYPE_DATA].cast<int>();
@@ -48,8 +50,8 @@ class JsonNodeToAppSwitchState {
 }
 
 class JsonNodeInfo {
-  final String from = JSON_TO_NODE;
-  final String type = JSON_TYPE_INFO;
+  String from;
+  String type;
   String deviceType;
   String nodeName;
   int nod;
@@ -61,6 +63,8 @@ class JsonNodeInfo {
     try {
       rawJson = rawJson.replaceAll('\'', '\"');
       Map<String, dynamic> json = jsonDecode(rawJson);
+      type = json[JSON_TYPE];
+      from = json[JSON_FROM];
       deviceType = json[JSON_DEVICE_TYPE];
       nodeName = json[JSON_NODENAME];
       nod = json[JSON_NoD];

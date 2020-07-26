@@ -3,6 +3,8 @@ import 'package:flutter/cupertino.dart';
 
 const String TEST_SMARTID = 'SMART_00DCCBB8';
 const String TEST_USERNAME = 'joshi.pranjal5@gmail.com';
+const String BROKER_IP = "35.222.110.118";
+const int BROKER_PORT = 1883;
 
 final color_accent = Colors.red[700].withOpacity(0.8);
 final color_accent_dark = Colors.red[400];
