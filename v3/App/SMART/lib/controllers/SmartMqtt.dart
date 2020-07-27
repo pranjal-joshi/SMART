@@ -22,10 +22,9 @@ class SmartMqtt {
   final StreamController _subscriptionController = StreamController<String>();
   final StreamController _unsubscriptionController = StreamController<String>();
 
-
   static final SmartMqtt _instance = SmartMqtt._internal();
   SmartMqtt._internal();
-  
+
   factory SmartMqtt({
     String ip = BROKER_IP,
     int port = BROKER_PORT,
@@ -47,13 +46,11 @@ class SmartMqtt {
       client.onConnected = () {
         _subscriptionController.stream.listen((topic) {
           client.subscribe(topic, MqttQos.exactlyOnce);
-          if(debug)
-            print('[SmartMqtt] Subscribed -> $topic');
+          if (debug) print('[SmartMqtt] Subscribed -> $topic');
         });
         _unsubscriptionController.stream.listen((topic) {
           client.unsubscribe(topic);
-          if(debug)
-            print('[SmartMqtt] Unsubscribed -> $topic');
+          if (debug) print('[SmartMqtt] Unsubscribed -> $topic');
         });
       };
       client.onDisconnected = () {
@@ -70,8 +67,7 @@ class SmartMqtt {
           .withClientIdentifier(await _getUniqueId())
           //.withClientIdentifier(DateTime.now().toString())
           .withWillQos(MqttQos.atMostOnce);
-      if(debug)
-        print("[SmartMqtt] -> MQTT Client connecting...");
+      if (debug) print("[SmartMqtt] -> MQTT Client connecting...");
       client.connectionMessage = connectMessage;
 
       try {
@@ -82,8 +78,7 @@ class SmartMqtt {
       }
 
       if (client.connectionStatus.state == MqttConnectionState.connected) {
-        if(debug)
-          print("[SmartMqtt] -> MQTT Connected!");
+        if (debug) print("[SmartMqtt] -> MQTT Connected!");
         subscription = client.updates.listen((event) {
           final MqttPublishMessage recMessage =
               event[0].payload as MqttPublishMessage;
@@ -102,6 +97,9 @@ class SmartMqtt {
   void disconnect() {
     client.disconnect();
     isConnected = false;
+    _controller.sink.close();
+    _subscriptionController.close();
+    _unsubscriptionController.close();
   }
 
   void subscribe(String topic) {
@@ -112,12 +110,23 @@ class SmartMqtt {
     _unsubscriptionController.sink.add(topic);
   }
 
-  void publish(
-      {@required String topic, @required String message, bool retain = false}) {
-    final MqttClientPayloadBuilder builder = MqttClientPayloadBuilder();
-    builder.addString(message);
-    client.publishMessage(topic, MqttQos.exactlyOnce, builder.payload,
-        retain: retain);
+  void publish({
+    @required String topic,
+    @required String message,
+    bool retain = false,
+  }) {
+    try {
+      final MqttClientPayloadBuilder builder = MqttClientPayloadBuilder();
+      builder.addString(message);
+      client.publishMessage(
+        topic,
+        MqttQos.exactlyOnce,
+        builder.payload,
+        retain: retain,
+      );
+    } on ConnectionException catch (e) {
+      if (debug) print('[SmartMqtt] Exception -> $e');
+    }
   }
 
   String getTopic({
