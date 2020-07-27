@@ -10,15 +10,14 @@ class SwitchboardTile extends StatefulWidget {
   final SwitchboardRow row;
   final int index;
   final Function onSwitchStateChanged;
-  // final Key key;
+  final Key key;
 
   SwitchboardTile({
-    // @required this.key,
+    @required this.key,
     @required this.row,
     @required this.index,
     @required this.onSwitchStateChanged,
-  });
-  // }) : super(key: key);
+  }) : super(key: key);
 
   @override
   _SwitchboardTileState createState() => _SwitchboardTileState();
@@ -76,9 +75,7 @@ class _SwitchboardTileState extends State<SwitchboardTile> {
     SmartHelper helper = SmartHelper(context: context);
 
     return Padding(
-      padding: EdgeInsets.symmetric(
-        vertical: 4,
-      ),
+      padding: const EdgeInsets.symmetric(vertical: 4),
       child: ExpansionTile(
         // leading: Icon(
         //   widget.row.deviceIcon,
@@ -113,8 +110,9 @@ class _SwitchboardTileState extends State<SwitchboardTile> {
                 padding: EdgeInsets.symmetric(horizontal: 16),
                 onPressed: () async {
                   IconData iconData = await FlutterIconPicker.showIconPicker(
-                      context,
-                      iconPackMode: IconPack.material);
+                    context,
+                    iconPackMode: IconPack.material,
+                  );
                   if (iconData != null) {
                     _icon = Icon(
                       iconData,
