@@ -53,7 +53,7 @@ class ProfileCard extends StatelessWidget {
                     Expanded(
                       flex: 7,
                       child: Padding(
-                        padding: EdgeInsets.fromLTRB(10, 4, 0, 0),
+                        padding: const EdgeInsets.fromLTRB(10, 4, 0, 0),
                         child: Text(
                           profileName,
                           overflow: TextOverflow.fade,
@@ -70,7 +70,7 @@ class ProfileCard extends StatelessWidget {
                     Expanded(
                       flex: 3,
                       child: Padding(
-                        padding: EdgeInsets.fromLTRB(0, 10, 4, 0),
+                        padding: const EdgeInsets.fromLTRB(0, 10, 4, 0),
                         child: PopupMenuButton(
                           onCanceled: () => print("Popup Dismissed!"),
                           onSelected: (val) => helper.showSnackbarText("Selected: ${val.title}"),
@@ -108,7 +108,7 @@ class ProfileCard extends StatelessWidget {
                 flex: 2,
                 child: Container(
                   width: double.infinity,
-                  padding: EdgeInsets.all(8),
+                  padding: const EdgeInsets.all(8),
                   child: IconButton(
                     icon: Icon(
                       profileIcon,

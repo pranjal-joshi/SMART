@@ -18,6 +18,7 @@ dependencies:
   flutter_iconpicker: ^2.1.2
   mqtt_client: ^7.3.0
   device_info: ^0.4.2+4
+  shared_preferences: ^0.5.8
 
 dev_dependencies:
   flutter_test:

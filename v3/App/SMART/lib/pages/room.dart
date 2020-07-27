@@ -101,8 +101,6 @@ class _RoomState extends State<Room> {
               ),
             );
           }
-          var x = switchList.map((e) => e.toJsonString()).toList();
-          print(x.toString());
           setState(() {});
         }
       }
@@ -211,27 +209,5 @@ class _RoomState extends State<Room> {
         ),
       ),
     );
-  }
-
-  void onMqttConnect() {
-    // mqtt.subscribe(mqtt.getTopic(
-    //   username: TEST_USERNAME,
-    //   smartId: TEST_SMARTID,
-    //   type: SmartMqtt.typeNodeInfo,
-    // ));
-    // Implement Switch widgets freez/unfreez here!
-  }
-
-  void onMqttReconnect() {
-    print("[Room.dart] - MQTT Reconnected!");
-  }
-
-  void onMqttDisconnect() {
-    print("[Room.dart] - MQTT Disconnected!");
-  }
-
-  void onMqttReceive(String msg) {
-    nodeInfo = JsonNodeInfo.fromJsonString(msg);
-    print(msg);
   }
 }

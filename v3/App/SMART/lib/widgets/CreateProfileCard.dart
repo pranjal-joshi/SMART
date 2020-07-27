@@ -17,8 +17,8 @@ class CreateProfileCard extends StatelessWidget {
       color: Theme.of(context).textTheme.bodyText2.color,
       radius: Radius.circular(radius),
       strokeWidth: 2,
-      dashPattern: [8,8],
-      padding: EdgeInsets.all(0),
+      dashPattern: const [8,8],
+      padding: const EdgeInsets.all(0),
       child: Card(
         clipBehavior: Clip.antiAliasWithSaveLayer,
         shape: RoundedRectangleBorder(
@@ -43,7 +43,7 @@ class CreateProfileCard extends StatelessWidget {
                     children: <Widget>[
                       Expanded(
                         child: Padding(
-                          padding: EdgeInsets.fromLTRB(10, 4, 0, 0),
+                          padding: const EdgeInsets.fromLTRB(10, 4, 0, 0),
                           child: Text(
                             "Create Profile",
                             overflow: TextOverflow.fade,
