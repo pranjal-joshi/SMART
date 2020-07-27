@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 
 import '../models/SmartConstants.dart';
@@ -36,7 +38,6 @@ class _SwitchboardCardState extends State<SwitchboardCard>
     );
     mqtt.connect();
     mqtt.subscribe(_switchStateTopic);
-    print(_switchStateTopic);
     mqtt.stream.asBroadcastStream().listen((msg) {
       if (msg is String) {
         print("[STREAM-SwitchboardCard] $msg");
@@ -63,23 +64,24 @@ class _SwitchboardCardState extends State<SwitchboardCard>
     helper = SmartHelper(context: context);
     initSwitchStateList();
 
+    var x = widget.switchboardList.map((e) => e.toJsonString()).toList();
+    mqtt.publish(topic: 'smart/flutter', message: x.toString());
+
     if (widget.switchboardList.length == 0) {
-      return Expanded(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisSize: MainAxisSize.max,
-          children: <Widget>[
-            CircularProgressIndicator(),
-            Padding(
-              padding: EdgeInsets.only(top: 16),
-              child: Text(
-                "Just a moment..",
-                style: Theme.of(context).textTheme.headline1,
-              ),
-            )
-          ],
-        ),
+      return Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisSize: MainAxisSize.max,
+        children: <Widget>[
+          CircularProgressIndicator(),
+          Padding(
+            padding: EdgeInsets.only(top: 16),
+            child: Text(
+              "Just a moment..",
+              style: Theme.of(context).textTheme.headline1,
+            ),
+          )
+        ],
       );
     }
 
@@ -118,7 +120,7 @@ class _SwitchboardCardState extends State<SwitchboardCard>
                         itemCount: widget.switchboardList.length,
                         itemBuilder: (ctx, index) {
                           return SwitchboardTile(
-                            //key: UniqueKey(),
+                            key: ValueKey(widget.switchboardList[index]),
                             row: widget.switchboardList[index],
                             index: index,
                             onSwitchStateChanged: updateSwitchStates,
@@ -141,13 +143,11 @@ class _SwitchboardCardState extends State<SwitchboardCard>
   void dispose() {
     print("[SwitchboardCard] - Disposing..");
     mqtt.unsubscribe(_switchStateTopic);
-    //mqtt.disconnect();
     super.dispose();
   }
 
   // Initialize switchState list like [1,0,1,0] for MQTT
   void initSwitchStateList() {
-    print("LIST SIZE = ${widget.switchboardList.length}");
     widget.switchboardList.forEach((element) {
       if (element.deviceState) {
         switchStatesList.add(1);
