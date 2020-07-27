@@ -9,6 +9,7 @@ class SwitchboardRow {
   bool deviceState;
   IconData deviceIcon;
   String smartId;
+  String type = "SwitchboardRow";
 
   SwitchboardRow({
     this.deviceName,
@@ -22,19 +23,21 @@ class SwitchboardRow {
     try {
       rawJson = rawJson.replaceAll('\'', '\"');
       Map<String, dynamic> json = jsonDecode(rawJson);
+      type = json['type'];
       deviceName = json['name'];
       deviceDescription = json['description'];
       deviceState = json['state'].cast<bool>();
-      deviceIcon = json['icon'];
+      deviceIcon = IconData(json['iconCode'], fontFamily: 'MaterialIcons');
     } catch (e) {}
   }
 
   Map<String, dynamic> toJson() {
     return {
+      'type': type,
       'name': deviceName,
       'description': deviceDescription,
       'state': deviceState,
-      // 'icon': deviceIcon,
+      'icon': deviceIcon.codePoint,
     };
   }
 
