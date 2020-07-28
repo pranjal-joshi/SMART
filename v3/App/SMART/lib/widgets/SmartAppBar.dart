@@ -5,9 +5,11 @@ import '../models/SmartConstants.dart';
 
 class SmartAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
+  final bool showActions;
 
   SmartAppBar({
     @required this.title,
+    @required this.showActions,
   });
 
   @override
@@ -20,7 +22,7 @@ class SmartAppBar extends StatelessWidget implements PreferredSizeWidget {
         title,
         style: TextStyle(
           fontWeight: FontWeight.bold,
-          fontSize: 28,
+          fontSize: 32,
           //color: helper.getAppBarTextColor,
           color: Theme.of(context).textTheme.headline1.color,
         ),
@@ -29,7 +31,7 @@ class SmartAppBar extends StatelessWidget implements PreferredSizeWidget {
       backgroundColor: Colors.transparent,
       // backgroundColor: helper.getAppBarBackgroundColor,
       leading: showBackButton(context),
-      actions: <Widget>[
+      actions: showActions ? <Widget>[
         Padding(
           padding: const EdgeInsets.only(right: 16),
           child: Icon(
@@ -37,7 +39,7 @@ class SmartAppBar extends StatelessWidget implements PreferredSizeWidget {
             color: Theme.of(context).primaryColorDark,
           ),
         )
-      ],
+      ] : null,
     );
   }
 

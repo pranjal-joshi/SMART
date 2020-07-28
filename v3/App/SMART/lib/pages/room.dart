@@ -106,11 +106,19 @@ class _RoomState extends State<Room> {
     });
 
     return Scaffold(
-      appBar: SmartAppBar(title: _roomName),
+      appBar: SmartAppBar(
+        title: _roomName,
+        showActions: true,
+      ),
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
+            RaisedButton(
+              child: Text("Add New Device Page"),
+              onPressed: () =>
+                  Navigator.of(context).pushNamed(route_addNewDevice),
+            ),
             Flexible(
               flex: 4,
               child: Container(
