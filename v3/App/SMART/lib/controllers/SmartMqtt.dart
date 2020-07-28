@@ -131,8 +131,9 @@ class SmartMqtt {
 
   String getTopic({
     @required String username,
-    @required String smartId,
     @required int type,
+    String roomName,
+    String smartId,
   }) {
     switch (type) {
       case typeSwitchStateAppToNode:
@@ -143,6 +144,9 @@ class SmartMqtt {
         break;
       case typeNodeInfo:
         return 'smart/$username/+/info';
+        break;
+      case typeAppRoomConfig:
+        return 'smart/$username/app/$roomName/config';
         break;
       default:
         return 'smart/$username/gateway';
@@ -164,4 +168,5 @@ class SmartMqtt {
   static const int typeSwitchStateAppToNode = 1;
   static const int typeSwitchStateNodeToApp = 2;
   static const int typeNodeInfo = 3;
+  static const int typeAppRoomConfig = 4;
 }

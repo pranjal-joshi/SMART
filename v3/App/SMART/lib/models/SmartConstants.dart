@@ -229,3 +229,6 @@ const String JSON_SENSOR_DS_MIN       = "dm";
 const String JSON_STATUS_ONLINE       = "online";
 const String JSON_STATUS_OFFLINE      = "offline";
 const String JSON_STATUS_BUSY         = "busy";
+
+// SharedPreferences keys
+const String SP_SwitchboardRowList    = "sp_SwitchboardRowList";
