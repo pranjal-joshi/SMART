@@ -26,7 +26,7 @@ class SwitchboardTile extends StatefulWidget {
 class _SwitchboardTileState extends State<SwitchboardTile> {
   bool _switchState;
   Icon _icon;
-  SmartMqtt mqtt;
+  SmartMqtt mqtt = SmartMqtt();
   TextEditingController _nameController = TextEditingController();
 
   @override
@@ -38,8 +38,6 @@ class _SwitchboardTileState extends State<SwitchboardTile> {
       color: color_accent,
       size: 32,
     );
-
-    mqtt = SmartMqtt();
     mqtt.connect();
     mqtt.subscribe(
       mqtt.getTopic(
