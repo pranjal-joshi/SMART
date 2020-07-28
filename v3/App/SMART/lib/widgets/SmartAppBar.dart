@@ -5,11 +5,9 @@ import '../models/SmartConstants.dart';
 
 class SmartAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
-  final SmartHelper helper;
 
   SmartAppBar({
     @required this.title,
-    @required this.helper,
   });
 
   @override
@@ -46,7 +44,7 @@ class SmartAppBar extends StatelessWidget implements PreferredSizeWidget {
   Widget showBackButton(BuildContext context) {
     if (ModalRoute.of(context).canPop) {
       return BackButton(
-        color: helper.getAppBarTextColor,
+        color: Theme.of(context).primaryColorDark,
       );
     } else {
       return null;

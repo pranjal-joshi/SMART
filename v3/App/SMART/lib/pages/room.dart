@@ -106,10 +106,7 @@ class _RoomState extends State<Room> {
     });
 
     return Scaffold(
-      appBar: SmartAppBar(
-        title: _roomName,
-        helper: helper,
-      ),
+      appBar: SmartAppBar(title: _roomName),
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,

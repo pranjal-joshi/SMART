@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'models/SmartConstants.dart';
 import 'pages/room.dart';
+import 'pages/addNewDevice.dart';
+
 
 void main() => runApp(SmartApp());
 
@@ -13,9 +15,11 @@ class SmartApp extends StatelessWidget {
       title: 'SMART',
       routes: {
         route_room: (context) => Room(),
+        route_addNewDevice: (context) => AddNewDevice(),
       },
       locale: Locale("en-IN"),
-      initialRoute: route_room,
+      // initialRoute: route_room,
+      initialRoute: route_addNewDevice,
       themeMode: ThemeMode.system,
       theme: helper.themeLight,
       darkTheme: helper.themeDark,
