@@ -1,17 +1,20 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 
 import '../models/SmartConstants.dart';
 import '../models/SwitchboardRow.dart';
 import '../models/JsonModel.dart';
+import '../models/SmartSharedPref.dart';
 import '../controllers/SmartMqtt.dart';
 import '../widgets/SwitchboardTile.dart';
 
 class SwitchboardCard extends StatefulWidget {
   final List<SwitchboardRow> switchboardList;
+  final List<String> nodeList;
 
-  SwitchboardCard({@required this.switchboardList});
+  SwitchboardCard({
+    @required this.switchboardList,
+    @required this.nodeList,
+  });
 
   @override
   _SwitchboardCardState createState() => _SwitchboardCardState();
@@ -20,17 +23,18 @@ class SwitchboardCard extends StatefulWidget {
 class _SwitchboardCardState extends State<SwitchboardCard>
     with TickerProviderStateMixin {
   SmartHelper helper;
-  SmartMqtt mqtt;
+  SmartMqtt mqtt = SmartMqtt();
+  SmartSharedPreference sp = SmartSharedPreference();
 
   JsonNodeToAppSwitchState switchStates;
 
   List<int> switchStatesList = [];
+  List<String> _switchboardRowList = [];
 
   String _switchStateTopic;
 
   @override
   void initState() {
-    mqtt = SmartMqtt();
     _switchStateTopic = mqtt.getTopic(
       username: TEST_USERNAME,
       smartId: TEST_SMARTID,
@@ -64,9 +68,6 @@ class _SwitchboardCardState extends State<SwitchboardCard>
     helper = SmartHelper(context: context);
     initSwitchStateList();
 
-    var x = widget.switchboardList.map((e) => e.toJsonString()).toList();
-    mqtt.publish(topic: 'smart/flutter', message: x.toString());
-
     if (widget.switchboardList.length == 0) {
       return Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -84,6 +85,24 @@ class _SwitchboardCardState extends State<SwitchboardCard>
         ],
       );
     }
+
+    _switchboardRowList = widget.switchboardList
+        .map(
+          (e) => e.toJsonString(),
+        )
+        .toList();
+    mqtt.publish(
+      topic: mqtt.getTopic(
+        username: TEST_USERNAME,
+        smartId: TEST_SMARTID,
+        type: SmartMqtt.typeAppRoomConfig,
+      ),
+      message: _switchboardRowList.toString(),
+    );
+    sp.saveStringList(
+      key: SP_SwitchboardRowList,
+      data: _switchboardRowList,
+    );
 
     return Padding(
       padding: EdgeInsets.symmetric(
@@ -127,7 +146,7 @@ class _SwitchboardCardState extends State<SwitchboardCard>
                           );
                         },
                       ),
-                      Text("Add Switch List Here 2"),
+                      Text(widget.nodeList.toString()),
                     ],
                   ),
                 ),

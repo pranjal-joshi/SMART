@@ -1,11 +1,10 @@
-import 'dart:async';
-import 'package:SMART/models/JsonModel.dart';
 import 'package:flutter/material.dart';
 import 'package:mqtt_client/mqtt_client.dart';
 
 import '../models/SmartConstants.dart';
 import '../models/SmartProfile.dart';
 import '../models/SwitchboardRow.dart';
+import '../models/JsonModel.dart';
 import '../controllers/SmartMqtt.dart';
 
 import '../widgets/SmartAppBar.dart';
@@ -168,6 +167,7 @@ class _RoomState extends State<Room> {
                         padding: const EdgeInsets.only(bottom: 6),
                         child: SwitchboardCard(
                           switchboardList: switchList,
+                          nodeList: _nodesInRoomList,
                         ),
                       ),
                     ),
