@@ -189,4 +189,7 @@ smart/username/gateway
 	'state': 'enable/disable'
 }
 
+# App to MQTT - save Room Config - List<SwitchboardRow> dart
+smart/username/app/roomName/config
+
 smart/username/gateway					->	{'from':'app', 'to':'smartId', type':'label', data:[a,b,c,d]}
