@@ -21,7 +21,8 @@ dependencies:
   shared_preferences: ^0.5.8
   flutter_svg: ^0.17.4
   shimmer: ^1.1.1
-
+  wifi: ^0.1.5
+  
 dev_dependencies:
   flutter_test:
     sdk: flutter

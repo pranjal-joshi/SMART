@@ -6,10 +6,13 @@ const String TEST_USERNAME = 'joshi.pranjal5@gmail.com';
 const String BROKER_IP = "35.222.110.118";
 const int BROKER_PORT = 1883;
 
+const String SMART_SSID_FILTER = "SMART_";
+
 final color_accent = Colors.red[700].withOpacity(0.8);
 final color_accent_dark = Colors.red[400];
 final color_white_dark = Colors.grey[200];
 final color_material_dark = Colors.grey[900];
+// Primary Dark Hex code = #d32f2f
 
 const String route_room = '/room';
 const String route_addNewDevice = '/addNewDevice';
@@ -137,6 +140,9 @@ class SmartHelper {
     cardColor: color_material_dark,
     accentColor: Colors.red[400],
     scaffoldBackgroundColor: Colors.black,
+    floatingActionButtonTheme: FloatingActionButtonThemeData(
+      foregroundColor: Colors.black
+    ),
     textTheme: TextTheme(
       headline1: TextStyle(
         fontWeight: FontWeight.bold,
