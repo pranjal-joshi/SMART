@@ -1,9 +1,9 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:wifi/wifi.dart';
+import 'package:location/location.dart';
 
 import '../models/SmartConstants.dart';
 import '../widgets/SmartAppBar.dart';
@@ -15,6 +15,9 @@ class AddNewDevice extends StatefulWidget {
 
 class _AddNewDeviceState extends State<AddNewDevice> {
   SmartHelper helper;
+  Location location = Location();
+  bool _locServiceEnabled = false;
+  PermissionStatus _permissionStatus = PermissionStatus.granted;
 
   bool _showScanningLogo = false;
   bool _showFab = true;
@@ -29,25 +32,42 @@ class _AddNewDeviceState extends State<AddNewDevice> {
   );
 
   void scanWifi() async {
-    Wifi.list('').then((value) {
+    Wifi.list(SMART_SSID_FILTER).then((value) {
       _showScanningLogo = false;
       _showFab = true;
       _fabLabel = Text("REFRESH");
       _fabIcon = Icon(Icons.refresh);
       _wiList.clear();
-      /*value.forEach((element) {
+      value.forEach((element) {
         _wiList.add(element.ssid);
-      });*/
-      _wiList.add('SMART_00DCB288_4');
+      });
+      /*_wiList.add('SMART_00DCB288_4');
       _wiList.add('SMART_00DCB435_2');
       _wiList.add('SMART_00DAC268_1');
-      _wiList.add('SMART_00CE379A_S');
+      _wiList.add('SMART_00CE379A_S');*/
       if (_wiList.length == 0)
         _searchFailed = 1;
       else
         _searchFailed = 0;
       setState(() {});
     });
+  }
+
+  Future<PermissionStatus> getPermissions() async {
+    _locServiceEnabled = await location.serviceEnabled();
+    if (!_locServiceEnabled) {
+      _locServiceEnabled = await location.requestService();
+      if (!_locServiceEnabled) return PermissionStatus.denied;
+    }
+    _permissionStatus = await location.hasPermission();
+    if (_permissionStatus == PermissionStatus.denied) {
+      _permissionStatus = await location.requestPermission();
+      if (_permissionStatus != PermissionStatus.granted)
+        return PermissionStatus.denied;
+      else
+        return PermissionStatus.granted;
+    } else
+      return PermissionStatus.granted;
   }
 
   @override
@@ -59,40 +79,54 @@ class _AddNewDeviceState extends State<AddNewDevice> {
           ? FloatingActionButton.extended(
               label: _fabLabel,
               icon: _fabIcon,
-              onPressed: () {
+              onPressed: () async {
                 _wiList.clear();
                 _searchFailed = -1;
                 _showScanningLogo = true;
                 _showFab = false;
-                Timer.periodic(
-                  Duration(seconds: 3),
-                  (timer) {
-                    timer.cancel();
-                    scanWifi();
-                  },
-                );
+                _permissionStatus = await getPermissions();
+                if (_permissionStatus == PermissionStatus.granted) {
+                  Timer.periodic(
+                    Duration(seconds: 3),
+                    (timer) {
+                      timer.cancel();
+                      scanWifi();
+                    },
+                  );
+                } else {
+                  _fabLabel = Text("RETRY");
+                  _fabIcon = Icon(Icons.refresh);
+                  _searchFailed = -1;
+                  _showScanningLogo = false;
+                  _showFab = true;
+                }
                 setState(() {});
               },
             )
           : null,
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Container(
-              // So that column can get screen width & CrossAxisAlignment will work
-              width: helper.screenWidth,
-              child: null,
-            ),
-            if (_showScanningLogo && _searchFailed < 1)
-              _getScanningWidget(helper)
-            else if (_searchFailed < 1 && _wiList.length == 0)
-              _getEmptyWidget(helper),
-            if (_searchFailed > 0) _getSearchFailedWidget(helper),
-            if (_searchFailed < 1 && _wiList.length > 0)
-              _getSearchOkWidget(helper),
-          ],
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Container(
+                // So that column can get screen width & CrossAxisAlignment will work
+                width: helper.screenWidth,
+                child: null,
+              ),
+              if (_permissionStatus != PermissionStatus.granted)
+                _getPermissionFailedWidget(helper)
+              else if (_showScanningLogo && _searchFailed < 1)
+                _getScanningWidget(helper)
+              else if (_searchFailed < 1 && _wiList.length == 0)
+                _getEmptyWidget(helper),
+              if (_searchFailed > 0 && _wiList.length == 0)
+                _getSearchFailedWidget(helper),
+              if (_searchFailed < 1 && _wiList.length > 0)
+                _getSearchOkWidget(helper),
+            ],
+          ),
         ),
       ),
     );
@@ -193,7 +227,7 @@ class _AddNewDeviceState extends State<AddNewDevice> {
         Container(
           width: helper.screenWidth * 0.8,
           height: (helper.screenHeight - _appBar.preferredSize.height) * 0.25,
-          padding: EdgeInsets.symmetric(
+          padding: const EdgeInsets.symmetric(
             vertical: 16,
             horizontal: 4,
           ),
@@ -221,78 +255,134 @@ class _AddNewDeviceState extends State<AddNewDevice> {
     );
   }
 
+  Widget _getPermissionFailedWidget(SmartHelper helper) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: <Widget>[
+        SizedBox(
+          height: (helper.screenHeight - _appBar.preferredSize.height) / 6,
+        ),
+        Container(
+          width: helper.screenWidth * 0.8,
+          height: (helper.screenHeight - _appBar.preferredSize.height) * 0.25,
+          padding: const EdgeInsets.symmetric(
+            vertical: 16,
+            horizontal: 4,
+          ),
+          child: SvgPicture.asset(
+            'assets/images/location_review.svg',
+            fit: BoxFit.contain,
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(
+            vertical: 24,
+            horizontal: 16,
+          ),
+          child: const Text(
+            "Can't Search Without Your Location!",
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 32,
+              color: Colors.grey,
+              letterSpacing: 0.5,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget _getSearchOkWidget(SmartHelper helper) {
-    /*return ListTile(
-      leading: Icon(
-        Icons.wifi_lock,
-        size: 32,
-        color: Theme.of(context).primaryColorDark,
-      ),
-      title: Text(
-        _wiList[0],
-        style: Theme.of(context).textTheme.headline3,
-      ),
-      subtitle: const Text("Tap to Add"),
-      trailing: Icon(
-        Icons.arrow_forward_ios,
-        color: Theme.of(context).primaryColorDark.withOpacity(0.7),
-      ),
-      onTap: () => onWifiSelect(_wiList[0]),
-    );*/
     return SizedBox(
       height: helper.screenHeight - _appBar.preferredSize.height,
       child: ListView.builder(
         itemCount: _wiList.length,
         itemBuilder: (ctx, index) {
-          return ListTile(
-            leading: Icon(
-              Icons.wifi_lock,
-              size: 32,
-              color: Theme.of(context).primaryColorDark,
-            ),
-            title: Text(
-              titleGenerator(_wiList[index]),
-              style: Theme.of(context).textTheme.headline3,
-            ),
-            subtitle: subtitleGenerator(_wiList[index]),
-            trailing: Icon(
-              Icons.arrow_forward_ios,
-              color: Theme.of(context).primaryColorDark.withOpacity(0.7),
-            ),
-            onTap: () => onWifiSelect(_wiList[index]),
-          );
+          if (_titleGenerator(_wiList[index]) != null)
+            return ListTile(
+              leading: Icon(
+                Icons.wifi_lock,
+                size: 32,
+                color: Theme.of(context).primaryColorDark,
+              ),
+              title: Text(
+                _titleGenerator(_wiList[index]),
+                style: Theme.of(context).textTheme.headline3,
+              ),
+              subtitle: _subtitleWidgetGenerator(_wiList[index]),
+              trailing: Icon(
+                Icons.arrow_forward_ios,
+                color: Theme.of(context).primaryColorDark.withOpacity(0.7),
+              ),
+              onTap: () {
+                Navigator.of(context).pushNamed(
+                  route_configureDevice,
+                  arguments: {
+                    'ssid': _titleGenerator(_wiList[index]),
+                    'info': _subtitleGenerator(_wiList[index]),
+                  },
+                );
+              },
+            );
+          else
+            return null;
         },
       ),
     );
   }
 
-  void onWifiSelect(String ssid) {
-    print('${ssid} Selected');
-  }
-
-  String titleGenerator(String ssid) {
-    List<String> s = ssid.split('_');
-    return '${s[0]} ${s[1]}';
-  }
-
-  Widget subtitleGenerator(String ssid) {
-    List<String> s = ssid.split('_');
-    String sub;
-    switch (s[2]) {
-      case 'S':
-        sub = 'Sensor Node';
-        break;
-      case '1':
-        sub = 'SwitchBox - ${s[2]} Device';
-        break;
-      default:
-        sub = 'SwitchBox - ${s[2]} Devices';
+  String _titleGenerator(String ssid) {
+    try {
+      List<String> s = ssid.split('_');
+      return '${s[0]} ${s[1]}';
+    } on RangeError catch (_) {
+      return null;
     }
-    return Text(
-      sub,
-      style: TextStyle(
-        color: Colors.grey,
-      ),
-    );
+  }
+
+  Widget _subtitleWidgetGenerator(String ssid) {
+    try {
+      List<String> s = ssid.split('_');
+      String sub;
+      switch (s[2]) {
+        case 'S':
+          sub = 'Sensor Node';
+          break;
+        case '1':
+          sub = 'SwitchBox - ${s[2]} Device';
+          break;
+        default:
+          sub = 'SwitchBox - ${s[2]} Devices';
+      }
+      return Text(
+        sub,
+        style: TextStyle(
+          color: Colors.grey,
+        ),
+      );
+    } on RangeError catch (_) {
+      return null;
+    }
+  }
+
+  String _subtitleGenerator(String ssid) {
+    try {
+      List<String> s = ssid.split('_');
+      String sub;
+      switch (s[2]) {
+        case 'S':
+          sub = 'Sensor Node';
+          break;
+        case '1':
+          sub = 'SwitchBox - ${s[2]} Device';
+          break;
+        default:
+          sub = 'SwitchBox - ${s[2]} Devices';
+      }
+      return sub;
+    } on RangeError catch (_) {
+      return '';
+    }
   }
 }
