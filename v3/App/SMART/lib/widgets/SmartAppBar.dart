@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'dart:io' show Platform;
 
 import '../models/SmartConstants.dart';
 
@@ -27,26 +28,35 @@ class SmartAppBar extends StatelessWidget implements PreferredSizeWidget {
           color: Theme.of(context).textTheme.headline1.color,
         ),
       ),
-      elevation: 0,
-      backgroundColor: Colors.transparent,
+      elevation: 2,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       // backgroundColor: helper.getAppBarBackgroundColor,
       leading: showBackButton(context),
-      actions: showActions ? <Widget>[
-        Padding(
-          padding: const EdgeInsets.only(right: 16),
-          child: Icon(
-            Icons.more_vert,
-            color: Theme.of(context).primaryColorDark,
-          ),
-        )
-      ] : null,
+      actions: showActions
+          ? <Widget>[
+              Padding(
+                padding: const EdgeInsets.only(right: 16),
+                child: Icon(
+                  Icons.more_vert,
+                  color: Theme.of(context).primaryColorDark,
+                ),
+              )
+            ]
+          : null,
     );
   }
 
   Widget showBackButton(BuildContext context) {
     if (ModalRoute.of(context).canPop) {
-      return BackButton(
-        color: Theme.of(context).primaryColorDark,
+      return IconButton(
+        icon: Icon(
+          Platform.isAndroid ? Icons.arrow_back : Icons.arrow_back_ios,
+          color: Theme.of(context).primaryColorDark,
+          size: 32,
+        ),
+        onPressed: () {
+          Navigator.of(context).pop();
+        },
       );
     } else {
       return null;
