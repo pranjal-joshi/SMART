@@ -69,7 +69,7 @@ class _RoomState extends State<Room> {
       mqtt.getTopic(
         username: TEST_USERNAME,
         smartId: TEST_SMARTID,
-        type: SmartMqtt.typeNodeInfo,
+        type: SmartMqttTopic.NodeInfo,
       ),
     );
     super.initState();

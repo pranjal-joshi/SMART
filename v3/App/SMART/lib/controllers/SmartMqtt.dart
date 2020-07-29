@@ -1,10 +1,18 @@
 import 'dart:async';
 import 'dart:io';
-import 'package:SMART/models/SmartConstants.dart';
 import 'package:device_info/device_info.dart';
 import 'package:flutter/material.dart';
 import 'package:mqtt_client/mqtt_client.dart';
 import 'package:mqtt_client/mqtt_server_client.dart';
+
+import '../models/SmartConstants.dart';
+
+enum SmartMqttTopic {
+  SwitchStateAppToNode,
+  SwitchStateNodeToApp,
+  NodeInfo,
+  AppRoomConfig,
+}
 
 class SmartMqtt {
   String ip;
@@ -129,7 +137,7 @@ class SmartMqtt {
     }
   }
 
-  String getTopic({
+  /*String getTopic({
     @required String username,
     @required int type,
     String roomName,
@@ -151,7 +159,25 @@ class SmartMqtt {
       default:
         return 'smart/$username/gateway';
     }
-  }
+  }*/
+
+  String getTopic({
+    @required String username,
+    @required SmartMqttTopic type,
+    String roomName,
+    String smartId,
+  }) {
+      if(type == SmartMqttTopic.SwitchStateAppToNode)
+        return 'smart/$username/gateway';
+      if(type == SmartMqttTopic.SwitchStateNodeToApp)
+        return 'smart/$username/+/state';
+      if(type == SmartMqttTopic.NodeInfo)
+        return 'smart/$username/+/info';
+      if(type == SmartMqttTopic.AppRoomConfig)
+        return 'smart/$username/app/$roomName/config';
+      else
+        return 'smart/$username/gateway';
+    }
 
   Future<String> _getUniqueId() async {
     DeviceInfoPlugin deviceInfoPlugin = DeviceInfoPlugin();

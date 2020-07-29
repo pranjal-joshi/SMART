@@ -43,7 +43,7 @@ class _SwitchboardTileState extends State<SwitchboardTile> {
       mqtt.getTopic(
         username: TEST_USERNAME,
         smartId: TEST_SMARTID,
-        type: SmartMqtt.typeSwitchStateNodeToApp,
+        type: SmartMqttTopic.SwitchStateNodeToApp,
       ),
     );
     mqtt.stream.asBroadcastStream().listen((msg) {

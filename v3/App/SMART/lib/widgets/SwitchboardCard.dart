@@ -38,7 +38,7 @@ class _SwitchboardCardState extends State<SwitchboardCard>
     _switchStateTopic = mqtt.getTopic(
       username: TEST_USERNAME,
       smartId: TEST_SMARTID,
-      type: SmartMqtt.typeSwitchStateNodeToApp,
+      type: SmartMqttTopic.SwitchStateNodeToApp,
     );
     mqtt.connect();
     mqtt.subscribe(_switchStateTopic);
@@ -95,7 +95,7 @@ class _SwitchboardCardState extends State<SwitchboardCard>
       topic: mqtt.getTopic(
         username: TEST_USERNAME,
         smartId: TEST_SMARTID,
-        type: SmartMqtt.typeAppRoomConfig,
+        type: SmartMqttTopic.AppRoomConfig,
       ),
       message: _switchboardRowList.toString(),
     );
@@ -187,7 +187,7 @@ class _SwitchboardCardState extends State<SwitchboardCard>
       topic: mqtt.getTopic(
         username: TEST_USERNAME,
         smartId: TEST_SMARTID,
-        type: SmartMqtt.typeSwitchStateAppToNode,
+        type: SmartMqttTopic.SwitchStateAppToNode,
       ),
       message: JsonAppToNodeSwitchState(
         smartId: TEST_SMARTID,
