@@ -14,8 +14,10 @@ final color_white_dark = Colors.grey[200];
 final color_material_dark = Colors.grey[900];
 // Primary Dark Hex code = #d32f2f
 
+// Page routes
 const String route_room = '/room';
 const String route_addNewDevice = '/addNewDevice';
+const String route_configureDevice = '/configureDevice';
 
 class SmartHelper {
   BuildContext _context;
