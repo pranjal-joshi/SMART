@@ -516,13 +516,22 @@ void connectMqttClient() {
   }
 }
 
-// Get NodeName or SSID -> E.g. SMART_1A2B3C4D
+// Get NodeName or SSID -> E.g. SMART_1A2B3C4D_NoD
 const char* getSmartSSID() {
-  size_t sz = snprintf(NULL, 0, "SMART_%08X", (uint32_t)ESP.getChipId()) + 1;
-  char *ssid = (char*)malloc(sz);
-  snprintf(ssid, 15, "SMART_%08X", (uint32_t)ESP.getChipId());
-  smartSsid = String(ssid);
-  return ssid;
+  #ifdef SWITCHING_NODE
+    size_t sz = snprintf(NULL, 0, "SMART_%08X_%d", (uint32_t)ESP.getChipId(), NO_OF_DEVICES) + 1;
+    char *ssid = (char*)malloc(sz);
+    snprintf(ssid, 17, "SMART_%08X_%d", (uint32_t)ESP.getChipId(), NO_OF_DEVICES);
+    smartSsid = String(ssid);
+    return ssid;
+  #endif
+  #ifdef SENSOR_NODE
+    size_t sz = snprintf(NULL, 0, "SMART_%08X_S", (uint32_t)ESP.getChipId()) + 1;
+    char *ssid = (char*)malloc(sz);
+    snprintf(ssid, 17, "SMART_%08X", (uint32_t)ESP.getChipId());
+    smartSsid = String(ssid);
+    return ssid;
+  #endif
 }
 
 // set Smart Status for MQTT Will and to help app
