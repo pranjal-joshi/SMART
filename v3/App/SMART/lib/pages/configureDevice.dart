@@ -26,13 +26,13 @@ class _ConfigureDeviceState extends State<ConfigureDevice> {
   Widget build(BuildContext context) {
     Map<String, dynamic> args =
         ModalRoute.of(context).settings.arguments as Map<String, dynamic>;
-    print(args['ssid']);
-    print(args['info']);
+    // print(args['ssid']);
+    // print(args['info']);
     //fetchWebpage().then((value) => print(value));
 
     HttpClient client = HttpClient();
-    client.getUrl(Uri.parse('http://192.168.4.1/')).then(
-    // client.getUrl(Uri.parse('http://216.58.203.163/')).then(
+    // client.getUrl(Uri.parse('http://192.168.4.1/')).then(
+    client.getUrl(Uri.parse('http://192.168.1.14/')).then(
       (req) {
         return req.close();
       },
