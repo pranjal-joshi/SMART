@@ -23,6 +23,9 @@ dependencies:
   shimmer: ^1.1.1
   wifi: ^0.1.5
   location: ^3.0.0
+  http: ^0.12.2
+  curl: ^1.0.0
+  webview_flutter: ^0.3.22+1
   
 dev_dependencies:
   flutter_test:
