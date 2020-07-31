@@ -7,6 +7,7 @@ const String BROKER_IP = "35.222.110.118";
 const int BROKER_PORT = 1883;
 
 const String SMART_SSID_FILTER = "SMART_";
+const String SMART_PASSWORD = "12345678";
 
 final color_accent = Colors.red[700].withOpacity(0.8);
 final color_accent_dark = Colors.red[400];

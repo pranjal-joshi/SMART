@@ -316,11 +316,19 @@ class _AddNewDeviceState extends State<AddNewDevice> {
                 color: Theme.of(context).primaryColorDark.withOpacity(0.7),
               ),
               onTap: () {
-                Navigator.of(context).pushNamed(
-                  route_configureDevice,
-                  arguments: {
-                    'ssid': _titleGenerator(_wiList[index]),
-                    'info': _subtitleGenerator(_wiList[index]),
+                Wifi.connection(_wiList[index], SMART_PASSWORD).then(
+                  (state) {
+                    if (state == WifiState.success) {
+                      Navigator.of(context).pushNamed(
+                        route_configureDevice,
+                        arguments: {
+                          'ssid': _titleGenerator(_wiList[index]),
+                          'info': _subtitleGenerator(_wiList[index]),
+                        },
+                      );
+                    } else {
+                      print('Failed to connect Selected WiFi network!');
+                    }
                   },
                 );
               },
