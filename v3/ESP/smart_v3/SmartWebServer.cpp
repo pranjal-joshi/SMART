@@ -268,7 +268,24 @@ void SmartWebServer::begin(const char* ssid, const char* pass) {
   });
   
   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
-    request->send_P(200, "text/html", index_html, processor);
+    // Earlier, was sending a HTML page for Config through Browser
+    //request->send_P(200, "text/html", index_html, processor);
+
+    // Later, Now send JSON array (Dart List) to App like [[SSID, RSSI, CH],...]
+    DynamicJsonDocument doc(JSON_BUF_SIZE*2);
+    DynamicJsonDocument d(JSON_BUF_SIZE);
+    char jBuf[JSON_BUF_SIZE*2];
+    Serial.println(WiFi.scanComplete());
+    for(int i=0;i<WiFi.scanComplete();i++) {
+      JsonArray j = doc.createNestedArray();
+      j.add(WiFi.SSID(i));
+      j.add(String(map(WiFi.RSSI(i),-90,-20,0, 100)));
+      j.add(String(WiFi.channel()));
+    }
+    doc.shrinkToFit();
+    serializeJson(doc, jBuf);
+    request->send(200, "text/html", jBuf);
+    doc.clear();
   });
   
   // Handle response after submit
@@ -314,6 +331,14 @@ void SmartWebServer::begin(const char* ssid, const char* pass) {
     doc[CONF_MESH_SSID]=paramMeshSsid;
     doc[CONF_MESH_PASS]=paramMeshPass;
     doc.shrinkToFit();
+
+    // Validation For Blank fields
+    if(paramSsid == "" || paramPass == "" || paramChannel == "" || paramUsername == "" || paramNodename == "" || paramMqttIp == "" || 
+       paramMqttPort == "" || paramMeshSsid == "" || paramMeshPass == "") {
+        request->send(200, "text/html", "Can't accept blank fields! Validation failed!");
+        return;
+    }
+    
     if(SPIFFS.begin()) {
       File f = SPIFFS.open(CONF_FILE,"w");
       serializeJson(doc, f);
@@ -353,7 +378,7 @@ void SmartWebServer::showWifiNetworks(void) {
         Serial.flush();
       }
     }
-    WiFi.scanDelete();
+    //WiFi.scanDelete();
   }
   else {
     if(SWS_DEBUG) {
