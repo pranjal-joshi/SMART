@@ -23,7 +23,7 @@ class SmartAppBar extends StatelessWidget implements PreferredSizeWidget {
         title,
         style: TextStyle(
           fontWeight: FontWeight.bold,
-          fontSize: 32,
+          fontSize: 28,
           //color: helper.getAppBarTextColor,
           color: Theme.of(context).primaryColorDark,
         ),

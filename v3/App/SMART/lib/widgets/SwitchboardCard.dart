@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../models/SmartConstants.dart';
 import '../models/SwitchboardRow.dart';
 import '../models/JsonModel.dart';
-import '../models/SmartSharedPref.dart';
+import '../controllers/SmartSharedPref.dart';
 import '../controllers/SmartMqtt.dart';
 import '../widgets/SwitchboardTile.dart';
 
