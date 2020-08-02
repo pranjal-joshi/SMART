@@ -25,7 +25,7 @@ dependencies:
   location: ^3.0.0
   http: ^0.12.2
   curl: ^1.0.0
-  webview_flutter: ^0.3.22+1
+  connectivity: ^0.4.9
   
 dev_dependencies:
   flutter_test:
