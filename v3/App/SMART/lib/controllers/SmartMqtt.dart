@@ -12,6 +12,7 @@ enum SmartMqttTopic {
   SwitchStateNodeToApp,
   NodeInfo,
   AppRoomConfig,
+  AppDeviceConfig
 }
 
 class SmartMqtt {
@@ -175,6 +176,8 @@ class SmartMqtt {
         return 'smart/$username/+/info';
       if(type == SmartMqttTopic.AppRoomConfig)
         return 'smart/$username/app/$roomName/config';
+      if(type == SmartMqttTopic.AppDeviceConfig)
+        return 'smart/$username/app/deviceConfig';
       else
         return 'smart/$username/gateway';
     }
