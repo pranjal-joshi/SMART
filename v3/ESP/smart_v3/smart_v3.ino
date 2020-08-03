@@ -352,6 +352,7 @@ void meshDroppedCallback(uint32_t nodeId) {
     }
     nodeIdVector.erase(nodeIdVector.begin()+index);
     smartIdVector.erase(smartIdVector.begin()+index);
+    taskCheckRootNode();
   }
   else {
     if(mDebug)

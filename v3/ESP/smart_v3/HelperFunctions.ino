@@ -732,6 +732,18 @@ void taskCheckRootNode() {
       Serial.println(F("[+] SMART: INFO -> checkRootTask -> Disabled searchTargetTask as ROOT is found!"));
     }
   }
+  else {
+    // If root node itself drops and 'this' is not connected to internet!
+    sched.addTask(rootCheckTask);
+    rootCheckTask.enableIfNot();
+    if(!isInternetAvailable()) {
+      isTargetSsidFound = false;
+      sched.addTask(searchTargetTask);
+      if(!searchTargetTask.isEnabled()) {
+        searchTargetTask.restartDelayed(INTERVAL_TARGET_SEARCH * TASK_SECOND);
+      }
+    }
+  }
 }
 
 // Check wether the NTP time is in range with user setted time to take motion related control action
