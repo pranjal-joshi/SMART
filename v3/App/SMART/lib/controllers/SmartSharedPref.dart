@@ -27,9 +27,13 @@ class SmartSharedPreference {
      return _sp.getStringList(key);
   }
 
+  Future<bool> delete({@required String key}) async {
+    _sp = await SharedPreferences.getInstance();
+    return _sp.remove(key);
+  }
+
   Future<void> loadDebug({@required String key}) async {
     _sp = await SharedPreferences.getInstance();
     print('[SmartSharedPreference] loadDebug (key: $key) -> ${_sp.getStringList(key)}');
   }
-
 }
