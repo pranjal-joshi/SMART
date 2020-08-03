@@ -12,6 +12,7 @@ class SmartConfigData {
   String nodename;
   String mqttIp;
   String mqttPort;
+  static final String type = 'SmartConfigData';
 
   SmartConfigData({
     @required this.smartId,
@@ -38,6 +39,7 @@ class SmartConfigData {
       'nodename': nodename,
       'mqttIp': mqttIp,
       'mqttPort': mqttPort,
+      'type': type,
     };
   }
 

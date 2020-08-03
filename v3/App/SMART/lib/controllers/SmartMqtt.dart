@@ -248,6 +248,7 @@ class SmartMqttPublishBuffer {
   String topic;
   String message;
   bool retain;
+  static final String type = 'PublishBuffer';
 
   SmartMqttPublishBuffer({
     @required this.topic,
@@ -270,6 +271,7 @@ class SmartMqttPublishBuffer {
       'topic': topic,
       'message': message,
       'retain': retain.toString(),
+      'type': type,
     };
   }
 
