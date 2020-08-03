@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:SMART/controllers/SmartMqtt.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:shimmer/shimmer.dart';
@@ -69,6 +70,17 @@ class _AddNewDeviceState extends State<AddNewDevice> {
     } else
       return PermissionStatus.granted;
   }
+
+  @override
+  void initState() {
+    SmartMqtt mqtt = SmartMqtt(debug: true);
+    mqtt.connect();
+    super.initState();
+  }
+
+  /* TODO: Create a class that can be used to sync from MQTT to SP, write businees logic there,
+  call its methods from pages screens whenever syncing/pushing is required!
+  */
 
   @override
   Widget build(BuildContext context) {
