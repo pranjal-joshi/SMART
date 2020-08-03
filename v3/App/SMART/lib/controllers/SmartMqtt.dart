@@ -1,11 +1,14 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
+import 'package:connectivity/connectivity.dart';
 import 'package:device_info/device_info.dart';
 import 'package:flutter/material.dart';
 import 'package:mqtt_client/mqtt_client.dart';
 import 'package:mqtt_client/mqtt_server_client.dart';
 
 import '../models/SmartConstants.dart';
+import '../controllers/SmartSharedPref.dart';
 
 enum SmartMqttTopic {
   SwitchStateAppToNode,
@@ -24,6 +27,10 @@ class SmartMqtt {
   MqttConnectionState connectionState;
   StreamSubscription subscription;
   bool isConnected = false;
+
+  SmartSharedPreference sp = SmartSharedPreference();
+  ConnectivityResult _connectivityResult;
+  List<SmartMqttPublishBuffer> _publishBuffer = [];
 
   final StreamController _controller = StreamController<dynamic>.broadcast();
   Stream<dynamic> get stream => _controller.stream;
@@ -45,14 +52,16 @@ class SmartMqtt {
     return _instance;
   }
 
-  void connect() async {
+  void connect({
+    bool syncPendingBuffer = true,
+  }) async {
     if (!isConnected) {
       isConnected = true;
       client = MqttServerClient.withPort(ip, '', port);
       client.logging(on: false);
       client.keepAlivePeriod = 30;
       client.autoReconnect = true;
-      client.onConnected = () {
+      client.onConnected = () async {
         _subscriptionController.stream.listen((topic) {
           client.subscribe(topic, MqttQos.exactlyOnce);
           if (debug) print('[SmartMqtt] Subscribed -> $topic');
@@ -61,6 +70,13 @@ class SmartMqtt {
           client.unsubscribe(topic);
           if (debug) print('[SmartMqtt] Unsubscribed -> $topic');
         });
+        List<String> buf =
+            await sp.loadStringList(key: SP_SmartMqttPublishBuffer);
+        try {
+          _publishBuffer =
+              buf.map((e) => SmartMqttPublishBuffer.fromJsonString(e)).toList();
+        } on NoSuchMethodError catch (_) {}
+        if (syncPendingBuffer) publishBuffer();
       };
       client.onDisconnected = () {
         _controller.sink.add(client.connectionStatus.state);
@@ -80,7 +96,10 @@ class SmartMqtt {
       client.connectionMessage = connectMessage;
 
       try {
-        await client.connect();
+        await client.connect().timeout(Duration(seconds: 10), onTimeout: () {
+          print('[SmartMqtt] -> MQTT Connection Timed out!');
+          return;
+        });
       } catch (e) {
         print(e);
         disconnect();
@@ -123,44 +142,76 @@ class SmartMqtt {
     @required String topic,
     @required String message,
     bool retain = false,
-  }) {
-    try {
-      final MqttClientPayloadBuilder builder = MqttClientPayloadBuilder();
-      builder.addString(message);
-      client.publishMessage(
-        topic,
-        MqttQos.exactlyOnce,
-        builder.payload,
-        retain: retain,
+  }) async {
+    final MqttClientPayloadBuilder builder = MqttClientPayloadBuilder();
+    builder.addString(message);
+    if (await isInternetAvailable()) {
+      try {
+        client.publishMessage(
+          topic,
+          MqttQos.exactlyOnce,
+          builder.payload,
+          retain: retain,
+        );
+      } on ConnectionException catch (e) {
+        if (debug) print('[SmartMqtt] Exception -> $e');
+      }
+    } else {
+      _publishBuffer.add(
+        SmartMqttPublishBuffer(
+          topic: topic,
+          message: message,
+          retain: retain,
+        ),
       );
-    } on ConnectionException catch (e) {
-      if (debug) print('[SmartMqtt] Exception -> $e');
+      List<String> buf = _publishBuffer.map((e) => e.toJsonString()).toList();
+      sp.saveStringList(
+        key: SP_SmartMqttPublishBuffer,
+        data: buf,
+      );
+      if (debug)
+        print('[SmartMqtt] No Internet -> PublishBuffer = ${buf.toString()}');
     }
   }
 
-  /*String getTopic({
-    @required String username,
-    @required int type,
-    String roomName,
-    String smartId,
-  }) {
-    switch (type) {
-      case typeSwitchStateAppToNode:
-        return 'smart/$username/gateway';
-        break;
-      case typeSwitchStateNodeToApp:
-        return 'smart/$username/+/state';
-        break;
-      case typeNodeInfo:
-        return 'smart/$username/+/info';
-        break;
-      case typeAppRoomConfig:
-        return 'smart/$username/app/$roomName/config';
-        break;
-      default:
-        return 'smart/$username/gateway';
+  void publishBuffer() async {
+    if (await isInternetAvailable()) {
+      List<String> buf =
+          await sp.loadStringList(key: SP_SmartMqttPublishBuffer);
+      if (buf != null) {
+        print('[SmartMqtt] Read PublishBuffer -> ${buf.toString()}');
+        List<SmartMqttPublishBuffer> pubBuf =
+            buf.map((e) => SmartMqttPublishBuffer.fromJsonString(e)).toList();
+        pubBuf.forEach((element) {
+          MqttClientPayloadBuilder builder = MqttClientPayloadBuilder();
+          builder.addString(element.message);
+          client.publishMessage(
+            element.topic,
+            MqttQos.exactlyOnce,
+            builder.payload,
+            retain: element.retain,
+          );
+          builder = null;
+        });
+        sp.delete(key: SP_SmartMqttPublishBuffer);
+      }
     }
-  }*/
+  }
+
+  Future<bool> isInternetAvailable() async {
+    _connectivityResult = await Connectivity().checkConnectivity();
+    if (_connectivityResult != ConnectivityResult.none) {
+      try {
+        final result = await InternetAddress.lookup('google.co.in');
+        if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
+          return true;
+        }
+      } on SocketException catch (_) {
+        return false;
+      }
+    }
+    return false;
+  }
 
   String getTopic({
     @required String username,
@@ -168,19 +219,18 @@ class SmartMqtt {
     String roomName,
     String smartId,
   }) {
-      if(type == SmartMqttTopic.SwitchStateAppToNode)
-        return 'smart/$username/gateway';
-      if(type == SmartMqttTopic.SwitchStateNodeToApp)
-        return 'smart/$username/+/state';
-      if(type == SmartMqttTopic.NodeInfo)
-        return 'smart/$username/+/info';
-      if(type == SmartMqttTopic.AppRoomConfig)
-        return 'smart/$username/app/$roomName/config';
-      if(type == SmartMqttTopic.AppDeviceConfig)
-        return 'smart/$username/app/deviceConfig';
-      else
-        return 'smart/$username/gateway';
-    }
+    if (type == SmartMqttTopic.SwitchStateAppToNode)
+      return 'smart/$username/gateway';
+    if (type == SmartMqttTopic.SwitchStateNodeToApp)
+      return 'smart/$username/+/state';
+    if (type == SmartMqttTopic.NodeInfo) return 'smart/$username/+/info';
+    if (type == SmartMqttTopic.AppRoomConfig)
+      return 'smart/$username/app/$roomName/config';
+    if (type == SmartMqttTopic.AppDeviceConfig)
+      return 'smart/$username/app/deviceConfig';
+    else
+      return 'smart/$username/gateway';
+  }
 
   Future<String> _getUniqueId() async {
     DeviceInfoPlugin deviceInfoPlugin = DeviceInfoPlugin();
@@ -192,10 +242,38 @@ class SmartMqtt {
       return iosDeviceInfo.identifierForVendor;
     }
   }
+}
 
-  // Static properties for types of topic for topic generation
-  static const int typeSwitchStateAppToNode = 1;
-  static const int typeSwitchStateNodeToApp = 2;
-  static const int typeNodeInfo = 3;
-  static const int typeAppRoomConfig = 4;
+class SmartMqttPublishBuffer {
+  String topic;
+  String message;
+  bool retain;
+
+  SmartMqttPublishBuffer({
+    @required this.topic,
+    @required this.message,
+    @required this.retain,
+  });
+
+  SmartMqttPublishBuffer.fromJsonString(String rawJson) {
+    try {
+      rawJson = rawJson.replaceAll('\'', '\"');
+      Map<String, dynamic> json = jsonDecode(rawJson);
+      topic = json['topic'];
+      message = json['message'];
+      retain = json['retain'] == 'true' ? true : false;
+    } catch (_) {}
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'topic': topic,
+      'message': message,
+      'retain': retain.toString(),
+    };
+  }
+
+  String toJsonString() {
+    return jsonEncode(toJson());
+  }
 }
