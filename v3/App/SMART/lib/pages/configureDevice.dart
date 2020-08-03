@@ -18,7 +18,7 @@ class ConfigureDevice extends StatefulWidget {
 class _ConfigureDeviceState extends State<ConfigureDevice> {
   SmartHelper helper;
   SmartSharedPreference sp = SmartSharedPreference();
-  SmartMqtt mqtt = SmartMqtt();
+  SmartMqtt mqtt = SmartMqtt(debug: true);
   var connectivitySubscription;
   var _wifiListRaw = List();
   List<SmartWifiConfig> _wifiList = List();
@@ -51,40 +51,42 @@ class _ConfigureDeviceState extends State<ConfigureDevice> {
         _getWifiListFromNode();
       }
     });
+    mqtt.connect();
     // Load Details of this node if already found in SP
-    Future.delayed(Duration.zero, () {
-      setState(() async {
-        Map<String, dynamic> args =
-            ModalRoute.of(context).settings.arguments as Map<String, dynamic>;
-        List<String> smartConfigDataRaw =
-            await sp.loadStringList(key: SP_SmartConfigData);
-        List<SmartConfigData> smartConfigList = List();
-        if (smartConfigDataRaw != null) {
-          smartConfigDataRaw.forEach(
-            (element) {
-              smartConfigList.add(SmartConfigData.fromJsonString(element));
-            },
-          );
-          try {
-            SmartConfigData thisData = smartConfigList
-                .firstWhere((element) => element.smartId == args['ssid']);
-            _usernameController.text = thisData.username;
-            _nodenameController.text = thisData.nodename;
-            _ipController.text = thisData.mqttIp;
-            _portController.text = thisData.mqttPort;
-            _meshSsidController.text = thisData.meshSsid;
-            _meshPassController.text = thisData.meshPass;
-          } on StateError catch (_) {
-            if (smartConfigList.length > 0) {
-              _usernameController.text = smartConfigList[0].username;
-              _ipController.text = smartConfigList[0].mqttIp;
-              _portController.text = smartConfigList[0].mqttPort;
-              _meshSsidController.text = smartConfigList[0].meshSsid;
-              _meshPassController.text = smartConfigList[0].meshPass;
-            }
+    Future.delayed(Duration.zero, () async {
+      Map<String, dynamic> args =
+          ModalRoute.of(context).settings.arguments as Map<String, dynamic>;
+      List<String> smartConfigDataRaw =
+          await sp.loadStringList(key: SP_SmartConfigData);
+      List<SmartConfigData> smartConfigList = List();
+      if (smartConfigDataRaw != null) {
+        smartConfigDataRaw.forEach(
+          (element) {
+            smartConfigList.add(SmartConfigData.fromJsonString(element));
+          },
+        );
+        try {
+          SmartConfigData thisData = smartConfigList
+              .firstWhere((element) => element.smartId == args['ssid']);
+          _usernameController.text = thisData.username;
+          _nodenameController.text = thisData.nodename;
+          _ipController.text = thisData.mqttIp;
+          _portController.text = thisData.mqttPort;
+          _meshSsidController.text = thisData.meshSsid;
+          _meshPassController.text = thisData.meshPass;
+          _passController.text = thisData.pass;
+        } on StateError catch (_) {
+          if (smartConfigList.length > 0) {
+            _usernameController.text = smartConfigList[0].username;
+            _ipController.text = smartConfigList[0].mqttIp;
+            _portController.text = smartConfigList[0].mqttPort;
+            _meshSsidController.text = smartConfigList[0].meshSsid;
+            _meshPassController.text = smartConfigList[0].meshPass;
+            _passController.text = smartConfigList[0].pass;
           }
         }
-      });
+      }
+      setState(() {});
     });
     super.initState();
   }
@@ -176,34 +178,36 @@ class _ConfigureDeviceState extends State<ConfigureDevice> {
               var resp = await http.get(Uri.encodeFull(uri));
               print(resp.body);
               if (resp.body.contains('Ok')) {
-                /*mqtt.publish(
-                  topic: mqtt.getTopic(
-                    username: TEST_USERNAME,
-                    type: SmartMqttTopic.AppDeviceConfig,
-                  ),
-                  message: smartConfigDataRaw.toString(),
-                );*/
-                // TODO - Implement MQTT buffer which will be synced on Successful Internet connection, As this deviceConfig can't be synced to MQTT over WiFi-LAN.
-                _showDialog(
-                  context: context,
-                  title: 'Device Configured Successfully',
-                  iconData: Icons.done,
-                  actions: <Widget>[
-                    FlatButton(
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                        Navigator.of(context)
-                            .pushReplacementNamed(route_addNewDevice);
-                      },
-                      child: Text(
-                        'OK',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
+                Future.delayed(Duration(seconds: 1), () {
+                  mqtt.publish(
+                    topic: mqtt.getTopic(
+                      username: TEST_USERNAME,
+                      type: SmartMqttTopic.AppDeviceConfig,
+                    ),
+                    message: smartConfigDataRaw.toString(),
+                    retain: true,
+                  );
+                  _showDialog(
+                    context: context,
+                    title: 'Device Configured Successfully',
+                    iconData: Icons.done,
+                    actions: <Widget>[
+                      FlatButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                          Navigator.of(context)
+                              .pushReplacementNamed(route_addNewDevice);
+                        },
+                        child: Text(
+                          'OK',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                      ),
-                    )
-                  ],
-                );
+                      )
+                    ],
+                  );
+                });
               } else {
                 _showDialog(
                   context: context,

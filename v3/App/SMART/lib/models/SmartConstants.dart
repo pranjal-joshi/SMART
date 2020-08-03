@@ -259,3 +259,4 @@ const String JSON_STATUS_BUSY = "busy";
 // SharedPreferences keys
 const String SP_SwitchboardRowList = "sp_SwitchboardRowList";
 const String SP_SmartConfigData = "sp_SmartConfigData";
+const String SP_SmartMqttPublishBuffer = "sp_SmartMqttPublishBuffer";
