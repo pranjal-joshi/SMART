@@ -8,6 +8,7 @@ import '../controllers/SmartMqtt.dart';
 import '../controllers/SmartSharedPref.dart';
 import '../models/SmartConstants.dart';
 import '../models/SmartWifiConfig.dart';
+import '../models/SmartRoomData.dart';
 import '../widgets/SmartAppBar.dart';
 
 class ConfigureDevice extends StatefulWidget {
@@ -21,9 +22,14 @@ class _ConfigureDeviceState extends State<ConfigureDevice> {
   SmartMqtt mqtt = SmartMqtt(debug: true);
   var connectivitySubscription;
   var _wifiListRaw = List();
+
   List<SmartWifiConfig> _wifiList = List();
   List<DropdownMenuItem<SmartWifiConfig>> _dropdownList = List();
   SmartWifiConfig _selectedDropdown;
+
+  List<SmartRoomData> _roomList = [];
+  List<DropdownMenuItem<SmartRoomData>> _dropdownRoomList = List();
+  SmartRoomData _selectedRoom;
 
   TextEditingController _passController = TextEditingController();
   TextEditingController _usernameController = TextEditingController();
@@ -41,6 +47,8 @@ class _ConfigureDeviceState extends State<ConfigureDevice> {
     showActions: false,
   );
 
+  // TODO - Implement add new room, save room class to SP, sync with Mqtt
+
   @override
   void initState() {
     // Create connectivity stream subscription to monitor WiFi changes and get WiFi list from node accordingly
@@ -54,6 +62,9 @@ class _ConfigureDeviceState extends State<ConfigureDevice> {
     mqtt.connect();
     // Load Details of this node if already found in SP
     Future.delayed(Duration.zero, () async {
+      _roomList = await _getSmartRoomData();
+      _dropdownRoomList =
+          _getRoomDropdownList(roomList: _roomList, context: context);
       Map<String, dynamic> args =
           ModalRoute.of(context).settings.arguments as Map<String, dynamic>;
       List<String> smartConfigDataRaw =
@@ -291,6 +302,11 @@ class _ConfigureDeviceState extends State<ConfigureDevice> {
                     helper: helper,
                   ),
                   const SizedBox(height: 16),
+                  _getRoomDropdownListUI(
+                    context: context,
+                    helper: helper,
+                  ),
+                  const SizedBox(height: 16),
                   _getTextFormField(
                     context: context,
                     label: 'Password',
@@ -360,13 +376,13 @@ class _ConfigureDeviceState extends State<ConfigureDevice> {
                   const SizedBox(height: 16),
                   _getTextFormField(
                     context: context,
-                    label: 'Device Name',
+                    label: 'Device Location',
                     hint: 'Like "Living Room" or "Garden"',
                     iconData: Icons.memory,
                     controller: _nodenameController,
                     validator: (String val) {
                       if (val.isEmpty) {
-                        return 'Device name is required!';
+                        return 'Device Location is required!';
                       }
                     },
                   ),
@@ -445,6 +461,24 @@ class _ConfigureDeviceState extends State<ConfigureDevice> {
     );
   }
 
+  // Fetch SmartRoomData as a list saved on shared
+  Future<List<SmartRoomData>> _getSmartRoomData() async {
+    List<String> raw = await sp.loadStringList(key: SP_SmartRoomData);
+    List<SmartRoomData> list = [];
+    if (raw != null) {
+      list = raw.map((e) {
+        return SmartRoomData.fromJsonString(e);
+      }).toList();
+    }
+    list.add(
+      SmartRoomData(
+        name: "Add New Room",
+        icon: Icons.add_circle_outline,
+      ),
+    );
+    return list;
+  }
+
   void _getWifiListFromNode() {
     fetchWebpage().then(
       (value) {
@@ -488,6 +522,40 @@ class _ConfigureDeviceState extends State<ConfigureDevice> {
             child: Text(
               element.ssid,
               style: Theme.of(context).textTheme.headline3,
+            ),
+            value: element,
+          ),
+        );
+      },
+    );
+    return list;
+  }
+
+  List<DropdownMenuItem<SmartRoomData>> _getRoomDropdownList(
+      {BuildContext context, List<SmartRoomData> roomList}) {
+    List<DropdownMenuItem<SmartRoomData>> list = List();
+    roomList.forEach(
+      (element) {
+        list.add(
+          DropdownMenuItem(
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                Expanded(
+                  flex: 1,
+                  child: Icon(
+                    element.icon,
+                    color: Theme.of(context).iconTheme.color,
+                  ),
+                ),
+                Expanded(
+                  flex: 4,
+                  child: Text(
+                    element.name,
+                    style: Theme.of(context).textTheme.headline3,
+                  ),
+                ),
+              ],
             ),
             value: element,
           ),
@@ -607,7 +675,7 @@ class _ConfigureDeviceState extends State<ConfigureDevice> {
         ),
         Container(
           width: helper.screenWidth - 32 - 48,
-          margin: EdgeInsets.only(left: 16),
+          margin: const EdgeInsets.only(left: 16),
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
           clipBehavior: Clip.antiAliasWithSaveLayer,
           decoration: BoxDecoration(
@@ -623,6 +691,7 @@ class _ConfigureDeviceState extends State<ConfigureDevice> {
               items: _dropdownList,
               elevation: 2,
               iconEnabledColor: Theme.of(context).primaryColorDark,
+              isExpanded: true,
               hint: Text(
                 "Select Your WiFi Network",
                 style: TextStyle(
@@ -634,6 +703,58 @@ class _ConfigureDeviceState extends State<ConfigureDevice> {
               value: _selectedDropdown,
               onChanged: (SmartWifiConfig val) {
                 setState(() => _selectedDropdown = val);
+              },
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _getRoomDropdownListUI({
+    @required BuildContext context,
+    @required SmartHelper helper,
+  }) {
+    return Row(
+      children: <Widget>[
+        Icon(
+          Icons.room,
+          color: Theme.of(context).primaryColorDark,
+          size: 32,
+        ),
+        Container(
+          width: helper.screenWidth - 32 - 48,
+          margin: const EdgeInsets.only(left: 16),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
+          clipBehavior: Clip.antiAliasWithSaveLayer,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              width: 2,
+              color: Theme.of(context).primaryColorDark,
+            ),
+          ),
+          child: DropdownButtonHideUnderline(
+            child: DropdownButton(
+              icon: Icon(Icons.arrow_drop_down),
+              items: _dropdownRoomList,
+              elevation: 2,
+              iconEnabledColor: Theme.of(context).primaryColorDark,
+              isExpanded: true,
+              hint: Text(
+                "Select Device Location",
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).primaryColorDark,
+                ),
+              ),
+              value: _selectedRoom,
+              onChanged: (SmartRoomData val) {
+                if (val.name == 'Add New Room') {
+                  print('got you!!!!');
+                }
+                setState(() => _selectedRoom = val);
               },
             ),
           ),
