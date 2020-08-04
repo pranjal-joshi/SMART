@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_iconpicker/flutter_iconpicker.dart';
 import 'package:http/http.dart' as http;
 import 'package:connectivity/connectivity.dart';
 
@@ -22,6 +23,7 @@ class _ConfigureDeviceState extends State<ConfigureDevice> {
   SmartMqtt mqtt = SmartMqtt(debug: true);
   var connectivitySubscription;
   var _wifiListRaw = List();
+  Icon _addRoomIcon;
 
   List<SmartWifiConfig> _wifiList = List();
   List<DropdownMenuItem<SmartWifiConfig>> _dropdownList = List();
@@ -39,6 +41,7 @@ class _ConfigureDeviceState extends State<ConfigureDevice> {
   TextEditingController _portController = TextEditingController(text: '1883');
   TextEditingController _meshSsidController = TextEditingController();
   TextEditingController _meshPassController = TextEditingController();
+  TextEditingController _addRoomController = TextEditingController();
 
   final _formKey = GlobalKey<FormState>();
 
@@ -46,8 +49,6 @@ class _ConfigureDeviceState extends State<ConfigureDevice> {
     title: 'Configure Device',
     showActions: false,
   );
-
-  // TODO - Implement add new room, save room class to SP, sync with Mqtt
 
   @override
   void initState() {
@@ -97,6 +98,12 @@ class _ConfigureDeviceState extends State<ConfigureDevice> {
           }
         }
       }
+      // Initialize Icon for add new room
+      _addRoomIcon = Icon(
+        Icons.touch_app,
+        color: Theme.of(context).primaryColorDark,
+        size: 32,
+      );
       setState(() {});
     });
     super.initState();
@@ -112,6 +119,7 @@ class _ConfigureDeviceState extends State<ConfigureDevice> {
     _portController.dispose();
     _meshSsidController.dispose();
     _meshPassController.dispose();
+    _addRoomController.dispose();
     super.dispose();
   }
 
@@ -320,6 +328,7 @@ class _ConfigureDeviceState extends State<ConfigureDevice> {
                           return 'Can\'t Connect to the WiFi Without Password!';
                         }
                       }
+                      return '';
                     },
                   ),
                   const SizedBox(height: 16),
@@ -335,6 +344,7 @@ class _ConfigureDeviceState extends State<ConfigureDevice> {
                       if (val.isEmpty) {
                         return 'Can\'t Configure Without S.M.A.R.T SSID.';
                       }
+                      return null;
                     },
                   ),
                   const SizedBox(height: 16),
@@ -351,6 +361,7 @@ class _ConfigureDeviceState extends State<ConfigureDevice> {
                       if (val.isEmpty) {
                         return 'Can\'t Configure Without Password!';
                       }
+                      return null;
                     },
                   ),
                   const SizedBox(height: 16),
@@ -371,6 +382,7 @@ class _ConfigureDeviceState extends State<ConfigureDevice> {
                       if (val.isEmpty) {
                         return 'Can\'t Configure Without Your Username.';
                       }
+                      return null;
                     },
                   ),
                   const SizedBox(height: 16),
@@ -384,6 +396,7 @@ class _ConfigureDeviceState extends State<ConfigureDevice> {
                       if (val.isEmpty) {
                         return 'Device Location is required!';
                       }
+                      return null;
                     },
                   ),
                   const SizedBox(height: 16),
@@ -403,6 +416,7 @@ class _ConfigureDeviceState extends State<ConfigureDevice> {
                       if (val.isEmpty) {
                         return 'Can\'t Configure Without IP Address.';
                       }
+                      return null;
                     },
                   ),
                   const SizedBox(height: 16),
@@ -417,6 +431,7 @@ class _ConfigureDeviceState extends State<ConfigureDevice> {
                       if (val.isEmpty) {
                         return 'Can\'t Configure Without Port Number.';
                       }
+                      return null;
                     },
                   ),
                 ],
@@ -428,8 +443,157 @@ class _ConfigureDeviceState extends State<ConfigureDevice> {
     );
   }
 
+  void _showAddRoomDialog({@required BuildContext context}) {
+    final OutlineInputBorder outlineInputBorder_2 = OutlineInputBorder(
+      borderRadius: BorderRadius.circular(16),
+      borderSide: BorderSide(
+        color: Theme.of(context).primaryColorDark,
+        width: 2,
+      ),
+    );
+    final OutlineInputBorder outlineInputBorder_3 = OutlineInputBorder(
+      borderRadius: BorderRadius.circular(16),
+      borderSide: BorderSide(
+        color: Theme.of(context).primaryColorDark,
+        width: 3,
+      ),
+    );
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          backgroundColor: Theme.of(context).canvasColor,
+          clipBehavior: Clip.antiAliasWithSaveLayer,
+          elevation: 2,
+          scrollable: true,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(24),
+          ),
+          title: Text(
+            "Add A New Room",
+            textAlign: TextAlign.center,
+          ),
+          titleTextStyle: Theme.of(context).textTheme.headline1,
+          content: TextFormField(
+            cursorColor: Theme.of(context).primaryColorDark,
+            textInputAction: TextInputAction.done,
+            style: Theme.of(context).textTheme.headline3,
+            controller: _addRoomController,
+            validator: (msg) {
+              if (msg == null) {
+                return 'Can\'t be left blank!';
+              }
+              return null;
+            },
+            decoration: InputDecoration(
+              isDense: true,
+              labelText: 'Name',
+              hintText: 'E.g. Bedroom',
+              hintMaxLines: 2,
+              hintStyle: TextStyle(
+                color: Theme.of(context).textTheme.subtitle1.color,
+                fontSize: Theme.of(context).textTheme.headline3.fontSize,
+              ),
+              labelStyle: TextStyle(
+                color: Theme.of(context).primaryColorDark,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 0.5,
+              ),
+              border: outlineInputBorder_2,
+              enabledBorder: outlineInputBorder_2,
+              focusedBorder: outlineInputBorder_3,
+              errorBorder: outlineInputBorder_2,
+              errorMaxLines: 2,
+              errorStyle: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 13,
+                color: helper.isDarkModeActive
+                    ? Colors.blue[400]
+                    : Colors.blue[700],
+              ),
+              prefixIcon: IconButton(
+                icon: _addRoomIcon,
+                onPressed: () async {
+                  //TODO: fix box icon bug!!
+                  IconData iconData = await FlutterIconPicker.showIconPicker(
+                    context,
+                    iconPackMode: IconPack.material,
+                    backgroundColor: Theme.of(context).canvasColor,
+                    iconColor: Theme.of(context).accentColor,
+                    iconPickerShape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    title: Text(
+                      'Select Icon',
+                      style: Theme.of(context).textTheme.headline1,
+                    ),
+                  );
+                  _addRoomIcon = Icon(
+                    iconData != null ? iconData : Icons.touch_app,
+                    color: Theme.of(context).primaryColorDark,
+                    size: 32,
+                  );
+                  setState(() {
+                    Navigator.of(context).pop();
+                    _showAddRoomDialog(context: context);
+                  });
+                },
+              ),
+            ),
+          ),
+          actions: <Widget>[
+            FlatButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text(
+                'CANCEL',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            FlatButton(
+              onPressed: () async {
+                _addNewRoom(
+                  SmartRoomData(
+                    name: _addRoomController.text,
+                    icon: _addRoomIcon.icon,
+                  ),
+                );
+                Navigator.of(context).pop();
+                _roomList = await _getSmartRoomData();
+                // _dropdownRoomList =
+                //     _getRoomDropdownList(roomList: _roomList, context: context);
+                setState(() {});
+              },
+              child: Text(
+                'SAVE',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _addNewRoom(SmartRoomData room) async {
+    List<String> raw = await sp.loadStringList(key: SP_SmartRoomData);
+    List<SmartRoomData> roomList = [];
+    if (raw != null) {
+      roomList = raw.map((e) => SmartRoomData.fromJsonString(e)).toList();
+      roomList.removeWhere((e) => e.name == room.name);
+      roomList.add(room);
+    } else {
+      roomList.add(room);
+    }
+    raw = roomList.map((e) => e.toJsonString()).toList();
+    sp.saveStringList(key: SP_SmartRoomData, data: raw);
+  }
+
   void _showDialog({
-    BuildContext context,
+    @required BuildContext context,
     String title,
     IconData iconData,
     List<Widget> actions,
@@ -466,6 +630,7 @@ class _ConfigureDeviceState extends State<ConfigureDevice> {
     List<String> raw = await sp.loadStringList(key: SP_SmartRoomData);
     List<SmartRoomData> list = [];
     if (raw != null) {
+      print(raw.toString());
       list = raw.map((e) {
         return SmartRoomData.fromJsonString(e);
       }).toList();
@@ -545,7 +710,7 @@ class _ConfigureDeviceState extends State<ConfigureDevice> {
                   flex: 1,
                   child: Icon(
                     element.icon,
-                    color: Theme.of(context).iconTheme.color,
+                    color: Theme.of(context).textTheme.headline3.color,
                   ),
                 ),
                 Expanded(
@@ -752,7 +917,7 @@ class _ConfigureDeviceState extends State<ConfigureDevice> {
               value: _selectedRoom,
               onChanged: (SmartRoomData val) {
                 if (val.name == 'Add New Room') {
-                  print('got you!!!!');
+                  _showAddRoomDialog(context: context);
                 }
                 setState(() => _selectedRoom = val);
               },
