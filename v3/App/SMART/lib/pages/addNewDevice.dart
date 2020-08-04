@@ -6,6 +6,7 @@ import 'package:shimmer/shimmer.dart';
 import 'package:wifi/wifi.dart';
 import 'package:location/location.dart';
 
+import '../controllers/SmartSync.dart';
 import '../models/SmartConstants.dart';
 import '../widgets/SmartAppBar.dart';
 
@@ -75,6 +76,18 @@ class _AddNewDeviceState extends State<AddNewDevice> {
   void initState() {
     SmartMqtt mqtt = SmartMqtt(debug: true);
     mqtt.connect();
+
+    mqtt.subscribe(
+      mqtt.getTopic(
+        username: TEST_USERNAME,
+        type: SmartMqttTopic.AppDeviceConfig,
+      ),
+    );
+    mqtt.stream.asBroadcastStream().listen((msg) async {
+      SmartSync smartSync = SmartSync(debug: true);
+      smartSync.syncMqttWithSp(msg);
+    });
+
     super.initState();
   }
 
