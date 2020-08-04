@@ -91,13 +91,6 @@ class _AddNewDeviceState extends State<AddNewDevice> {
     super.initState();
   }
 
-  /* TODO: Create a class that can be used to sync from MQTT to SP, write businees logic there,
-  call its methods from pages screens whenever syncing/pushing is required!
-  handle it like ---->>
-  mqtt.subscribe(syncTopic);
-  onRecv() { if(msg['type'] == SmartConfigData.type) {append to respective SP key}}
-  */
-
   @override
   Widget build(BuildContext context) {
     helper = SmartHelper(context: context);

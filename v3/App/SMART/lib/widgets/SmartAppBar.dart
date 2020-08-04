@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'dart:io' show Platform;
 
-import '../models/SmartConstants.dart';
-
 class SmartAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
   final bool showActions;

@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 class SmartRoomData {
   String name;
   IconData icon;
-  List<String> smartIds = List();
+  List<dynamic> smartIds = List();
   final String type = 'SmartRoomData';
 
   SmartRoomData({
@@ -20,7 +20,9 @@ class SmartRoomData {
       name = json['name'];
       icon = IconData(int.parse(json['icon']));
       smartIds = json['smartIds'];
-    } catch(_) {}
+    } catch (e) {
+      print(e);
+    }
   }
 
   void addSmartId(String id) {

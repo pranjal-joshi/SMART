@@ -10,7 +10,7 @@ class SmartSync {
   SmartSharedPreference _sp;
   List<String> _smartConfigDataList = [];
 
-  SmartSync({@required bool this.debug}) {
+  SmartSync({@required this.debug}) {
     _sp = SmartSharedPreference();
   }
 
