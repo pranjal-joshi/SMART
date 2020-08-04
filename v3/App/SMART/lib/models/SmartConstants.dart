@@ -260,3 +260,4 @@ const String JSON_STATUS_BUSY = "busy";
 const String SP_SwitchboardRowList = "sp_SwitchboardRowList";
 const String SP_SmartConfigData = "sp_SmartConfigData";
 const String SP_SmartMqttPublishBuffer = "sp_SmartMqttPublishBuffer";
+const String SP_SmartRoomData = "sp_SmartRoomData";
