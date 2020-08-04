@@ -62,14 +62,16 @@ class SmartMqtt {
       client.keepAlivePeriod = 30;
       client.autoReconnect = true;
       client.onConnected = () async {
-        _subscriptionController.stream.listen((topic) {
-          client.subscribe(topic, MqttQos.exactlyOnce);
-          if (debug) print('[SmartMqtt] Subscribed -> $topic');
-        });
-        _unsubscriptionController.stream.listen((topic) {
-          client.unsubscribe(topic);
-          if (debug) print('[SmartMqtt] Unsubscribed -> $topic');
-        });
+        try {
+          _subscriptionController.stream.listen((topic) {
+            client.subscribe(topic, MqttQos.exactlyOnce);
+            if (debug) print('[SmartMqtt] Subscribed -> $topic');
+          });
+          _unsubscriptionController.stream.listen((topic) {
+            client.unsubscribe(topic);
+            if (debug) print('[SmartMqtt] Unsubscribed -> $topic');
+          });
+        } catch (_) {}
         List<String> buf =
             await sp.loadStringList(key: SP_SmartMqttPublishBuffer);
         try {
