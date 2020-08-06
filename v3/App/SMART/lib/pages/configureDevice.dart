@@ -533,6 +533,7 @@ class _ConfigureDeviceState extends State<ConfigureDevice> {
                     color: Theme.of(context).primaryColorDark,
                     size: 32,
                   );
+                  print('MAP: ${iconDataToMap(iconData).toString()}');
                   setState(() {
                     Navigator.of(context).pop();
                     _showAddRoomDialog(context: context);
