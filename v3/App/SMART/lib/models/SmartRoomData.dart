@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_iconpicker/flutter_iconpicker.dart';
 
 class SmartRoomData {
   String name;
@@ -18,7 +19,7 @@ class SmartRoomData {
       rawJson = rawJson.replaceAll('\'', '\"');
       Map<String, dynamic> json = jsonDecode(rawJson);
       name = json['name'];
-      icon = IconData(int.parse(json['icon']));
+      icon = IconData(int.parse(json['icon']), fontFamily: json['fontFamily']);
       smartIds = json['smartIds'];
     } catch (e) {
       print(e);
@@ -33,6 +34,7 @@ class SmartRoomData {
     return {
       'name': name,
       'icon': icon.codePoint.toString(),
+      'fontFamily': icon.fontFamily,
       'smartIds': smartIds.toList(),
       'type': type,
     };
