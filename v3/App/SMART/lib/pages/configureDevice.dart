@@ -25,6 +25,9 @@ class _ConfigureDeviceState extends State<ConfigureDevice> {
   var _wifiListRaw = List();
   Icon _addRoomIcon;
 
+  String argsSsid;
+  String argsInfo;
+
   List<SmartWifiConfig> _wifiList = List();
   List<DropdownMenuItem<SmartWifiConfig>> _dropdownList = List();
   SmartWifiConfig _selectedDropdown;
@@ -35,7 +38,6 @@ class _ConfigureDeviceState extends State<ConfigureDevice> {
 
   TextEditingController _passController = TextEditingController();
   TextEditingController _usernameController = TextEditingController();
-  TextEditingController _nodenameController = TextEditingController();
   TextEditingController _ipController =
       TextEditingController(text: '35.222.110.118');
   TextEditingController _portController = TextEditingController(text: '1883');
@@ -71,6 +73,7 @@ class _ConfigureDeviceState extends State<ConfigureDevice> {
       List<String> smartConfigDataRaw =
           await sp.loadStringList(key: SP_SmartConfigData);
       List<SmartConfigData> smartConfigList = List();
+      // TODO: Sort problem: deviceConfig list in SP, first element turns into NULL!
       if (smartConfigDataRaw != null) {
         smartConfigDataRaw.forEach(
           (element) {
@@ -81,7 +84,8 @@ class _ConfigureDeviceState extends State<ConfigureDevice> {
           SmartConfigData thisData = smartConfigList
               .firstWhere((element) => element.smartId == args['ssid']);
           _usernameController.text = thisData.username;
-          _nodenameController.text = thisData.nodename;
+          _selectedRoom = _roomList
+              .firstWhere((element) => element.name == thisData.nodename);
           _ipController.text = thisData.mqttIp;
           _portController.text = thisData.mqttPort;
           _meshSsidController.text = thisData.meshSsid;
@@ -114,7 +118,6 @@ class _ConfigureDeviceState extends State<ConfigureDevice> {
     connectivitySubscription.cancel();
     _passController.dispose();
     _usernameController.dispose();
-    _nodenameController.dispose();
     _ipController.dispose();
     _portController.dispose();
     _meshSsidController.dispose();
@@ -140,6 +143,8 @@ class _ConfigureDeviceState extends State<ConfigureDevice> {
 
     Map<String, dynamic> args =
         ModalRoute.of(context).settings.arguments as Map<String, dynamic>;
+    argsSsid = args['ssid'];
+    argsInfo = args['info'];
 
     return Scaffold(
       appBar: _appBar,
@@ -162,7 +167,7 @@ class _ConfigureDeviceState extends State<ConfigureDevice> {
               meshSsid: _meshSsidController.text,
               meshPass: _meshPassController.text,
               username: _usernameController.text,
-              nodename: _nodenameController.text,
+              nodename: _selectedRoom.name,
               mqttIp: _ipController.text,
               mqttPort: _portController.text,
             );
@@ -191,11 +196,10 @@ class _ConfigureDeviceState extends State<ConfigureDevice> {
                   key: SP_SmartConfigData, data: smartConfigDataRaw);
             }
             String uri =
-                'http://192.168.4.1/get?ssid=${_selectedDropdown.ssid}&channel=${_selectedDropdown.channel}&pass=${_passController.text}&mesh_ssid=${_meshSsidController.text}&mesh_pass=${_meshPassController.text}&username=${_usernameController.text}&nodename=${_nodenameController.text}&mqtt_ip=${_ipController.text}&mqtt_port=${_portController.text}&Submit=Submit';
+                'http://192.168.4.1/get?ssid=${_selectedDropdown.ssid}&channel=${_selectedDropdown.channel}&pass=${_passController.text}&mesh_ssid=${_meshSsidController.text}&mesh_pass=${_meshPassController.text}&username=${_usernameController.text}&nodename=${_selectedRoom.name}&mqtt_ip=${_ipController.text}&mqtt_port=${_portController.text}&Submit=Submit';
             print('Form validated. Sending a web request now..');
             try {
               var resp = await http.get(Uri.encodeFull(uri));
-              print(resp.body);
               if (resp.body.contains('Ok')) {
                 Future.delayed(Duration(seconds: 1), () {
                   mqtt.publish(
@@ -310,11 +314,6 @@ class _ConfigureDeviceState extends State<ConfigureDevice> {
                     helper: helper,
                   ),
                   const SizedBox(height: 16),
-                  _getRoomDropdownListUI(
-                    context: context,
-                    helper: helper,
-                  ),
-                  const SizedBox(height: 16),
                   _getTextFormField(
                     context: context,
                     label: 'Password',
@@ -328,7 +327,7 @@ class _ConfigureDeviceState extends State<ConfigureDevice> {
                           return 'Can\'t Connect to the WiFi Without Password!';
                         }
                       }
-                      return '';
+                      return null;
                     },
                   ),
                   const SizedBox(height: 16),
@@ -386,18 +385,9 @@ class _ConfigureDeviceState extends State<ConfigureDevice> {
                     },
                   ),
                   const SizedBox(height: 16),
-                  _getTextFormField(
+                  _getRoomDropdownListUI(
                     context: context,
-                    label: 'Device Location',
-                    hint: 'Like "Living Room" or "Garden"',
-                    iconData: Icons.memory,
-                    controller: _nodenameController,
-                    validator: (String val) {
-                      if (val.isEmpty) {
-                        return 'Device Location is required!';
-                      }
-                      return null;
-                    },
+                    helper: helper,
                   ),
                   const SizedBox(height: 16),
                   Text(
@@ -514,7 +504,6 @@ class _ConfigureDeviceState extends State<ConfigureDevice> {
               prefixIcon: IconButton(
                 icon: _addRoomIcon,
                 onPressed: () async {
-                  //TODO: fix box icon bug!!
                   IconData iconData = await FlutterIconPicker.showIconPicker(
                     context,
                     iconPackMode: IconPack.material,
@@ -533,7 +522,6 @@ class _ConfigureDeviceState extends State<ConfigureDevice> {
                     color: Theme.of(context).primaryColorDark,
                     size: 32,
                   );
-                  print('MAP: ${iconDataToMap(iconData).toString()}');
                   setState(() {
                     Navigator.of(context).pop();
                     _showAddRoomDialog(context: context);
@@ -561,7 +549,14 @@ class _ConfigureDeviceState extends State<ConfigureDevice> {
                   ),
                 );
                 Navigator.of(context).pop();
-                _roomList = await _getSmartRoomData();
+                Navigator.of(context).popAndPushNamed(
+                  route_configureDevice,
+                  arguments: {
+                    'ssid': argsSsid,
+                    'info': argsInfo,
+                  },
+                );
+                // _roomList = await _getSmartRoomData();
                 // _dropdownRoomList =
                 //     _getRoomDropdownList(roomList: _roomList, context: context);
                 setState(() {});
@@ -631,7 +626,6 @@ class _ConfigureDeviceState extends State<ConfigureDevice> {
     List<String> raw = await sp.loadStringList(key: SP_SmartRoomData);
     List<SmartRoomData> list = [];
     if (raw != null) {
-      print(raw.toString());
       list = raw.map((e) {
         return SmartRoomData.fromJsonString(e);
       }).toList();
