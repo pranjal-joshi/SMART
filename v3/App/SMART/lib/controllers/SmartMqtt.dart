@@ -133,11 +133,13 @@ class SmartMqtt {
   }
 
   void subscribe(String topic) {
-    _subscriptionController.sink.add(topic);
+    if (!_subscriptionController.isClosed)
+      _subscriptionController.sink.add(topic);
   }
 
   void unsubscribe(String topic) {
-    _unsubscriptionController.sink.add(topic);
+    if (!_unsubscriptionController.isClosed)
+      _unsubscriptionController.sink.add(topic);
   }
 
   void publish({
@@ -227,7 +229,7 @@ class SmartMqtt {
       return 'smart/$username/+/state';
     if (type == SmartMqttTopic.NodeInfo) return 'smart/$username/+/info';
     if (type == SmartMqttTopic.AppRoomConfig)
-      return 'smart/$username/app/$roomName/config';
+      return 'smart/$username/app/$roomName/roomConfig';
     if (type == SmartMqttTopic.AppDeviceConfig)
       return 'smart/$username/app/deviceConfig';
     else
