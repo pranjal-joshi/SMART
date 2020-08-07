@@ -18,7 +18,9 @@ class SmartSync {
     if (msg is String) {
       var json = jsonDecode(msg);
       if (json is List<dynamic>) {
+        // Clear buffers
         _smartConfigDataList.clear();
+        // Check Types of all received messages and them into appropriate lists
         json.forEach((jsonElement) {
           if (jsonElement['type'] == SmartConfigData.type) {
             _smartConfigDataList.add(jsonElement.toString());
