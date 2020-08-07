@@ -11,6 +11,7 @@ import '../models/SmartConstants.dart';
 import '../models/SmartWifiConfig.dart';
 import '../models/SmartRoomData.dart';
 import '../widgets/SmartAppBar.dart';
+import '../widgets/SmartTextFormField.dart';
 
 class ConfigureDevice extends StatefulWidget {
   @override
@@ -65,22 +66,18 @@ class _ConfigureDeviceState extends State<ConfigureDevice> {
     mqtt.connect();
     // Load Details of this node if already found in SP
     Future.delayed(Duration.zero, () async {
+      Map<String, dynamic> args =
+          ModalRoute.of(context).settings.arguments as Map<String, dynamic>;
       _roomList = await _getSmartRoomData();
       _dropdownRoomList =
           _getRoomDropdownList(roomList: _roomList, context: context);
-      Map<String, dynamic> args =
-          ModalRoute.of(context).settings.arguments as Map<String, dynamic>;
-      List<String> smartConfigDataRaw =
-          await sp.loadStringList(key: SP_SmartConfigData);
-      List<SmartConfigData> smartConfigList = List();
+
+      List<SmartConfigData> smartConfigList =
+          await SmartConfigData.loadFromDisk();
       // TODO: Sort problem: deviceConfig list in SP, first element turns into NULL!
-      if (smartConfigDataRaw != null) {
-        smartConfigDataRaw.forEach(
-          (element) {
-            smartConfigList.add(SmartConfigData.fromJsonString(element));
-          },
-        );
+      if (smartConfigList != null) {
         try {
+          // If the same device config already exists, load it
           SmartConfigData thisData = smartConfigList
               .firstWhere((element) => element.smartId == args['ssid']);
           _usernameController.text = thisData.username;
@@ -92,6 +89,7 @@ class _ConfigureDeviceState extends State<ConfigureDevice> {
           _meshPassController.text = thisData.meshPass;
           _passController.text = thisData.pass;
         } on StateError catch (_) {
+          // Attempt to load common config things if any device entry exists in SP
           if (smartConfigList.length > 0) {
             _usernameController.text = smartConfigList[0].username;
             _ipController.text = smartConfigList[0].mqttIp;
@@ -158,7 +156,9 @@ class _ConfigureDeviceState extends State<ConfigureDevice> {
         ),
         icon: Icon(Icons.save),
         onPressed: () async {
-          if (_formKey.currentState.validate() && _selectedDropdown != null) {
+          if (_formKey.currentState.validate() &&
+              _selectedDropdown != null &&
+              _selectedRoom != null) {
             SmartConfigData data = SmartConfigData(
               smartId: args['ssid'],
               ssid: _selectedDropdown.ssid,
@@ -171,30 +171,14 @@ class _ConfigureDeviceState extends State<ConfigureDevice> {
               mqttIp: _ipController.text,
               mqttPort: _portController.text,
             );
-            List<String> smartConfigDataRaw =
-                await sp.loadStringList(key: SP_SmartConfigData);
-            List<SmartConfigData> smartConfigList = List();
-            if (smartConfigDataRaw != null) {
-              smartConfigDataRaw.forEach(
-                (element) {
-                  smartConfigList.add(SmartConfigData.fromJsonString(element));
-                },
-              );
+            List<SmartConfigData> smartConfigList =
+                await SmartConfigData.loadFromDisk();
+            if (smartConfigList != null) {
               smartConfigList
                   .removeWhere((element) => element.smartId == data.smartId);
-              smartConfigList.add(data);
-              smartConfigDataRaw.clear();
-              smartConfigList.forEach((element) {
-                smartConfigDataRaw.add(jsonEncode(element.toJson()));
-              });
-              sp.saveStringList(
-                  key: SP_SmartConfigData, data: smartConfigDataRaw);
-            } else {
-              smartConfigDataRaw = List();
-              smartConfigDataRaw.add(jsonEncode(data.toJson()));
-              sp.saveStringList(
-                  key: SP_SmartConfigData, data: smartConfigDataRaw);
             }
+            smartConfigList.add(data);
+            SmartConfigData.saveToDisk(smartConfigList);
             String uri =
                 'http://192.168.4.1/get?ssid=${_selectedDropdown.ssid}&channel=${_selectedDropdown.channel}&pass=${_passController.text}&mesh_ssid=${_meshSsidController.text}&mesh_pass=${_meshPassController.text}&username=${_usernameController.text}&nodename=${_selectedRoom.name}&mqtt_ip=${_ipController.text}&mqtt_port=${_portController.text}&Submit=Submit';
             print('Form validated. Sending a web request now..');
@@ -207,7 +191,7 @@ class _ConfigureDeviceState extends State<ConfigureDevice> {
                       username: TEST_USERNAME,
                       type: SmartMqttTopic.AppDeviceConfig,
                     ),
-                    message: smartConfigDataRaw.toString(),
+                    message: SmartConfigData.loadFromDisk().toString(),
                     retain: true,
                   );
                   _showDialog(
@@ -313,9 +297,7 @@ class _ConfigureDeviceState extends State<ConfigureDevice> {
                     context: context,
                     helper: helper,
                   ),
-                  const SizedBox(height: 16),
-                  _getTextFormField(
-                    context: context,
+                  SmartTextFormField(
                     label: 'Password',
                     iconData: Icons.lock_outline,
                     obscure: true,
@@ -330,9 +312,7 @@ class _ConfigureDeviceState extends State<ConfigureDevice> {
                       return null;
                     },
                   ),
-                  const SizedBox(height: 16),
-                  _getTextFormField(
-                    context: context,
+                  SmartTextFormField(
                     label: 'S.M.A.R.T SSID',
                     hint: 'S.M.A.R.T\'s Own Network Name',
                     helperText:
@@ -346,9 +326,7 @@ class _ConfigureDeviceState extends State<ConfigureDevice> {
                       return null;
                     },
                   ),
-                  const SizedBox(height: 16),
-                  _getTextFormField(
-                    context: context,
+                  SmartTextFormField(
                     label: 'S.M.A.R.T Password',
                     hint: 'S.M.A.R.T\'s Own Network Password',
                     helperText:
@@ -368,9 +346,7 @@ class _ConfigureDeviceState extends State<ConfigureDevice> {
                     "Device Setup",
                     style: _headingStyle,
                   ),
-                  const SizedBox(height: 16),
-                  _getTextFormField(
-                    context: context,
+                  SmartTextFormField(
                     label: 'Username',
                     hint: 'Registered Username',
                     helperText:
@@ -394,9 +370,7 @@ class _ConfigureDeviceState extends State<ConfigureDevice> {
                     "Connection Setup",
                     style: _headingStyle,
                   ),
-                  const SizedBox(height: 16),
-                  _getTextFormField(
-                    context: context,
+                  SmartTextFormField(
                     label: 'IP Address',
                     hint: 'Where is the S.M.A.R.T Cloud?',
                     iconData: Icons.cloud_circle,
@@ -409,9 +383,7 @@ class _ConfigureDeviceState extends State<ConfigureDevice> {
                       return null;
                     },
                   ),
-                  const SizedBox(height: 16),
-                  _getTextFormField(
-                    context: context,
+                  SmartTextFormField(
                     label: 'Port',
                     hint: 'On Which Port?',
                     iconData: Icons.settings_input_composite,
@@ -575,17 +547,12 @@ class _ConfigureDeviceState extends State<ConfigureDevice> {
   }
 
   Future<void> _addNewRoom(SmartRoomData room) async {
-    List<String> raw = await sp.loadStringList(key: SP_SmartRoomData);
-    List<SmartRoomData> roomList = [];
-    if (raw != null) {
-      roomList = raw.map((e) => SmartRoomData.fromJsonString(e)).toList();
+    List<SmartRoomData> roomList = await SmartRoomData.loadFromDisk();
+    if (roomList != null) {
       roomList.removeWhere((e) => e.name == room.name);
-      roomList.add(room);
-    } else {
-      roomList.add(room);
-    }
-    raw = roomList.map((e) => e.toJsonString()).toList();
-    sp.saveStringList(key: SP_SmartRoomData, data: raw);
+    } 
+    roomList.add(room);
+    SmartRoomData.saveToDisk(roomList);
   }
 
   void _showDialog({
@@ -623,13 +590,9 @@ class _ConfigureDeviceState extends State<ConfigureDevice> {
 
   // Fetch SmartRoomData as a list saved on shared
   Future<List<SmartRoomData>> _getSmartRoomData() async {
-    List<String> raw = await sp.loadStringList(key: SP_SmartRoomData);
-    List<SmartRoomData> list = [];
-    if (raw != null) {
-      list = raw.map((e) {
-        return SmartRoomData.fromJsonString(e);
-      }).toList();
-    }
+    List<SmartRoomData> list = await SmartRoomData.loadFromDisk();
+    if(list == null)
+      list = [];
     list.add(
       SmartRoomData(
         name: "Add New Room",
@@ -639,6 +602,7 @@ class _ConfigureDeviceState extends State<ConfigureDevice> {
     return list;
   }
 
+  // Send a GET request to Smart Node to get WiFi scan list
   void _getWifiListFromNode() {
     fetchWebpage().then(
       (value) {
@@ -672,6 +636,7 @@ class _ConfigureDeviceState extends State<ConfigureDevice> {
     );
   }
 
+  // Build a list of widgets for 'Select WiFi' Dropdown
   List<DropdownMenuItem<SmartWifiConfig>> _getDropdownList(
       {BuildContext context, List<SmartWifiConfig> wifiList}) {
     List<DropdownMenuItem<SmartWifiConfig>> list = List();
@@ -691,6 +656,7 @@ class _ConfigureDeviceState extends State<ConfigureDevice> {
     return list;
   }
 
+  // Build a list of widgets for 'Select Room' Dropdown
   List<DropdownMenuItem<SmartRoomData>> _getRoomDropdownList(
       {BuildContext context, List<SmartRoomData> roomList}) {
     List<DropdownMenuItem<SmartRoomData>> list = List();
@@ -725,6 +691,7 @@ class _ConfigureDeviceState extends State<ConfigureDevice> {
     return list;
   }
 
+  // Get text row to show info like SmartID and details at the top of page
   Row _getTextRow({
     @required BuildContext context,
     @required String title,
@@ -750,78 +717,7 @@ class _ConfigureDeviceState extends State<ConfigureDevice> {
     );
   }
 
-  TextFormField _getTextFormField({
-    @required BuildContext context,
-    String label,
-    String hint,
-    String helperText,
-    String initialVal,
-    IconData iconData,
-    bool obscure = false,
-    TextInputType keyboardType = TextInputType.text,
-    Function validator,
-    TextEditingController controller,
-  }) {
-    final SmartHelper helper = SmartHelper(context: context);
-    final OutlineInputBorder outlineInputBorder_2 = OutlineInputBorder(
-      borderRadius: BorderRadius.circular(16),
-      borderSide: BorderSide(
-        color: Theme.of(context).primaryColorDark,
-        width: 2,
-      ),
-    );
-    final OutlineInputBorder outlineInputBorder_3 = OutlineInputBorder(
-      borderRadius: BorderRadius.circular(16),
-      borderSide: BorderSide(
-        color: Theme.of(context).primaryColorDark,
-        width: 3,
-      ),
-    );
-    return TextFormField(
-      initialValue: initialVal != null ? initialVal : null,
-      cursorColor: Theme.of(context).primaryColorDark,
-      keyboardType: keyboardType,
-      textInputAction: TextInputAction.done,
-      style: Theme.of(context).textTheme.headline3,
-      obscureText: obscure,
-      validator: (str) => validator != null ? validator(str) : null,
-      controller: controller,
-      decoration: InputDecoration(
-        isDense: true,
-        labelText: label,
-        hintText: hint,
-        helperText: helperText,
-        helperMaxLines: 4,
-        helperStyle: Theme.of(context).textTheme.subtitle1,
-        hintMaxLines: 1,
-        hintStyle: TextStyle(
-          color: Theme.of(context).textTheme.subtitle1.color,
-          fontSize: Theme.of(context).textTheme.headline3.fontSize,
-        ),
-        labelStyle: TextStyle(
-          color: Theme.of(context).primaryColorDark,
-          fontWeight: FontWeight.bold,
-          letterSpacing: 0.5,
-        ),
-        icon: Icon(
-          iconData,
-          color: Theme.of(context).primaryColorDark,
-          size: 32,
-        ),
-        border: outlineInputBorder_2,
-        enabledBorder: outlineInputBorder_2,
-        focusedBorder: outlineInputBorder_3,
-        errorBorder: outlineInputBorder_2,
-        errorMaxLines: 2,
-        errorStyle: TextStyle(
-          fontWeight: FontWeight.bold,
-          fontSize: 13,
-          color: helper.isDarkModeActive ? Colors.blue[400] : Colors.blue[700],
-        ),
-      ),
-    );
-  }
-
+  // Show a dropdown widget - 'Select WiFi'
   Row _getDropdownListUI({
     @required BuildContext context,
     @required SmartHelper helper,
@@ -871,6 +767,7 @@ class _ConfigureDeviceState extends State<ConfigureDevice> {
     );
   }
 
+  // Show a dropdown widget - 'Select Room'
   Widget _getRoomDropdownListUI({
     @required BuildContext context,
     @required SmartHelper helper,

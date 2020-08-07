@@ -1,5 +1,8 @@
 import 'dart:convert';
+import 'package:SMART/models/SmartConstants.dart';
 import 'package:flutter/foundation.dart';
+
+import '../controllers/SmartSharedPref.dart';
 
 class SmartConfigData {
   String smartId;
@@ -57,8 +60,27 @@ class SmartConfigData {
       nodename = json['nodename'];
       mqttIp = json['mqttIp'];
       mqttPort = json['mqttPort'];
+    } catch (_) {}
+  }
+
+  static Future<List<SmartConfigData>> loadFromDisk() async {
+    SmartSharedPreference _sp = SmartSharedPreference();
+    List<String> raw = await _sp.loadStringList(key: SP_SmartConfigData);
+    if (raw != null) {
+      final List<SmartConfigData> list =
+          raw.map((e) => SmartConfigData.fromJsonString(e)).toList();
+      return list;
     }
-    catch(_) {}
+    return null;
+  }
+
+  static Future<void> saveToDisk(List<SmartConfigData> list) async {
+    if (list != null) {
+      final List<String> raw = list.map((e) => jsonEncode(e.toJson())).toList();
+      SmartSharedPreference _sp = SmartSharedPreference();
+      _sp.saveStringList(key: SP_SmartConfigData, data: raw);
+    }
+    return;
   }
 }
 

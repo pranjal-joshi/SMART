@@ -1,7 +1,8 @@
 import 'dart:convert';
-
+import 'package:SMART/models/SmartConstants.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_iconpicker/flutter_iconpicker.dart';
+
+import '../controllers/SmartSharedPref.dart';
 
 class SmartRoomData {
   String name;
@@ -42,5 +43,25 @@ class SmartRoomData {
 
   String toJsonString() {
     return jsonEncode(toJson());
+  }
+
+  static Future<void> saveToDisk(List<SmartRoomData> list) async {
+    if (list != null) {
+      final List<String> raw = list.map((e) => e.toJsonString()).toList();
+      SmartSharedPreference _sp = SmartSharedPreference();
+      _sp.saveStringList(key: SP_SmartRoomData, data: raw);
+    }
+    return;
+  }
+
+  static Future<List<SmartRoomData>> loadFromDisk() async {
+    SmartSharedPreference _sp = SmartSharedPreference();
+    List<String> raw = await _sp.loadStringList(key: SP_SmartRoomData);
+    if (raw != null) {
+      final List<SmartRoomData> list =
+          raw.map((e) => SmartRoomData.fromJsonString(e)).toList();
+      return list;
+    }
+    return null;
   }
 }
