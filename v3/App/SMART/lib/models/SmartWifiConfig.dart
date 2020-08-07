@@ -71,7 +71,14 @@ class SmartConfigData {
           raw.map((e) => SmartConfigData.fromJsonString(e)).toList();
       return list;
     }
-    return null;
+    return [];
+  }
+
+  static Future<String> loadFromDiskAsString() async {
+    SmartSharedPreference _sp = SmartSharedPreference();
+    List<String> raw = await _sp.loadStringList(key: SP_SmartConfigData);
+    if (raw != null) return raw.toString();
+    return '';
   }
 
   static Future<void> saveToDisk(List<SmartConfigData> list) async {
