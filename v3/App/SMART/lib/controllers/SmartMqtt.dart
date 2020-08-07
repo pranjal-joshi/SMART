@@ -183,7 +183,7 @@ class SmartMqtt {
       List<String> buf =
           await sp.loadStringList(key: SP_SmartMqttPublishBuffer);
       if (buf != null) {
-        print('[SmartMqtt] Read PublishBuffer -> ${buf.toString()}');
+        if (debug) print('[SmartMqtt] Read PublishBuffer -> ${buf.toString()}');
         List<SmartMqttPublishBuffer> pubBuf =
             buf.map((e) => SmartMqttPublishBuffer.fromJsonString(e)).toList();
         pubBuf.forEach((element) {

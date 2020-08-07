@@ -62,6 +62,6 @@ class SmartRoomData {
           raw.map((e) => SmartRoomData.fromJsonString(e)).toList();
       return list;
     }
-    return null;
+    return [];
   }
 }

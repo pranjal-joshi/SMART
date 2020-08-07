@@ -22,10 +22,10 @@ class SmartSync {
         _smartConfigDataList.clear();
         // Check Types of all received messages and them into appropriate lists
         json.forEach((jsonElement) {
-          if (jsonElement['type'] == SmartConfigData.type) {
-            _smartConfigDataList.add(jsonElement.toString());
-          }
-        });
+            if (jsonElement['type'] == SmartConfigData.type) {
+              _smartConfigDataList.add(jsonElement.toString());
+            }
+          });
         // Add 'SmartConfigData' data from MQTT to Shared Pref
         if (_smartConfigDataList.isNotEmpty) {
           if (debug)
