@@ -77,6 +77,9 @@ class _ConfigureDeviceState extends State<ConfigureDevice> {
       // TODO: Sort problem: deviceConfig list in SP, first element turns into NULL!
       if (smartConfigList != null) {
         try {
+          smartConfigList.forEach((element) {
+            print('Object: ${element.smartId} === args: ${args["ssid"]}');
+          });
           // If the same device config already exists, load it
           SmartConfigData thisData = smartConfigList
               .firstWhere((element) => element.smartId == args['ssid']);
@@ -88,7 +91,7 @@ class _ConfigureDeviceState extends State<ConfigureDevice> {
           _meshSsidController.text = thisData.meshSsid;
           _meshPassController.text = thisData.meshPass;
           _passController.text = thisData.pass;
-        } on StateError catch (_) {
+        } on StateError catch (e) {
           // Attempt to load common config things if any device entry exists in SP
           if (smartConfigList.length > 0) {
             _usernameController.text = smartConfigList[0].username;
@@ -185,13 +188,14 @@ class _ConfigureDeviceState extends State<ConfigureDevice> {
             try {
               var resp = await http.get(Uri.encodeFull(uri));
               if (resp.body.contains('Ok')) {
-                Future.delayed(Duration(seconds: 1), () {
+                Future.delayed(Duration(seconds: 1), () async {
+                  var msg = await SmartConfigData.loadFromDiskAsString();
                   mqtt.publish(
                     topic: mqtt.getTopic(
                       username: TEST_USERNAME,
                       type: SmartMqttTopic.AppDeviceConfig,
                     ),
-                    message: SmartConfigData.loadFromDisk().toString(),
+                    message: msg,
                     retain: true,
                   );
                   _showDialog(
