@@ -180,12 +180,8 @@ class SmartMqtt {
 
   void publishBuffer() async {
     if (await isInternetAvailable()) {
-      List<String> buf =
-          await sp.loadStringList(key: SP_SmartMqttPublishBuffer);
-      if (buf != null) {
-        if (debug) print('[SmartMqtt] Read PublishBuffer -> ${buf.toString()}');
-        List<SmartMqttPublishBuffer> pubBuf =
-            buf.map((e) => SmartMqttPublishBuffer.fromJsonString(e)).toList();
+        List<SmartMqttPublishBuffer> pubBuf = await SmartMqttPublishBuffer.loadFromDisk();
+        if (debug) print('[SmartMqtt] Read PublishBuffer -> ${pubBuf.toString()}');
         pubBuf.forEach((element) {
           MqttClientPayloadBuilder builder = MqttClientPayloadBuilder();
           builder.addString(element.message);
@@ -198,7 +194,6 @@ class SmartMqtt {
           builder = null;
         });
         sp.delete(key: SP_SmartMqttPublishBuffer);
-      }
     }
   }
 
@@ -281,5 +276,24 @@ class SmartMqttPublishBuffer {
 
   String toJsonString() {
     return jsonEncode(toJson());
+  }
+
+  static Future<void> saveToDisk(List<SmartMqttPublishBuffer> list) async {
+    if (list != null) {
+      final SmartSharedPreference _sp = SmartSharedPreference();
+      final List<String> raw = list.map((e) => e.toJsonString()).toList();
+      _sp.saveStringList(key: SP_SmartMqttPublishBuffer, data: raw);
+    }
+  }
+
+  static Future<List<SmartMqttPublishBuffer>> loadFromDisk() async {
+    final SmartSharedPreference _sp = SmartSharedPreference();
+    List<String> raw = await _sp.loadStringList(key: SP_SmartMqttPublishBuffer);
+    if (raw != null) {
+      List<SmartMqttPublishBuffer> list =
+          raw.map((e) => SmartMqttPublishBuffer.fromJsonString(e)).toList();
+      return list;
+    }
+    return [];
   }
 }
