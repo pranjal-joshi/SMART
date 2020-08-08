@@ -74,13 +74,19 @@ class _AddNewDeviceState extends State<AddNewDevice> {
 
   @override
   void initState() {
+    // Init MQTT connection - TODO implement connectivity check with this later!
     SmartMqtt mqtt = SmartMqtt(debug: true);
     mqtt.connect();
-
     mqtt.subscribe(
       mqtt.getTopic(
         username: TEST_USERNAME,
         type: SmartMqttTopic.AppDeviceConfig,
+      ),
+    );
+    mqtt.subscribe(
+      mqtt.getTopic(
+        username: TEST_USERNAME,
+        type: SmartMqttTopic.AppRoomList,
       ),
     );
     mqtt.stream.asBroadcastStream().listen((msg) async {
