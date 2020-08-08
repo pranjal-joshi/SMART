@@ -180,9 +180,16 @@ class SmartMqtt {
 
   void publishBuffer() async {
     if (await isInternetAvailable()) {
-        List<SmartMqttPublishBuffer> pubBuf = await SmartMqttPublishBuffer.loadFromDisk();
-        if (debug) print('[SmartMqtt] Read PublishBuffer -> ${pubBuf.toString()}');
-        pubBuf.forEach((element) {
+      List<SmartMqttPublishBuffer> pubBuf =
+          await SmartMqttPublishBuffer.loadFromDisk();
+      if (debug)
+        print('[SmartMqtt] Read PublishBuffer -> ${pubBuf.toString()}');
+      List<String> _deviceConfigBuffer = [];
+      pubBuf.forEach((element) {
+        //Check each msg, add to buffer list if required so that entire list can be published as a single msg which will be retained.
+        if (element.topic.contains('deviceConfig')) {
+          _deviceConfigBuffer.add(element.message);
+        } else {
           MqttClientPayloadBuilder builder = MqttClientPayloadBuilder();
           builder.addString(element.message);
           client.publishMessage(
@@ -192,8 +199,25 @@ class SmartMqtt {
             retain: element.retain,
           );
           builder = null;
-        });
-        sp.delete(key: SP_SmartMqttPublishBuffer);
+        }
+      });
+      // Publish all buffers to MQTT as a list of msgs
+      if (_deviceConfigBuffer.isNotEmpty) {
+        MqttClientPayloadBuilder builder = MqttClientPayloadBuilder();
+        builder.addString(_deviceConfigBuffer.toString());
+        client.publishMessage(
+          this.getTopic(
+            username: TEST_USERNAME,
+            type: SmartMqttTopic.AppDeviceConfig,
+          ),
+          MqttQos.exactlyOnce,
+          builder.payload,
+          retain: true,
+        );
+        builder = null;
+        _deviceConfigBuffer = null;
+      }
+      sp.delete(key: SP_SmartMqttPublishBuffer);
     }
   }
 
