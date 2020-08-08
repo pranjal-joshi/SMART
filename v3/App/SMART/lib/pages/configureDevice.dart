@@ -74,7 +74,6 @@ class _ConfigureDeviceState extends State<ConfigureDevice> {
 
       List<SmartConfigData> smartConfigList =
           await SmartConfigData.loadFromDisk();
-      // TODO: Sort problem: deviceConfig list in SP, first element turns into NULL!
       if (smartConfigList != null) {
         try {
           smartConfigList.forEach((element) {
@@ -554,9 +553,18 @@ class _ConfigureDeviceState extends State<ConfigureDevice> {
     List<SmartRoomData> roomList = await SmartRoomData.loadFromDisk();
     if (roomList != null) {
       roomList.removeWhere((e) => e.name == room.name);
-    } 
+    }
     roomList.add(room);
     SmartRoomData.saveToDisk(roomList);
+    final String msg = await SmartRoomData.loadFromDiskAsString();
+    mqtt.publish(
+      topic: mqtt.getTopic(
+        username: TEST_USERNAME,
+        type: SmartMqttTopic.AppRoomList,
+      ),
+      message: msg,
+      retain: true,
+    );
   }
 
   void _showDialog({
@@ -595,8 +603,7 @@ class _ConfigureDeviceState extends State<ConfigureDevice> {
   // Fetch SmartRoomData as a list saved on shared
   Future<List<SmartRoomData>> _getSmartRoomData() async {
     List<SmartRoomData> list = await SmartRoomData.loadFromDisk();
-    if(list == null)
-      list = [];
+    if (list == null) list = [];
     list.add(
       SmartRoomData(
         name: "Add New Room",

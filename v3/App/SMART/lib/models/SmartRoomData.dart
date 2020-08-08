@@ -8,7 +8,7 @@ class SmartRoomData {
   String name;
   IconData icon;
   List<dynamic> smartIds = List();
-  final String type = 'SmartRoomData';
+  static final String type = 'SmartRoomData';
 
   SmartRoomData({
     @required this.name,
@@ -63,5 +63,12 @@ class SmartRoomData {
       return list;
     }
     return [];
+  }
+
+  static Future<String> loadFromDiskAsString() async {
+    SmartSharedPreference _sp = SmartSharedPreference();
+    List<String> raw = await _sp.loadStringList(key: SP_SmartRoomData);
+    if (raw != null) return raw.toString();
+    return '';
   }
 }
