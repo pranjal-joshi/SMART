@@ -119,7 +119,7 @@ class SmartMqtt {
       } else {
         print(
             "[SmartMqtt] -> Failed to Connect. RC -> ${client.connectionStatus.returnCode}");
-        disconnect();
+        // disconnect();
       }
     }
   }
