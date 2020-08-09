@@ -47,6 +47,7 @@ class _ConfigureDeviceState extends State<ConfigureDevice> {
   TextEditingController _addRoomController = TextEditingController();
 
   final _formKey = GlobalKey<FormState>();
+  final _scaffoldKey = GlobalKey<ScaffoldState>();
 
   final SmartAppBar _appBar = SmartAppBar(
     title: 'Configure Device',
@@ -76,9 +77,6 @@ class _ConfigureDeviceState extends State<ConfigureDevice> {
           await SmartConfigData.loadFromDisk();
       if (smartConfigList != null) {
         try {
-          smartConfigList.forEach((element) {
-            print('Object: ${element.smartId} === args: ${args["ssid"]}');
-          });
           // If the same device config already exists, load it
           SmartConfigData thisData = smartConfigList
               .firstWhere((element) => element.smartId == args['ssid']);
@@ -127,7 +125,7 @@ class _ConfigureDeviceState extends State<ConfigureDevice> {
   }
 
   Future<String> fetchWebpage() async {
-    var response = await http.get('http://192.168.4.1');
+    var response = await http.get(NODE_IP);
     return response.body;
   }
 
@@ -147,6 +145,7 @@ class _ConfigureDeviceState extends State<ConfigureDevice> {
     argsInfo = args['info'];
 
     return Scaffold(
+      key: _scaffoldKey,
       appBar: _appBar,
       floatingActionButton: FloatingActionButton.extended(
         label: Text(
@@ -158,7 +157,17 @@ class _ConfigureDeviceState extends State<ConfigureDevice> {
         ),
         icon: Icon(Icons.save),
         onPressed: () async {
-          if (_formKey.currentState.validate() &&
+          if (_selectedRoom == null)
+            helper.showSnackbarTextWithGlobalKey(
+              _scaffoldKey,
+              'Select Device Location to Continue!',
+            );
+          else if (_selectedDropdown == null)
+            helper.showSnackbarTextWithGlobalKey(
+              _scaffoldKey,
+              'Select WiFi Network to Continue!',
+            );
+          else if (_formKey.currentState.validate() &&
               _selectedDropdown != null &&
               _selectedRoom != null) {
             SmartConfigData data = SmartConfigData(
@@ -187,37 +196,35 @@ class _ConfigureDeviceState extends State<ConfigureDevice> {
             try {
               var resp = await http.get(Uri.encodeFull(uri));
               if (resp.body.contains('Ok')) {
-                Future.delayed(Duration(seconds: 1), () async {
-                  var msg = await SmartConfigData.loadFromDiskAsString();
-                  mqtt.publish(
-                    topic: mqtt.getTopic(
-                      username: TEST_USERNAME,
-                      type: SmartMqttTopic.AppDeviceConfig,
-                    ),
-                    message: msg,
-                    retain: true,
-                  );
-                  _showDialog(
-                    context: context,
-                    title: 'Device Configured Successfully',
-                    iconData: Icons.done,
-                    actions: <Widget>[
-                      FlatButton(
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                          Navigator.of(context)
-                              .pushReplacementNamed(route_addNewDevice);
-                        },
-                        child: Text(
-                          'OK',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                          ),
+                var msg = await SmartConfigData.loadFromDiskAsString();
+                mqtt.publish(
+                  topic: mqtt.getTopic(
+                    username: TEST_USERNAME,
+                    type: SmartMqttTopic.AppDeviceConfig,
+                  ),
+                  message: msg,
+                  retain: true,
+                );
+                _showDialog(
+                  context: context,
+                  title: 'Device Configured Successfully',
+                  iconData: Icons.done,
+                  actions: <Widget>[
+                    FlatButton(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                        Navigator.of(context)
+                            .pushReplacementNamed(route_addNewDevice);
+                      },
+                      child: Text(
+                        'OK',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
                         ),
-                      )
-                    ],
-                  );
-                });
+                      ),
+                    )
+                  ],
+                );
               } else {
                 _showDialog(
                   context: context,
@@ -258,7 +265,11 @@ class _ConfigureDeviceState extends State<ConfigureDevice> {
                 ],
               );
             }
-          }
+          } else
+            helper.showSnackbarTextWithGlobalKey(
+              _scaffoldKey,
+              'Please Fill All Mandetory Fields!',
+            );
         },
       ),
       body: SafeArea(
@@ -364,9 +375,20 @@ class _ConfigureDeviceState extends State<ConfigureDevice> {
                     },
                   ),
                   const SizedBox(height: 16),
-                  _getRoomDropdownListUI(
-                    context: context,
-                    helper: helper,
+                  FutureBuilder(
+                    future: _getSmartRoomData(),
+                    initialData: _roomList,
+                    builder:
+                        (ctx, AsyncSnapshot<List<SmartRoomData>> snapshot) {
+                      _dropdownRoomList = _getRoomDropdownList(
+                        roomList: snapshot.data,
+                        context: context,
+                      );
+                      return _getRoomDropdownListUI(
+                        context: context,
+                        helper: helper,
+                      );
+                    },
                   ),
                   const SizedBox(height: 16),
                   Text(
@@ -507,7 +529,11 @@ class _ConfigureDeviceState extends State<ConfigureDevice> {
           ),
           actions: <Widget>[
             FlatButton(
-              onPressed: () => Navigator.of(context).pop(),
+              onPressed: () {
+                Navigator.of(context).pop();
+                _selectedRoom = null;
+                setState(() {});
+              },
               child: Text(
                 'CANCEL',
                 style: TextStyle(
@@ -523,18 +549,21 @@ class _ConfigureDeviceState extends State<ConfigureDevice> {
                     icon: _addRoomIcon.icon,
                   ),
                 );
-                Navigator.of(context).pop();
+                /*Navigator.of(context).pop();
                 Navigator.of(context).popAndPushNamed(
                   route_configureDevice,
                   arguments: {
                     'ssid': argsSsid,
                     'info': argsInfo,
                   },
-                );
-                // _roomList = await _getSmartRoomData();
-                // _dropdownRoomList =
-                //     _getRoomDropdownList(roomList: _roomList, context: context);
-                setState(() {});
+                );*/
+                _roomList = await _getSmartRoomData();
+                _dropdownRoomList =
+                    _getRoomDropdownList(roomList: _roomList, context: context);
+                _selectedRoom = null;
+                setState(() {
+                  Navigator.of(context).pop();
+                });
               },
               child: Text(
                 'SAVE',
@@ -817,6 +846,7 @@ class _ConfigureDeviceState extends State<ConfigureDevice> {
                   color: Theme.of(context).primaryColorDark,
                 ),
               ),
+              // value: _selectedRoom == null ? null : _roomList.where((e) => e.name == _selectedRoom.name).first,
               value: _selectedRoom,
               onChanged: (SmartRoomData val) {
                 if (val.name == 'Add New Room') {
