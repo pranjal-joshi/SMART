@@ -65,11 +65,13 @@ class SmartMqtt {
       client.onConnected = () async {
         try {
           _subscriptionController.stream.listen((topic) {
-            client.subscribe(topic, MqttQos.exactlyOnce);
+            if (client.connectionStatus.state == MqttConnectionState.connected)
+              client.subscribe(topic, MqttQos.exactlyOnce);
             if (debug) print('[SmartMqtt] Subscribed -> $topic');
           });
           _unsubscriptionController.stream.listen((topic) {
-            client.unsubscribe(topic);
+            if (client.connectionStatus.state == MqttConnectionState.connected)
+              client.unsubscribe(topic);
             if (debug) print('[SmartMqtt] Unsubscribed -> $topic');
           });
         } catch (_) {}
@@ -183,63 +185,65 @@ class SmartMqtt {
     if (await isInternetAvailable()) {
       List<SmartMqttPublishBuffer> pubBuf =
           await SmartMqttPublishBuffer.loadFromDisk();
-      if (debug)
-        print('[SmartMqtt] Read PublishBuffer -> ${pubBuf.toString()}');
       List<String> _deviceConfigBuffer = [];
       List<String> _roomListBuffer = [];
-      pubBuf.forEach((element) {
-        //Check each msg, add to buffer list if required so that entire list can be published as a single msg which will be retained.
-        if (element.topic.contains('deviceConfig')) {
-          _deviceConfigBuffer.add(element.message);
-        } else if (element.topic.contains('roomList')) {
-          _roomListBuffer.add(element.message);
-        } else {
-          /*
-          ---> This was deleting last retained deviceConfig on MQTT
-          ---> TODO Also, if recvd msg is blank, it overwrites SP.. NEED DEBUGING
+      if (pubBuf.isNotEmpty) {
+        if (debug)
+          print('[SmartMqtt] Read PublishBuffer -> ${pubBuf.toString()}');
+        pubBuf.forEach((element) {
+          //Check each msg, add to buffer list if required so that entire list can be published as a single msg which will be retained.
+          if (element.topic.contains('deviceConfig')) {
+            _deviceConfigBuffer.add(element.message);
+          } else if (element.topic.contains('roomList')) {
+            _roomListBuffer.add(element.message);
+          } else {
+            MqttClientPayloadBuilder builder = MqttClientPayloadBuilder();
+            builder.addString(element.message);
+            client.publishMessage(
+              element.topic,
+              MqttQos.exactlyOnce,
+              builder.payload,
+              retain: element.retain,
+            );
+            builder = null;
+          }
+        });
+        // Publish all buffers to MQTT as a list of msgs
+        if (_deviceConfigBuffer.isNotEmpty) {
           MqttClientPayloadBuilder builder = MqttClientPayloadBuilder();
-          builder.addString(element.message);
+          builder.addString(_deviceConfigBuffer.toString());
           client.publishMessage(
-            element.topic,
+            this.getTopic(
+              username: TEST_USERNAME,
+              type: SmartMqttTopic.AppDeviceConfig,
+            ),
             MqttQos.exactlyOnce,
             builder.payload,
-            retain: element.retain,
+            retain: true,
           );
-          builder = null;*/
+          builder = null;
+          _deviceConfigBuffer = null;
         }
-      });
-      // Publish all buffers to MQTT as a list of msgs
-      if (_deviceConfigBuffer.isNotEmpty) {
-        MqttClientPayloadBuilder builder = MqttClientPayloadBuilder();
-        builder.addString(_deviceConfigBuffer.toString());
-        client.publishMessage(
-          this.getTopic(
-            username: TEST_USERNAME,
-            type: SmartMqttTopic.AppDeviceConfig,
-          ),
-          MqttQos.exactlyOnce,
-          builder.payload,
-          retain: true,
-        );
-        builder = null;
-        _deviceConfigBuffer = null;
+        if (_roomListBuffer.isNotEmpty) {
+          MqttClientPayloadBuilder builder = MqttClientPayloadBuilder();
+          builder.addString(_roomListBuffer.toString());
+          client.publishMessage(
+            this.getTopic(
+              username: TEST_USERNAME,
+              type: SmartMqttTopic.AppRoomList,
+            ),
+            MqttQos.exactlyOnce,
+            builder.payload,
+            retain: true,
+          );
+          builder = null;
+          _roomListBuffer = null;
+        }
+        sp.delete(key: SP_SmartMqttPublishBuffer);
+      } else {
+        if (debug)
+        print('[SmartMqtt] PublishBuffer Empty!');
       }
-      if (_roomListBuffer.isNotEmpty) {
-        MqttClientPayloadBuilder builder = MqttClientPayloadBuilder();
-        builder.addString(_roomListBuffer.toString());
-        client.publishMessage(
-          this.getTopic(
-            username: TEST_USERNAME,
-            type: SmartMqttTopic.AppDeviceConfig,
-          ),
-          MqttQos.exactlyOnce,
-          builder.payload,
-          retain: true,
-        );
-        builder = null;
-        _roomListBuffer = null;
-      }
-      sp.delete(key: SP_SmartMqttPublishBuffer);
     }
   }
 

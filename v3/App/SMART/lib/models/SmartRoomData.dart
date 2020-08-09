@@ -15,6 +15,10 @@ class SmartRoomData {
     @required this.icon,
   });
 
+  // Overload this == operator to avoid error with dropdown
+  // This may cause some other bugs in future! Keep an eye on it!
+  bool operator ==(o) => o is SmartRoomData && o.name == name && o.icon == icon;
+
   SmartRoomData.fromJsonString(String rawJson) {
     try {
       rawJson = rawJson.replaceAll('\'', '\"');

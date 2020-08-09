@@ -5,6 +5,7 @@ const String TEST_SMARTID = 'SMART_00DCCBB8';
 const String TEST_USERNAME = 'joshi.pranjal5@gmail.com';
 const String BROKER_IP = "35.222.110.118";
 const int BROKER_PORT = 1883;
+const String NODE_IP = 'http://192.168.4.1';
 
 const String SMART_SSID_FILTER = "SMART_";
 const String SMART_PASSWORD = "12345678";
@@ -186,7 +187,7 @@ class SmartHelper {
       ),
     ),
     snackBarTheme: SnackBarThemeData(
-      backgroundColor: color_accent_dark.withOpacity(0.8),
+      backgroundColor: color_accent_dark,
       contentTextStyle: TextStyle(
         color: Colors.black,
         fontWeight: FontWeight.bold,
@@ -203,6 +204,17 @@ class SmartHelper {
 
   void showSnackbarText(String text) {
     Scaffold.of(_context).showSnackBar(
+      SnackBar(
+        content: Text(text),
+      ),
+    );
+  }
+
+  void showSnackbarTextWithGlobalKey(
+    GlobalKey<ScaffoldState> key,
+    String text,
+  ) {
+    key.currentState.showSnackBar(
       SnackBar(
         content: Text(text),
       ),
