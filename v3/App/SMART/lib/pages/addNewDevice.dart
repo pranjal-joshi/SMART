@@ -10,12 +10,12 @@ import '../controllers/SmartSync.dart';
 import '../models/SmartConstants.dart';
 import '../widgets/SmartAppBar.dart';
 
-class AddNewDevice extends StatefulWidget {
+class AddNewDevicePage extends StatefulWidget {
   @override
-  _AddNewDeviceState createState() => _AddNewDeviceState();
+  _AddNewDevicePageState createState() => _AddNewDevicePageState();
 }
 
-class _AddNewDeviceState extends State<AddNewDevice> {
+class _AddNewDevicePageState extends State<AddNewDevicePage> {
   SmartHelper helper;
   Location location = Location();
   bool _locServiceEnabled = false;

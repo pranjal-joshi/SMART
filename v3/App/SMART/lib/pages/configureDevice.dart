@@ -13,12 +13,12 @@ import '../models/SmartRoomData.dart';
 import '../widgets/SmartAppBar.dart';
 import '../widgets/SmartTextFormField.dart';
 
-class ConfigureDevice extends StatefulWidget {
+class ConfigureDevicePage extends StatefulWidget {
   @override
-  _ConfigureDeviceState createState() => _ConfigureDeviceState();
+  _ConfigureDevicePageState createState() => _ConfigureDevicePageState();
 }
 
-class _ConfigureDeviceState extends State<ConfigureDevice> {
+class _ConfigureDevicePageState extends State<ConfigureDevicePage> {
   SmartHelper helper;
   SmartSharedPreference sp = SmartSharedPreference();
   SmartMqtt mqtt = SmartMqtt(debug: true);
