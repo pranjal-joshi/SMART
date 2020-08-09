@@ -4,6 +4,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 
 import '../models/SmartConstants.dart';
 import '../widgets/SmartTextFormField.dart';
+import '../widgets/SmartCheckBox.dart';
 
 class LoginPage extends StatelessWidget {
   SmartHelper helper;
@@ -28,7 +29,7 @@ class LoginPage extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Expanded(
-                  flex: 2,
+                  flex: 3,
                   child: Center(
                     child: Container(
                       width: helper.screenWidth * 0.7,
@@ -39,6 +40,14 @@ class LoginPage extends StatelessWidget {
                     ),
                   ),
                 ),
+                Padding(
+                  padding: const EdgeInsets.only(
+                    left: 20,
+                    top: 32,
+                    right: 10,
+                  ),
+                  child: _getRichText(context),
+                ),
                 Expanded(
                   flex: 3,
                   child: Container(
@@ -48,117 +57,123 @@ class LoginPage extends StatelessWidget {
                     ),
                     child: Form(
                       key: _formKey,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.only(
-                              left: 10,
-                              bottom: 10,
-                              right: 10,
-                            ),
-                            child: _getRichText(context),
-                          ),
-                          SmartTextFormField(
-                            topPadding: 24,
-                            bottomPadding: 8,
-                            leftPadding: 10,
-                            rightPadding: 10,
-                            controller: _usernameController,
-                            label: 'Username',
-                            iconData: Icons.account_circle,
-                            hint: 'Registered E-mail',
-                            keyboardType: TextInputType.emailAddress,
-                            validator: (String msg) {
-                              if (msg.isEmpty)
-                                return 'Need a Username to Login!';
-                              return null;
-                            },
-                          ),
-                          SmartTextFormField(
-                            topPadding: 16,
-                            bottomPadding: 8,
-                            leftPadding: 10,
-                            rightPadding: 10,
-                            controller: _passController,
-                            label: 'Password',
-                            iconData: Icons.security,
-                            keyboardType: TextInputType.visiblePassword,
-                            obscure: true,
-                            validator: (String msg) {
-                              if (msg.isEmpty)
-                                return 'Uh-oh! Password can\'t be blank!';
-                              return null;
-                            },
-                          ),
-                          const SizedBox(height: 16),
-                          Center(
-                            child: RaisedButton(
-                              child: Text(
-                                'LOGIN',
-                                style: TextStyle(
-                                  color: helper.isDarkModeActive
-                                      ? Colors.black
-                                      : Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                  letterSpacing: 1.5,
-                                  fontSize: 20,
-                                ),
-                              ),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(48),
-                              ),
-                              color: Theme.of(context).primaryColorDark,
-                              elevation: 2,
-                              padding: EdgeInsets.symmetric(
-                                vertical: 10,
-                                horizontal: 16,
-                              ),
-                              onPressed: () {
-                                helper.showSnackbarTextWithGlobalKey(
-                                  _scaffoldKey,
-                                  'Logging In...',
-                                );
-                                _formKey.currentState.validate();
+                      child: SingleChildScrollView(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            SmartTextFormField(
+                              topPadding: 24,
+                              bottomPadding: 8,
+                              leftPadding: 10,
+                              rightPadding: 10,
+                              controller: _usernameController,
+                              label: 'Username',
+                              iconData: Icons.account_circle,
+                              hint: 'Registered E-mail',
+                              keyboardType: TextInputType.emailAddress,
+                              validator: (String msg) {
+                                if (msg.isEmpty)
+                                  return 'Need a Username to Login!';
+                                return null;
                               },
                             ),
-                          ),
-                          SizedBox(height: (helper.screenHeight-MediaQuery.of(context).padding.top)*0.05),
-                          Center(
-                            child: RichText(
-                              text: TextSpan(
-                                text: 'Don\'t have an account?  ',
-                                style: TextStyle(
-                                  color: Theme.of(context)
-                                      .textTheme
-                                      .subtitle1
-                                      .color,
-                                  fontSize: 18,
-                                  fontFamily: 'ProductSans',
+                            SmartTextFormField(
+                              topPadding: 20,
+                              bottomPadding: 8,
+                              leftPadding: 10,
+                              rightPadding: 10,
+                              controller: _passController,
+                              label: 'Password',
+                              iconData: Icons.security,
+                              keyboardType: TextInputType.visiblePassword,
+                              obscure: true,
+                              validator: (String msg) {
+                                if (msg.isEmpty)
+                                  return 'Uh-oh! Password can\'t be blank!';
+                                return null;
+                              },
+                            ),
+                            Center(
+                              child: SizedBox(
+                                width: helper.screenWidth * 0.65,
+                                child: SmartCheckBox(
+                                  padding: const EdgeInsets.only(left: 10),
+                                  initialValue: true,
+                                  title: 'Remember Me',
+                                  onChange: (bool val) {
+                                    print(val.toString());
+                                  },
                                 ),
-                                children: [
-                                  TextSpan(
-                                      text: "Sign up!",
-                                      style: TextStyle(
-                                        color: Theme.of(context).primaryColorDark,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                      recognizer: TapGestureRecognizer()
-                                        ..onTap = () {
-                                          helper.showSnackbarTextWithGlobalKey(
-                                            _scaffoldKey,
-                                            'Go to Signup!',
-                                          );
-                                        }),
-                                ],
                               ),
                             ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                Center(
+                  child: SizedBox(
+                    width: helper.screenWidth - 40,
+                    child: RaisedButton(
+                      child: Text(
+                        'LOGIN',
+                        style: TextStyle(
+                          color: helper.isDarkModeActive
+                              ? Colors.black
+                              : Colors.white,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 1.5,
+                          fontSize: 22,
+                        ),
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      color: Theme.of(context).primaryColorDark,
+                      elevation: 8,
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 10,
+                        horizontal: 16,
+                      ),
+                      onPressed: () {
+                        helper.showSnackbarTextWithGlobalKey(
+                          _scaffoldKey,
+                          'Logging In...',
+                        );
+                        _formKey.currentState.validate();
+                      },
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 36, top: 28),
+                  child: Center(
+                    child: RichText(
+                      text: TextSpan(
+                        text: 'Don\'t have an account?  ',
+                        style: TextStyle(
+                          color: Theme.of(context).textTheme.subtitle1.color,
+                          fontSize: 18,
+                          fontFamily: 'ProductSans',
+                        ),
+                        children: [
+                          TextSpan(
+                            text: "Sign up!",
+                            style: TextStyle(
+                              color: Theme.of(context).primaryColorDark,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            recognizer: TapGestureRecognizer()
+                              ..onTap = () {
+                                _onLoginTap();
+                              },
                           ),
                         ],
                       ),
                     ),
                   ),
-                )
+                ),
               ],
             ),
           ),
@@ -172,11 +187,12 @@ class LoginPage extends StatelessWidget {
       text: TextSpan(
         text: "Smartify the",
         style: TextStyle(
-            fontSize: 28,
-            fontWeight: FontWeight.bold,
-            letterSpacing: 0.7,
-            color: Theme.of(context).primaryColorDark,
-            fontFamily: 'ProductSans'),
+          fontSize: 28,
+          fontWeight: FontWeight.bold,
+          letterSpacing: 0.7,
+          color: Theme.of(context).primaryColorDark,
+          fontFamily: 'ProductSans',
+        ),
         children: [
           TextSpan(
             text: "\nFuture",
@@ -188,6 +204,13 @@ class LoginPage extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+
+  void _onLoginTap() {
+    helper.showSnackbarTextWithGlobalKey(
+      _scaffoldKey,
+      'Go to Signup!',
     );
   }
 }
