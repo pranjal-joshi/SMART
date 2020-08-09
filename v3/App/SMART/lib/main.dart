@@ -5,6 +5,7 @@ import 'models/SmartConstants.dart';
 import 'pages/room.dart';
 import 'pages/addNewDevice.dart';
 import 'pages/configureDevice.dart';
+import 'pages/login_page.dart';
 
 
 void main() => runApp(SmartApp());
@@ -17,14 +18,13 @@ class SmartApp extends StatelessWidget {
     return MaterialApp(
       title: 'SMART',
       routes: {
+        route_login: (context) => LoginPage(),
         route_room: (context) => Room(),
-        route_addNewDevice: (context) => AddNewDevice(),
-        route_configureDevice: (context) => ConfigureDevice(),
+        route_addNewDevice: (context) => AddNewDevicePage(),
+        route_configureDevice: (context) => ConfigureDevicePage(),
       },
-      locale: Locale("en-IN"),
-      // initialRoute: route_room,
-      initialRoute: route_addNewDevice,
-      // initialRoute: route_configureDevice,
+      locale: Locale('en','IN'),
+      initialRoute: route_login,
       themeMode: ThemeMode.system,
       theme: helper.themeLight,
       darkTheme: helper.themeDark,

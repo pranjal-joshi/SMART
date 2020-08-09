@@ -14,6 +14,8 @@ class SmartTextFormField extends StatelessWidget {
   final TextEditingController controller;
   final double topPadding;
   final double bottomPadding;
+  final double leftPadding;
+  final double rightPadding;
 
   SmartTextFormField({
     this.label,
@@ -27,6 +29,8 @@ class SmartTextFormField extends StatelessWidget {
     this.controller,
     this.topPadding = 8,
     this.bottomPadding = 8,
+    this.leftPadding = 0,
+    this.rightPadding = 0,
   });
 
   @override
@@ -50,6 +54,8 @@ class SmartTextFormField extends StatelessWidget {
       padding: EdgeInsets.only(
         top: topPadding,
         bottom: bottomPadding,
+        left: leftPadding,
+        right: rightPadding,
       ),
       child: TextFormField(
         initialValue: initialVal != null ? initialVal : null,

@@ -93,9 +93,20 @@ class SmartHelper {
     ];
   }
 
-  Shader get textGradient {
-    return LinearGradient(colors: profileCardGradientColors).createShader(
-      Rect.fromLTWH(0, 0, 200, 70),
+  LinearGradient get textGradient {
+    List<Color> col = List();
+    if (!isDarkModeActive) {
+      col = [Colors.blue[600], Colors.red[500]];
+    } else {
+      col = [
+        Colors.blue[600].withOpacity(0.8),
+        Colors.red[500].withOpacity(0.8)
+      ];
+    }
+    return LinearGradient(
+      colors: col,
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
     );
   }
 
