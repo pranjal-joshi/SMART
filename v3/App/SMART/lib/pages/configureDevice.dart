@@ -87,7 +87,6 @@ class _ConfigureDeviceState extends State<ConfigureDevice> {
           _portController.text = thisData.mqttPort;
           _meshSsidController.text = thisData.meshSsid;
           _meshPassController.text = thisData.meshPass;
-          _passController.text = thisData.pass;
         } on StateError catch (e) {
           // Attempt to load common config things if any device entry exists in SP
           if (smartConfigList.length > 0) {
@@ -96,7 +95,6 @@ class _ConfigureDeviceState extends State<ConfigureDevice> {
             _portController.text = smartConfigList[0].mqttPort;
             _meshSsidController.text = smartConfigList[0].meshSsid;
             _meshPassController.text = smartConfigList[0].meshPass;
-            _passController.text = smartConfigList[0].pass;
           }
         }
       }
@@ -846,7 +844,6 @@ class _ConfigureDeviceState extends State<ConfigureDevice> {
                   color: Theme.of(context).primaryColorDark,
                 ),
               ),
-              // value: _selectedRoom == null ? null : _roomList.where((e) => e.name == _selectedRoom.name).first,
               value: _selectedRoom,
               onChanged: (SmartRoomData val) {
                 if (val.name == 'Add New Room') {
