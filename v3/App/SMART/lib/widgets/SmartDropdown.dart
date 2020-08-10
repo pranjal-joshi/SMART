@@ -29,16 +29,21 @@ class _SmartDropdownState extends State<SmartDropdown> {
   @override
   Widget build(BuildContext context) {
     helper = SmartHelper(context: context);
-
     return Row(
       children: <Widget>[
-        Icon(
-          widget.prefixIcon,
-          color: Theme.of(context).primaryColorDark,
-          size: 32,
+        Container(
+          child: widget.prefixIcon == null
+              ? null
+              : Icon(
+                  widget.prefixIcon,
+                  color: Theme.of(context).primaryColorDark,
+                  size: 32,
+                ),
         ),
         Container(
-          width: helper.screenWidth - 32 - 48,
+          width: widget.prefixIcon == null
+              ? helper.screenWidth - 32 - 16
+              : helper.screenWidth - 32 - 48,
           margin: const EdgeInsets.only(left: 16),
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
           clipBehavior: Clip.antiAliasWithSaveLayer,

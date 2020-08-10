@@ -17,6 +17,10 @@ class SmartConfigData {
   String mqttPort;
   static final String type = 'SmartConfigData';
 
+  // Overload this == operator to avoid error with dropdown
+  // This may cause some other bugs in future! Keep an eye on it!
+  bool operator ==(o) => o is SmartWifiConfig && o.ssid == ssid;
+
   SmartConfigData({
     @required this.smartId,
     @required this.ssid,
