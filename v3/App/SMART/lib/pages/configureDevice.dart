@@ -305,9 +305,32 @@ class _ConfigureDevicePageState extends State<ConfigureDevicePage> {
                     style: _headingStyle,
                   ),
                   const SizedBox(height: 16),
-                  _getDropdownListUI(
+                  /*_getDropdownListUI(
                     context: context,
                     helper: helper,
+                  ),*/
+                  // TODO - Test this FutureBuilder
+                  FutureBuilder(
+                    future: _getWifiListFromNode(),
+                    initialData: _wifiList,
+                    builder: (ctx, snapshot) {
+                      _wifiList.clear();
+                      _dropdownList = _getDropdownList(
+                        context: context,
+                        wifiList: _wifiList,
+                      );
+                      _wifiList.add(
+                        SmartWifiConfig(
+                          ssid: "-- NOT IN LIST --",
+                          rssi: 50,
+                          channel: 1,
+                        ),
+                      );
+                      return _getDropdownListUI(
+                        context: context,
+                        helper: helper,
+                      );
+                    },
                   ),
                   SmartTextFormField(
                     label: 'Password',
@@ -641,7 +664,7 @@ class _ConfigureDevicePageState extends State<ConfigureDevicePage> {
   }
 
   // Send a GET request to Smart Node to get WiFi scan list
-  void _getWifiListFromNode() {
+  /*void _getWifiListFromNode() {
     fetchWebpage().then(
       (value) {
         _wifiListRaw.clear();
@@ -672,6 +695,25 @@ class _ConfigureDevicePageState extends State<ConfigureDevicePage> {
         setState(() {});
       },
     );
+  }*/
+
+  Future<void> _getWifiListFromNode() async {
+    final value = await fetchWebpage();
+    _wifiListRaw.clear();
+    _wifiList.clear();
+    _wifiListRaw = jsonDecode(value);
+    _wifiListRaw.forEach(
+      (element) {
+        _wifiList.add(
+          SmartWifiConfig(
+            ssid: element[0],
+            rssi: int.parse(element[1]),
+            channel: int.parse(element[2]),
+          ),
+        );
+      },
+    );
+    return;
   }
 
   // Build a list of widgets for 'Select WiFi' Dropdown
