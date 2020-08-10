@@ -1,3 +1,4 @@
+import 'dart:collection';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -26,6 +27,7 @@ class _ConfigureDevicePageState extends State<ConfigureDevicePage> {
   var connectivitySubscription;
   var _wifiListRaw = List();
   Icon _addRoomIcon;
+  bool _onceExecuted = false;
 
   String argsSsid;
   String argsInfo;
@@ -62,7 +64,8 @@ class _ConfigureDevicePageState extends State<ConfigureDevicePage> {
         Connectivity().onConnectivityChanged.listen((result) {
       print(result);
       if (result == ConnectivityResult.wifi) {
-        _getWifiListFromNode();
+        // Rebuild on wifi connection
+        setState(() {});
       }
     });
     mqtt.connect();
@@ -306,29 +309,22 @@ class _ConfigureDevicePageState extends State<ConfigureDevicePage> {
                     style: _headingStyle,
                   ),
                   const SizedBox(height: 16),
-                  // TODO - Test this FutureBuilder
                   FutureBuilder(
                     future: _getWifiListFromNode(),
                     initialData: _wifiList,
                     builder: (ctx, snapshot) {
-                      _wifiList.clear();
                       _dropdownList = _getDropdownList(
                         context: context,
-                        wifiList: _wifiList,
-                      );
-                      _wifiList.add(
-                        SmartWifiConfig(
-                          ssid: "-- NOT IN LIST --",
-                          rssi: 50,
-                          channel: 1,
-                        ),
+                        wifiList: snapshot.data,
                       );
                       return SmartDropdown(
                         hint: 'Select WiFi Network',
                         prefixIcon: Icons.network_wifi,
                         itemList: _dropdownList,
                         selectedItem: _selectedDropdown,
-                        onChanged: null,
+                        onChanged: (SmartWifiConfig val) {
+                          _selectedDropdown = val;
+                        },
                       );
                     },
                   ),
@@ -414,6 +410,7 @@ class _ConfigureDevicePageState extends State<ConfigureDevicePage> {
                           if (val.name == 'Add New Room') {
                             _showAddRoomDialog(context: context);
                           }
+                          setState(() => _selectedRoom = val);
                         },
                       );
                     },
@@ -577,21 +574,8 @@ class _ConfigureDevicePageState extends State<ConfigureDevicePage> {
                     icon: _addRoomIcon.icon,
                   ),
                 );
-                /*Navigator.of(context).pop();
-                Navigator.of(context).popAndPushNamed(
-                  route_configureDevice,
-                  arguments: {
-                    'ssid': argsSsid,
-                    'info': argsInfo,
-                  },
-                );*/
-                _roomList = await _getSmartRoomData();
-                _dropdownRoomList =
-                    _getRoomDropdownList(roomList: _roomList, context: context);
                 _selectedRoom = null;
-                setState(() {
-                  Navigator.of(context).pop();
-                });
+                setState(() => Navigator.of(context).pop());
               },
               child: Text(
                 'SAVE',
@@ -671,56 +655,35 @@ class _ConfigureDevicePageState extends State<ConfigureDevicePage> {
   }
 
   // Send a GET request to Smart Node to get WiFi scan list
-  /*void _getWifiListFromNode() {
-    fetchWebpage().then(
-      (value) {
-        _wifiListRaw.clear();
-        _wifiList.clear();
-        _wifiListRaw = jsonDecode(value);
-        _wifiListRaw.forEach(
-          (element) {
-            _wifiList.add(
-              SmartWifiConfig(
-                ssid: element[0],
-                rssi: int.parse(element[1]),
-                channel: int.parse(element[2]),
-              ),
-            );
-          },
-        );
-        _wifiList.add(
-          SmartWifiConfig(
-            ssid: "-- NOT IN LIST --",
-            rssi: 50,
-            channel: 1,
-          ),
-        );
-        _dropdownList = _getDropdownList(
-          context: context,
-          wifiList: _wifiList,
-        );
-        setState(() {});
-      },
-    );
-  }*/
-
-  Future<void> _getWifiListFromNode() async {
-    final value = await fetchWebpage();
-    _wifiListRaw.clear();
-    _wifiList.clear();
-    _wifiListRaw = jsonDecode(value);
-    _wifiListRaw.forEach(
-      (element) {
-        _wifiList.add(
-          SmartWifiConfig(
-            ssid: element[0],
-            rssi: int.parse(element[1]),
-            channel: int.parse(element[2]),
-          ),
-        );
-      },
-    );
-    return;
+  Future<List<SmartWifiConfig>> _getWifiListFromNode() async {
+    // This flag only executes GET request once & "Never Clears" the _wifiList
+    // Clearing _wifiList gives dropdown error as _selectedDropdown not founds in _dropdownList
+    if (!_onceExecuted) {
+      final value = await fetchWebpage();
+      _wifiListRaw.clear();
+      _wifiList.clear();
+      _wifiListRaw = jsonDecode(value);
+      _wifiListRaw.forEach(
+        (element) {
+          _wifiList.add(
+            SmartWifiConfig(
+              ssid: element[0],
+              rssi: int.parse(element[1]),
+              channel: int.parse(element[2]),
+            ),
+          );
+        },
+      );
+      _wifiList.add(
+        SmartWifiConfig(
+          ssid: "-- NOT IN LIST --",
+          rssi: 50,
+          channel: 1,
+        ),
+      );
+      _onceExecuted = true;
+    }
+    return _wifiList;
   }
 
   // Build a list of widgets for 'Select WiFi' Dropdown
