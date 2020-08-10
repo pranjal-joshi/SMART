@@ -140,9 +140,31 @@ class SmartMqtt {
       _subscriptionController.sink.add(topic);
   }
 
+  void subscribeMultiple(List<SmartMqttTopic> enumList) {
+    if (enumList != null && enumList.isNotEmpty)
+      enumList.forEach(
+        (e) {
+          this.subscribe(
+            this.getTopic(username: TEST_USERNAME, type: e),
+          );
+        },
+      );
+  }
+
   void unsubscribe(String topic) {
     if (!_unsubscriptionController.isClosed)
       _unsubscriptionController.sink.add(topic);
+  }
+
+  void unsubscribeMultiple(List<SmartMqttTopic> enumList) {
+    if (enumList != null && enumList.isNotEmpty)
+      enumList.forEach(
+        (e) {
+          this.unsubscribe(
+            this.getTopic(username: TEST_USERNAME, type: e),
+          );
+        },
+      );
   }
 
   void publish({
@@ -241,8 +263,7 @@ class SmartMqtt {
         }
         sp.delete(key: SP_SmartMqttPublishBuffer);
       } else {
-        if (debug)
-        print('[SmartMqtt] PublishBuffer Empty!');
+        if (debug) print('[SmartMqtt] PublishBuffer Empty!');
       }
     }
   }
