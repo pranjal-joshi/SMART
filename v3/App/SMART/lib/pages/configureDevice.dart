@@ -12,6 +12,7 @@ import '../models/SmartWifiConfig.dart';
 import '../models/SmartRoomData.dart';
 import '../widgets/SmartAppBar.dart';
 import '../widgets/SmartTextFormField.dart';
+import '../widgets/SmartDropdown.dart';
 
 class ConfigureDevicePage extends StatefulWidget {
   @override
@@ -305,10 +306,6 @@ class _ConfigureDevicePageState extends State<ConfigureDevicePage> {
                     style: _headingStyle,
                   ),
                   const SizedBox(height: 16),
-                  /*_getDropdownListUI(
-                    context: context,
-                    helper: helper,
-                  ),*/
                   // TODO - Test this FutureBuilder
                   FutureBuilder(
                     future: _getWifiListFromNode(),
@@ -326,9 +323,12 @@ class _ConfigureDevicePageState extends State<ConfigureDevicePage> {
                           channel: 1,
                         ),
                       );
-                      return _getDropdownListUI(
-                        context: context,
-                        helper: helper,
+                      return SmartDropdown(
+                        hint: 'Select WiFi Network',
+                        prefixIcon: Icons.network_wifi,
+                        itemList: _dropdownList,
+                        selectedItem: _selectedDropdown,
+                        onChanged: null,
                       );
                     },
                   ),
@@ -405,9 +405,16 @@ class _ConfigureDevicePageState extends State<ConfigureDevicePage> {
                         roomList: snapshot.data,
                         context: context,
                       );
-                      return _getRoomDropdownListUI(
-                        context: context,
-                        helper: helper,
+                      return SmartDropdown(
+                        hint: 'Select Device Location',
+                        prefixIcon: Icons.room,
+                        itemList: _dropdownRoomList,
+                        selectedItem: _selectedRoom,
+                        onChanged: (SmartRoomData val) {
+                          if (val.name == 'Add New Room') {
+                            _showAddRoomDialog(context: context);
+                          }
+                        },
                       );
                     },
                   ),
@@ -791,109 +798,6 @@ class _ConfigureDevicePageState extends State<ConfigureDevicePage> {
           child: Text(
             data,
             style: Theme.of(context).textTheme.headline3,
-          ),
-        ),
-      ],
-    );
-  }
-
-  // Show a dropdown widget - 'Select WiFi'
-  Row _getDropdownListUI({
-    @required BuildContext context,
-    @required SmartHelper helper,
-  }) {
-    return Row(
-      children: <Widget>[
-        Icon(
-          Icons.network_wifi,
-          color: Theme.of(context).primaryColorDark,
-          size: 32,
-        ),
-        Container(
-          width: helper.screenWidth - 32 - 48,
-          margin: const EdgeInsets.only(left: 16),
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
-          clipBehavior: Clip.antiAliasWithSaveLayer,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              width: 2,
-              color: Theme.of(context).primaryColorDark,
-            ),
-          ),
-          child: DropdownButtonHideUnderline(
-            child: DropdownButton(
-              icon: Icon(Icons.arrow_drop_down),
-              items: _dropdownList,
-              elevation: 2,
-              iconEnabledColor: Theme.of(context).primaryColorDark,
-              isExpanded: true,
-              hint: Text(
-                "Select Your WiFi Network",
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Theme.of(context).primaryColorDark,
-                ),
-              ),
-              value: _selectedDropdown,
-              onChanged: (SmartWifiConfig val) {
-                setState(() => _selectedDropdown = val);
-              },
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  // Show a dropdown widget - 'Select Room'
-  Widget _getRoomDropdownListUI({
-    @required BuildContext context,
-    @required SmartHelper helper,
-  }) {
-    return Row(
-      children: <Widget>[
-        Icon(
-          Icons.room,
-          color: Theme.of(context).primaryColorDark,
-          size: 32,
-        ),
-        Container(
-          width: helper.screenWidth - 32 - 48,
-          margin: const EdgeInsets.only(left: 16),
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
-          clipBehavior: Clip.antiAliasWithSaveLayer,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              width: 2,
-              color: Theme.of(context).primaryColorDark,
-            ),
-          ),
-          child: DropdownButtonHideUnderline(
-            child: DropdownButton(
-              icon: Icon(Icons.arrow_drop_down),
-              items: _dropdownRoomList,
-              elevation: 2,
-              iconEnabledColor: Theme.of(context).primaryColorDark,
-              isExpanded: true,
-              hint: Text(
-                "Select Device Location",
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Theme.of(context).primaryColorDark,
-                ),
-              ),
-              value: _selectedRoom,
-              onChanged: (SmartRoomData val) {
-                if (val.name == 'Add New Room') {
-                  _showAddRoomDialog(context: context);
-                }
-                setState(() => _selectedRoom = val);
-              },
-            ),
           ),
         ),
       ],
