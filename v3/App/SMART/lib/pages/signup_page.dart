@@ -2,6 +2,8 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:email_validator/email_validator.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../models/SmartConstants.dart';
 import '../widgets/SmartTextFormField.dart';
@@ -193,11 +195,40 @@ class SignupPage extends StatelessWidget {
     );
   }
 
+  // Register user to Firebase
   void signupProcees(SmartHelper helper) {
     if (_formKey.currentState.validate()) {
       helper.showSnackbarTextWithGlobalKey(
         _scaffoldKey,
         'Signing Up...',
+      );
+      FirebaseAuth.instance
+          .createUserWithEmailAndPassword(
+        email: _usernameController.text,
+        password: _passController.text,
+      )
+          .then((currentUser) {
+        Firestore.instance
+            .collection('users')
+            .document(currentUser.user.uid)
+            .setData(
+          {
+            'uid': currentUser.user.uid,
+            'username': _usernameController.text,
+            'password': _passController.text,
+          },
+        ).then((result) {
+          helper.showSnackbarTextWithGlobalKey(
+            _scaffoldKey,
+            "Signup Completed!",
+          );
+          _usernameController.clear();
+          _passController.clear();
+        }).catchError(
+          (e) => print(e),
+        );
+      }).catchError(
+        (e) => print(e),
       );
     }
   }
