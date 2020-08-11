@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "595808799175",
+    "firebase_url": "https://smart-43845.firebaseio.com",
+    "project_id": "smart-43845",
+    "storage_bucket": "smart-43845.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:595808799175:android:0d70d5d3d4537ac88571e2",
+        "android_client_info": {
+          "package_name": "com.cyberfox.smart"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "595808799175-taneroiohu0m2mnpfv3mvf5a3r1uscn1.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyByMlqIpbGt2awsDu5KAOky0EMowNXhR_4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "595808799175-taneroiohu0m2mnpfv3mvf5a3r1uscn1.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
