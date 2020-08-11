@@ -215,23 +215,54 @@ class SmartHelper {
     ),
   );
 
-  void showSnackbarText(String text) {
-    Scaffold.of(_context).showSnackBar(
-      SnackBar(
-        content: Text(text),
-      ),
-    );
+  void showSnackbarText(
+    String text, {
+    bool persistent = false,
+    bool dismissable = true,
+  }) {
+    Scaffold.of(_context).hideCurrentSnackBar();
+    Scaffold.of(_context)
+        .showSnackBar(
+          SnackBar(
+            duration: persistent ? Duration(days: 1) : Duration(seconds: 4),
+            content: Text(text),
+          ),
+        )
+        .closed
+        .then((reason) {
+      if (reason == SnackBarClosedReason.swipe && !dismissable)
+        this.showSnackbarText(
+          text,
+          persistent: persistent,
+          dismissable: dismissable,
+        );
+    });
   }
 
   void showSnackbarTextWithGlobalKey(
     GlobalKey<ScaffoldState> key,
-    String text,
-  ) {
-    key.currentState.showSnackBar(
-      SnackBar(
-        content: Text(text),
-      ),
-    );
+    String text, {
+    bool persistent = false,
+    bool dismissable = true,
+  }) {
+    key.currentState.hideCurrentSnackBar();
+    key.currentState
+        .showSnackBar(
+          SnackBar(
+            duration: persistent ? Duration(days: 1) : Duration(seconds: 4),
+            content: Text(text),
+          ),
+        )
+        .closed
+        .then((reason) {
+      if (reason == SnackBarClosedReason.swipe && !dismissable)
+        this.showSnackbarTextWithGlobalKey(
+          key,
+          text,
+          persistent: persistent,
+          dismissable: dismissable,
+        );
+    });
   }
 }
 
