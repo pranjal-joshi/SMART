@@ -147,7 +147,10 @@ class LoginPage extends StatelessWidget {
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.only(bottom: 36, top: 28),
+                  padding: EdgeInsets.only(
+                    bottom: helper.screenHeight * 0.05,
+                    top: helper.screenHeight * 0.03,
+                  ),
                   child: Center(
                     child: RichText(
                       text: TextSpan(
@@ -166,7 +169,7 @@ class LoginPage extends StatelessWidget {
                             ),
                             recognizer: TapGestureRecognizer()
                               ..onTap = () {
-                                _onLoginTap();
+                                Navigator.of(context).pushNamed(route_signup);
                               },
                           ),
                         ],
@@ -204,13 +207,6 @@ class LoginPage extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
-
-  void _onLoginTap() {
-    helper.showSnackbarTextWithGlobalKey(
-      _scaffoldKey,
-      'Go to Signup!',
     );
   }
 }

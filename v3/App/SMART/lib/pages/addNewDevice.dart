@@ -33,6 +33,11 @@ class _AddNewDevicePageState extends State<AddNewDevicePage> {
     showActions: false,
   );
 
+  final List<SmartMqttTopic> _subscriptionList = [
+    SmartMqttTopic.AppDeviceConfig,
+    SmartMqttTopic.AppRoomList,
+  ];
+
   void scanWifi() async {
     Wifi.list(SMART_SSID_FILTER).then((value) {
       _showScanningLogo = false;
@@ -77,18 +82,7 @@ class _AddNewDevicePageState extends State<AddNewDevicePage> {
     // Init MQTT connection - TODO implement connectivity check with this later!
     SmartMqtt mqtt = SmartMqtt(debug: true);
     mqtt.connect();
-    mqtt.subscribe(
-      mqtt.getTopic(
-        username: TEST_USERNAME,
-        type: SmartMqttTopic.AppDeviceConfig,
-      ),
-    );
-    mqtt.subscribe(
-      mqtt.getTopic(
-        username: TEST_USERNAME,
-        type: SmartMqttTopic.AppRoomList,
-      ),
-    );
+    mqtt.subscribeMultiple(_subscriptionList);
     mqtt.stream.asBroadcastStream().listen((msg) async {
       SmartSync smartSync = SmartSync(debug: true);
       smartSync.syncMqttWithSp(msg);

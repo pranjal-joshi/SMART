@@ -21,6 +21,7 @@ const String route_room = '/room';
 const String route_addNewDevice = '/addNewDevice_page';
 const String route_configureDevice = '/configureDevice_page';
 const String route_login = '/login_page';
+const String route_signup = '/signup_page';
 
 class SmartHelper {
   BuildContext _context;

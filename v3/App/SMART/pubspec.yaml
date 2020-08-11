@@ -26,6 +26,7 @@ dependencies:
   http: ^0.12.2
   curl: ^1.0.0
   connectivity: ^0.4.9
+  email_validator: ^1.0.5
   
 dev_dependencies:
   flutter_test:
