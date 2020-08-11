@@ -62,8 +62,8 @@ class LoginPage extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             SmartTextFormField(
-                              topPadding: 24,
-                              bottomPadding: 8,
+                              topPadding: 18,
+                              bottomPadding: 0,
                               leftPadding: 10,
                               rightPadding: 10,
                               controller: _usernameController,
@@ -78,7 +78,7 @@ class LoginPage extends StatelessWidget {
                               },
                             ),
                             SmartTextFormField(
-                              topPadding: 20,
+                              topPadding: 18,
                               bottomPadding: 8,
                               leftPadding: 10,
                               rightPadding: 10,
