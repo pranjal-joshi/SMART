@@ -1,6 +1,4 @@
-import 'dart:collection';
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_iconpicker/flutter_iconpicker.dart';
 import 'package:http/http.dart' as http;
@@ -216,7 +214,7 @@ class _ConfigureDevicePageState extends State<ConfigureDevicePage> {
                       onPressed: () {
                         Navigator.of(context).pop();
                         Navigator.of(context)
-                            .pushReplacementNamed(route_addNewDevice);
+                            .popAndPushNamed(route_addNewDevice);
                       },
                       child: Text(
                         'OK',
@@ -313,19 +311,29 @@ class _ConfigureDevicePageState extends State<ConfigureDevicePage> {
                     future: _getWifiListFromNode(),
                     initialData: _wifiList,
                     builder: (ctx, snapshot) {
-                      _dropdownList = _getDropdownList(
-                        context: context,
-                        wifiList: snapshot.data,
-                      );
-                      return SmartDropdown(
-                        hint: 'Select WiFi Network',
-                        prefixIcon: Icons.network_wifi,
-                        itemList: _dropdownList,
-                        selectedItem: _selectedDropdown,
-                        onChanged: (SmartWifiConfig val) {
-                          _selectedDropdown = val;
-                        },
-                      );
+                      if (snapshot.hasData) {
+                        _dropdownList = _getDropdownList(
+                          context: context,
+                          wifiList: snapshot.data,
+                        );
+                        return SmartDropdown(
+                          hint: 'Select WiFi Network',
+                          prefixIcon: Icons.network_wifi,
+                          itemList: _dropdownList,
+                          selectedItem: _selectedDropdown,
+                          onChanged: (SmartWifiConfig val) {
+                            _selectedDropdown = val;
+                          },
+                        );
+                      } else {
+                        return SmartDropdown(
+                          hint: 'Select WiFi Network',
+                          prefixIcon: Icons.network_wifi,
+                          itemList: null,
+                          selectedItem: null,
+                          onChanged: (SmartWifiConfig val) {},
+                        );
+                      }
                     },
                   ),
                   SmartTextFormField(
