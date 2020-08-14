@@ -1,10 +1,11 @@
+import 'package:SMART/pages/home_page.dart';
 import 'package:flutter/material.dart';
 
 import 'models/SmartConstants.dart';
 
 import 'pages/room.dart';
-import 'pages/addNewDevice.dart';
-import 'pages/configureDevice.dart';
+import 'pages/add_new_device_page.dart';
+import 'pages/configure_device_page.dart';
 import 'pages/login_page.dart';
 import 'pages/signup_page.dart';
 
@@ -21,6 +22,7 @@ class SmartApp extends StatelessWidget {
       routes: {
         route_login: (context) => LoginPage(),
         route_signup: (context) => SignupPage(),
+        route_home: (context) => HomePage(),
         route_room: (context) => Room(),
         route_addNewDevice: (context) => AddNewDevicePage(),
         route_configureDevice: (context) => ConfigureDevicePage(),
