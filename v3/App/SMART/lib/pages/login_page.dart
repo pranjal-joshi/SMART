@@ -1,18 +1,55 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:connectivity/connectivity.dart';
+import 'package:email_validator/email_validator.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+import '../controllers/SmartSharedPref.dart';
 import '../models/SmartConstants.dart';
 import '../widgets/SmartTextFormField.dart';
 import '../widgets/SmartCheckBox.dart';
 
-class LoginPage extends StatelessWidget {
+class LoginPage extends StatefulWidget {
+  @override
+  _LoginPageState createState() => _LoginPageState();
+}
+
+class _LoginPageState extends State<LoginPage> {
   SmartHelper helper;
+  final SmartSharedPreference sp = SmartSharedPreference();
+
   final _usernameController = TextEditingController();
   final _passController = TextEditingController();
 
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   final _formKey = GlobalKey<FormState>();
+
+  bool _showSpinner = false;
+  bool _rememberMe = true;
+
+  @override
+  void initState() {
+    sp.loadLoginCredentials().then((creds) {
+      try {
+        _usernameController.text = creds[0];
+        _passController.text = creds[1];
+        setState(() {});
+      } on RangeError catch (e) {
+        print(e);
+      }
+    });
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _usernameController.dispose();
+    _passController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -74,6 +111,8 @@ class LoginPage extends StatelessWidget {
                               validator: (String msg) {
                                 if (msg.isEmpty)
                                   return 'Need a Username to Login!';
+                                else if (!EmailValidator.validate(msg))
+                                  return 'Enter a valid E-mail!';
                                 return null;
                               },
                             ),
@@ -98,11 +137,9 @@ class LoginPage extends StatelessWidget {
                                 width: helper.screenWidth * 0.65,
                                 child: SmartCheckBox(
                                   padding: const EdgeInsets.only(left: 10),
-                                  initialValue: true,
+                                  initialValue: _rememberMe,
                                   title: 'Remember Me',
-                                  onChange: (bool val) {
-                                    print(val.toString());
-                                  },
+                                  onChange: (bool val) => _rememberMe = val,
                                 ),
                               ),
                             ),
@@ -116,17 +153,27 @@ class LoginPage extends StatelessWidget {
                   child: SizedBox(
                     width: helper.screenWidth - 40,
                     child: RaisedButton(
-                      child: Text(
-                        'LOGIN',
-                        style: TextStyle(
-                          color: helper.isDarkModeActive
-                              ? Colors.black
-                              : Colors.white,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 1.5,
-                          fontSize: 22,
-                        ),
-                      ),
+                      child: !_showSpinner
+                          ? Text(
+                              'LOGIN',
+                              style: TextStyle(
+                                color: helper.isDarkModeActive
+                                    ? Colors.black
+                                    : Colors.white,
+                                fontWeight: FontWeight.bold,
+                                letterSpacing: 1.5,
+                                fontSize: 22,
+                              ),
+                            )
+                          : CircularProgressIndicator(
+                              backgroundColor: helper.isDarkModeActive
+                                  ? Colors.black26
+                                  : Colors.white,
+                              valueColor: helper.isDarkModeActive
+                                  ? AlwaysStoppedAnimation(Colors.black)
+                                  : null,
+                              semanticsLabel: 'Logging In',
+                            ),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(14),
                       ),
@@ -136,13 +183,7 @@ class LoginPage extends StatelessWidget {
                         vertical: 10,
                         horizontal: 16,
                       ),
-                      onPressed: () {
-                        helper.showSnackbarTextWithGlobalKey(
-                          _scaffoldKey,
-                          'Logging In...',
-                        );
-                        _formKey.currentState.validate();
-                      },
+                      onPressed: () => !_showSpinner ? _loginProcess() : null,
                     ),
                   ),
                 ),
@@ -208,5 +249,70 @@ class LoginPage extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  void _loginProcess() async {
+    if (_formKey.currentState.validate()) {
+      final network = await Connectivity().checkConnectivity();
+      if (network == ConnectivityResult.none) {
+        helper.showSnackbarTextWithGlobalKey(
+          _scaffoldKey,
+          'Can\'t Connect to the Network!',
+        );
+        return;
+      }
+      setState(() => _showSpinner = true);
+      helper.showSnackbarTextWithGlobalKey(
+        _scaffoldKey,
+        'Logging In...',
+      );
+      FirebaseAuth.instance
+          .signInWithEmailAndPassword(
+        email: _usernameController.text,
+        password: _passController.text,
+      )
+          .then((currentUser) {
+        Firestore.instance
+            .collection('users')
+            .document(currentUser.user.uid)
+            .get()
+            .then(
+          (DocumentSnapshot result) {
+            sp.saveLoginState(true);
+            setState(() => _showSpinner = false);
+            if (_rememberMe)
+              sp.saveLoginCredentials(
+                [_usernameController.text, _passController.text],
+              );
+            Navigator.of(context).pushReplacementNamed(route_home);
+          },
+        ).catchError((e) => print('Err 1 = $e'));
+      }).catchError((e) {
+        sp.saveLoginState(false);
+        if (e.toString().contains('WRONG_PASSWORD')) {
+          helper.showSnackbarTextWithGlobalKey(
+            _scaffoldKey,
+            'Username/Password Incorrect!',
+          );
+        } else if (e.toString().contains('NETWORK')) {
+          helper.showSnackbarTextWithGlobalKey(
+            _scaffoldKey,
+            'Couldn\'t Reach the Server at the moment!',
+          );
+        } else if (e.toString().contains('USER_NOT_FOUND')) {
+          helper.showSnackbarTextWithGlobalKey(
+            _scaffoldKey,
+            'Sign-up with this E-mail to register',
+          );
+        } else if (e.toString().contains('TOO_MANY_REQUESTS')) {
+          helper.showSnackbarTextWithGlobalKey(
+            _scaffoldKey,
+            'Login Blocked due to Multiple Attempts! Try Later!',
+          );
+        }
+        print(e);
+        setState(() => _showSpinner = false);
+      });
+    }
   }
 }
