@@ -1,9 +1,13 @@
-import 'package:SMART/widgets/SmartRoomIndicator.dart';
 import 'package:flutter/material.dart';
+
+import '../controllers/SmartMqtt.dart';
+import '../controllers/SmartSharedPref.dart';
+import '../controllers/SmartSync.dart';
 
 import '../models/SmartConstants.dart';
 import '../models/SmartRoomData.dart';
 
+import '../widgets/SmartRoomIndicator.dart';
 import '../widgets/SmartRoomCard.dart';
 
 class HomePage extends StatefulWidget {
@@ -13,6 +17,33 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   SmartHelper helper;
+  SmartMqtt mqtt = SmartMqtt(debug: true);
+
+  final List<SmartMqttTopic> subscriptionList = [
+    SmartMqttTopic.NodeInfo,
+  ];
+
+  final dummyString =
+      '{"to": "gateway","from": "app","smartId": "SMART_00DCCFC8","type": "state","data": "[1, 0, 0, 1]"}';
+
+  @override
+  void initState() {
+    mqtt.connect();
+    mqtt.subscribeMultiple(subscriptionList);
+    mqtt.stream.asBroadcastStream().listen((msg) {
+      print('EVENT => $msg');
+      //TODO - Test receving uname/+/info from Cloud & map them into room layout
+      /*
+      Algorithm for TODO
+      - get data from all nodes @ +/info
+      - get 'nodeName' from each node, Add it to the 'roomName' list
+      - get 'data' from each node, append it to data of 'roomName'
+      - if any is 1, show green else red
+      - use futurebuilder - show grey on init
+      */
+    });
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -45,17 +76,18 @@ class _HomePageState extends State<HomePage> {
       body: SafeArea(
         child: GridView.builder(
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              crossAxisSpacing: 8,
-              mainAxisSpacing: 10,
-              childAspectRatio: 5 / 3.5),
+            crossAxisCount: 2,
+            crossAxisSpacing: 8,
+            mainAxisSpacing: 10,
+            childAspectRatio: 5 / 3.5,
+          ),
           itemCount: dataList.length,
           itemBuilder: (_, index) {
             return SmartRoomCard(
               helper: helper,
               roomData: dataList[index],
               indicatorState: SmartRoomIndicatorState.powerOn,
-              onTap: (){
+              onTap: () {
                 print('Clicked on ${dataList[index].name}');
               },
             );
