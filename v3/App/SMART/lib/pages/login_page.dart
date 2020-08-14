@@ -23,6 +23,7 @@ class _LoginPageState extends State<LoginPage> {
 
   final _usernameController = TextEditingController();
   final _passController = TextEditingController();
+  final _displayNameController = TextEditingController();
 
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   final _formKey = GlobalKey<FormState>();
@@ -36,6 +37,7 @@ class _LoginPageState extends State<LoginPage> {
       try {
         _usernameController.text = creds[0];
         _passController.text = creds[1];
+        _displayNameController.text = creds[2];
         setState(() {});
       } on RangeError catch (e) {
         print(e);
@@ -48,6 +50,7 @@ class _LoginPageState extends State<LoginPage> {
   void dispose() {
     _usernameController.dispose();
     _passController.dispose();
+    _displayNameController.dispose();
     super.dispose();
   }
 
@@ -66,7 +69,7 @@ class _LoginPageState extends State<LoginPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Expanded(
-                  flex: 3,
+                  flex: 6,
                   child: Center(
                     child: Container(
                       width: helper.screenWidth * 0.7,
@@ -86,7 +89,7 @@ class _LoginPageState extends State<LoginPage> {
                   child: _getRichText(context),
                 ),
                 Expanded(
-                  flex: 3,
+                  flex: 7,
                   child: Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 10,
@@ -98,6 +101,21 @@ class _LoginPageState extends State<LoginPage> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
+                            SmartTextFormField(
+                              topPadding: 18,
+                              bottomPadding: 0,
+                              leftPadding: 10,
+                              rightPadding: 10,
+                              controller: _displayNameController,
+                              label: 'Your Name',
+                              iconData: Icons.account_circle,
+                              hint: 'Name to Display for other members',
+                              keyboardType: TextInputType.name,
+                              validator: (String msg) {
+                                if (msg.isEmpty) return 'What\'s your name?';
+                                return null;
+                              },
+                            ),
                             SmartTextFormField(
                               topPadding: 18,
                               bottomPadding: 0,
@@ -189,7 +207,7 @@ class _LoginPageState extends State<LoginPage> {
                 ),
                 Padding(
                   padding: EdgeInsets.only(
-                    bottom: helper.screenHeight * 0.05,
+                    bottom: helper.screenHeight * 0.04,
                     top: helper.screenHeight * 0.03,
                   ),
                   child: Center(
@@ -282,7 +300,11 @@ class _LoginPageState extends State<LoginPage> {
             setState(() => _showSpinner = false);
             if (_rememberMe)
               sp.saveLoginCredentials(
-                [_usernameController.text, _passController.text],
+                [
+                  _usernameController.text,
+                  _passController.text,
+                  _displayNameController.text,
+                ],
               );
             Navigator.of(context).pushReplacementNamed(route_home);
           },
