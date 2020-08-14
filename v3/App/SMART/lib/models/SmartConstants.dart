@@ -22,6 +22,7 @@ const String route_addNewDevice = '/addNewDevice_page';
 const String route_configureDevice = '/configureDevice_page';
 const String route_login = '/login_page';
 const String route_signup = '/signup_page';
+const String route_home = '/home_page';
 
 class SmartHelper {
   BuildContext _context;
@@ -317,3 +318,4 @@ const String SP_SwitchboardRowList = "sp_SwitchboardRowList";
 const String SP_SmartConfigData = "sp_SmartConfigData";
 const String SP_SmartMqttPublishBuffer = "sp_SmartMqttPublishBuffer";
 const String SP_SmartRoomData = "sp_SmartRoomData";
+const String SP_LoginState = "sp_LoginState";
