@@ -28,6 +28,7 @@ class _SignupPageState extends State<SignupPage> {
 
   bool _termsAccepted = true;
   bool _signupButtonEnabled = true;
+  bool _showSpinner = false;
 
   @override
   void initState() {
@@ -160,17 +161,27 @@ class _SignupPageState extends State<SignupPage> {
                   child: SizedBox(
                     width: helper.screenWidth - 40,
                     child: RaisedButton(
-                      child: Text(
-                        'Create My Account',
-                        style: TextStyle(
-                          color: helper.isDarkModeActive
-                              ? Colors.black
-                              : Colors.white,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 1.5,
-                          fontSize: 22,
-                        ),
-                      ),
+                      child: !_showSpinner
+                          ? Text(
+                              'Create My Account',
+                              style: TextStyle(
+                                color: helper.isDarkModeActive
+                                    ? Colors.black
+                                    : Colors.white,
+                                fontWeight: FontWeight.bold,
+                                letterSpacing: 1.5,
+                                fontSize: 22,
+                              ),
+                            )
+                          : CircularProgressIndicator(
+                              backgroundColor: helper.isDarkModeActive
+                                  ? Colors.black26
+                                  : Colors.white,
+                              valueColor: helper.isDarkModeActive
+                                  ? AlwaysStoppedAnimation(Colors.black)
+                                  : null,
+                              semanticsLabel: 'Signing Up',
+                            ),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(14),
                       ),
@@ -183,7 +194,9 @@ class _SignupPageState extends State<SignupPage> {
                         horizontal: 16,
                       ),
                       onPressed: _signupButtonEnabled
-                          ? () => signupProcees(helper)
+                          ? () {
+                              !_showSpinner ? signupProcees(helper) : null;
+                            }
                           : null,
                     ),
                   ),
@@ -254,10 +267,7 @@ class _SignupPageState extends State<SignupPage> {
       helper.showSnackbarTextWithGlobalKey(
           _scaffoldKey, "Please Accept the Terms & Conditions!");
     } else if (_formKey.currentState.validate()) {
-      helper.showSnackbarTextWithGlobalKey(
-        _scaffoldKey,
-        'Signing Up...',
-      );
+      setState(() => _showSpinner = true);
       FirebaseAuth.instance
           .createUserWithEmailAndPassword(
         email: _usernameController.text,
@@ -274,11 +284,12 @@ class _SignupPageState extends State<SignupPage> {
             'password': _passController.text,
           },
         );
+        setState(() => _showSpinner = false);
         helper.showSnackbarTextWithGlobalKey(
           _scaffoldKey,
           "Signup Completed!",
         );
-        Future.delayed(Duration(seconds: 4), () {
+        Future.delayed(Duration(seconds: 3), () {
           _usernameController.clear();
           _passController.clear();
           _passConformController.clear();
@@ -286,11 +297,18 @@ class _SignupPageState extends State<SignupPage> {
         });
       }).catchError(
         (e) {
+          setState(() => _showSpinner = false);
           if (e is PlatformException) {
-            helper.showSnackbarTextWithGlobalKey(
-              _scaffoldKey,
-              "This E-mail is Already Registered!",
-            );
+            if (e.toString().contains('WEAK'))
+              helper.showSnackbarTextWithGlobalKey(
+                _scaffoldKey,
+                "Weak Password! Try Harder..",
+              );
+            else
+              helper.showSnackbarTextWithGlobalKey(
+                _scaffoldKey,
+                "This E-mail is Already Registered!",
+              );
           }
         },
       );
