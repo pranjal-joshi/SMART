@@ -320,3 +320,4 @@ const String SP_SmartMqttPublishBuffer = "sp_SmartMqttPublishBuffer";
 const String SP_SmartRoomData = "sp_SmartRoomData";
 const String SP_LoginState = "sp_LoginState";
 const String SP_LoginCredentials = "sp_LoginCredentials";
+const String SP_DisplayName = "sp_DisplayName";
