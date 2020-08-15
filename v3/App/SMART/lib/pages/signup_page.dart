@@ -284,11 +284,13 @@ class _SignupPageState extends State<SignupPage> {
             'password': _passController.text,
           },
         );
+        currentUser.user
+            .sendEmailVerification()
+            .then((_) => helper.showSnackbarTextWithGlobalKey(
+                  _scaffoldKey,
+                  "Verification E-mail has been sent",
+                ));
         setState(() => _showSpinner = false);
-        helper.showSnackbarTextWithGlobalKey(
-          _scaffoldKey,
-          "Signup Completed!",
-        );
         Future.delayed(Duration(seconds: 3), () {
           _usernameController.clear();
           _passController.clear();

@@ -69,7 +69,7 @@ class _LoginPageState extends State<LoginPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Expanded(
-                  flex: 6,
+                  flex: 5,
                   child: Center(
                     child: Container(
                       width: helper.screenWidth * 0.7,
@@ -109,7 +109,7 @@ class _LoginPageState extends State<LoginPage> {
                               controller: _displayNameController,
                               label: 'Your Name',
                               iconData: Icons.account_circle,
-                              hint: 'Name to Display for other members',
+                              hint: 'Name to Display',
                               keyboardType: TextInputType.name,
                               validator: (String msg) {
                                 if (msg.isEmpty) return 'What\'s your name?';
@@ -168,6 +168,26 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                 ),
                 Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(12.0),
+                    child: RichText(
+                      text: TextSpan(
+                          text: "Forgot Password?",
+                          style: TextStyle(
+                            color: Theme.of(context).textTheme.subtitle1.color,
+                            fontSize: 18,
+                            fontFamily: 'ProductSans',
+                            fontWeight: FontWeight.bold,
+                          ),
+                          recognizer: TapGestureRecognizer()
+                            ..onTap = () {
+                              Navigator.of(context)
+                                  .pushNamed(route_forgot_pass);
+                            }),
+                    ),
+                  ),
+                ),
+                Center(
                   child: SizedBox(
                     width: helper.screenWidth - 40,
                     child: RaisedButton(
@@ -207,8 +227,8 @@ class _LoginPageState extends State<LoginPage> {
                 ),
                 Padding(
                   padding: EdgeInsets.only(
-                    bottom: helper.screenHeight * 0.04,
-                    top: helper.screenHeight * 0.03,
+                    bottom: helper.screenHeight * 0.03,
+                    top: helper.screenHeight * 0.02,
                   ),
                   child: Center(
                     child: RichText(
@@ -259,10 +279,11 @@ class _LoginPageState extends State<LoginPage> {
           TextSpan(
             text: "\nFuture",
             style: TextStyle(
-                fontSize: 52,
-                fontWeight: FontWeight.bold,
-                letterSpacing: 1.5,
-                height: 1.1),
+              fontSize: 52,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 1.5,
+              height: 1.1,
+            ),
           ),
         ],
       ),
@@ -280,35 +301,41 @@ class _LoginPageState extends State<LoginPage> {
         return;
       }
       setState(() => _showSpinner = true);
-      helper.showSnackbarTextWithGlobalKey(
-        _scaffoldKey,
-        'Logging In...',
-      );
       FirebaseAuth.instance
           .signInWithEmailAndPassword(
         email: _usernameController.text,
         password: _passController.text,
       )
           .then((currentUser) {
-        Firestore.instance
-            .collection('users')
-            .document(currentUser.user.uid)
-            .get()
-            .then(
-          (DocumentSnapshot result) {
-            sp.saveLoginState(true);
-            setState(() => _showSpinner = false);
-            if (_rememberMe)
-              sp.saveLoginCredentials(
-                [
-                  _usernameController.text,
-                  _passController.text,
-                  _displayNameController.text,
-                ],
+        if (!currentUser.user.isEmailVerified) {
+          currentUser.user.sendEmailVerification().then(
+                (_) => helper.showSnackbarTextWithGlobalKey(
+                  _scaffoldKey,
+                  "Verify this Email to Continue!",
+                ),
               );
-            Navigator.of(context).pushReplacementNamed(route_home);
-          },
-        ).catchError((e) => print('Err 1 = $e'));
+          setState(() => _showSpinner = false);
+        } else {
+          Firestore.instance
+              .collection('users')
+              .document(currentUser.user.uid)
+              .get()
+              .then(
+            (DocumentSnapshot result) {
+              sp.saveLoginState(true);
+              setState(() => _showSpinner = false);
+              if (_rememberMe)
+                sp.saveLoginCredentials(
+                  [
+                    _usernameController.text,
+                    _passController.text,
+                    _displayNameController.text,
+                  ],
+                );
+              Navigator.of(context).pushReplacementNamed(route_home);
+            },
+          ).catchError((e) => print('Err 1 = $e'));
+        }
       }).catchError((e) {
         sp.saveLoginState(false);
         if (e.toString().contains('WRONG_PASSWORD')) {
