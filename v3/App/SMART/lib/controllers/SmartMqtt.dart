@@ -33,6 +33,8 @@ class SmartMqtt {
   ConnectivityResult _connectivityResult;
   List<SmartMqttPublishBuffer> _publishBuffer = [];
 
+  List<String> _subscribeToStateList = [];
+
   final StreamController _controller = StreamController<dynamic>.broadcast();
   Stream<dynamic> get stream => _controller.stream;
 
@@ -151,6 +153,13 @@ class SmartMqtt {
       );
   }
 
+  void subscribeToStateIfNot({@required String smartId}) {
+    if(!_subscribeToStateList.contains(smartId)) {
+      this.subscribe('smart/$TEST_USERNAME/$smartId/state');
+      _subscribeToStateList.add(smartId);
+    }
+  }
+
   void unsubscribe(String topic) {
     if (!_unsubscriptionController.isClosed)
       _unsubscriptionController.sink.add(topic);
@@ -165,6 +174,13 @@ class SmartMqtt {
           );
         },
       );
+  }
+
+  void unsubscribeToStateIfNot({@required String smartId}) {
+    if(_subscribeToStateList.contains(smartId)) {
+      this.unsubscribe('smart/$TEST_USERNAME/$smartId/state');
+      _subscribeToStateList.remove(smartId);
+    }
   }
 
   void publish({
