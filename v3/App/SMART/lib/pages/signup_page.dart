@@ -284,19 +284,20 @@ class _SignupPageState extends State<SignupPage> {
             'password': _passController.text,
           },
         );
-        currentUser.user
-            .sendEmailVerification()
-            .then((_) => helper.showSnackbarTextWithGlobalKey(
-                  _scaffoldKey,
-                  "Verification E-mail has been sent",
-                ));
+        currentUser.user.sendEmailVerification().then(
+              (_) => helper.showSnackbarTextWithGlobalKey(
+                _scaffoldKey,
+                "Verification E-mail has been sent",
+                onTimeout: () {
+                  print('Snackbar Closed');
+                  _usernameController.clear();
+                  _passController.clear();
+                  _passConformController.clear();
+                  Navigator.of(context).pop();
+                },
+              ),
+            );
         setState(() => _showSpinner = false);
-        Future.delayed(Duration(seconds: 3), () {
-          _usernameController.clear();
-          _passController.clear();
-          _passConformController.clear();
-          Navigator.of(context).pop();
-        });
       }).catchError(
         (e) {
           setState(() => _showSpinner = false);

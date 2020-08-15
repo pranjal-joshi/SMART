@@ -221,6 +221,7 @@ class SmartHelper {
     String text, {
     bool persistent = false,
     bool dismissable = true,
+    Function onTimeout,
   }) {
     Scaffold.of(_context).hideCurrentSnackBar();
     Scaffold.of(_context)
@@ -238,6 +239,8 @@ class SmartHelper {
           persistent: persistent,
           dismissable: dismissable,
         );
+      if(reason == SnackBarClosedReason.timeout && onTimeout != null)
+        onTimeout();
     });
   }
 
@@ -246,6 +249,7 @@ class SmartHelper {
     String text, {
     bool persistent = false,
     bool dismissable = true,
+    Function onTimeout,
   }) {
     key.currentState.hideCurrentSnackBar();
     key.currentState
@@ -264,6 +268,8 @@ class SmartHelper {
           persistent: persistent,
           dismissable: dismissable,
         );
+      if(reason == SnackBarClosedReason.timeout && onTimeout != null)
+        onTimeout();
     });
   }
 }
