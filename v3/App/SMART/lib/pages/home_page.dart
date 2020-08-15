@@ -2,11 +2,10 @@ import 'package:flutter/material.dart';
 
 import '../controllers/SmartMqtt.dart';
 import '../controllers/SmartSharedPref.dart';
-import '../controllers/SmartSync.dart';
 
 import '../models/SmartConstants.dart';
 import '../models/SmartRoomData.dart';
-
+import '../models/JsonModel.dart';
 import '../widgets/SmartRoomIndicator.dart';
 import '../widgets/SmartRoomCard.dart';
 
@@ -20,51 +19,24 @@ class _HomePageState extends State<HomePage> {
   final SmartMqtt mqtt = SmartMqtt(debug: true);
   final SmartSharedPreference sp = SmartSharedPreference();
 
+  Map<String, SmartRoomIndicatorState> roomToPowerIndicatorMap = {};
+  Map<String, Map<String, List<int>>> roomStateMap = {};
+
   final List<SmartMqttTopic> subscriptionList = [
     SmartMqttTopic.NodeInfo,
+    SmartMqttTopic.SwitchStateNodeToApp,
   ];
 
-  final dummyString =
-      '{"to": "gateway","from": "app","smartId": "SMART_00DCCFC8","type": "state","data": "[1, 0, 0, 1]"}';
-
-  List<SmartRoomData> roomDataList = [
-    SmartRoomData(
-      name: 'Room 1',
-      icon: Icons.filter_1,
-    ),
-    SmartRoomData(
-      name: 'Room 2',
-      icon: Icons.filter_2,
-    ),
-    SmartRoomData(
-      name: 'Room 3',
-      icon: Icons.filter_3,
-    ),
-    SmartRoomData(
-      name: 'Room 4',
-      icon: Icons.filter_4,
-    ),
-    SmartRoomData(
-      name: 'Room 5',
-      icon: Icons.filter_5,
-    ),
-  ];
+  List<SmartRoomData> roomDataList = [];
 
   @override
   void initState() {
     mqtt.connect();
     mqtt.subscribeMultiple(subscriptionList);
     mqtt.stream.asBroadcastStream().listen((msg) {
-      print('EVENT => $msg');
-      //TODO - Test receving uname/+/info from Cloud & map them into room layout
-      /*
-      Algorithm for TODO
-      - get data from all nodes @ +/info
-      - get 'nodeName' from each node, Add it to the 'roomName' list
-      - get 'data' from each node, append it to data of 'roomName'
-      - if any is 1, show green else red
-      - use futurebuilder - show grey on init
-      */
+      if (msg is String) {
+        setState(() => _getRoomDataFromMqtt(msg));
+      }
     });
     SmartRoomData.loadFromDisk().then((value) {
       if (value != null) roomDataList = value;
@@ -73,12 +45,72 @@ class _HomePageState extends State<HomePage> {
   }
 
   @override
+  void dispose() {
+    mqtt.unsubscribeMultiple(subscriptionList);
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     helper = SmartHelper(context: context);
 
     return Scaffold(
       body: SafeArea(
-        child: FutureBuilder(
+        child: Container(
+          width: double.infinity,
+          height: helper.screenHeight - MediaQuery.of(context).padding.top,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                flex: 1,
+                child: Card(
+                  child: Text(
+                    'Add Hello Message here with nice background gradient & elevated card on it\n\nOr even a summary card!',
+                    style: Theme.of(context).textTheme.headline3,
+                  ),
+                ),
+              ),
+              Expanded(
+                flex: 4,
+                child: Padding(
+                  padding: const EdgeInsets.only(
+                    left: 10,
+                    right: 10,
+                    top: 16,
+                  ),
+                  child: FutureBuilder(
+                    initialData: roomDataList,
+                    future: loadRooms(),
+                    builder: (_, AsyncSnapshot<List<SmartRoomData>> snapshot) {
+                      return GridView.builder(
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          crossAxisSpacing: 8,
+                          mainAxisSpacing: 10,
+                          childAspectRatio: 5 / 4,
+                        ),
+                        itemCount: snapshot.data.length,
+                        itemBuilder: (_, index) {
+                          return SmartRoomCard(
+                            helper: helper,
+                            roomData: snapshot.data[index],
+                            indicatorState: roomToPowerIndicatorMap[
+                                snapshot.data[index].name],
+                            onTap: () {
+                              print('Clicked on ${snapshot.data[index].name}');
+                            },
+                          );
+                        },
+                      );
+                    },
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        /*child: FutureBuilder(
           initialData: roomDataList,
           future: loadRooms(),
           builder: (_, AsyncSnapshot<List<SmartRoomData>> snapshot) {
@@ -94,7 +126,8 @@ class _HomePageState extends State<HomePage> {
                 return SmartRoomCard(
                   helper: helper,
                   roomData: snapshot.data[index],
-                  indicatorState: SmartRoomIndicatorState.powerOn,
+                  indicatorState:
+                      roomToPowerIndicatorMap[snapshot.data[index].name],
                   onTap: () {
                     print('Clicked on ${snapshot.data[index].name}');
                   },
@@ -102,7 +135,7 @@ class _HomePageState extends State<HomePage> {
               },
             );
           },
-        ),
+        ),*/
       ),
     );
   }
@@ -110,5 +143,63 @@ class _HomePageState extends State<HomePage> {
   Future<List<SmartRoomData>> loadRooms() async {
     List<SmartRoomData> list = await SmartRoomData.loadFromDisk();
     return list;
+  }
+
+  void _getRoomDataFromMqtt(String msg) {
+    try {
+      JsonNodeToAppSwitchState statePacket =
+          JsonNodeToAppSwitchState.fromJsonString(msg);
+      if (statePacket.type == JSON_TYPE_STATE) {
+        if (!roomStateMap.containsKey(statePacket.nodeName)) {
+          roomStateMap.putIfAbsent(
+            statePacket.nodeName,
+            () => {
+              statePacket.smartId: statePacket.dataList,
+            },
+          );
+        } else {
+          roomStateMap.update(
+            statePacket.nodeName,
+            (value) {
+              value.update(
+                statePacket.smartId,
+                (value) => statePacket.dataList,
+                ifAbsent: () => statePacket.dataList,
+              );
+              return value;
+            },
+          );
+        }
+        roomToPowerIndicatorMap = {};
+        roomStateMap.forEach((key, value) {
+          value.forEach((k, v) {
+            if (v.any((element) => element == 1)) {
+              if (!roomToPowerIndicatorMap.containsKey(key))
+                roomToPowerIndicatorMap.putIfAbsent(
+                  key,
+                  () => SmartRoomIndicatorState.powerOn,
+                );
+              else
+                roomToPowerIndicatorMap.update(
+                  key,
+                  (value) => SmartRoomIndicatorState.powerOn,
+                );
+            } else {
+              if (!roomToPowerIndicatorMap.containsKey(key))
+                roomToPowerIndicatorMap.putIfAbsent(
+                  key,
+                  () => SmartRoomIndicatorState.powerOff,
+                );
+              else
+                roomToPowerIndicatorMap.update(key, (value) {
+                  if (value == SmartRoomIndicatorState.powerOn)
+                    return SmartRoomIndicatorState.powerOn;
+                  return SmartRoomIndicatorState.powerOff;
+                });
+            }
+          });
+        });
+      }
+    } catch (_) {}
   }
 }
