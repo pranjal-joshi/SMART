@@ -5,10 +5,12 @@ import 'dart:io' show Platform;
 class SmartAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
   final bool showActions;
+  final bool elivated;
 
   SmartAppBar({
     @required this.title,
-    @required this.showActions,
+    this.showActions = false,
+    this.elivated = false,
   });
 
   @override
@@ -26,7 +28,7 @@ class SmartAppBar extends StatelessWidget implements PreferredSizeWidget {
           color: Theme.of(context).primaryColorDark,
         ),
       ),
-      elevation: 2,
+      elevation: elivated ? 2 : 0,
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       // backgroundColor: helper.getAppBarBackgroundColor,
       leading: showBackButton(context),
