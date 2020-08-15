@@ -34,6 +34,7 @@ class JsonNodeToAppSwitchState {
   String from;
   String type;
   String smartId;
+  String nodeName;
   List<int> dataList;
 
   JsonNodeToAppSwitchState.fromJsonString(String rawJson) {
@@ -44,6 +45,7 @@ class JsonNodeToAppSwitchState {
       from = json[JSON_FROM];
       topic = json[JSON_TOPIC];
       smartId = json[JSON_SMARTID];
+      nodeName = json[JSON_NODENAME];
       dataList = json[JSON_TYPE_DATA].cast<int>();
     } catch (e) {}
   }
