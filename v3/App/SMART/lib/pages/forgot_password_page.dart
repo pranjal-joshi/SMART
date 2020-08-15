@@ -1,3 +1,4 @@
+import 'package:connectivity/connectivity.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
@@ -176,8 +177,16 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
     );
   }
 
-  void _resetProcess() {
+  void _resetProcess() async {
     if (_formKey.currentState.validate()) {
+      var con = await Connectivity().checkConnectivity();
+      if (con == ConnectivityResult.none) {
+        helper.showSnackbarTextWithGlobalKey(
+          _scaffoldKey,
+          'Can\'t Connect to the Network!',
+        );
+        return;
+      }
       setState(() => _showSpinner = true);
       print('Resetting Password!');
       FirebaseAuth.instance
