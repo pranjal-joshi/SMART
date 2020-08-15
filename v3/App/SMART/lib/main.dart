@@ -1,3 +1,4 @@
+import 'package:SMART/pages/forgot_password_page.dart';
 import 'package:SMART/pages/home_page.dart';
 import 'package:flutter/material.dart';
 
@@ -22,14 +23,15 @@ class SmartApp extends StatelessWidget {
       routes: {
         route_login: (context) => LoginPage(),
         route_signup: (context) => SignupPage(),
+        route_forgot_pass: (context) => ForgotPasswordPage(),
         route_home: (context) => HomePage(),
         route_room: (context) => Room(),
         route_addNewDevice: (context) => AddNewDevicePage(),
         route_configureDevice: (context) => ConfigureDevicePage(),
       },
       locale: Locale('en','IN'),
-      // initialRoute: route_login,
-      initialRoute: route_home,
+      initialRoute: route_login,
+      // initialRoute: route_home,
       themeMode: ThemeMode.system,
       theme: helper.themeLight,
       darkTheme: helper.themeDark,

@@ -11,7 +11,7 @@ class SmartGradient extends StatelessWidget {
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
         colors: [
-          Theme.of(context).primaryColorDark.withOpacity(0.01),
+          Theme.of(context).primaryColorDark.withOpacity(0.1),
           Theme.of(context).primaryColorDark,
         ],
         tileMode: TileMode.mirror,
