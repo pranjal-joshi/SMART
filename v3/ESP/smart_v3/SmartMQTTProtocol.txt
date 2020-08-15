@@ -75,6 +75,7 @@ smart/username/smartId/state
 	'from': 'node',
 	'smartId': 'SMART_00DCCFC8',
 	'type': 'state',
+	'nodeName': 'TestRoom',
 	'data': [1, 0, 0, 1]
 }
 
