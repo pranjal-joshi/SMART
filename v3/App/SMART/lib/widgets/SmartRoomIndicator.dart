@@ -32,6 +32,8 @@ class SmartRoomIndicator extends StatelessWidget {
       case SmartRoomIndicatorState.indicatorDisabled:
         color = helper.isDarkModeActive ? Colors.grey[700] : Colors.grey[400];
         break;
+      default:
+        color = helper.isDarkModeActive ? Colors.grey[700] : Colors.grey[400];
     }
     return Container(
       height: size,
