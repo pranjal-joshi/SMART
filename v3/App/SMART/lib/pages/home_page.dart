@@ -17,7 +17,8 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   SmartHelper helper;
-  SmartMqtt mqtt = SmartMqtt(debug: true);
+  final SmartMqtt mqtt = SmartMqtt(debug: true);
+  final SmartSharedPreference sp = SmartSharedPreference();
 
   final List<SmartMqttTopic> subscriptionList = [
     SmartMqttTopic.NodeInfo,
@@ -25,6 +26,29 @@ class _HomePageState extends State<HomePage> {
 
   final dummyString =
       '{"to": "gateway","from": "app","smartId": "SMART_00DCCFC8","type": "state","data": "[1, 0, 0, 1]"}';
+
+  List<SmartRoomData> roomDataList = [
+    SmartRoomData(
+      name: 'Room 1',
+      icon: Icons.filter_1,
+    ),
+    SmartRoomData(
+      name: 'Room 2',
+      icon: Icons.filter_2,
+    ),
+    SmartRoomData(
+      name: 'Room 3',
+      icon: Icons.filter_3,
+    ),
+    SmartRoomData(
+      name: 'Room 4',
+      icon: Icons.filter_4,
+    ),
+    SmartRoomData(
+      name: 'Room 5',
+      icon: Icons.filter_5,
+    ),
+  ];
 
   @override
   void initState() {
@@ -42,6 +66,9 @@ class _HomePageState extends State<HomePage> {
       - use futurebuilder - show grey on init
       */
     });
+    SmartRoomData.loadFromDisk().then((value) {
+      if (value != null) roomDataList = value;
+    });
     super.initState();
   }
 
@@ -49,51 +76,39 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     helper = SmartHelper(context: context);
 
-    List<SmartRoomData> dataList = [
-      SmartRoomData(
-        name: 'Room 1',
-        icon: Icons.filter_1,
-      ),
-      SmartRoomData(
-        name: 'Room 2',
-        icon: Icons.filter_2,
-      ),
-      SmartRoomData(
-        name: 'Room 3',
-        icon: Icons.filter_3,
-      ),
-      SmartRoomData(
-        name: 'Room 4',
-        icon: Icons.filter_4,
-      ),
-      SmartRoomData(
-        name: 'Room 5',
-        icon: Icons.filter_5,
-      ),
-    ];
-
     return Scaffold(
       body: SafeArea(
-        child: GridView.builder(
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            crossAxisSpacing: 8,
-            mainAxisSpacing: 10,
-            childAspectRatio: 5 / 3.5,
-          ),
-          itemCount: dataList.length,
-          itemBuilder: (_, index) {
-            return SmartRoomCard(
-              helper: helper,
-              roomData: dataList[index],
-              indicatorState: SmartRoomIndicatorState.powerOn,
-              onTap: () {
-                print('Clicked on ${dataList[index].name}');
+        child: FutureBuilder(
+          initialData: roomDataList,
+          future: loadRooms(),
+          builder: (_, AsyncSnapshot<List<SmartRoomData>> snapshot) {
+            return GridView.builder(
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                crossAxisSpacing: 8,
+                mainAxisSpacing: 10,
+                childAspectRatio: 5 / 4,
+              ),
+              itemCount: snapshot.data.length,
+              itemBuilder: (_, index) {
+                return SmartRoomCard(
+                  helper: helper,
+                  roomData: snapshot.data[index],
+                  indicatorState: SmartRoomIndicatorState.powerOn,
+                  onTap: () {
+                    print('Clicked on ${snapshot.data[index].name}');
+                  },
+                );
               },
             );
           },
         ),
       ),
     );
+  }
+
+  Future<List<SmartRoomData>> loadRooms() async {
+    List<SmartRoomData> list = await SmartRoomData.loadFromDisk();
+    return list;
   }
 }
