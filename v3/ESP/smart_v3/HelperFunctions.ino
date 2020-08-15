@@ -413,6 +413,7 @@ void broadcastStateChanged(const char* stateBuf) {
   doc[JSON_FROM] = JSON_TO_NODE;
   doc[JSON_SMARTID] = smartSsid;
   doc[JSON_TYPE] = JSON_TYPE_STATE;
+  doc[JSON_NODENAME] = confJson[CONF_NODENAME];
   doc[JSON_TYPE_DATA] = arr.as<JsonArray>();
   doc.shrinkToFit();
   serializeJson(doc, charBuf);
