@@ -1,4 +1,6 @@
+import 'package:SMART/widgets/SmartWelcomeCard.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../controllers/SmartMqtt.dart';
 import '../controllers/SmartSharedPref.dart';
@@ -6,6 +8,8 @@ import '../controllers/SmartSharedPref.dart';
 import '../models/SmartConstants.dart';
 import '../models/SmartRoomData.dart';
 import '../models/JsonModel.dart';
+
+import '../widgets/SmartWelcomeBanner.dart';
 import '../widgets/SmartRoomIndicator.dart';
 import '../widgets/SmartRoomCard.dart';
 
@@ -19,6 +23,8 @@ class _HomePageState extends State<HomePage> {
   final SmartMqtt mqtt = SmartMqtt(debug: true);
   final SmartSharedPreference sp = SmartSharedPreference();
 
+  final JsonNodeStatus jsonNodeStatusHandler = JsonNodeStatus();
+
   Map<String, SmartRoomIndicatorState> roomToPowerIndicatorMap = {};
   Map<String, Map<String, List<int>>> roomStateMap = {};
 
@@ -28,6 +34,7 @@ class _HomePageState extends State<HomePage> {
   ];
 
   List<SmartRoomData> roomDataList = [];
+  List<String> _credentials = [];
 
   @override
   void initState() {
@@ -35,7 +42,8 @@ class _HomePageState extends State<HomePage> {
     mqtt.subscribeMultiple(subscriptionList);
     mqtt.stream.asBroadcastStream().listen((msg) {
       if (msg is String) {
-        setState(() => _getRoomDataFromMqtt(msg));
+        _getRoomDataFromMqtt(msg, rebuildOnPacket: false);
+        jsonNodeStatusHandler.addDevice(msg);
       }
     });
     SmartRoomData.loadFromDisk().then((value) {
@@ -54,6 +62,20 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     helper = SmartHelper(context: context);
 
+    // Set Status bar color
+    if (!helper.isDarkModeActive)
+      SystemChrome.setSystemUIOverlayStyle(
+        SystemUiOverlayStyle(
+          statusBarColor: Theme.of(context).primaryColorDark,
+        ),
+      );
+    else
+      SystemChrome.setSystemUIOverlayStyle(
+        SystemUiOverlayStyle(
+          statusBarColor: Colors.black,
+        ),
+      );
+
     return Scaffold(
       body: SafeArea(
         child: Container(
@@ -63,16 +85,74 @@ class _HomePageState extends State<HomePage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Expanded(
-                flex: 1,
-                child: Card(
-                  child: Text(
-                    'Add Hello Message here with nice background gradient & elevated card on it\n\nOr even a summary card!',
-                    style: Theme.of(context).textTheme.headline3,
-                  ),
+                flex: 2,
+                child: LayoutBuilder(
+                  builder: (_, constraints) {
+                    return Stack(
+                      clipBehavior: Clip.antiAliasWithSaveLayer,
+                      children: [
+                        Align(
+                          alignment: Alignment.topCenter,
+                          child: Container(
+                            width: double.infinity,
+                            height: constraints.maxHeight / 1.2,
+                            decoration: helper.isDarkModeActive
+                                ? BoxDecoration(
+                                    color: Colors.black,
+                                  )
+                                : BoxDecoration(
+                                    gradient: LinearGradient(
+                                      tileMode: TileMode.mirror,
+                                      begin: Alignment.topCenter,
+                                      end: Alignment.bottomCenter,
+                                      colors: [
+                                        Theme.of(context).primaryColorDark,
+                                        Colors.amber[800],
+                                      ],
+                                    ),
+                                    borderRadius: BorderRadius.only(
+                                      bottomLeft: Radius.circular(10),
+                                      bottomRight: Radius.circular(10),
+                                    ),
+                                  ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(12.0),
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Expanded(
+                                    child: Padding(
+                                      padding: const EdgeInsets.only(right: 12),
+                                      child: SmartWelcomeBanner(),
+                                    ),
+                                  ),
+                                  CircleAvatar(
+                                    backgroundColor:
+                                        Theme.of(context).canvasColor,
+                                    radius: 28,
+                                    child: Text('DP'),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                        SmartWelcomeCard(
+                          helper: helper,
+                          constraints: constraints,
+                          title: '2 Devices',
+                          subtitle: 'Active',
+                          onActionTap: () => print('Pressed!'),
+                        ),
+                      ],
+                    );
+                  },
                 ),
               ),
               Expanded(
-                flex: 4,
+                flex: 6,
                 child: Padding(
                   padding: const EdgeInsets.only(
                     left: 10,
@@ -110,32 +190,6 @@ class _HomePageState extends State<HomePage> {
             ],
           ),
         ),
-        /*child: FutureBuilder(
-          initialData: roomDataList,
-          future: loadRooms(),
-          builder: (_, AsyncSnapshot<List<SmartRoomData>> snapshot) {
-            return GridView.builder(
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                crossAxisSpacing: 8,
-                mainAxisSpacing: 10,
-                childAspectRatio: 5 / 4,
-              ),
-              itemCount: snapshot.data.length,
-              itemBuilder: (_, index) {
-                return SmartRoomCard(
-                  helper: helper,
-                  roomData: snapshot.data[index],
-                  indicatorState:
-                      roomToPowerIndicatorMap[snapshot.data[index].name],
-                  onTap: () {
-                    print('Clicked on ${snapshot.data[index].name}');
-                  },
-                );
-              },
-            );
-          },
-        ),*/
       ),
     );
   }
@@ -145,7 +199,7 @@ class _HomePageState extends State<HomePage> {
     return list;
   }
 
-  void _getRoomDataFromMqtt(String msg) {
+  void _getRoomDataFromMqtt(String msg, {bool rebuildOnPacket = true}) {
     try {
       JsonNodeToAppSwitchState statePacket =
           JsonNodeToAppSwitchState.fromJsonString(msg);
@@ -199,6 +253,7 @@ class _HomePageState extends State<HomePage> {
             }
           });
         });
+        rebuildOnPacket ? setState(() {}) : null;
       }
     } catch (_) {}
   }
