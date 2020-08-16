@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
 
+import '../models/SmartConstants.dart';
 import '../controllers/SmartSharedPref.dart';
 
 class SmartWelcomeBanner extends StatefulWidget {
@@ -11,6 +12,7 @@ class SmartWelcomeBanner extends StatefulWidget {
 class _SmartWelcomeBannerState extends State<SmartWelcomeBanner> {
   final sp = SmartSharedPreference();
   final randomizer = Random();
+  SmartHelper helper;
   String _displayMessage;
 
   final messages = [
@@ -30,6 +32,8 @@ class _SmartWelcomeBannerState extends State<SmartWelcomeBanner> {
 
   @override
   Widget build(BuildContext context) {
+    helper = SmartHelper(context: context);
+
     return FutureBuilder(
       future: _loadCredentials(),
       initialData: ['', '', 'User'],
@@ -40,7 +44,9 @@ class _SmartWelcomeBannerState extends State<SmartWelcomeBanner> {
             style: TextStyle(
               fontSize: 28,
               fontWeight: FontWeight.bold,
-              color: Colors.white,
+              color: helper.isDarkModeActive
+                  ? Theme.of(context).primaryColor
+                  : Colors.white,
               fontFamily: 'ProductSans',
             ),
             children: [
