@@ -1,6 +1,8 @@
 import 'dart:convert';
-import 'SmartConstants.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import '../models/SmartConstants.dart';
 
 class JsonAppToNodeSwitchState {
   final String to = 'gateway';
@@ -79,6 +81,63 @@ class JsonNodeInfo {
       version = json[JSON_VERSION];
       to = json[JSON_TO];
       smartId = json[JSON_SMARTID];
+    } catch (e) {}
+  }
+}
+
+class JsonNodeStatus extends ChangeNotifier {
+  String type;
+  String smartId;
+  String status;
+  static List<JsonNodeStatus> _deviceList = List<JsonNodeStatus>();
+
+  JsonNodeStatus();
+
+  void addDevice(String rawJson) {
+    var json = jsonDecode(rawJson);
+    if (json[JSON_TYPE] == JSON_TYPE_STATUS) {
+      final JsonNodeStatus s = JsonNodeStatus.fromJsonString(rawJson);
+      _deviceList.add(s);
+      notifyListeners();
+    }
+  }
+
+  List<JsonNodeStatus> get deviceList {
+    return [..._deviceList];
+  }
+
+  int get totalDeviceCount {
+    return _deviceList.length;
+  }
+
+  int get onlineDeviceCount {
+    return _deviceList
+        .where((element) => element.status == JSON_STATUS_ONLINE)
+        .toList()
+        .length;
+  }
+
+  int get offlineDeviceCount {
+    return _deviceList
+        .where((element) => element.status == JSON_STATUS_OFFLINE)
+        .toList()
+        .length;
+  }
+
+  int get busyDeviceCount {
+    return _deviceList
+        .where((element) => element.status == JSON_STATUS_BUSY)
+        .toList()
+        .length;
+  }
+
+  JsonNodeStatus.fromJsonString(String rawJson) {
+    try {
+      rawJson = rawJson.replaceAll('\'', '\"');
+      Map<String, dynamic> json = jsonDecode(rawJson);
+      type = json[JSON_TYPE];
+      smartId = json[JSON_SMARTID];
+      status = json[JSON_TYPE_STATUS];
     } catch (e) {}
   }
 }
