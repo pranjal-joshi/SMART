@@ -64,7 +64,7 @@ class _LoginPageState extends State<LoginPage> {
         child: SingleChildScrollView(
           child: Container(
             width: double.infinity,
-            height: helper.screenHeight - MediaQuery.of(context).padding.top,
+            height: helper.screenHeight - MediaQuery.of(context).padding.top - MediaQuery.of(context).padding.bottom,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [

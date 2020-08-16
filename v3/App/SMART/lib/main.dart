@@ -1,5 +1,3 @@
-import 'package:SMART/pages/forgot_password_page.dart';
-import 'package:SMART/pages/home_page.dart';
 import 'package:flutter/material.dart';
 
 import 'models/SmartConstants.dart';
@@ -9,7 +7,8 @@ import 'pages/add_new_device_page.dart';
 import 'pages/configure_device_page.dart';
 import 'pages/login_page.dart';
 import 'pages/signup_page.dart';
-
+import 'pages/forgot_password_page.dart';
+import 'pages/home_page.dart';
 
 void main() => runApp(SmartApp());
 
@@ -29,7 +28,7 @@ class SmartApp extends StatelessWidget {
         route_addNewDevice: (context) => AddNewDevicePage(),
         route_configureDevice: (context) => ConfigureDevicePage(),
       },
-      locale: Locale('en','IN'),
+      locale: Locale('en', 'IN'),
       // initialRoute: route_login,
       initialRoute: route_home,
       themeMode: ThemeMode.system,
