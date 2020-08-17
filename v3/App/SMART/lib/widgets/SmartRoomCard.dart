@@ -47,7 +47,10 @@ class SmartRoomCard extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 28,
                     fontWeight: FontWeight.bold,
-                    color: Theme.of(context).primaryColorDark,
+                    // color: Theme.of(context).primaryColorDark,
+                    color: helper.isDarkModeActive
+                        ? Colors.indigo[300]
+                        : Colors.indigo,
                   ),
                   overflow: TextOverflow.ellipsis,
                   softWrap: true,
@@ -67,6 +70,7 @@ class SmartRoomCard extends StatelessWidget {
               top: helper.screenHeight * 0.05,
               right: helper.screenWidth * 0.05 * -1,
               child: SmartGradient(
+                helper: helper,
                 child: Icon(
                   roomData.icon,
                   size: helper.screenWidth / 2.9,
@@ -80,7 +84,10 @@ class SmartRoomCard extends StatelessWidget {
               child: Icon(
                 Icons.arrow_forward,
                 size: 28,
-                color: Theme.of(context).primaryColorDark.withOpacity(0.6),
+                // color: Theme.of(context).primaryColorDark.withOpacity(0.6),
+                color: helper.isDarkModeActive
+                    ? Colors.indigo[300].withOpacity(0.6)
+                    : Colors.indigo.withOpacity(0.6),
               ),
             ),
           ],

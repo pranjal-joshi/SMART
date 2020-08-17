@@ -43,8 +43,8 @@ class SmartRoomIndicator extends StatelessWidget {
         shape: BoxShape.circle,
         boxShadow: [
           BoxShadow(
-            blurRadius: 14,
-            spreadRadius: 3.5,
+            blurRadius: 8,
+            spreadRadius: 2,
             color: color.withOpacity(0.8),
           ),
         ],
