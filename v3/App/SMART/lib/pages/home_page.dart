@@ -1,15 +1,19 @@
-import 'package:SMART/widgets/SmartWelcomeCard.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 
 import '../controllers/SmartMqtt.dart';
 import '../controllers/SmartSharedPref.dart';
+import '../controllers/SmartSync.dart';
+
+import '../providers/JsonNodeStatusProvider.dart';
 
 import '../models/SmartConstants.dart';
 import '../models/SmartRoomData.dart';
 import '../models/JsonModel.dart';
 
 import '../widgets/SmartWelcomeBanner.dart';
+import '../widgets/SmartWelcomeCard.dart';
 import '../widgets/SmartRoomIndicator.dart';
 import '../widgets/SmartRoomCard.dart';
 
@@ -21,20 +25,20 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   SmartHelper helper;
   final SmartMqtt mqtt = SmartMqtt(debug: true);
+  final SmartSync smartSync = SmartSync(debug: false);
   final SmartSharedPreference sp = SmartSharedPreference();
-
-  final JsonNodeStatus jsonNodeStatusHandler = JsonNodeStatus();
 
   Map<String, SmartRoomIndicatorState> roomToPowerIndicatorMap = {};
   Map<String, Map<String, List<int>>> roomStateMap = {};
 
   final List<SmartMqttTopic> subscriptionList = [
+    SmartMqttTopic.NodeStatus,
     SmartMqttTopic.NodeInfo,
     SmartMqttTopic.SwitchStateNodeToApp,
+    SmartMqttTopic.AppRoomList,
   ];
 
   List<SmartRoomData> roomDataList = [];
-  List<String> _credentials = [];
 
   @override
   void initState() {
@@ -42,8 +46,10 @@ class _HomePageState extends State<HomePage> {
     mqtt.subscribeMultiple(subscriptionList);
     mqtt.stream.asBroadcastStream().listen((msg) {
       if (msg is String) {
-        _getRoomDataFromMqtt(msg, rebuildOnPacket: false);
-        jsonNodeStatusHandler.addDevice(msg);
+        _getRoomDataFromMqtt(msg, rebuildOnPacket: true);
+        smartSync.syncMqttWithSp(msg);
+        Provider.of<JsonNodeStatusProvider>(context, listen: false)
+            .addDevice(msg);
       }
     });
     SmartRoomData.loadFromDisk().then((value) {
@@ -139,12 +145,17 @@ class _HomePageState extends State<HomePage> {
                             ),
                           ),
                         ),
-                        SmartWelcomeCard(
-                          helper: helper,
-                          constraints: constraints,
-                          title: '2 Devices',
-                          subtitle: 'Active',
-                          onActionTap: () => print('Pressed!'),
+                        Consumer<JsonNodeStatusProvider>(
+                          builder: (_, status, __) {
+                            return SmartWelcomeCard(
+                              helper: helper,
+                              constraints: constraints,
+                              title: status.getActiveMessage['title'],
+                              subtitle: status.getActiveMessage['subtitle'],
+                              onActionTap: () => Navigator.of(context)
+                                  .pushNamed(route_addNewDevice),
+                            );
+                          },
                         ),
                       ],
                     );

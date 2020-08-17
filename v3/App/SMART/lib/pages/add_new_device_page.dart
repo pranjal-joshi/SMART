@@ -1,12 +1,14 @@
 import 'dart:async';
-import 'package:SMART/controllers/SmartMqtt.dart';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:wifi/wifi.dart';
 import 'package:location/location.dart';
 
 import '../controllers/SmartSync.dart';
+import '../controllers/SmartMqtt.dart';
 import '../models/SmartConstants.dart';
 import '../widgets/SmartAppBar.dart';
 
@@ -94,6 +96,14 @@ class _AddNewDevicePageState extends State<AddNewDevicePage> {
   @override
   Widget build(BuildContext context) {
     helper = SmartHelper(context: context);
+
+    // Set Status bar color - As we're comming from homepage
+    SystemChrome.setSystemUIOverlayStyle(
+      SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+      ),
+    );
+
     return Scaffold(
       appBar: _appBar,
       floatingActionButton: _showFab
