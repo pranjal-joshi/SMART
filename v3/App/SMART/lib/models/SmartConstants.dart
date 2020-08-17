@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/services.dart';
 
-const String TEST_SMARTID = 'SMART_00DCCBB8';
+const String TEST_SMARTID = 'SMART_00DCCBB8_4';
 const String TEST_USERNAME = 'joshi.pranjal5@gmail.com';
 const String BROKER_IP = "35.222.110.118";
 const int BROKER_PORT = 1883;
@@ -239,7 +240,7 @@ class SmartHelper {
           persistent: persistent,
           dismissable: dismissable,
         );
-      if(reason == SnackBarClosedReason.timeout && onTimeout != null)
+      if (reason == SnackBarClosedReason.timeout && onTimeout != null)
         onTimeout();
     });
   }
@@ -268,7 +269,7 @@ class SmartHelper {
           persistent: persistent,
           dismissable: dismissable,
         );
-      if(reason == SnackBarClosedReason.timeout && onTimeout != null)
+      if (reason == SnackBarClosedReason.timeout && onTimeout != null)
         onTimeout();
     });
   }

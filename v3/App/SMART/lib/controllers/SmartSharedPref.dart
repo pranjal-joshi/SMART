@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:ffi';
 
 import 'package:SMART/models/SmartConstants.dart';
 import 'package:flutter/material.dart';

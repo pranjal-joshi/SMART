@@ -45,7 +45,7 @@ class SmartWelcomeCard extends StatelessWidget {
               ),
             ),
             title: Text(
-              '2 Devices',
+              title,
               style: Theme.of(context).textTheme.headline1,
             ),
             subtitle: subtitle != null

@@ -14,6 +14,7 @@ enum SmartMqttTopic {
   SwitchStateAppToNode,
   SwitchStateNodeToApp,
   NodeInfo,
+  NodeStatus,
   AppRoomConfig,
   AppDeviceConfig,
   AppRoomList,
@@ -154,7 +155,7 @@ class SmartMqtt {
   }
 
   void subscribeToStateIfNot({@required String smartId}) {
-    if(!_subscribeToStateList.contains(smartId)) {
+    if (!_subscribeToStateList.contains(smartId)) {
       this.subscribe('smart/$TEST_USERNAME/$smartId/state');
       _subscribeToStateList.add(smartId);
     }
@@ -177,7 +178,7 @@ class SmartMqtt {
   }
 
   void unsubscribeToStateIfNot({@required String smartId}) {
-    if(_subscribeToStateList.contains(smartId)) {
+    if (_subscribeToStateList.contains(smartId)) {
       this.unsubscribe('smart/$TEST_USERNAME/$smartId/state');
       _subscribeToStateList.remove(smartId);
     }
@@ -310,6 +311,7 @@ class SmartMqtt {
     if (type == SmartMqttTopic.SwitchStateNodeToApp)
       return 'smart/$username/+/state';
     if (type == SmartMqttTopic.NodeInfo) return 'smart/$username/+/info';
+    if (type == SmartMqttTopic.NodeStatus) return 'smart/$username/+/status';
     if (type == SmartMqttTopic.AppRoomConfig)
       return 'smart/$username/app/$roomName/roomConfig';
     if (type == SmartMqttTopic.AppDeviceConfig)
