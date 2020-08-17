@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 
+// Global Debug Flag
+final smartGlobalDebug = true;
+
 const String TEST_SMARTID = 'SMART_00DCCBB8_4';
 const String TEST_USERNAME = 'joshi.pranjal5@gmail.com';
 const String BROKER_IP = "35.222.110.118";
@@ -19,6 +22,7 @@ final color_material_dark = Colors.grey[900];
 
 // Page routes
 const String route_room = '/room';
+const String route_room_page = '/room_page';
 const String route_addNewDevice = '/addNewDevice_page';
 const String route_configureDevice = '/configureDevice_page';
 const String route_login = '/login_page';
