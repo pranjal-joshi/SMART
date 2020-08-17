@@ -1,22 +1,28 @@
-import 'dart:convert';
 import 'package:flutter/foundation.dart';
 
 import '../models/JsonModel.dart';
 import '../models/SmartConstants.dart';
 
 class JsonNodeStatusProvider with ChangeNotifier {
+  final bool debug;
   List<JsonNodeStatus> _deviceList = List<JsonNodeStatus>();
 
-  void addDevice(String rawJson) {
-    var json = jsonDecode(rawJson);
+  JsonNodeStatusProvider({@required this.debug});
+
+  void addDevice(String rawJson, var decodedJson) {
     try {
-      if (json[JSON_TYPE] == JSON_TYPE_STATUS) {
-        final JsonNodeStatus s = JsonNodeStatus.fromJsonString(rawJson);
-        _deviceList.removeWhere((element) => element.smartId == s.smartId);
-        _deviceList.add(s);
-        notifyListeners();
+      if (decodedJson is Map) {
+        if (decodedJson[JSON_TYPE] == JSON_TYPE_STATUS) {
+          final JsonNodeStatus s = JsonNodeStatus.fromJsonString(rawJson);
+          _deviceList.removeWhere((element) => element.smartId == s.smartId);
+          _deviceList.add(s);
+          notifyListeners();
+        }
       }
-    } catch (_) {}
+    } catch (e) {
+      if (debug)
+        print('[JsonNodeStatusProvider] EXCEPTION: $e\nJSON: $rawJson');
+    }
   }
 
   List<JsonNodeStatus> get deviceList {
@@ -54,12 +60,12 @@ class JsonNodeStatusProvider with ChangeNotifier {
         'title': 'No Devices',
         'subtitle': 'Add Devices to Get Started',
       };
-    else if(onlineDeviceCount == 1)
+    else if (onlineDeviceCount == 1)
       return {
         'title': '$onlineDeviceCount Device',
         'subtitle': 'Active and Online',
       };
-    else if(onlineDeviceCount > 1)
+    else
       return {
         'title': '$onlineDeviceCount Devices',
         'subtitle': 'Active and Online',
