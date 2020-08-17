@@ -99,7 +99,7 @@ class _HomePageState extends State<HomePage> {
                                       end: Alignment.bottomCenter,
                                       colors: [
                                         Theme.of(context).primaryColorDark,
-                                        Colors.amber[800],
+                                        Colors.purple[600],
                                       ],
                                     ),
                                     borderRadius: BorderRadius.only(

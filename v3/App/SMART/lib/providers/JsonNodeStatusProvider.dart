@@ -14,7 +14,6 @@ class JsonNodeStatusProvider with ChangeNotifier {
         final JsonNodeStatus s = JsonNodeStatus.fromJsonString(rawJson);
         _deviceList.removeWhere((element) => element.smartId == s.smartId);
         _deviceList.add(s);
-        print('Device Added');
         notifyListeners();
       }
     } catch (_) {}

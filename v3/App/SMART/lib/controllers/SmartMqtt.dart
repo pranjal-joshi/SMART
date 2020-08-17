@@ -106,6 +106,8 @@ class SmartMqtt {
       try {
         await client.connect().timeout(Duration(seconds: 10), onTimeout: () {
           print('[SmartMqtt] -> MQTT Connection Timed out!');
+          isConnected = false;
+          this.connect();
           return;
         });
       } catch (e) {
