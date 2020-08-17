@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import '../controllers/SmartMqtt.dart';
@@ -68,30 +67,17 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     helper = SmartHelper(context: context);
 
-    // Set Status bar color
-    if (!helper.isDarkModeActive)
-      SystemChrome.setSystemUIOverlayStyle(
-        SystemUiOverlayStyle(
-          statusBarColor: Theme.of(context).primaryColorDark,
-        ),
-      );
-    else
-      SystemChrome.setSystemUIOverlayStyle(
-        SystemUiOverlayStyle(
-          statusBarColor: Colors.black,
-        ),
-      );
-
     return Scaffold(
       body: SafeArea(
+        top: false,
         child: Container(
           width: double.infinity,
-          height: helper.screenHeight - MediaQuery.of(context).padding.top,
+          height: helper.screenHeight,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Expanded(
-                flex: 2,
+                flex: 6,
                 child: LayoutBuilder(
                   builder: (_, constraints) {
                     return Stack(
@@ -122,7 +108,11 @@ class _HomePageState extends State<HomePage> {
                                     ),
                                   ),
                             child: Padding(
-                              padding: const EdgeInsets.all(12.0),
+                              padding: EdgeInsets.only(
+                                left: 12,
+                                right: 12,
+                                top: 12 + MediaQuery.of(context).padding.top,
+                              ),
                               child: Row(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 mainAxisAlignment:
@@ -163,7 +153,7 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
               Expanded(
-                flex: 6,
+                flex: 15,
                 child: Padding(
                   padding: const EdgeInsets.only(
                     left: 10,

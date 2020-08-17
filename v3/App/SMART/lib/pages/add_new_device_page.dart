@@ -97,13 +97,6 @@ class _AddNewDevicePageState extends State<AddNewDevicePage> {
   Widget build(BuildContext context) {
     helper = SmartHelper(context: context);
 
-    // Set Status bar color - As we're comming from homepage
-    SystemChrome.setSystemUIOverlayStyle(
-      SystemUiOverlayStyle(
-        statusBarColor: Colors.transparent,
-      ),
-    );
-
     return Scaffold(
       appBar: _appBar,
       floatingActionButton: _showFab
