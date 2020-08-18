@@ -4,6 +4,8 @@ import 'package:flutter/foundation.dart';
 
 import '../controllers/SmartSharedPref.dart';
 
+// Model class - Manage All configuration data of each node for configuring,
+// editiing & local storage
 class SmartConfigData {
   String smartId;
   String ssid;
@@ -95,6 +97,7 @@ class SmartConfigData {
   }
 }
 
+// Model class - Json received from SMART nodes during config
 class SmartWifiConfig {
   String ssid;
   int rssi;

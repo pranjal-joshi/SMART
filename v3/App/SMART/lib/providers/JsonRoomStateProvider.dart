@@ -4,6 +4,22 @@ import '../models/JsonModel.dart';
 import '../models/SmartConstants.dart';
 import '../widgets/SmartRoomIndicator.dart';
 
+// Provider class - Manage States of all nodes by their parent room
+// Provides additional method for BLOC
+// Call 'addState' method in MQTT listener
+/*
+Example Data Container
+{
+  'room a': {
+    'smart_1': [1,0,1,0],
+    'smart_2': [0,1],
+  }
+  'room b': {
+    'smart_3': [1]
+  }
+}
+*/
+
 class JsonRoomStateProvider with ChangeNotifier {
   final bool debug;
   Map<String, Map<String, List<int>>> _roomStateMap = {};

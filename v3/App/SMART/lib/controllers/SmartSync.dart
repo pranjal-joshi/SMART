@@ -6,6 +6,7 @@ import '../models/SmartWifiConfig.dart';
 import '../models/SmartConstants.dart';
 import '../models/SmartRoomData.dart';
 
+// Utility Class to manage Syncing of MQTT message with local storage
 class SmartSync {
   final bool debug;
   SmartSharedPreference _sp;
@@ -16,6 +17,7 @@ class SmartSync {
     _sp = SmartSharedPreference();
   }
 
+  // Sync incomming MQTT messages into their respective storages
   Future<void> syncMqttWithSp(dynamic msg) async {
     if (msg is String) {
       var json = jsonDecode(msg);
@@ -37,7 +39,7 @@ class SmartSync {
             });
           });
         } finally {
-          // Add 'SmartConfigData' data from MQTT to Shared Pref
+          // Sync 'SmartConfigData' data from MQTT to Shared Pref
           if (_smartConfigDataList.isNotEmpty) {
             if (debug)
               print(
@@ -47,6 +49,7 @@ class SmartSync {
               data: _smartConfigDataList,
             );
           }
+          // Sync 'SmartRoomData' data from MQTT to Shared Pref
           if (_smartRoomDataList.isNotEmpty) {
             if (debug)
               print(

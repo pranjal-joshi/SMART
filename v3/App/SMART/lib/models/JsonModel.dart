@@ -3,6 +3,10 @@ import 'package:flutter/material.dart';
 
 import '../models/SmartConstants.dart';
 
+// This file contains classes that acts as a model of data
+// This models are serialized and deserialized for communication between Broker & App
+// This models should be used to convert raw data into objects of data packets for processing
+
 class JsonAppToNodeSwitchState {
   final String to = 'gateway';
   final String from = 'app';

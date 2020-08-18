@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
+// Model class to manage the user selectable profiles for each room
 class SmartProfile {
   String profileName;
   IconData profileIcon;

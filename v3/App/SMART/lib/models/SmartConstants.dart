@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 
+// This file contains all Global Var, constants & Utility classes.
+
 // Global Debug Flag
 final smartGlobalDebug = true;
 
@@ -30,6 +32,7 @@ const String route_signup = '/signup_page';
 const String route_home = '/home_page';
 const String route_forgot_pass = '/forgot_password_page';
 
+// Utility class provides additional 'help' features that are widely used in the App
 class SmartHelper {
   BuildContext _context;
 

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../controllers/SmartSharedPref.dart';
 
+// Model class for Room related data
 class SmartRoomData {
   String name;
   IconData icon;

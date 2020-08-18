@@ -3,6 +3,21 @@ import 'package:flutter/foundation.dart';
 import '../models/JsonModel.dart';
 import '../models/SmartConstants.dart';
 
+// Provider class - Manage status of all nodes along with their parent room
+// Proivdes additional methods to get status of rooms
+// use 'addDevice' method in MQTT listening stream
+/*
+Example Data Container
+{
+  'room a': {
+    'smart_1': 'online',
+    'smart_2': 'offline',
+  }
+  'room b': {
+    'smart_3': 'busy'
+  }
+}
+*/
 class JsonNodeStatusProvider with ChangeNotifier {
   final bool debug;
   List<JsonNodeStatus> _deviceList = List<JsonNodeStatus>();

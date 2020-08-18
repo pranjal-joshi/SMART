@@ -4,6 +4,7 @@ import 'package:SMART/models/SmartConstants.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+// Utility class to manage local storage
 class SmartSharedPreference {
   SmartSharedPreference();
 
