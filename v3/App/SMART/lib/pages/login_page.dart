@@ -9,6 +9,8 @@ import 'package:flutter_svg/flutter_svg.dart';
 
 import '../controllers/SmartSharedPref.dart';
 import '../models/SmartConstants.dart';
+import '../exceptions/SmartException.dart';
+
 import '../widgets/SmartTextFormField.dart';
 import '../widgets/SmartCheckBox.dart';
 
@@ -39,8 +41,8 @@ class _LoginPageState extends State<LoginPage> {
         _passController.text = creds[1];
         _displayNameController.text = creds[2];
         setState(() {});
-      } on RangeError catch (e) {
-        print(e);
+      } on RangeError {
+        SmartException(SmartException.credentialNotFoundException);
       }
     });
     super.initState();

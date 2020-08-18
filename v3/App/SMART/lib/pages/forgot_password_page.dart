@@ -6,6 +6,7 @@ import 'package:email_validator/email_validator.dart';
 
 import '../models/SmartConstants.dart';
 import '../controllers/SmartSharedPref.dart';
+import '../Exceptions/SmartException.dart';
 
 import '../widgets/SmartTextFormField.dart';
 import '../widgets/SmartAppBar.dart';
@@ -31,7 +32,9 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
     sp.loadLoginCredentials().then((creds) {
       try {
         _usernameController.text = creds[0];
-      } on RangeError catch (_) {}
+      } on RangeError {
+        throw SmartException(SmartException.credentialNotFoundException);
+      }
     });
     super.initState();
   }
