@@ -89,7 +89,7 @@ class _ConfigureDevicePageState extends State<ConfigureDevicePage> {
           _portController.text = thisData.mqttPort;
           _meshSsidController.text = thisData.meshSsid;
           _meshPassController.text = thisData.meshPass;
-        } on StateError catch (e) {
+        } on StateError {
           // Attempt to load common config things if any device entry exists in SP
           if (smartConfigList.length > 0) {
             _usernameController.text = smartConfigList[0].username;
@@ -225,45 +225,11 @@ class _ConfigureDevicePageState extends State<ConfigureDevicePage> {
                     )
                   ],
                 );
-              } else {
-                _showDialog(
-                  context: context,
-                  title: 'Device Configuration Failed',
-                  iconData: Icons.error,
-                  actions: <Widget>[
-                    FlatButton(
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                      },
-                      child: Text(
-                        'RETRY',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    )
-                  ],
-                );
-              }
+              } else
+                _showFailureDialog();
             } catch (e) {
-              _showDialog(
-                context: context,
-                title: 'Device Configuration Failed',
-                iconData: Icons.error,
-                actions: <Widget>[
-                  FlatButton(
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                    child: Text(
-                      'RETRY',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  )
-                ],
-              );
+              _showFailureDialog();
+              if (smartGlobalDebug) print(e);
             }
           } else
             helper.showSnackbarTextWithGlobalKey(
@@ -460,6 +426,27 @@ class _ConfigureDevicePageState extends State<ConfigureDevicePage> {
           ),
         ),
       ),
+    );
+  }
+
+  void _showFailureDialog() {
+    _showDialog(
+      context: context,
+      title: 'Device Configuration Failed',
+      iconData: Icons.error,
+      actions: <Widget>[
+        FlatButton(
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+          child: Text(
+            'RETRY',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        )
+      ],
     );
   }
 

@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:wifi/wifi.dart';
@@ -89,7 +88,6 @@ class _AddNewDevicePageState extends State<AddNewDevicePage> {
       SmartSync smartSync = SmartSync(debug: true);
       smartSync.syncMqttWithSp(msg);
     });
-
     super.initState();
   }
 
