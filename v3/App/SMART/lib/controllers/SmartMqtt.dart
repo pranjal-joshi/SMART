@@ -10,6 +10,7 @@ import 'package:mqtt_client/mqtt_server_client.dart';
 import '../models/SmartConstants.dart';
 import '../controllers/SmartSharedPref.dart';
 
+// Enum to retireve to topic string from 'getTopic' method
 enum SmartMqttTopic {
   SwitchStateAppToNode,
   SwitchStateNodeToApp,
@@ -20,6 +21,7 @@ enum SmartMqttTopic {
   AppRoomList,
 }
 
+// Singleton class to maintain only one connection state accross all pages
 class SmartMqtt {
   String ip;
   int port;
@@ -56,6 +58,7 @@ class SmartMqtt {
     return _instance;
   }
 
+  // Connect Setup required callbacks & connect to the MQTT broker
   void connect({
     bool syncPendingBuffer = true,
   }) async {
@@ -78,12 +81,7 @@ class SmartMqtt {
             if (debug) print('[SmartMqtt] Unsubscribed -> $topic');
           });
         } catch (_) {}
-        List<String> buf =
-            await sp.loadStringList(key: SP_SmartMqttPublishBuffer);
-        try {
-          _publishBuffer =
-              buf.map((e) => SmartMqttPublishBuffer.fromJsonString(e)).toList();
-        } on NoSuchMethodError catch (_) {}
+        _publishBuffer = await SmartMqttPublishBuffer.loadFromDisk();
         if (syncPendingBuffer) publishBuffer();
       };
       client.onDisconnected = () {
@@ -104,12 +102,16 @@ class SmartMqtt {
       client.connectionMessage = connectMessage;
 
       try {
-        await client.connect().timeout(Duration(seconds: 10), onTimeout: () {
-          print('[SmartMqtt] -> MQTT Connection Timed out!');
-          isConnected = false;
-          this.connect();
-          return;
-        });
+        await client.connect().timeout(
+          Duration(seconds: 10),
+          onTimeout: () {
+            // Auto Reconnect if connection timeouts!
+            print('[SmartMqtt] -> MQTT Connection Timed out!');
+            isConnected = false;
+            this.connect();
+            return;
+          },
+        );
       } catch (e) {
         print(e);
         disconnect();
@@ -125,13 +127,15 @@ class SmartMqtt {
           _controller.sink.add(msg);
         });
       } else {
-        print(
-            "[SmartMqtt] -> Failed to Connect. RC -> ${client.connectionStatus.returnCode}");
+        if (debug)
+          print(
+              "[SmartMqtt] -> Failed to Connect. RC -> ${client.connectionStatus.returnCode}");
         // disconnect();
       }
     }
   }
 
+  // Disconnect from broker & clear the streams
   void disconnect() {
     client.disconnect();
     isConnected = false;
@@ -140,11 +144,13 @@ class SmartMqtt {
     _unsubscriptionController.close();
   }
 
+  // Sub to topic
   void subscribe(String topic) {
     if (!_subscriptionController.isClosed)
       _subscriptionController.sink.add(topic);
   }
 
+  // Sub to all topics in the given list
   void subscribeMultiple(List<SmartMqttTopic> enumList) {
     if (enumList != null && enumList.isNotEmpty)
       enumList.forEach(
@@ -156,6 +162,7 @@ class SmartMqtt {
       );
   }
 
+  // Sub state topic
   void subscribeToStateIfNot({@required String smartId}) {
     if (!_subscribeToStateList.contains(smartId)) {
       this.subscribe('smart/$TEST_USERNAME/$smartId/state');
@@ -163,11 +170,13 @@ class SmartMqtt {
     }
   }
 
+  // Unsub from the topics
   void unsubscribe(String topic) {
     if (!_unsubscriptionController.isClosed)
       _unsubscriptionController.sink.add(topic);
   }
 
+  // Unsub from all topics in the given list
   void unsubscribeMultiple(List<SmartMqttTopic> enumList) {
     if (enumList != null && enumList.isNotEmpty)
       enumList.forEach(
@@ -179,6 +188,7 @@ class SmartMqtt {
       );
   }
 
+  // Unsub from the state topic
   void unsubscribeToStateIfNot({@required String smartId}) {
     if (_subscribeToStateList.contains(smartId)) {
       this.unsubscribe('smart/$TEST_USERNAME/$smartId/state');
@@ -186,6 +196,7 @@ class SmartMqtt {
     }
   }
 
+  // Publish message to MQTT broker
   void publish({
     @required String topic,
     @required String message,
@@ -212,16 +223,14 @@ class SmartMqtt {
           retain: retain,
         ),
       );
-      List<String> buf = _publishBuffer.map((e) => e.toJsonString()).toList();
-      sp.saveStringList(
-        key: SP_SmartMqttPublishBuffer,
-        data: buf,
-      );
+      SmartMqttPublishBuffer.saveToDisk(_publishBuffer);
       if (debug)
-        print('[SmartMqtt] No Internet -> PublishBuffer = ${buf.toString()}');
+        print(
+            '[SmartMqtt] No Internet -> Added to PublishBuffer = \nTopic -> $topic\nMessage -> $message\nRetain = $retain');
     }
   }
 
+  // Publish the local buffer storage to MQTT broker
   void publishBuffer() async {
     if (await isInternetAvailable()) {
       List<SmartMqttPublishBuffer> pubBuf =
@@ -287,6 +296,8 @@ class SmartMqtt {
     }
   }
 
+  // Check for the internet connectivity
+  // TODO: Pinging to Google is not required on 'Mobile Data'
   Future<bool> isInternetAvailable() async {
     _connectivityResult = await Connectivity().checkConnectivity();
     if (_connectivityResult != ConnectivityResult.none) {
@@ -302,6 +313,7 @@ class SmartMqtt {
     return false;
   }
 
+  // Get the topic string from the enum
   String getTopic({
     @required String username,
     @required SmartMqttTopic type,
@@ -324,6 +336,7 @@ class SmartMqtt {
       return 'smart/$username/gateway';
   }
 
+  // Get Device UID to init MQTT connection
   Future<String> _getUniqueId() async {
     DeviceInfoPlugin deviceInfoPlugin = DeviceInfoPlugin();
     if (Platform.isAndroid) {
@@ -336,6 +349,7 @@ class SmartMqtt {
   }
 }
 
+// Model class to maintain PublishBuffer on the local storage
 class SmartMqttPublishBuffer {
   String topic;
   String message;
@@ -371,6 +385,7 @@ class SmartMqttPublishBuffer {
     return jsonEncode(toJson());
   }
 
+  // Serialize given list and store
   static Future<void> saveToDisk(List<SmartMqttPublishBuffer> list) async {
     if (list != null) {
       final SmartSharedPreference _sp = SmartSharedPreference();
@@ -379,6 +394,7 @@ class SmartMqttPublishBuffer {
     }
   }
 
+  // Load from disk & Deserialize
   static Future<List<SmartMqttPublishBuffer>> loadFromDisk() async {
     final SmartSharedPreference _sp = SmartSharedPreference();
     List<String> raw = await _sp.loadStringList(key: SP_SmartMqttPublishBuffer);
