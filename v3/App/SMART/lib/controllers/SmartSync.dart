@@ -1,10 +1,17 @@
 import 'dart:convert';
-import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import '../helpers/SmartHelper.dart';
 
 import '../controllers/SmartSharedPref.dart';
+
 import '../models/SmartWifiConfig.dart';
-import '../helpers/SmartHelper.dart';
 import '../models/SmartRoomData.dart';
+
+import '../providers/JsonNodeStatusProvider.dart';
+import '../providers/JsonRoomStateProvider.dart';
+import '../providers/JsonNodeInfoProvider.dart';
 
 // Utility Class to manage Syncing of MQTT message with local storage
 class SmartSync {
@@ -15,6 +22,20 @@ class SmartSync {
 
   SmartSync({@required this.debug}) {
     _sp = SmartSharedPreference();
+  }
+
+  // Sync incoming data with provider classes if possible
+  void syncMqttWithProviders(
+    BuildContext context,
+    String rawJson,
+    var decodedJson,
+  ) {
+    Provider.of<JsonRoomStateProvider>(context, listen: false)
+        .addState(rawJson, decodedJson);
+    Provider.of<JsonNodeStatusProvider>(context, listen: false)
+        .addDevice(rawJson, decodedJson);
+    Provider.of<JsonNodeInfoProvider>(context, listen: false)
+        .addInfo(rawJson, decodedJson);
   }
 
   // Sync incomming MQTT messages into their respective storages

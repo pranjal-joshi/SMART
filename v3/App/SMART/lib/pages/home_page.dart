@@ -45,10 +45,7 @@ class _HomePageState extends State<HomePage> {
       if (msg is String) {
         var decodedJson = jsonDecode(msg);
         smartSync.syncMqttWithSp(msg);
-        Provider.of<JsonRoomStateProvider>(context, listen: false)
-            .addState(msg, decodedJson);
-        Provider.of<JsonNodeStatusProvider>(context, listen: false)
-            .addDevice(msg, decodedJson);
+        smartSync.syncMqttWithProviders(context, msg, decodedJson);
       }
     });
     super.initState();
@@ -57,6 +54,7 @@ class _HomePageState extends State<HomePage> {
   @override
   void dispose() {
     mqtt.unsubscribeMultiple(subscriptionList);
+    mqtt.disconnect();
     super.dispose();
   }
 
@@ -179,7 +177,8 @@ class _HomePageState extends State<HomePage> {
                               onTap: () {
                                 print(
                                     'Clicked on ${snapshot.data[index].name}');
-                                    Navigator.of(context).pushNamed(route_room_page);
+                                Navigator.of(context)
+                                    .pushNamed(route_room_page);
                               },
                             ),
                           );
