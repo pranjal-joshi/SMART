@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import 'providers/JsonNodeStatusProvider.dart';
 import 'providers/JsonRoomStateProvider.dart';
+import 'providers/JsonNodeInfoProvider.dart';
 
 import 'helpers/SmartHelper.dart';
 
@@ -29,6 +30,9 @@ class SmartApp extends StatelessWidget {
         ),
         ChangeNotifierProvider(
           create: (ctx) => JsonRoomStateProvider(debug: smartGlobalDebug),
+        ),
+        ChangeNotifierProvider(
+          create: (ctx) => JsonNodeInfoProvider(debug: smartGlobalDebug),
         ),
       ],
       child: MaterialApp(
