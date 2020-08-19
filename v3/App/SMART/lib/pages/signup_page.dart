@@ -7,7 +7,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:connectivity/connectivity.dart';
 
-import '../models/SmartConstants.dart';
+import '../helpers/SmartHelper.dart';
 import '../widgets/SmartTextFormField.dart';
 import '../widgets/SmartCheckBox.dart';
 

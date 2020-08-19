@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 
-import '../models/SmartConstants.dart';
+import '../helpers/SmartHelper.dart';
 import '../models/SmartPopupMenu.dart';
 
 class ProfileCard extends StatelessWidget {

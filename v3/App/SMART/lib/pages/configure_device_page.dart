@@ -6,7 +6,7 @@ import 'package:connectivity/connectivity.dart';
 
 import '../controllers/SmartMqtt.dart';
 import '../controllers/SmartSharedPref.dart';
-import '../models/SmartConstants.dart';
+import '../helpers/SmartHelper.dart';
 import '../models/SmartWifiConfig.dart';
 import '../models/SmartRoomData.dart';
 import '../widgets/SmartAppBar.dart';

@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:email_validator/email_validator.dart';
 
-import '../models/SmartConstants.dart';
+import '../helpers/SmartHelper.dart';
 import '../controllers/SmartSharedPref.dart';
 import '../Exceptions/SmartException.dart';
 

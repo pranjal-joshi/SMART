@@ -10,7 +10,7 @@ import '../controllers/SmartSync.dart';
 import '../providers/JsonNodeStatusProvider.dart';
 import '../providers/JsonRoomStateProvider.dart';
 
-import '../models/SmartConstants.dart';
+import '../helpers/SmartHelper.dart';
 import '../models/SmartRoomData.dart';
 
 import '../widgets/SmartWelcomeBanner.dart';

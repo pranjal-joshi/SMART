@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:mqtt_client/mqtt_client.dart';
 import 'package:mqtt_client/mqtt_server_client.dart';
 
-import '../models/SmartConstants.dart';
+import '../helpers/SmartHelper.dart';
 import '../controllers/SmartSharedPref.dart';
 
 // Enum to retireve to topic string from 'getTopic' method

@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 
 import '../models/JsonModel.dart';
-import '../models/SmartConstants.dart';
+import '../helpers/SmartHelper.dart';
 import '../widgets/SmartRoomIndicator.dart';
 
 // Provider class - Manage States of all nodes by their parent room

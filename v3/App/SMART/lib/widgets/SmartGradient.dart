@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../models/SmartConstants.dart';
+import '../helpers/SmartHelper.dart';
 
 class SmartGradient extends StatelessWidget {
   SmartGradient({this.child, @required this.helper});

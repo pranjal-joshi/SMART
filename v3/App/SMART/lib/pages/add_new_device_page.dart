@@ -8,7 +8,7 @@ import 'package:location/location.dart';
 
 import '../controllers/SmartSync.dart';
 import '../controllers/SmartMqtt.dart';
-import '../models/SmartConstants.dart';
+import '../helpers/SmartHelper.dart';
 import '../widgets/SmartAppBar.dart';
 
 class AddNewDevicePage extends StatefulWidget {

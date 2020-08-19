@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../models/SmartConstants.dart';
+import '../helpers/SmartHelper.dart';
 import '../models/SmartRoomData.dart';
 
 import '../widgets/SmartRoomIndicator.dart';

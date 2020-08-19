@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:dotted_border/dotted_border.dart';
 
-import '../models/SmartConstants.dart';
+import '../helpers/SmartHelper.dart';
 
 class CreateProfileCard extends StatelessWidget {
   CreateProfileCard();

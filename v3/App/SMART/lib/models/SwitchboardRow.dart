@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 
-import '../models/SmartConstants.dart';
+import '../helpers/SmartHelper.dart';
 
 class SwitchboardRow {
   String deviceName;

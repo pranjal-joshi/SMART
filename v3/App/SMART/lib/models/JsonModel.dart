@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 
-import '../models/SmartConstants.dart';
+import '../helpers/SmartHelper.dart';
 
 // This file contains classes that acts as a model of data
 // This models are serialized and deserialized for communication between Broker & App

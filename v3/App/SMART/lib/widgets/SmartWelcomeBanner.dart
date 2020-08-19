@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
 
-import '../models/SmartConstants.dart';
+import '../helpers/SmartHelper.dart';
 import '../controllers/SmartSharedPref.dart';
 
 class SmartWelcomeBanner extends StatefulWidget {
