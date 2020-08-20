@@ -9,7 +9,9 @@ import 'package:location/location.dart';
 import '../controllers/SmartSync.dart';
 import '../controllers/SmartMqtt.dart';
 import '../helpers/SmartHelper.dart';
+
 import '../widgets/SmartAppBar.dart';
+import '../widgets/SmartCard.dart';
 
 class AddNewDevicePage extends StatefulWidget {
   @override
@@ -98,32 +100,39 @@ class _AddNewDevicePageState extends State<AddNewDevicePage> {
     return Scaffold(
       appBar: _appBar,
       floatingActionButton: _showFab
-          ? FloatingActionButton.extended(
-              label: _fabLabel,
-              icon: _fabIcon,
-              onPressed: () async {
-                _wiList.clear();
-                _searchFailed = -1;
-                _showScanningLogo = true;
-                _showFab = false;
-                _permissionStatus = await getPermissions();
-                if (_permissionStatus == PermissionStatus.granted) {
-                  Timer.periodic(
-                    Duration(seconds: 3),
-                    (timer) {
-                      timer.cancel();
-                      scanWifi();
-                    },
-                  );
-                } else {
-                  _fabLabel = Text("RETRY");
-                  _fabIcon = Icon(Icons.refresh);
+          ? SmartCard(
+              helper: helper,
+              cornerRadius: 48,
+              elevation: 12,
+              blurRadius: SmartCardBlurRadius.Subtle,
+              shadowColor: Theme.of(context).accentColor,
+              child: FloatingActionButton.extended(
+                label: _fabLabel,
+                icon: _fabIcon,
+                onPressed: () async {
+                  _wiList.clear();
                   _searchFailed = -1;
-                  _showScanningLogo = false;
-                  _showFab = true;
-                }
-                setState(() {});
-              },
+                  _showScanningLogo = true;
+                  _showFab = false;
+                  _permissionStatus = await getPermissions();
+                  if (_permissionStatus == PermissionStatus.granted) {
+                    Timer.periodic(
+                      Duration(seconds: 3),
+                      (timer) {
+                        timer.cancel();
+                        scanWifi();
+                      },
+                    );
+                  } else {
+                    _fabLabel = Text("RETRY");
+                    _fabIcon = Icon(Icons.refresh);
+                    _searchFailed = -1;
+                    _showScanningLogo = false;
+                    _showFab = true;
+                  }
+                  setState(() {});
+                },
+              ),
             )
           : null,
       body: SafeArea(

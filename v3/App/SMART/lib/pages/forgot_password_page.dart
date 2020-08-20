@@ -10,6 +10,7 @@ import '../Exceptions/SmartException.dart';
 
 import '../widgets/SmartTextFormField.dart';
 import '../widgets/SmartAppBar.dart';
+import '../widgets/SmartCard.dart';
 
 class ForgotPasswordPage extends StatefulWidget {
   @override
@@ -133,39 +134,46 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                       Center(
                         child: SizedBox(
                           width: helper.screenWidth - 40,
-                          child: RaisedButton(
-                            child: !_showSpinner
-                                ? Text(
-                                    'RESET PASSWORD',
-                                    style: TextStyle(
-                                      color: helper.isDarkModeActive
-                                          ? Colors.black
+                          child: SmartCard(
+                            helper: helper,
+                            elevation: 14,
+                            cornerRadius: 14,
+                            shadowColor: Theme.of(context).primaryColor,
+                            blurRadius: SmartCardBlurRadius.Subtle,
+                            child: RaisedButton(
+                              child: !_showSpinner
+                                  ? Text(
+                                      'RESET PASSWORD',
+                                      style: TextStyle(
+                                        color: helper.isDarkModeActive
+                                            ? Colors.black
+                                            : Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                        letterSpacing: 1.5,
+                                        fontSize: 22,
+                                      ),
+                                    )
+                                  : CircularProgressIndicator(
+                                      backgroundColor: helper.isDarkModeActive
+                                          ? Colors.black26
                                           : Colors.white,
-                                      fontWeight: FontWeight.bold,
-                                      letterSpacing: 1.5,
-                                      fontSize: 22,
+                                      valueColor: helper.isDarkModeActive
+                                          ? AlwaysStoppedAnimation(Colors.black)
+                                          : null,
+                                      semanticsLabel: 'Resetting Password',
                                     ),
-                                  )
-                                : CircularProgressIndicator(
-                                    backgroundColor: helper.isDarkModeActive
-                                        ? Colors.black26
-                                        : Colors.white,
-                                    valueColor: helper.isDarkModeActive
-                                        ? AlwaysStoppedAnimation(Colors.black)
-                                        : null,
-                                    semanticsLabel: 'Resetting Password',
-                                  ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(14),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                              color: Theme.of(context).primaryColorDark,
+                              elevation: 8,
+                              padding: const EdgeInsets.symmetric(
+                                vertical: 10,
+                                horizontal: 16,
+                              ),
+                              onPressed: () =>
+                                  !_showSpinner ? _resetProcess() : null,
                             ),
-                            color: Theme.of(context).primaryColorDark,
-                            elevation: 8,
-                            padding: const EdgeInsets.symmetric(
-                              vertical: 10,
-                              horizontal: 16,
-                            ),
-                            onPressed: () =>
-                                !_showSpinner ? _resetProcess() : null,
                           ),
                         ),
                       ),

@@ -10,6 +10,7 @@ import 'package:connectivity/connectivity.dart';
 import '../helpers/SmartHelper.dart';
 import '../widgets/SmartTextFormField.dart';
 import '../widgets/SmartCheckBox.dart';
+import '../widgets/SmartCard.dart';
 
 class SignupPage extends StatefulWidget {
   @override
@@ -160,44 +161,47 @@ class _SignupPageState extends State<SignupPage> {
                 Center(
                   child: SizedBox(
                     width: helper.screenWidth - 40,
-                    child: RaisedButton(
-                      child: !_showSpinner
-                          ? Text(
-                              'Create My Account',
-                              style: TextStyle(
-                                color: helper.isDarkModeActive
-                                    ? Colors.black
+                    child: SmartCard(
+                      helper: helper,
+                      elevation: 14,
+                      cornerRadius: 14,
+                      shadowColor: Theme.of(context).primaryColor,
+                      blurRadius: SmartCardBlurRadius.Subtle,
+                      child: RaisedButton(
+                        child: !_showSpinner
+                            ? Text(
+                                'Create My Account',
+                                style: TextStyle(
+                                  color: helper.isDarkModeActive
+                                      ? Colors.black
+                                      : Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  letterSpacing: 1.5,
+                                  fontSize: 22,
+                                ),
+                              )
+                            : CircularProgressIndicator(
+                                backgroundColor: helper.isDarkModeActive
+                                    ? Colors.black26
                                     : Colors.white,
-                                fontWeight: FontWeight.bold,
-                                letterSpacing: 1.5,
-                                fontSize: 22,
+                                valueColor: helper.isDarkModeActive
+                                    ? AlwaysStoppedAnimation(Colors.black)
+                                    : null,
+                                semanticsLabel: 'Signing Up',
                               ),
-                            )
-                          : CircularProgressIndicator(
-                              backgroundColor: helper.isDarkModeActive
-                                  ? Colors.black26
-                                  : Colors.white,
-                              valueColor: helper.isDarkModeActive
-                                  ? AlwaysStoppedAnimation(Colors.black)
-                                  : null,
-                              semanticsLabel: 'Signing Up',
-                            ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14),
+                        color: Theme.of(context).primaryColorDark,
+                        disabledColor:
+                            Theme.of(context).primaryColorDark.withOpacity(0.3),
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 10,
+                          horizontal: 16,
+                        ),
+                        onPressed: _signupButtonEnabled
+                            ? () {
+                                !_showSpinner ? signupProcees(helper) : null;
+                              }
+                            : null,
                       ),
-                      color: Theme.of(context).primaryColorDark,
-                      disabledColor:
-                          Theme.of(context).primaryColorDark.withOpacity(0.3),
-                      elevation: 8,
-                      padding: const EdgeInsets.symmetric(
-                        vertical: 10,
-                        horizontal: 16,
-                      ),
-                      onPressed: _signupButtonEnabled
-                          ? () {
-                              !_showSpinner ? signupProcees(helper) : null;
-                            }
-                          : null,
                     ),
                   ),
                 ),
