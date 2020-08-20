@@ -31,10 +31,11 @@ class SmartWelcomeCard extends StatelessWidget {
           blurRadius: SmartCardBlurRadius.Spread14,
           shadowColor: Colors.indigo[300],
           cornerRadius: 20,
+          darkModeSurfaceColor: Colors.grey[850],
           child: ListTile(
             contentPadding: EdgeInsets.symmetric(
               horizontal: 12,
-              vertical: constraints.maxHeight / 30,
+              vertical: constraints.maxHeight / 50,
             ),
             leading: Padding(
               padding: const EdgeInsets.all(8.0),

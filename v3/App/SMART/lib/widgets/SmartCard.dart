@@ -17,6 +17,7 @@ class SmartCard extends StatelessWidget {
   final SmartHelper helper;
   final double elevation;
   final SmartCardBlurRadius blurRadius;
+  final Color darkModeSurfaceColor;
 
   SmartCard({
     this.shadowColor,
@@ -26,11 +27,13 @@ class SmartCard extends StatelessWidget {
     @required this.child,
     @required this.helper,
     this.blurRadius = SmartCardBlurRadius.Subtle,
+    this.darkModeSurfaceColor,
   });
 
   @override
   Widget build(BuildContext context) {
     Color _colorToUse;
+    Color _darkModeColorToUse;
     double _blurRadiusToUse;
     switch (blurRadius) {
       case SmartCardBlurRadius.Flat:
@@ -49,6 +52,9 @@ class SmartCard extends StatelessWidget {
     shadowColor == null
         ? _colorToUse = Colors.grey[400]
         : _colorToUse = shadowColor.withOpacity(0.35);
+    darkModeSurfaceColor == null
+        ? _darkModeColorToUse = Theme.of(context).cardColor
+        : _darkModeColorToUse = darkModeSurfaceColor;
     if (helper.isDarkModeActive) {
       return Container(
         child: ClipRRect(
@@ -58,7 +64,7 @@ class SmartCard extends StatelessWidget {
         ),
         padding: padding,
         decoration: BoxDecoration(
-          color: Theme.of(context).cardColor,
+          color: _darkModeColorToUse,
           borderRadius: BorderRadius.all(Radius.circular(cornerRadius)),
         ),
       );

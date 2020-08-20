@@ -14,7 +14,7 @@ class SmartAppBar extends StatelessWidget implements PreferredSizeWidget {
   });
 
   @override
-  Size get preferredSize => const Size.fromHeight(56);
+  Size get preferredSize => const Size.fromHeight(52);
 
   @override
   Widget build(BuildContext context) {
@@ -52,7 +52,7 @@ class SmartAppBar extends StatelessWidget implements PreferredSizeWidget {
         icon: Icon(
           Platform.isAndroid ? Icons.arrow_back : Icons.arrow_back_ios,
           color: Theme.of(context).primaryColorDark,
-          size: 32,
+          size: 28,
         ),
         onPressed: () {
           Navigator.of(context).pop();
