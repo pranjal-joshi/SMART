@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../helpers/SmartHelper.dart';
+import '../widgets/SmartCard.dart';
 
 class SmartWelcomeCard extends StatelessWidget {
   final SmartHelper helper;
@@ -24,13 +25,12 @@ class SmartWelcomeCard extends StatelessWidget {
       child: Container(
         width: double.infinity,
         margin: const EdgeInsets.symmetric(horizontal: 10),
-        child: Card(
-          clipBehavior: Clip.antiAliasWithSaveLayer,
-          elevation: 16,
-          color: helper.isDarkModeActive ? Colors.grey[850] : null,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
+        child: SmartCard(
+          helper: helper,
+          elevation: 24,
+          blurRadius: SmartCardBlurRadius.Spread14,
+          shadowColor: Colors.indigo[300],
+          cornerRadius: 20,
           child: ListTile(
             contentPadding: EdgeInsets.symmetric(
               horizontal: 12,

@@ -5,6 +5,7 @@ import '../models/SmartRoomData.dart';
 
 import '../widgets/SmartRoomIndicator.dart';
 import '../widgets/SmartGradient.dart';
+import '../widgets/SmartCard.dart';
 
 class SmartRoomCard extends StatelessWidget {
   final SmartHelper helper;
@@ -21,12 +22,11 @@ class SmartRoomCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      clipBehavior: Clip.antiAliasWithSaveLayer,
-      elevation: 4,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-      ),
+    return SmartCard(
+      helper: helper,
+      cornerRadius: 24,
+      elevation: 12,
+      blurRadius: SmartCardBlurRadius.Subtle,
       child: InkWell(
         onTap: onTap,
         highlightColor: Colors.transparent,
@@ -47,7 +47,6 @@ class SmartRoomCard extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 28,
                     fontWeight: FontWeight.bold,
-                    // color: Theme.of(context).primaryColorDark,
                     color: helper.isDarkModeActive
                         ? Colors.indigo[300]
                         : Colors.indigo,
