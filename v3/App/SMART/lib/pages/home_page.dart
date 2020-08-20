@@ -62,7 +62,7 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     helper = SmartHelper(context: context);
 
-    return Scaffold(
+    /*return Scaffold(
       body: SafeArea(
         top: false,
         child: Container(
@@ -150,11 +150,7 @@ class _HomePageState extends State<HomePage> {
               Expanded(
                 flex: 15,
                 child: Padding(
-                  padding: const EdgeInsets.only(
-                    left: 10,
-                    right: 10,
-                    top: 16,
-                  ),
+                  padding: const EdgeInsets.only(top: 8),
                   child: FutureBuilder(
                     initialData: roomDataList,
                     future: loadRooms(),
@@ -162,30 +158,168 @@ class _HomePageState extends State<HomePage> {
                       return GridView.builder(
                         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                           crossAxisCount: 2,
-                          crossAxisSpacing: 8,
-                          mainAxisSpacing: 10,
+                          crossAxisSpacing: 0,
+                          mainAxisSpacing: 24,
                           childAspectRatio: 5 / 4,
                         ),
                         itemCount: snapshot.data.length,
                         itemBuilder: (_, index) {
                           return Consumer<JsonRoomStateProvider>(
-                            builder: (_, stateData, __) => SmartRoomCard(
-                              helper: helper,
-                              roomData: snapshot.data[index],
-                              indicatorState: stateData.roomPowerIndicatorMap[
-                                  snapshot.data[index].name],
-                              onTap: () {
-                                print(
-                                    'Clicked on ${snapshot.data[index].name}');
-                                Navigator.of(context)
-                                    .pushNamed(route_room_page);
-                              },
+                            builder: (_, stateData, __) => Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 14),
+                              child: SmartRoomCard(
+                                helper: helper,
+                                roomData: snapshot.data[index],
+                                indicatorState: stateData.roomPowerIndicatorMap[
+                                    snapshot.data[index].name],
+                                onTap: () {
+                                  print(
+                                      'Clicked on ${snapshot.data[index].name}');
+                                  Navigator.of(context)
+                                      .pushNamed(route_room_page);
+                                },
+                              ),
                             ),
                           );
                         },
                       );
                     },
                   ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );*/
+
+    return Scaffold(
+      body: SafeArea(
+        top: false,
+        child: Container(
+          width: helper.screenWidth,
+          height: helper.screenHeight,
+          child: Stack(
+            children: [
+              Positioned(
+                width: helper.screenWidth,
+                height: helper.screenHeight,
+                child: Padding(
+                  padding: EdgeInsets.only(top: helper.screenHeight/3),
+                  child: FutureBuilder(
+                    initialData: roomDataList,
+                    future: loadRooms(),
+                    builder: (_, AsyncSnapshot<List<SmartRoomData>> snapshot) {
+                      return GridView.builder(
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          crossAxisSpacing: 0,
+                          mainAxisSpacing: 24,
+                          childAspectRatio: 5 / 4,
+                        ),
+                        itemCount: snapshot.data.length,
+                        itemBuilder: (_, index) {
+                          return Consumer<JsonRoomStateProvider>(
+                            builder: (_, stateData, __) => Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 14),
+                              child: SmartRoomCard(
+                                helper: helper,
+                                roomData: snapshot.data[index],
+                                indicatorState: stateData.roomPowerIndicatorMap[
+                                    snapshot.data[index].name],
+                                onTap: () {
+                                  print(
+                                      'Clicked on ${snapshot.data[index].name}');
+                                  Navigator.of(context)
+                                      .pushNamed(route_room_page);
+                                },
+                              ),
+                            ),
+                          );
+                        },
+                      );
+                    },
+                  ),
+                ),
+              ),
+              Align(
+                alignment: Alignment.topCenter,
+                child: LayoutBuilder(
+                  builder: (_, constraints) {
+                    return Stack(
+                      clipBehavior: Clip.antiAlias,
+                      children: [
+                        Positioned(
+                          height: constraints.maxHeight / 3.6,
+                          width: constraints.maxWidth,
+                          child: Container(
+                            decoration: helper.isDarkModeActive
+                                ? BoxDecoration(
+                                    color: Colors.black,
+                                  )
+                                : BoxDecoration(
+                                    gradient: LinearGradient(
+                                      tileMode: TileMode.mirror,
+                                      begin: Alignment.topCenter,
+                                      end: Alignment.bottomCenter,
+                                      colors: [
+                                        Theme.of(context).primaryColorDark,
+                                        Colors.indigo[700],
+                                      ],
+                                    ),
+                                    borderRadius: BorderRadius.only(
+                                      bottomLeft: Radius.circular(10),
+                                      bottomRight: Radius.circular(10),
+                                    ),
+                                  ),
+                            child: Padding(
+                              padding: EdgeInsets.only(
+                                left: 12,
+                                right: 12,
+                                top: 12 + MediaQuery.of(context).padding.top,
+                              ),
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Expanded(
+                                    child: Padding(
+                                      padding: const EdgeInsets.only(right: 12),
+                                      child: SmartWelcomeBanner(),
+                                    ),
+                                  ),
+                                  CircleAvatar(
+                                    backgroundColor:
+                                        Theme.of(context).canvasColor,
+                                    radius: 28,
+                                    child: Text('DP'),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                        Positioned(
+                          top: constraints.maxHeight / 5.25,
+                          width: constraints.maxWidth,
+                          child: Consumer<JsonNodeStatusProvider>(
+                            builder: (_, status, __) {
+                              return SmartWelcomeCard(
+                                helper: helper,
+                                constraints: constraints,
+                                title: status.getActiveMessage['title'],
+                                subtitle: status.getActiveMessage['subtitle'],
+                                onActionTap: () => Navigator.of(context)
+                                    .pushNamed(route_addNewDevice),
+                              );
+                            },
+                          ),
+                        ),
+                      ],
+                    );
+                  },
                 ),
               ),
             ],
