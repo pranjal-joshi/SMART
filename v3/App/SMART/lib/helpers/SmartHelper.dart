@@ -280,6 +280,11 @@ class SmartHelper {
         onTimeout();
     });
   }
+
+  double map(double number, double fromLow, double fromHigh,
+      {double toLow = 0.0, double toHigh = 1.0}) {
+    return (number - fromLow) * (toHigh - toLow) / (fromHigh - fromLow) + toLow * 1.0;
+  }
 }
 
 // Json Constants

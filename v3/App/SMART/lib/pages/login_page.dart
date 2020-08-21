@@ -342,7 +342,14 @@ class _LoginPageState extends State<LoginPage> {
                 );
               Navigator.of(context).pushReplacementNamed(route_home);
             },
-          ).catchError((e) => print('Err 1 = $e'));
+          ).catchError((e) {
+            print('Err 1 = $e');
+            setState(() => _showSpinner = false);
+            helper.showSnackbarTextWithGlobalKey(
+              _scaffoldKey,
+              'Something Went Wrong!\n$e',
+            );
+          });
         }
       }).catchError((e) {
         sp.saveLoginState(false);

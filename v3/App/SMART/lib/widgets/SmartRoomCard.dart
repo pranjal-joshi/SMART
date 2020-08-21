@@ -12,10 +12,12 @@ class SmartRoomCard extends StatelessWidget {
   final SmartRoomData roomData;
   final SmartRoomIndicatorState indicatorState;
   final Function onTap;
+  final MaterialColor color;
 
   SmartRoomCard({
     @required this.helper,
     @required this.roomData,
+    @required this.color,
     this.onTap,
     this.indicatorState = SmartRoomIndicatorState.indicatorDisabled,
   });
@@ -24,8 +26,8 @@ class SmartRoomCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return SmartCard(
       helper: helper,
-      cornerRadius: 24,
-      elevation: 12,
+      cornerRadius: 28,
+      elevation: 10,
       blurRadius: SmartCardBlurRadius.Subtle,
       child: InkWell(
         onTap: onTap,
@@ -45,11 +47,11 @@ class SmartRoomCard extends StatelessWidget {
                 child: Text(
                   roomData.name,
                   style: TextStyle(
-                    fontSize: 28,
+                    fontSize: 26,
                     fontWeight: FontWeight.bold,
                     color: helper.isDarkModeActive
-                        ? Colors.indigo[300]
-                        : Colors.indigo,
+                        ? color[300]
+                        : color,
                   ),
                   overflow: TextOverflow.ellipsis,
                   softWrap: true,
@@ -72,21 +74,9 @@ class SmartRoomCard extends StatelessWidget {
                 helper: helper,
                 child: Icon(
                   roomData.icon,
-                  size: helper.screenWidth / 2.9,
+                  size: helper.screenWidth / 3.2,
                   color: Colors.white,
                 ),
-              ),
-            ),
-            Positioned(
-              bottom: 8,
-              left: 8,
-              child: Icon(
-                Icons.arrow_forward,
-                size: 28,
-                // color: Theme.of(context).primaryColorDark.withOpacity(0.6),
-                color: helper.isDarkModeActive
-                    ? Colors.indigo[300].withOpacity(0.6)
-                    : Colors.indigo.withOpacity(0.6),
               ),
             ),
           ],

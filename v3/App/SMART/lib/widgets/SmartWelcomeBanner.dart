@@ -65,6 +65,8 @@ class _SmartWelcomeBannerState extends State<SmartWelcomeBanner> {
 
   Future<List<String>> _loadCredentials() async {
     List<String> list = await sp.loadLoginCredentials();
+    if(list.isEmpty)
+      list = ['', '', 'Username'];
     return list;
   }
 
