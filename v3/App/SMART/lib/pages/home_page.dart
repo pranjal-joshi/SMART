@@ -83,33 +83,62 @@ class _HomePageState extends State<HomePage> {
                       if (snapshot.data.length == 0) {
                         return _getNoRoomLayout();
                       }
-                      return GridView.builder(
-                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 2,
-                          mainAxisSpacing: 24,
-                          childAspectRatio: 5 / 4,
-                        ),
-                        itemCount: snapshot.data.length,
-                        itemBuilder: (_, index) {
-                          return Consumer<JsonRoomStateProvider>(
-                            builder: (_, stateData, __) => Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 14),
-                              child: SmartRoomCard(
-                                helper: helper,
-                                roomData: snapshot.data[index],
-                                indicatorState: stateData.roomPowerIndicatorMap[
-                                    snapshot.data[index].name],
-                                onTap: () {
-                                  print(
-                                      'Clicked on ${snapshot.data[index].name}');
-                                  Navigator.of(context)
-                                      .pushNamed(route_room_page);
-                                },
+                      return ListView(
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.only(
+                              left: 20,
+                              bottom: 16,
+                            ),
+                            child: Text(
+                              'All Rooms',
+                              style: TextStyle(
+                                fontSize: 28,
+                                fontWeight: FontWeight.bold,
+                                color: Theme.of(context).accentColor,
                               ),
                             ),
-                          );
-                        },
+                          ),
+                          GridView.builder(
+                            gridDelegate:
+                                SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 2,
+                              mainAxisSpacing: 24,
+                              childAspectRatio: 4 / 3,
+                            ),
+                            itemCount: snapshot.data.length,
+                            shrinkWrap: true,
+                            physics: NeverScrollableScrollPhysics(),
+                            itemBuilder: (_, index) {
+                              return Consumer<JsonRoomStateProvider>(
+                                builder: (_, stateData, __) => Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 14,
+                                  ),
+                                  child: SmartRoomCard(
+                                    helper: helper,
+                                    color: Colors.indigo,
+                                    roomData: snapshot.data[index],
+                                    indicatorState:
+                                        stateData.roomPowerIndicatorMap[
+                                            snapshot.data[index].name],
+                                    onTap: () {
+                                      print(
+                                          'Clicked on ${snapshot.data[index].name}');
+                                      Navigator.of(context).pushNamed(
+                                        route_room_page,
+                                        arguments: {
+                                          'roomName': snapshot.data[index].name,
+                                          'icon': snapshot.data[index].icon,
+                                        },
+                                      );
+                                    },
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        ],
                       );
                     },
                   ),
