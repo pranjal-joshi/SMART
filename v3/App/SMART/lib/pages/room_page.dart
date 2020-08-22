@@ -2,6 +2,11 @@ import 'package:flutter/material.dart';
 
 import '../helpers/SmartHelper.dart';
 
+import '../models/SmartProfile.dart';
+
+import '../widgets/ProfileCard.dart';
+import '../widgets/CreateProfileCard.dart';
+
 class RoomPage extends StatefulWidget {
   @override
   _RoomPageState createState() => _RoomPageState();
@@ -33,7 +38,7 @@ class _RoomPageState extends State<RoomPage> {
                   onPressed: () {},
                 ),
               ],
-              expandedHeight: helper.screenHeight / 2.7 -
+              expandedHeight: helper.screenHeight / 2.2 -
                   MediaQuery.of(context).padding.top,
               flexibleSpace: FlexibleSpaceBar(
                 background: Container(
@@ -60,48 +65,43 @@ class _RoomPageState extends State<RoomPage> {
                   child: Stack(
                     children: [
                       Positioned(
+                        right: 16,
                         top: MediaQuery.of(context).padding.top * 2.5,
+                        child: Icon(
+                          args['icon'],
+                          size: 156,
+                          color: Colors.white38,
+                        ),
+                      ),
+                      Positioned(
+                        top: MediaQuery.of(context).padding.top * 2.2,
                         left: 16,
                         right: 16,
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Row(
-                              children: [
-                                Icon(
-                                  args['icon'],
-                                  size: 48,
-                                  color: helper.isDarkModeActive
-                                      ? Theme.of(context).accentColor
-                                      : Colors.white,
+                            Flexible(
+                              child: Text(
+                                args['roomName'],
+                                maxLines: 2,
+                                softWrap: true,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  fontSize: 32,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                  letterSpacing: 1,
                                 ),
-                                SizedBox(
-                                  width: 10,
-                                ),
-                                Flexible(
-                                  child: Text(
-                                    args['roomName'],
-                                    maxLines: 2,
-                                    softWrap: true,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: TextStyle(
-                                      fontSize: 36,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.white,
-                                      letterSpacing: 1,
-                                    ),
-                                  ),
-                                ),
-                              ],
+                              ),
                             ),
                             Padding(
-                              padding: const EdgeInsets.only(top: 4, left: 60),
+                              padding: const EdgeInsets.only(top: 2),
                               child: Text(
                                 '4 Devices',
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
-                                  fontSize: 20,
+                                  fontSize: 16,
                                   color: Colors.white70,
                                 ),
                               ),
@@ -110,9 +110,31 @@ class _RoomPageState extends State<RoomPage> {
                         ),
                       ),
                       Positioned(
-                        bottom: 16,
-                        left: 16,
-                        child: Text('Add Profile Cards here!!', style: Theme.of(context).textTheme.headline2,),
+                        bottom: 12,
+                        top: MediaQuery.of(context).padding.top * 6.2,
+                        left: 0,
+                        right: 0,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.only(left: 16),
+                              child: const Text(
+                                'Profiles',
+                                style: TextStyle(
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                  letterSpacing: 1,
+                                  height: 0.1,
+                                ),
+                              ),
+                            ),
+                            Expanded(
+                              child: getProfileCards(),
+                            ),
+                          ],
+                        ),
                       ),
                     ],
                   ),
@@ -137,6 +159,39 @@ class _RoomPageState extends State<RoomPage> {
           ],
         ),
       ),
+    );
+  }
+
+  Widget getProfileCards({
+    List<SmartProfile> profileList,
+    SmartHelper helper,
+  }) {
+    final List<SmartProfile> profileList = [
+      SmartProfile(profileName: "Party", profileIcon: Icons.blur_circular),
+      SmartProfile(profileName: "Chill", profileIcon: Icons.music_note),
+      SmartProfile(profileName: "Sleep", profileIcon: Icons.brightness_3),
+      SmartProfile(profileName: "Movie", profileIcon: Icons.movie),
+    ];
+    return ListView.builder(
+      scrollDirection: Axis.horizontal,
+      itemCount: profileList.length + 1,
+      shrinkWrap: true,
+      itemBuilder: (context, index) {
+        try {
+          return Padding(
+            padding: EdgeInsets.all(6),
+            child: ProfileCard(
+              profileIcon: profileList[index].profileIcon,
+              profileName: profileList[index].profileName,
+            ),
+          );
+        } catch (e) {
+          return Padding(
+            padding: EdgeInsets.fromLTRB(8, 10, 16, 10),
+            child: CreateProfileCard(),
+          );
+        }
+      },
     );
   }
 }
