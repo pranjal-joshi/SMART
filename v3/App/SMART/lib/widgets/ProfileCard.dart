@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 
 import '../helpers/SmartHelper.dart';
 import '../models/SmartPopupMenu.dart';
+import '../widgets/SmartCard.dart';
 
 class ProfileCard extends StatelessWidget {
   final String profileName;
@@ -22,12 +23,12 @@ class ProfileCard extends StatelessWidget {
   Widget build(BuildContext context) {
     SmartHelper helper = SmartHelper(context: context);
 
-    return Card(
-      clipBehavior: Clip.antiAliasWithSaveLayer,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(helper.screenWidth * 0.08),
-      ),
+    return SmartCard(
+      helper: helper,
+      cornerRadius: helper.screenWidth * 0.08,
+      blurRadius: SmartCardBlurRadius.Subtle,
       elevation: 6,
+      shadowColor: Colors.transparent,
       child: Container(
         height: double.infinity,
         width: helper.screenWidth / 3,

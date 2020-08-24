@@ -14,7 +14,8 @@ class CreateProfileCard extends StatelessWidget {
 
     return DottedBorder(
       borderType: BorderType.RRect,
-      color: Theme.of(context).textTheme.bodyText2.color,
+      // color: Theme.of(context).textTheme.bodyText2.color,
+      color: Colors.white,
       radius: Radius.circular(radius),
       strokeWidth: 2,
       dashPattern: const [8,8],
@@ -52,7 +53,8 @@ class CreateProfileCard extends StatelessWidget {
                             style: TextStyle(
                               fontSize: 22,
                               fontWeight: FontWeight.bold,
-                              color: Theme.of(context).textTheme.bodyText2.color,
+                              // color: Theme.of(context).textTheme.bodyText2.color,
+                              color: Colors.white,
                             ),
                           ),
                         ),
@@ -69,7 +71,8 @@ class CreateProfileCard extends StatelessWidget {
                       icon: Icon(
                         Icons.add_circle_outline,
                         size: helper.screenWidth * 0.16,
-                        color: Theme.of(context).textTheme.bodyText2.color,
+                        // color: Theme.of(context).textTheme.bodyText2.color,
+                        color: Colors.white,
                       ),
                       onPressed: () {
                         helper.showSnackbarText('Create New Profile');

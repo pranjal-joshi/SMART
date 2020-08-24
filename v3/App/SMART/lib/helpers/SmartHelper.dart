@@ -99,8 +99,8 @@ class SmartHelper {
       return [Colors.blue[400], Colors.deepOrange[300]];
     }
     return [
-      Colors.blue[400].withOpacity(0.8),
-      Colors.deepOrange[300].withOpacity(0.8)
+      Colors.blue[300].withOpacity(0.55),
+      Colors.deepOrange[200].withOpacity(0.55)
     ];
   }
 
