@@ -29,58 +29,61 @@ class SmartRoomCard extends StatelessWidget {
       cornerRadius: 28,
       elevation: 10,
       blurRadius: SmartCardBlurRadius.Subtle,
-      child: InkWell(
-        onTap: onTap,
-        highlightColor: Colors.transparent,
-        splashColor: Theme.of(context).primaryColorDark.withOpacity(0.25),
-        child: Stack(
-          clipBehavior: Clip.antiAliasWithSaveLayer,
-          children: [
-            Align(
-              alignment: Alignment.topLeft,
-              child: Padding(
-                padding: EdgeInsets.only(
-                  top: 8.0,
-                  left: 8.0,
-                  right: helper.screenWidth * 0.13,
+      child: Stack(
+        children: [
+          Align(
+            alignment: Alignment.topLeft,
+            child: Padding(
+              padding: EdgeInsets.only(
+                top: 8.0,
+                left: 8.0,
+                right: helper.screenWidth * 0.13,
+              ),
+              child: Text(
+                roomData.name,
+                style: TextStyle(
+                  fontSize: 26,
+                  fontWeight: FontWeight.bold,
+                  color: helper.isDarkModeActive ? color[300] : color,
                 ),
-                child: Text(
-                  roomData.name,
-                  style: TextStyle(
-                    fontSize: 26,
-                    fontWeight: FontWeight.bold,
-                    color: helper.isDarkModeActive
-                        ? color[300]
-                        : color,
-                  ),
-                  overflow: TextOverflow.ellipsis,
-                  softWrap: true,
-                  maxLines: 2,
-                ),
+                overflow: TextOverflow.ellipsis,
+                softWrap: true,
+                maxLines: 2,
               ),
             ),
-            Positioned(
-              top: helper.screenHeight * 0.02,
-              right: helper.screenWidth * 0.05,
-              child: SmartRoomIndicator(
-                state: indicatorState,
-                helper: helper,
+          ),
+          Positioned(
+            top: helper.screenHeight * 0.02,
+            right: helper.screenWidth * 0.05,
+            child: SmartRoomIndicator(
+              state: indicatorState,
+              helper: helper,
+            ),
+          ),
+          Positioned(
+            top: helper.screenHeight * 0.05,
+            right: helper.screenWidth * 0.05 * -1,
+            child: SmartGradient(
+              helper: helper,
+              child: Icon(
+                roomData.icon,
+                size: helper.screenWidth / 3.2,
+                color: Colors.white,
               ),
             ),
-            Positioned(
-              top: helper.screenHeight * 0.05,
-              right: helper.screenWidth * 0.05 * -1,
-              child: SmartGradient(
-                helper: helper,
-                child: Icon(
-                  roomData.icon,
-                  size: helper.screenWidth / 3.2,
-                  color: Colors.white,
-                ),
+          ),
+          Positioned.fill(
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: onTap,
+                highlightColor: Colors.transparent,
+                splashColor:
+                    Theme.of(context).primaryColorDark.withOpacity(0.25),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

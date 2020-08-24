@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_sticky_header/flutter_sticky_header.dart';
+import 'package:line_awesome_icons/line_awesome_icons.dart';
 
 import '../helpers/SmartHelper.dart';
 
 import '../models/SmartProfile.dart';
+import '../models/SmartPopupMenu.dart';
 
+import '../widgets/SmartDeviceCard.dart';
 import '../widgets/ProfileCard.dart';
 import '../widgets/CreateProfileCard.dart';
 
@@ -14,6 +18,18 @@ class RoomPage extends StatefulWidget {
 
 class _RoomPageState extends State<RoomPage> {
   SmartHelper helper;
+  final _sliverAppBarBorder = const BorderRadius.only(
+    bottomLeft: Radius.circular(10),
+    bottomRight: Radius.circular(10),
+  );
+
+  final _menuList = [
+    SmartPopupMenu(title: 'Edit', icon: LineAwesomeIcons.edit),
+    SmartPopupMenu(title: 'Reset', icon: LineAwesomeIcons.refresh),
+    SmartPopupMenu(title: 'Emergency', icon: LineAwesomeIcons.power_off),
+  ];
+
+  final _scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
   Widget build(BuildContext context) {
@@ -22,20 +38,45 @@ class _RoomPageState extends State<RoomPage> {
 
     helper = SmartHelper(context: context);
     return Scaffold(
+      key: _scaffoldKey,
       body: SafeArea(
         top: false,
         child: CustomScrollView(
           slivers: [
             SliverAppBar(
               backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-              elevation: 0,
-              pinned: true,
-              snap: true,
+              elevation: 8,
+              shape: RoundedRectangleBorder(
+                borderRadius: _sliverAppBarBorder,
+              ),
+              pinned: false,
+              snap: false,
               floating: true,
+              forceElevated: true,
               actions: [
-                IconButton(
-                  icon: Icon(Icons.more_vert),
-                  onPressed: () {},
+                PopupMenuButton(
+                  itemBuilder: (_) => _menuList
+                      .map(
+                        (choice) => PopupMenuItem(
+                          value: choice,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: <Widget>[
+                              Text(
+                                choice.title,
+                                style: Theme.of(context).textTheme.bodyText2,
+                              ),
+                              Icon(
+                                choice.icon,
+                                color: helper.isDarkModeActive
+                                    ? color_white_dark
+                                    : Colors.black,
+                              ),
+                            ],
+                          ),
+                        ),
+                      )
+                      .toList(),
                 ),
               ],
               expandedHeight: helper.screenHeight / 2.2 -
@@ -45,7 +86,8 @@ class _RoomPageState extends State<RoomPage> {
                   width: double.infinity,
                   decoration: helper.isDarkModeActive
                       ? BoxDecoration(
-                          color: Colors.black,
+                          color: Color.fromRGBO(25, 25, 25, 1),
+                          borderRadius: _sliverAppBarBorder,
                         )
                       : BoxDecoration(
                           gradient: LinearGradient(
@@ -57,24 +99,21 @@ class _RoomPageState extends State<RoomPage> {
                               Colors.indigo[500],
                             ],
                           ),
-                          borderRadius: BorderRadius.only(
-                            bottomLeft: Radius.circular(10),
-                            bottomRight: Radius.circular(10),
-                          ),
+                          borderRadius: _sliverAppBarBorder,
                         ),
                   child: Stack(
                     children: [
                       Positioned(
                         right: 16,
-                        top: MediaQuery.of(context).padding.top * 2.5,
+                        top: MediaQuery.of(context).padding.top * 2.0,
                         child: Icon(
                           args['icon'],
                           size: 156,
-                          color: Colors.white38,
+                          color: Colors.white30,
                         ),
                       ),
                       Positioned(
-                        top: MediaQuery.of(context).padding.top * 2.2,
+                        top: MediaQuery.of(context).padding.top * 2.4,
                         left: 16,
                         right: 16,
                         child: Column(
@@ -87,7 +126,7 @@ class _RoomPageState extends State<RoomPage> {
                                 maxLines: 2,
                                 softWrap: true,
                                 overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
+                                style: const TextStyle(
                                   fontSize: 32,
                                   fontWeight: FontWeight.bold,
                                   color: Colors.white,
@@ -99,7 +138,7 @@ class _RoomPageState extends State<RoomPage> {
                               padding: const EdgeInsets.only(top: 2),
                               child: Text(
                                 '4 Devices',
-                                style: TextStyle(
+                                style: const TextStyle(
                                   fontWeight: FontWeight.bold,
                                   fontSize: 16,
                                   color: Colors.white70,
@@ -141,19 +180,51 @@ class _RoomPageState extends State<RoomPage> {
                 ),
               ),
             ),
-            SliverGrid(
-              delegate: SliverChildBuilderDelegate(
-                (ctx, i) => Padding(
-                  padding: const EdgeInsets.all(12.0),
-                  child: Placeholder(),
+            SliverStickyHeader(
+              header: Container(
+                color: Theme.of(context).scaffoldBackgroundColor,
+                width: double.infinity,
+                padding: EdgeInsets.only(
+                  top: MediaQuery.of(context).padding.top + 8,
+                  left: 16,
+                  bottom: 12,
                 ),
-                childCount: 10,
+                child: Text(
+                  'All Devices',
+                  style: TextStyle(
+                    fontSize: 28,
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).accentColor,
+                  ),
+                ),
               ),
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                mainAxisSpacing: 10,
-                crossAxisSpacing: 0,
-                childAspectRatio: 1 / 1,
+              sliver: SliverGrid(
+                delegate: SliverChildBuilderDelegate(
+                  (ctx, i) => Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
+                    child: LayoutBuilder(
+                      builder: (_, constraints) => SmartDeviceCard(
+                        helper: helper,
+                        constraints: constraints,
+                        textColor: Colors.indigo,
+                        onTap: () => helper.showSnackbarTextWithGlobalKey(
+                          _scaffoldKey,
+                          'Opening this Device Details!',
+                        ),
+                      ),
+                    ),
+                  ),
+                  childCount: 10,
+                ),
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  mainAxisSpacing: 10,
+                  crossAxisSpacing: 0,
+                  childAspectRatio: 1 / 1,
+                ),
               ),
             ),
           ],
@@ -179,7 +250,7 @@ class _RoomPageState extends State<RoomPage> {
       itemBuilder: (context, index) {
         try {
           return Padding(
-            padding: EdgeInsets.all(6),
+            padding: EdgeInsets.all(10),
             child: ProfileCard(
               profileIcon: profileList[index].profileIcon,
               profileName: profileList[index].profileName,
