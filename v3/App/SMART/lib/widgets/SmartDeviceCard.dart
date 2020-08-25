@@ -32,11 +32,14 @@ class SmartDeviceCard extends StatefulWidget {
 
 class _SmartDeviceCardState extends State<SmartDeviceCard> {
   bool _switchState;
-  var _stateProvider;
+  JsonRoomStateProvider _stateProvider;
 
   @override
   void initState() {
+    // Get switch state sepcified in constructor
     _switchState = widget.deviceData.switchState;
+
+    // Set listener to StateProvider - Handle Real time toggles from MQTT
     _stateProvider = Provider.of<JsonRoomStateProvider>(context, listen: false);
     _stateProvider.addListener(_switchStateChangeListener);
     super.initState();
@@ -44,6 +47,7 @@ class _SmartDeviceCardState extends State<SmartDeviceCard> {
 
   @override
   void dispose() {
+    // Clear provider listener
     _stateProvider.removeListener(_switchStateChangeListener);
     super.dispose();
   }
@@ -52,7 +56,7 @@ class _SmartDeviceCardState extends State<SmartDeviceCard> {
   Widget build(BuildContext context) {
     return SmartCard(
       helper: widget.helper,
-      cornerRadius: 28,
+      cornerRadius: widget.helper.screenWidth * 0.07,
       elevation: 10,
       blurRadius: SmartCardBlurRadius.Subtle,
       child: Stack(
@@ -137,24 +141,6 @@ class _SmartDeviceCardState extends State<SmartDeviceCard> {
             alignment: Alignment.centerRight,
             child: RotatedBox(
               quarterTurns: 3,
-              /*child: Consumer<JsonRoomStateProvider>(
-                builder: (_, stateProvider, __) {
-                  _switchState = stateProvider.getStateBySmartId(
-                      widget.deviceData.smartId)[widget.deviceData.id];
-                  return Switch.adaptive(
-                    inactiveTrackColor:
-                        widget.helper.isDarkModeActive ? Colors.white24 : null,
-                    materialTapTargetSize: MaterialTapTargetSize.padded,
-                    value: _switchState,
-                    onChanged: (val) {
-                      setState(() => _switchState = !_switchState);
-                      if (widget.onToggle != null) widget.onToggle(val);
-                      print(
-                          '[SmartDeviceCard] Toggle = $val -> ID: ${widget.deviceData.smartId} - ${widget.deviceData.id}');
-                    },
-                  );
-                },
-              ),*/
               child: Switch.adaptive(
                 inactiveTrackColor:
                     widget.helper.isDarkModeActive ? Colors.white24 : null,
@@ -174,6 +160,7 @@ class _SmartDeviceCardState extends State<SmartDeviceCard> {
     );
   }
 
+  // Handler to reflect toggle changes in real time
   void _switchStateChangeListener() {
     setState(() => _switchState = _stateProvider
         .getStateBySmartId(widget.deviceData.smartId)[widget.deviceData.id]);
