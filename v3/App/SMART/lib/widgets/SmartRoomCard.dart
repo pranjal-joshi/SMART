@@ -26,7 +26,7 @@ class SmartRoomCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return SmartCard(
       helper: helper,
-      cornerRadius: 28,
+      cornerRadius: helper.screenWidth * 0.06,
       elevation: 10,
       blurRadius: SmartCardBlurRadius.Subtle,
       child: Stack(

@@ -79,6 +79,16 @@ smart/username/smartId/state
 	'data': [1, 0, 0, 1]
 }
 
+// App Device Labels
+smart/username/smartId/label
+{
+	'from': 'app',
+	'smartId': 'SMART_00DCCFC8',
+	'type': 'label',
+	'nodeName': 'TestRoom',
+	'data': ['name1','name2','name3','name4']
+}
+
 // Node to App - will message
 smart/username/smartId/state
 {
