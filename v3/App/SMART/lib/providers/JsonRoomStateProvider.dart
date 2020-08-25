@@ -98,4 +98,14 @@ class JsonRoomStateProvider with ChangeNotifier {
         print('[JsonRoomStateProvider] -> EXCEPTION: $e\nJSON: $rawJson');
     }
   }
+
+  List<bool> getStateBySmartId(String smartId) {
+    List<bool> list = [];
+    _roomStateMap.forEach((key, value) {
+      if (value.containsKey(smartId)) {
+        value[smartId].forEach((e) => e > 0 ? list.add(true) : list.add(false));
+      }
+    });
+    return list;
+  }
 }
