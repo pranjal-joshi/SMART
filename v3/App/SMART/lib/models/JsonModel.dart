@@ -103,3 +103,39 @@ class JsonNodeStatus {
     } catch (e) {}
   }
 }
+
+class JsonNodeLabel {
+  String type;
+  String smartId;
+  String nodeName;
+  String from;
+  List<String> dataList;
+
+  Map<String, dynamic> toJson() {
+    return {
+      JSON_FROM: from,
+      JSON_TYPE: type,
+      JSON_SMARTID: smartId,
+      JSON_NODENAME: nodeName,
+      JSON_TYPE_DATA: dataList
+    };
+  }
+
+  String toJsonString() {
+    return jsonEncode(toJson());
+  }
+
+  JsonNodeLabel.fromJsonString(String rawJson) {
+    try {
+      rawJson = rawJson.replaceAll('\'', '\"');
+      Map<String, dynamic> json = jsonDecode(rawJson);
+      type = json[JSON_TYPE];
+      smartId = json[JSON_SMARTID];
+      from = json[JSON_FROM];
+      nodeName = json[JSON_NODENAME];
+      dataList = List<String>.from(json[JSON_TYPE_DATA]);
+    } catch (e) {
+      print(e);
+    }
+  }
+}

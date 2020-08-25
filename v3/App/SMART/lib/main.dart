@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'providers/JsonNodeStatusProvider.dart';
 import 'providers/JsonRoomStateProvider.dart';
 import 'providers/JsonNodeInfoProvider.dart';
+import 'providers/JsonNodeLabelProvider.dart';
 
 import 'helpers/SmartHelper.dart';
 
@@ -16,7 +17,9 @@ import 'pages/signup_page.dart';
 import 'pages/forgot_password_page.dart';
 import 'pages/home_page.dart';
 
-void main() => runApp(SmartApp());
+void main() {
+  runApp(SmartApp());
+}
 
 class SmartApp extends StatelessWidget {
   @override
@@ -33,6 +36,12 @@ class SmartApp extends StatelessWidget {
         ),
         ChangeNotifierProvider(
           create: (ctx) => JsonNodeInfoProvider(debug: smartGlobalDebug),
+        ),
+        ChangeNotifierProxyProvider<JsonRoomStateProvider,
+            JsonNodeLabelProvider>(
+          create: (ctx) => JsonNodeLabelProvider(debug: smartGlobalDebug),
+          update: (ctx, stateProvider, labelProvider) =>
+              labelProvider..roomStateProvider = stateProvider,
         ),
       ],
       child: MaterialApp(
