@@ -8,6 +8,7 @@ import '../controllers/SmartSharedPref.dart';
 
 import '../models/SmartWifiConfig.dart';
 import '../models/SmartRoomData.dart';
+import '../models/SmartDeviceData.dart';
 
 import '../providers/JsonNodeStatusProvider.dart';
 import '../providers/JsonRoomStateProvider.dart';
@@ -20,6 +21,7 @@ class SmartSync {
   SmartSharedPreference _sp;
   List<String> _smartConfigDataList = [];
   List<String> _smartRoomDataList = [];
+  List<String> _smartDeviceDataList = [];
 
   SmartSync({@required this.debug}) {
     _sp = SmartSharedPreference();
@@ -83,6 +85,16 @@ class SmartSync {
               data: _smartRoomDataList,
             );
           }
+          // Sync 'SmartDeviceData' data from MQTT to Shared Pref
+          if (_smartDeviceDataList.isNotEmpty) {
+            if (debug)
+              print(
+                  '[SmartSync] Saving \'$SP_SmartDeviceData\' -> ${_smartDeviceDataList.toString()}');
+            _sp.saveStringList(
+              key: SP_SmartDeviceData,
+              data: _smartDeviceDataList,
+            );
+          }
         }
       }
     }
@@ -94,6 +106,8 @@ class SmartSync {
       _smartConfigDataList.add(jsonEncode(jsonElement));
     } else if (jsonElement['type'] == SmartRoomData.type) {
       _smartRoomDataList.add(jsonEncode(jsonElement));
+    } else if (jsonElement['type'] == SmartDeviceData.type) {
+      _smartDeviceDataList.add(jsonEncode(jsonElement));
     }
   }
 }

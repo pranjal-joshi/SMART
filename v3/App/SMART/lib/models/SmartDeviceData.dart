@@ -5,6 +5,7 @@ import '../helpers/SmartHelper.dart';
 import '../controllers/SmartSharedPref.dart';
 
 class SmartDeviceData {
+  static String type = "SmartDeviceData";
   String smartId;
   String deviceName;
   int id; // Should be 0-3 as per NoD
@@ -45,6 +46,7 @@ class SmartDeviceData {
 
   Map<String, dynamic> toJson() {
     return {
+      JSON_TYPE: type,
       JSON_SMARTID: smartId,
       JSON_DEVICENAME: deviceName,
       'id': id.toString(),

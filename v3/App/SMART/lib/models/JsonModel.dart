@@ -105,11 +105,18 @@ class JsonNodeStatus {
 }
 
 class JsonNodeLabel {
-  String type;
+  static String type = JSON_TYPE_LABEL;
   String smartId;
   String nodeName;
   String from;
   List<String> dataList;
+
+  JsonNodeLabel({
+    this.smartId,
+    this.nodeName,
+    this.from = 'app',
+    @required this.dataList,
+  });
 
   Map<String, dynamic> toJson() {
     return {
@@ -129,13 +136,12 @@ class JsonNodeLabel {
     try {
       rawJson = rawJson.replaceAll('\'', '\"');
       Map<String, dynamic> json = jsonDecode(rawJson);
-      type = json[JSON_TYPE];
       smartId = json[JSON_SMARTID];
       from = json[JSON_FROM];
       nodeName = json[JSON_NODENAME];
       dataList = List<String>.from(json[JSON_TYPE_DATA]);
     } catch (e) {
-      print(e);
+      assert(e);
     }
   }
 }
