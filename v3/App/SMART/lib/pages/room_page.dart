@@ -5,10 +5,15 @@ import 'package:provider/provider.dart';
 
 import '../helpers/SmartHelper.dart';
 
+import '../controllers/SmartMqtt.dart';
+
+import '../models/JsonModel.dart';
 import '../models/SmartProfile.dart';
 import '../models/SmartPopupMenu.dart';
+import '../models/SmartDeviceData.dart';
 
 import '../providers/JsonNodeLabelProvider.dart';
+import '../providers/JsonNodeInfoProvider.dart';
 
 import '../widgets/SmartDeviceCard.dart';
 import '../widgets/ProfileCard.dart';
@@ -21,6 +26,7 @@ class RoomPage extends StatefulWidget {
 
 class _RoomPageState extends State<RoomPage> {
   SmartHelper helper;
+  SmartMqtt mqtt = SmartMqtt();
   final _sliverAppBarBorder = const BorderRadius.only(
     bottomLeft: Radius.circular(10),
     bottomRight: Radius.circular(10),
@@ -79,6 +85,9 @@ class _RoomPageState extends State<RoomPage> {
                         ),
                       )
                       .toList(),
+                  onSelected: (SmartPopupMenu choice) {
+                    if (choice.title == 'Reset') _showResetDialog();
+                  },
                 ),
               ],
               expandedHeight: helper.screenHeight / 2.2 -
@@ -273,5 +282,116 @@ class _RoomPageState extends State<RoomPage> {
         }
       },
     );
+  }
+
+  void _showResetDialog() {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        backgroundColor: Theme.of(context).canvasColor,
+        clipBehavior: Clip.antiAliasWithSaveLayer,
+        elevation: 2,
+        scrollable: true,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(24),
+        ),
+        title: Text(
+          'Confirm Reset',
+          style: Theme.of(context).textTheme.headline1,
+        ),
+        content: Text(
+          'This will Reset all the device names and turn them off. You need to reconfigure them again.\n\nAre you sure?',
+          style: Theme.of(context).textTheme.headline3,
+        ),
+        actions: [
+          FlatButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(
+              'CANCEL',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          FlatButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              resetAllDevices();
+              helper.showSnackbarTextWithGlobalKey(
+                _scaffoldKey,
+                'Resetting ${args["roomName"]}...',
+              );
+            },
+            child: Text(
+              'CONFIRM',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void resetAllDevices() {
+    List<SmartDeviceData> deviceList =
+        Provider.of<JsonNodeLabelProvider>(context, listen: false)
+            .getDeviceDataListByRoomId(args['roomName']);
+    List<SmartDeviceData> resetedList = [];
+    for (int i = 0; i < deviceList.length; i++) {
+      resetedList.add(
+        SmartDeviceData(
+          deviceName: 'Device Name',
+          iconData: LineAwesomeIcons.adjust,
+          id: deviceList[i].id,
+          smartId: deviceList[i].smartId,
+          switchState: false,
+          showMotionIcon: false,
+          showTimerIcon: false,
+        ),
+      );
+    }
+    SmartDeviceData.saveToDisk(resetedList);
+    List<String> publishableList =
+        resetedList.map((e) => e.toJsonString()).toList();
+    final infoList = Provider.of<JsonNodeInfoProvider>(context, listen: false)
+        .getInfoByRoomName(args['roomName']);
+    int baseIndex = 0;
+    infoList.forEach((e) {
+      // Publish labels to ../smartId/labels
+      mqtt.publish(
+        topic: mqtt.getTopic(
+          username: TEST_USERNAME,
+          type: SmartMqttTopic.AppDeviceLabelsPublish,
+          smartId: e.smartId,
+        ),
+        message: JsonNodeLabel(
+          nodeName: args['roomName'],
+          smartId: e.smartId,
+          dataList: resetedList
+              .getRange(baseIndex, baseIndex + e.nod)
+              .toList()
+              .map((e) => e.deviceName)
+              .toList(),
+        ).toJsonString(),
+        retain: true,
+      );
+      // Publish data to ../smartId/deviceData
+      mqtt.publish(
+        topic: mqtt.getTopic(
+          username: TEST_USERNAME,
+          type: SmartMqttTopic.AppDeviceDataPublish,
+          smartId: e.smartId,
+        ),
+        message: publishableList
+            .getRange(baseIndex, baseIndex + e.nod)
+            .toList()
+            .toString(),
+        retain: true,
+      );
+      baseIndex = e.nod;
+    });
+    // TODO: Reset the STATES of all devices, turn them OFF as well
   }
 }
