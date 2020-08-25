@@ -11,6 +11,7 @@ import '../models/SmartDeviceData.dart';
 // Provider class - Manage Label of all nodes by their parent room
 // Provides additional method for BLOC
 // Call 'addLabel' method in MQTT listener
+// This needs JsonRoomStateProvider through ProxyProviderChangeListener!
 /*
 Example Data Container
 {
