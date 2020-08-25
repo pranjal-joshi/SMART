@@ -9,6 +9,7 @@ import 'package:mqtt_client/mqtt_server_client.dart';
 
 import '../helpers/SmartHelper.dart';
 import '../controllers/SmartSharedPref.dart';
+import '../exceptions/SmartException.dart';
 
 // Enum to retireve to topic string from 'getTopic' method
 enum SmartMqttTopic {
@@ -20,6 +21,7 @@ enum SmartMqttTopic {
   AppDeviceConfig,
   AppRoomList,
   AppDeviceLabels,
+  AppDeviceData,
 }
 
 // Singleton class to maintain only one connection state accross all pages
@@ -327,14 +329,22 @@ class SmartMqtt {
       return 'smart/$username/+/state';
     if (type == SmartMqttTopic.NodeInfo) return 'smart/$username/+/info';
     if (type == SmartMqttTopic.NodeStatus) return 'smart/$username/+/status';
-    if (type == SmartMqttTopic.AppRoomConfig)
+    if (type == SmartMqttTopic.AppRoomConfig) {
+      if(roomName == null)
+        throw SmartException(SmartException.roomNotProvided);
       return 'smart/$username/app/$roomName/roomConfig';
+    }
     if (type == SmartMqttTopic.AppDeviceConfig)
       return 'smart/$username/app/deviceConfig';
     if (type == SmartMqttTopic.AppRoomList)
       return 'smart/$username/app/roomList';
     if (type == SmartMqttTopic.AppDeviceLabels)
       return 'smart/$username/+/label';
+    if (type == SmartMqttTopic.AppDeviceData) {
+      if(smartId == null)
+        throw SmartException(SmartException.smartIdNotProvided);
+      return 'smart/$username/$smartId/deviceData';
+    }
     else
       return 'smart/$username/gateway';
   }

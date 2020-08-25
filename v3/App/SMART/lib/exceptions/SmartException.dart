@@ -8,6 +8,8 @@ class SmartException implements Exception {
   }
 
   static String get credentialNotFoundException => 'Unable to Fetch Login Credentials.';
+  static String get smartIdNotProvided => 'SmartID is null or not provided.';
+  static String get roomNotProvided => 'Room name is null or not provided.';
 
   SmartException(this.message);
 }
