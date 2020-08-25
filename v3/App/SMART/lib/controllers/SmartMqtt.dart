@@ -20,8 +20,10 @@ enum SmartMqttTopic {
   AppRoomConfig,
   AppDeviceConfig,
   AppRoomList,
-  AppDeviceLabels,
-  AppDeviceData,
+  AppDeviceLabelsSubscribe,
+  AppDeviceLabelsPublish,
+  AppDeviceDataPublish,
+  AppDeviceDataSubscribe,
 }
 
 // Singleton class to maintain only one connection state accross all pages
@@ -330,7 +332,7 @@ class SmartMqtt {
     if (type == SmartMqttTopic.NodeInfo) return 'smart/$username/+/info';
     if (type == SmartMqttTopic.NodeStatus) return 'smart/$username/+/status';
     if (type == SmartMqttTopic.AppRoomConfig) {
-      if(roomName == null)
+      if (roomName == null)
         throw SmartException(SmartException.roomNotProvided);
       return 'smart/$username/app/$roomName/roomConfig';
     }
@@ -338,14 +340,20 @@ class SmartMqtt {
       return 'smart/$username/app/deviceConfig';
     if (type == SmartMqttTopic.AppRoomList)
       return 'smart/$username/app/roomList';
-    if (type == SmartMqttTopic.AppDeviceLabels)
+    if (type == SmartMqttTopic.AppDeviceLabelsSubscribe)
       return 'smart/$username/+/label';
-    if (type == SmartMqttTopic.AppDeviceData) {
-      if(smartId == null)
+    if(type == SmartMqttTopic.AppDeviceLabelsPublish) {
+      if (smartId == null)
+        throw SmartException(SmartException.smartIdNotProvided);
+      return 'smart/$username/$smartId/label';
+    }
+    if (type == SmartMqttTopic.AppDeviceDataSubscribe)
+      return 'smart/$username/+/deviceData';
+    if (type == SmartMqttTopic.AppDeviceDataPublish) {
+      if (smartId == null)
         throw SmartException(SmartException.smartIdNotProvided);
       return 'smart/$username/$smartId/deviceData';
-    }
-    else
+    } else
       return 'smart/$username/gateway';
   }
 

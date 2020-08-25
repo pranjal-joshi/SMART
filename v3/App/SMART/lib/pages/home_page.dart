@@ -34,7 +34,8 @@ class _HomePageState extends State<HomePage> {
     SmartMqttTopic.NodeInfo,
     SmartMqttTopic.SwitchStateNodeToApp,
     SmartMqttTopic.AppRoomList,
-    SmartMqttTopic.AppDeviceLabels,
+    SmartMqttTopic.AppDeviceLabelsSubscribe,
+    SmartMqttTopic.AppDeviceDataSubscribe,
   ];
 
   List<SmartRoomData> roomDataList = [];
