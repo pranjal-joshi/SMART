@@ -19,6 +19,7 @@ enum SmartMqttTopic {
   AppRoomConfig,
   AppDeviceConfig,
   AppRoomList,
+  AppDeviceLabels,
 }
 
 // Singleton class to maintain only one connection state accross all pages
@@ -332,6 +333,8 @@ class SmartMqtt {
       return 'smart/$username/app/deviceConfig';
     if (type == SmartMqttTopic.AppRoomList)
       return 'smart/$username/app/roomList';
+    if (type == SmartMqttTopic.AppDeviceLabels)
+      return 'smart/$username/+/label';
     else
       return 'smart/$username/gateway';
   }

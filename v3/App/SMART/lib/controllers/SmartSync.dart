@@ -12,6 +12,7 @@ import '../models/SmartRoomData.dart';
 import '../providers/JsonNodeStatusProvider.dart';
 import '../providers/JsonRoomStateProvider.dart';
 import '../providers/JsonNodeInfoProvider.dart';
+import '../providers/JsonNodeLabelProvider.dart';
 
 // Utility Class to manage Syncing of MQTT message with local storage
 class SmartSync {
@@ -36,6 +37,8 @@ class SmartSync {
         .addDevice(rawJson, decodedJson);
     Provider.of<JsonNodeInfoProvider>(context, listen: false)
         .addInfo(rawJson, decodedJson);
+    Provider.of<JsonNodeLabelProvider>(context, listen: false)
+        .addLabel(rawJson, decodedJson);
   }
 
   // Sync incomming MQTT messages into their respective storages

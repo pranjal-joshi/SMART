@@ -1,10 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:line_awesome_icons/line_awesome_icons.dart';
+import 'package:provider/provider.dart';
+
+import '../models/SmartDeviceData.dart';
+
+import '../providers/JsonRoomStateProvider.dart';
 
 import '../helpers/SmartHelper.dart';
 import '../widgets/SmartCard.dart';
 
 class SmartDeviceCard extends StatefulWidget {
+  final SmartDeviceData deviceData;
   final SmartHelper helper;
   final BoxConstraints constraints;
   final MaterialColor textColor;
@@ -12,6 +18,7 @@ class SmartDeviceCard extends StatefulWidget {
   final void Function() onTap;
 
   SmartDeviceCard({
+    @required this.deviceData,
     @required this.helper,
     @required this.constraints,
     @required this.textColor,
@@ -24,7 +31,22 @@ class SmartDeviceCard extends StatefulWidget {
 }
 
 class _SmartDeviceCardState extends State<SmartDeviceCard> {
-  bool _switchState = false;
+  bool _switchState;
+  var _stateProvider;
+
+  @override
+  void initState() {
+    _switchState = widget.deviceData.switchState;
+    _stateProvider = Provider.of<JsonRoomStateProvider>(context, listen: false);
+    _stateProvider.addListener(_switchStateChangeListener);
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _stateProvider.removeListener(_switchStateChangeListener);
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -41,7 +63,7 @@ class _SmartDeviceCardState extends State<SmartDeviceCard> {
             child: FittedBox(
               fit: BoxFit.fill,
               child: Icon(
-                LineAwesomeIcons.lightbulb_o,
+                widget.deviceData.iconData,
                 size: 64,
                 color: widget.helper.isDarkModeActive
                     ? Colors.grey.withOpacity(0.7)
@@ -54,7 +76,7 @@ class _SmartDeviceCardState extends State<SmartDeviceCard> {
             left: 12,
             right: 52,
             child: Text(
-              'Device Name',
+              widget.deviceData.deviceName,
               style: Theme.of(context).textTheme.headline1.copyWith(
                     color: widget.helper.isDarkModeActive
                         ? widget.textColor[300]
@@ -70,20 +92,22 @@ class _SmartDeviceCardState extends State<SmartDeviceCard> {
             right: 8,
             child: Row(
               children: [
-                Icon(
-                  LineAwesomeIcons.clock_o,
-                  color: widget.helper.isDarkModeActive
-                      ? Colors.white30
-                      : Colors.grey,
-                  size: 22,
-                ),
-                Icon(
-                  Icons.directions_walk,
-                  color: widget.helper.isDarkModeActive
-                      ? Colors.white30
-                      : Colors.grey,
-                  size: 22,
-                )
+                if (widget.deviceData.showTimerIcon)
+                  Icon(
+                    LineAwesomeIcons.clock_o,
+                    color: widget.helper.isDarkModeActive
+                        ? Colors.white30
+                        : Colors.grey,
+                    size: 22,
+                  ),
+                if (widget.deviceData.showMotionIcon)
+                  Icon(
+                    Icons.directions_walk,
+                    color: widget.helper.isDarkModeActive
+                        ? Colors.white30
+                        : Colors.grey,
+                    size: 22,
+                  )
               ],
             ),
           ),
@@ -113,6 +137,24 @@ class _SmartDeviceCardState extends State<SmartDeviceCard> {
             alignment: Alignment.centerRight,
             child: RotatedBox(
               quarterTurns: 3,
+              /*child: Consumer<JsonRoomStateProvider>(
+                builder: (_, stateProvider, __) {
+                  _switchState = stateProvider.getStateBySmartId(
+                      widget.deviceData.smartId)[widget.deviceData.id];
+                  return Switch.adaptive(
+                    inactiveTrackColor:
+                        widget.helper.isDarkModeActive ? Colors.white24 : null,
+                    materialTapTargetSize: MaterialTapTargetSize.padded,
+                    value: _switchState,
+                    onChanged: (val) {
+                      setState(() => _switchState = !_switchState);
+                      if (widget.onToggle != null) widget.onToggle(val);
+                      print(
+                          '[SmartDeviceCard] Toggle = $val -> ID: ${widget.deviceData.smartId} - ${widget.deviceData.id}');
+                    },
+                  );
+                },
+              ),*/
               child: Switch.adaptive(
                 inactiveTrackColor:
                     widget.helper.isDarkModeActive ? Colors.white24 : null,
@@ -121,6 +163,8 @@ class _SmartDeviceCardState extends State<SmartDeviceCard> {
                 onChanged: (val) {
                   setState(() => _switchState = !_switchState);
                   if (widget.onToggle != null) widget.onToggle(val);
+                  print(
+                      '[SmartDeviceCard] Toggle = $val -> ID: ${widget.deviceData.smartId} - ${widget.deviceData.id}');
                 },
               ),
             ),
@@ -128,5 +172,10 @@ class _SmartDeviceCardState extends State<SmartDeviceCard> {
         ],
       ),
     );
+  }
+
+  void _switchStateChangeListener() {
+    setState(() => _switchState = _stateProvider
+        .getStateBySmartId(widget.deviceData.smartId)[widget.deviceData.id]);
   }
 }

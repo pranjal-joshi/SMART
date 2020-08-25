@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_sticky_header/flutter_sticky_header.dart';
 import 'package:line_awesome_icons/line_awesome_icons.dart';
+import 'package:provider/provider.dart';
 
 import '../helpers/SmartHelper.dart';
 
 import '../models/SmartProfile.dart';
 import '../models/SmartPopupMenu.dart';
+
+import '../providers/JsonNodeLabelProvider.dart';
 
 import '../widgets/SmartDeviceCard.dart';
 import '../widgets/ProfileCard.dart';
@@ -22,21 +25,20 @@ class _RoomPageState extends State<RoomPage> {
     bottomLeft: Radius.circular(10),
     bottomRight: Radius.circular(10),
   );
-
   final _menuList = [
     SmartPopupMenu(title: 'Edit', icon: LineAwesomeIcons.edit),
     SmartPopupMenu(title: 'Reset', icon: LineAwesomeIcons.refresh),
     SmartPopupMenu(title: 'Emergency', icon: LineAwesomeIcons.power_off),
   ];
-
   final _scaffoldKey = GlobalKey<ScaffoldState>();
+
+  Map<String, dynamic> args = {};
 
   @override
   Widget build(BuildContext context) {
-    Map<String, dynamic> args =
-        ModalRoute.of(context).settings.arguments as Map<String, dynamic>;
-
+    args = ModalRoute.of(context).settings.arguments as Map<String, dynamic>;
     helper = SmartHelper(context: context);
+
     return Scaffold(
       key: _scaffoldKey,
       body: SafeArea(
@@ -198,33 +200,40 @@ class _RoomPageState extends State<RoomPage> {
                   ),
                 ),
               ),
-              sliver: SliverGrid(
-                delegate: SliverChildBuilderDelegate(
-                  (ctx, i) => Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 8,
-                    ),
-                    child: LayoutBuilder(
-                      builder: (_, constraints) => SmartDeviceCard(
-                        helper: helper,
-                        constraints: constraints,
-                        textColor: Colors.indigo,
-                        onTap: () => helper.showSnackbarTextWithGlobalKey(
-                          _scaffoldKey,
-                          'Opening this Device Details!',
+              sliver: Consumer<JsonNodeLabelProvider>(
+                builder: (_, labelData, __) {
+                  final deviceList =
+                      labelData.getDeviceDataListByRoomId(args['roomName']);
+                  return SliverGrid(
+                    delegate: SliverChildBuilderDelegate(
+                      (ctx, i) => Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
+                        ),
+                        child: LayoutBuilder(
+                          builder: (_, constraints) => SmartDeviceCard(
+                            deviceData: deviceList[i],
+                            helper: helper,
+                            constraints: constraints,
+                            textColor: Colors.indigo,
+                            onTap: () => helper.showSnackbarTextWithGlobalKey(
+                              _scaffoldKey,
+                              'Opening this Device Details!',
+                            ),
+                          ),
                         ),
                       ),
+                      childCount: deviceList.length,
                     ),
-                  ),
-                  childCount: 10,
-                ),
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  mainAxisSpacing: 10,
-                  crossAxisSpacing: 0,
-                  childAspectRatio: 1 / 1,
-                ),
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      mainAxisSpacing: 10,
+                      crossAxisSpacing: 0,
+                      childAspectRatio: 1 / 1,
+                    ),
+                  );
+                },
               ),
             ),
           ],

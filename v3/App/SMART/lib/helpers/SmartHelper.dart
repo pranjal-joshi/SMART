@@ -307,6 +307,7 @@ const String JSON_TYPE_BROADCAST = "bcast";
 const String JSON_TYPE_STATE = "state";
 const String JSON_TYPE_STATE_REQ = "state_req";
 const String JSON_TYPE_INFO = "info";
+const String JSON_TYPE_LABEL = "label";
 const String JSON_TYPE_FACT_RST = "factory_reset";
 const String JSON_TYPE_SOFT_RST = "soft_reset";
 const String JSON_TYPE_NTP = "ntp";
