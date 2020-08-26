@@ -164,7 +164,11 @@ class _HomePageState extends State<HomePage> {
                           child: Container(
                             decoration: helper.isDarkModeActive
                                 ? BoxDecoration(
-                                    color: Colors.black,
+                                    color: Color.fromRGBO(25, 25, 25, 1),
+                                    borderRadius: BorderRadius.only(
+                                      bottomLeft: Radius.circular(10),
+                                      bottomRight: Radius.circular(10),
+                                    ),
                                   )
                                 : BoxDecoration(
                                     gradient: LinearGradient(
@@ -269,46 +273,49 @@ class _HomePageState extends State<HomePage> {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (_) => AlertDialog(
-        backgroundColor: Theme.of(context).canvasColor,
-        clipBehavior: Clip.antiAliasWithSaveLayer,
-        elevation: 2,
-        scrollable: true,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(24),
-        ),
-        title: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              LineAwesomeIcons.frown_o,
-              size: 64,
-              color: Theme.of(context).primaryColor,
+      builder: (_) => WillPopScope(
+        onWillPop: (){},
+        child: AlertDialog(
+          backgroundColor: Theme.of(context).canvasColor,
+          clipBehavior: Clip.antiAliasWithSaveLayer,
+          elevation: 2,
+          scrollable: true,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(24),
+          ),
+          title: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                LineAwesomeIcons.frown_o,
+                size: 64,
+                color: Theme.of(context).primaryColor,
+              ),
+              SizedBox(height: 8),
+              Text(
+                'No Network',
+                style: Theme.of(context).textTheme.headline1,
+              ),
+            ],
+          ),
+          content: Center(
+            child: Text(
+              'Waiting for the Internet..',
+              style: Theme.of(context).textTheme.headline3,
             ),
-            SizedBox(height: 8),
-            Text(
-              'No Network',
-              style: Theme.of(context).textTheme.headline1,
+          ),
+          actions: [
+            FlatButton(
+              onPressed: () => SystemNavigator.pop(),
+              child: Text(
+                'EXIT',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ),
           ],
         ),
-        content: Center(
-          child: Text(
-            'Waiting for the Internet..',
-            style: Theme.of(context).textTheme.headline3,
-          ),
-        ),
-        actions: [
-          FlatButton(
-            onPressed: () => SystemNavigator.pop(),
-            child: Text(
-              'EXIT',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-        ],
       ),
     );
   }
