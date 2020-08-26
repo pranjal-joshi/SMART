@@ -38,8 +38,6 @@ class _HomePageState extends State<HomePage> {
     SmartMqttTopic.AppDeviceDataSubscribe,
   ];
 
-  List<SmartRoomData> roomDataList = [];
-
   @override
   void initState() {
     mqtt.connect();
@@ -79,8 +77,8 @@ class _HomePageState extends State<HomePage> {
                 child: Padding(
                   padding: EdgeInsets.only(top: helper.screenHeight / 3.3),
                   child: FutureBuilder(
-                    initialData: roomDataList,
-                    future: loadRooms(),
+                    initialData: <SmartRoomData>[],
+                    future: SmartRoomData.loadFromDisk(),
                     builder: (_, AsyncSnapshot<List<SmartRoomData>> snapshot) {
                       if (snapshot.data.length == 0) {
                         return _getNoRoomLayout();
@@ -258,10 +256,5 @@ class _HomePageState extends State<HomePage> {
         ),
       ),
     );
-  }
-
-  Future<List<SmartRoomData>> loadRooms() async {
-    List<SmartRoomData> list = await SmartRoomData.loadFromDisk();
-    return list;
   }
 }

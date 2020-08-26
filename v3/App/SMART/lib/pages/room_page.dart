@@ -36,8 +36,8 @@ class _RoomPageState extends State<RoomPage> {
     SmartPopupMenu(title: 'Reset', icon: LineAwesomeIcons.refresh),
     SmartPopupMenu(title: 'Emergency', icon: LineAwesomeIcons.power_off),
   ];
-  final _scaffoldKey = GlobalKey<ScaffoldState>();
 
+  final _scaffoldKey = GlobalKey<ScaffoldState>();
   Map<String, dynamic> args = {};
 
   @override
@@ -61,35 +61,7 @@ class _RoomPageState extends State<RoomPage> {
               snap: false,
               floating: true,
               forceElevated: true,
-              actions: [
-                PopupMenuButton(
-                  itemBuilder: (_) => _menuList
-                      .map(
-                        (choice) => PopupMenuItem(
-                          value: choice,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: <Widget>[
-                              Text(
-                                choice.title,
-                                style: Theme.of(context).textTheme.bodyText2,
-                              ),
-                              Icon(
-                                choice.icon,
-                                color: helper.isDarkModeActive
-                                    ? color_white_dark
-                                    : Colors.black,
-                              ),
-                            ],
-                          ),
-                        ),
-                      )
-                      .toList(),
-                  onSelected: (SmartPopupMenu choice) {
-                    if (choice.title == 'Reset') _showResetDialog();
-                  },
-                ),
-              ],
+              actions: [_getPopupMenuButton()],
               expandedHeight: helper.screenHeight / 2.2 -
                   MediaQuery.of(context).padding.top,
               flexibleSpace: FlexibleSpaceBar(
@@ -147,12 +119,14 @@ class _RoomPageState extends State<RoomPage> {
                             ),
                             Padding(
                               padding: const EdgeInsets.only(top: 2),
-                              child: Text(
-                                '4 Devices',
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16,
-                                  color: Colors.white70,
+                              child: Consumer<JsonNodeLabelProvider>(
+                                builder: (_, labelData, __) => Text(
+                                  '${labelData.getDeviceDataListByRoomId(args['roomName']).length} Devices',
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                    color: Colors.white70,
+                                  ),
                                 ),
                               ),
                             ),
@@ -224,6 +198,7 @@ class _RoomPageState extends State<RoomPage> {
                           builder: (_, constraints) => SmartDeviceCard(
                             deviceData: deviceList[i],
                             helper: helper,
+                            mqtt: mqtt,
                             constraints: constraints,
                             textColor: Colors.indigo,
                             onTap: () => helper.showSnackbarTextWithGlobalKey(
@@ -248,6 +223,36 @@ class _RoomPageState extends State<RoomPage> {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _getPopupMenuButton() {
+    return PopupMenuButton(
+      itemBuilder: (_) => _menuList
+          .map(
+            (choice) => PopupMenuItem(
+              value: choice,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: <Widget>[
+                  Text(
+                    choice.title,
+                    style: Theme.of(context).textTheme.bodyText2,
+                  ),
+                  Icon(
+                    choice.icon,
+                    color: helper.isDarkModeActive
+                        ? color_white_dark
+                        : Colors.black,
+                  ),
+                ],
+              ),
+            ),
+          )
+          .toList(),
+      onSelected: (SmartPopupMenu choice) {
+        if (choice.title == 'Reset') _showResetDialog();
+      },
     );
   }
 
