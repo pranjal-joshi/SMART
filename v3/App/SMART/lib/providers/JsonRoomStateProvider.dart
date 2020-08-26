@@ -111,4 +111,21 @@ class JsonRoomStateProvider with ChangeNotifier {
     }
     return list;
   }
+
+  List<int> getPublishableStateBySmartId(String smartId) {
+    List<int> list = [];
+    try {
+      _roomStateMap.forEach((key, value) {
+        if (value.containsKey(smartId)) {
+          list = value[smartId];
+          return;
+        }
+      });
+    } catch (e) {
+      if (debug)
+        print(
+            '[JsonRoomStateProvider] -> getPublishableStateBySmartId EXCEPTION: $e');
+    }
+    return list;
+  }
 }
