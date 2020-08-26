@@ -1,7 +1,9 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:line_awesome_icons/line_awesome_icons.dart';
 import 'package:provider/provider.dart';
 
 import '../controllers/SmartMqtt.dart';
@@ -10,6 +12,7 @@ import '../controllers/SmartSync.dart';
 
 import '../providers/JsonNodeStatusProvider.dart';
 import '../providers/JsonRoomStateProvider.dart';
+import '../providers/ConnectivityProvider.dart';
 
 import '../helpers/SmartHelper.dart';
 import '../models/SmartRoomData.dart';
@@ -62,6 +65,10 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     helper = SmartHelper(context: context);
+
+    if (Provider.of<ConnectivityProviderResult>(context) ==
+        ConnectivityProviderResult.none)
+      Future.delayed(Duration.zero, () => _showConnectivityAlert());
 
     return Scaffold(
       body: SafeArea(
@@ -254,6 +261,54 @@ class _HomePageState extends State<HomePage> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  void _showConnectivityAlert() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => AlertDialog(
+        backgroundColor: Theme.of(context).canvasColor,
+        clipBehavior: Clip.antiAliasWithSaveLayer,
+        elevation: 2,
+        scrollable: true,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(24),
+        ),
+        title: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              LineAwesomeIcons.frown_o,
+              size: 64,
+              color: Theme.of(context).primaryColor,
+            ),
+            SizedBox(height: 8),
+            Text(
+              'No Network',
+              style: Theme.of(context).textTheme.headline1,
+            ),
+          ],
+        ),
+        content: Center(
+          child: Text(
+            'Waiting for the Internet..',
+            style: Theme.of(context).textTheme.headline3,
+          ),
+        ),
+        actions: [
+          FlatButton(
+            onPressed: () => SystemNavigator.pop(),
+            child: Text(
+              'EXIT',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

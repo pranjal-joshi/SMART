@@ -5,6 +5,7 @@ import 'providers/JsonNodeStatusProvider.dart';
 import 'providers/JsonRoomStateProvider.dart';
 import 'providers/JsonNodeInfoProvider.dart';
 import 'providers/JsonNodeLabelProvider.dart';
+import 'providers/ConnectivityProvider.dart';
 
 import 'helpers/SmartHelper.dart';
 
@@ -42,6 +43,9 @@ class SmartApp extends StatelessWidget {
           create: (ctx) => JsonNodeLabelProvider(debug: smartGlobalDebug),
           update: (ctx, stateProvider, labelProvider) =>
               labelProvider..roomStateProvider = stateProvider,
+        ),
+        StreamProvider<ConnectivityProviderResult>(
+          create: (ctx) => ConnectivityProvider().connectivityStream,
         ),
       ],
       child: MaterialApp(
