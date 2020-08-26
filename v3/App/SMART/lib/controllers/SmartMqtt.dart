@@ -333,7 +333,10 @@ class SmartMqtt {
     if (type == SmartMqttTopic.NodeStatus) return 'smart/$username/+/status';
     if (type == SmartMqttTopic.AppRoomConfig) {
       if (roomName == null)
-        throw SmartException(SmartException.roomNotProvided);
+        throw SmartException(
+          SmartException.roomNotProvidedException,
+          errorCausedBy: 'SmartMqtt',
+        );
       return 'smart/$username/app/$roomName/roomConfig';
     }
     if (type == SmartMqttTopic.AppDeviceConfig)
@@ -342,16 +345,22 @@ class SmartMqtt {
       return 'smart/$username/app/roomList';
     if (type == SmartMqttTopic.AppDeviceLabelsSubscribe)
       return 'smart/$username/+/label';
-    if(type == SmartMqttTopic.AppDeviceLabelsPublish) {
+    if (type == SmartMqttTopic.AppDeviceLabelsPublish) {
       if (smartId == null)
-        throw SmartException(SmartException.smartIdNotProvided);
+        throw SmartException(
+          SmartException.smartIdNotProvidedException,
+          errorCausedBy: 'SmartMqtt',
+        );
       return 'smart/$username/$smartId/label';
     }
     if (type == SmartMqttTopic.AppDeviceDataSubscribe)
       return 'smart/$username/+/deviceData';
     if (type == SmartMqttTopic.AppDeviceDataPublish) {
       if (smartId == null)
-        throw SmartException(SmartException.smartIdNotProvided);
+        throw SmartException(
+          SmartException.smartIdNotProvidedException,
+          errorCausedBy: 'SmartMqtt',
+        );
       return 'smart/$username/$smartId/deviceData';
     } else
       return 'smart/$username/gateway';
