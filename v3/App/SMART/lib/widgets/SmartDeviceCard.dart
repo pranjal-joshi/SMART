@@ -2,14 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:line_awesome_icons/line_awesome_icons.dart';
 import 'package:provider/provider.dart';
 
+import '../controllers/SmartMqtt.dart';
+
 import '../models/SmartDeviceData.dart';
+import '../models/JsonModel.dart';
 
 import '../providers/JsonRoomStateProvider.dart';
 
 import '../helpers/SmartHelper.dart';
 import '../widgets/SmartCard.dart';
 
+import '../exceptions/SmartException.dart';
+
 class SmartDeviceCard extends StatefulWidget {
+  final SmartMqtt mqtt;
   final SmartDeviceData deviceData;
   final SmartHelper helper;
   final BoxConstraints constraints;
@@ -18,6 +24,7 @@ class SmartDeviceCard extends StatefulWidget {
   final void Function() onTap;
 
   SmartDeviceCard({
+    @required this.mqtt,
     @required this.deviceData,
     @required this.helper,
     @required this.constraints,
@@ -148,9 +155,35 @@ class _SmartDeviceCardState extends State<SmartDeviceCard> {
                 value: _switchState,
                 onChanged: (val) {
                   setState(() => _switchState = !_switchState);
+                  // Publish state packet to gateway node 
+                  if (widget.mqtt != null) {
+                    List<int> _dataList = Provider.of<JsonRoomStateProvider>(
+                            context,
+                            listen: false)
+                        .getPublishableStateBySmartId(
+                            widget.deviceData.smartId);
+                    try {
+                      val
+                          ? _dataList[widget.deviceData.id] = 1
+                          : _dataList[widget.deviceData.id] = 0;
+                      widget.mqtt.publish(
+                        topic: widget.mqtt.getTopic(
+                          username: TEST_USERNAME,
+                          type: SmartMqttTopic.SwitchStateAppToNode,
+                        ),
+                        message: JsonAppToNodeSwitchState(
+                          smartId: widget.deviceData.smartId,
+                          dataList: _dataList,
+                        ).toJsonString(),
+                      );
+                    } on RangeError {
+                      throw SmartException(
+                        SmartException.appToNodeSwitchStateUpdateException,
+                        errorCausedBy: 'SmartDeviceCard',
+                      );
+                    }
+                  }
                   if (widget.onToggle != null) widget.onToggle(val);
-                  print(
-                      '[SmartDeviceCard] Toggle = $val -> ID: ${widget.deviceData.smartId} - ${widget.deviceData.id}');
                 },
               ),
             ),
