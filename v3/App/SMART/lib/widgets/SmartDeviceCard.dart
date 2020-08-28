@@ -40,6 +40,7 @@ class SmartDeviceCard extends StatefulWidget {
 class _SmartDeviceCardState extends State<SmartDeviceCard> {
   bool _switchState;
   JsonRoomStateProvider _stateProvider;
+  double _elevation = 10;
 
   @override
   void initState() {
@@ -64,8 +65,8 @@ class _SmartDeviceCardState extends State<SmartDeviceCard> {
     return SmartCard(
       helper: widget.helper,
       cornerRadius: widget.helper.screenWidth * 0.07,
-      elevation: 10,
-      blurRadius: SmartCardBlurRadius.Subtle,
+      elevation: _elevation,
+      blurRadius: _elevation > 0 ? SmartCardBlurRadius.Subtle : SmartCardBlurRadius.Flat,
       child: Stack(
         children: [
           Positioned(
@@ -137,9 +138,15 @@ class _SmartDeviceCardState extends State<SmartDeviceCard> {
               color: Colors.transparent,
               child: InkWell(
                 onTap: widget.onTap,
+                onHighlightChanged: (val){
+                  if(val)
+                    setState(() => _elevation = 0);
+                  else
+                    setState(() => _elevation = 10);
+                },
                 highlightColor: Colors.transparent,
                 splashColor:
-                    Theme.of(context).primaryColorDark.withOpacity(0.25),
+                    Theme.of(context).primaryColorDark.withOpacity(0.15),
               ),
             ),
           ),

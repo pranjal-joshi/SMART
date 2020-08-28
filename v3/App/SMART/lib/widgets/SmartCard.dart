@@ -69,7 +69,8 @@ class SmartCard extends StatelessWidget {
         ),
       );
     }
-    return Container(
+    return AnimatedContainer(
+      duration: Duration(milliseconds: 100),
       child: ClipRRect(
         child: child,
         clipBehavior: Clip.antiAlias,
