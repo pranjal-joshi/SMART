@@ -201,7 +201,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
       setState(() => _showSpinner = true);
       print('Resetting Password!');
       FirebaseAuth.instance
-          .sendPasswordResetEmail(email: _usernameController.text)
+          .sendPasswordResetEmail(email: _usernameController.text.trim())
           .then((value) {
         setState(() => _showSpinner = false);
         helper.showSnackbarTextWithGlobalKey(

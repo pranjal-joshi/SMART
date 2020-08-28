@@ -262,7 +262,7 @@ class _SignupPageState extends State<SignupPage> {
   }
 
   void signupProcees(SmartHelper helper) {
-    if (_passConformController.text != _passController.text) {
+    if (_passConformController.text.trim() != _passController.text.trim()) {
       helper.showSnackbarTextWithGlobalKey(
           _scaffoldKey, "Password Mismatch! Try Again..");
       _passController.clear();
@@ -274,8 +274,8 @@ class _SignupPageState extends State<SignupPage> {
       setState(() => _showSpinner = true);
       FirebaseAuth.instance
           .createUserWithEmailAndPassword(
-        email: _usernameController.text,
-        password: _passController.text,
+        email: _usernameController.text.trim(),
+        password: _passController.text.trim(),
       )
           .then((currentUser) {
         Firestore.instance
@@ -284,8 +284,8 @@ class _SignupPageState extends State<SignupPage> {
             .setData(
           {
             'uid': currentUser.user.uid,
-            'username': _usernameController.text,
-            'password': _passController.text,
+            'username': _usernameController.text.trim(),
+            'password': _passController.text.trim(),
           },
         );
         currentUser.user.sendEmailVerification().then(

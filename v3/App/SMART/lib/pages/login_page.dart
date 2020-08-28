@@ -311,8 +311,8 @@ class _LoginPageState extends State<LoginPage> {
       setState(() => _showSpinner = true);
       FirebaseAuth.instance
           .signInWithEmailAndPassword(
-        email: _usernameController.text,
-        password: _passController.text,
+        email: _usernameController.text.trim(),
+        password: _passController.text.trim(),
       )
           .then((currentUser) {
         if (!currentUser.user.isEmailVerified) {
@@ -335,9 +335,9 @@ class _LoginPageState extends State<LoginPage> {
               if (_rememberMe)
                 sp.saveLoginCredentials(
                   [
-                    _usernameController.text,
-                    _passController.text,
-                    _displayNameController.text,
+                    _usernameController.text.trim(),
+                    _passController.text.trim(),
+                    _displayNameController.text.trim(),
                   ],
                 );
               Navigator.of(context).pushReplacementNamed(route_home);
