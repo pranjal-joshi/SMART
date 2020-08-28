@@ -11,6 +11,7 @@ import 'helpers/SmartHelper.dart';
 
 import 'pages/room.dart';
 import 'pages/room_page.dart';
+import 'pages/device_page.dart';
 import 'pages/add_new_device_page.dart';
 import 'pages/configure_device_page.dart';
 import 'pages/login_page.dart';
@@ -57,6 +58,7 @@ class SmartApp extends StatelessWidget {
           route_home: (context) => HomePage(),
           route_room: (context) => Room(),
           route_room_page: (context) => RoomPage(),
+          route_device_page: (context) => DevicePage(),
           route_addNewDevice: (context) => AddNewDevicePage(),
           route_configureDevice: (context) => ConfigureDevicePage(),
         },

@@ -25,6 +25,7 @@ final color_material_dark = Colors.grey[900];
 // Page routes
 const String route_room = '/room';
 const String route_room_page = '/room_page';
+const String route_device_page = '/device_page';
 const String route_addNewDevice = '/addNewDevice_page';
 const String route_configureDevice = '/configureDevice_page';
 const String route_login = '/login_page';
