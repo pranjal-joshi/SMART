@@ -84,83 +84,88 @@ class _RoomPageState extends State<RoomPage> {
                           ),
                           borderRadius: _sliverAppBarBorder,
                         ),
-                  child: Stack(
-                    children: [
-                      Positioned(
-                        right: 16,
-                        top: MediaQuery.of(context).padding.top * 2.0,
-                        child: Icon(
-                          args['icon'],
-                          size: 156,
-                          color: Colors.white30,
+                  child: Padding(
+                    padding: EdgeInsets.only(
+                      top: MediaQuery.of(context).padding.top,
+                    ),
+                    child: Stack(
+                      children: [
+                        Positioned(
+                          right: 16,
+                          top: 32,
+                          child: Icon(
+                            args['icon'],
+                            size: 156,
+                            color: Colors.white30,
+                          ),
                         ),
-                      ),
-                      Positioned(
-                        top: MediaQuery.of(context).padding.top * 2.4,
-                        left: 16,
-                        right: 16,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Flexible(
-                              child: Text(
-                                args['roomName'],
-                                maxLines: 2,
-                                softWrap: true,
-                                overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(
-                                  fontSize: 32,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                  letterSpacing: 1,
-                                ),
-                              ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.only(top: 2),
-                              child: Consumer<JsonNodeLabelProvider>(
-                                builder: (_, labelData, __) => Text(
-                                  '${labelData.getDeviceDataListByRoomId(args['roomName']).length} Devices',
+                        Positioned(
+                          top: 48,
+                          left: 16,
+                          right: 16,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Flexible(
+                                child: Text(
+                                  args['roomName'],
+                                  maxLines: 2,
+                                  softWrap: true,
+                                  overflow: TextOverflow.ellipsis,
                                   style: const TextStyle(
+                                    fontSize: 32,
                                     fontWeight: FontWeight.bold,
-                                    fontSize: 16,
-                                    color: Colors.white70,
+                                    color: Colors.white,
+                                    letterSpacing: 1,
                                   ),
                                 ),
                               ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Positioned(
-                        bottom: 12,
-                        top: MediaQuery.of(context).padding.top * 6.2,
-                        left: 0,
-                        right: 0,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.only(left: 16),
-                              child: const Text(
-                                'Profiles',
-                                style: TextStyle(
-                                  fontSize: 24,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                  letterSpacing: 1,
-                                  height: 0.1,
+                              Padding(
+                                padding: const EdgeInsets.only(top: 2, left: 4),
+                                child: Consumer<JsonNodeLabelProvider>(
+                                  builder: (_, labelData, __) => Text(
+                                    '${labelData.getDeviceDataListByRoomId(args['roomName']).length} Devices',
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16,
+                                      color: Colors.white70,
+                                    ),
+                                  ),
                                 ),
                               ),
-                            ),
-                            Expanded(
-                              child: getProfileCards(),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
-                      ),
-                    ],
+                        Positioned(
+                          bottom: 12,
+                          top: MediaQuery.of(context).padding.top * 5.2,
+                          left: 0,
+                          right: 0,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.only(left: 16),
+                                child: const Text(
+                                  'Profiles',
+                                  style: TextStyle(
+                                    fontSize: 24,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                    letterSpacing: 1,
+                                    height: 0.1,
+                                  ),
+                                ),
+                              ),
+                              Expanded(
+                                child: getProfileCards(),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -196,16 +201,20 @@ class _RoomPageState extends State<RoomPage> {
                         ),
                         child: LayoutBuilder(
                           builder: (_, constraints) => SmartDeviceCard(
-                            deviceData: deviceList[i],
-                            helper: helper,
-                            mqtt: mqtt,
-                            constraints: constraints,
-                            textColor: Colors.indigo,
-                            onTap: () => helper.showSnackbarTextWithGlobalKey(
-                              _scaffoldKey,
-                              'Opening this Device Details!',
-                            ),
-                          ),
+                              deviceData: deviceList[i],
+                              helper: helper,
+                              mqtt: mqtt,
+                              constraints: constraints,
+                              textColor: Colors.indigo,
+                              onTap: () {
+                                Navigator.of(context).pushNamed(
+                                  route_device_page,
+                                  arguments: {
+                                    'roomName': args['roomName'],
+                                    'deviceData': deviceList[i],
+                                  },
+                                );
+                              }),
                         ),
                       ),
                       childCount: deviceList.length,

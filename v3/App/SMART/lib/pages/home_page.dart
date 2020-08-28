@@ -31,6 +31,8 @@ class _HomePageState extends State<HomePage> {
   final SmartMqtt mqtt = SmartMqtt(debug: true);
   final SmartSync smartSync = SmartSync(debug: false);
   final SmartSharedPreference sp = SmartSharedPreference();
+  final _scaffoldKey = GlobalKey<ScaffoldState>();
+  bool _isConnectivityAlertOpen = false;
 
   final List<SmartMqttTopic> subscriptionList = [
     SmartMqttTopic.NodeStatus,
@@ -65,12 +67,10 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     helper = SmartHelper(context: context);
-
-    if (Provider.of<ConnectivityProviderResult>(context) ==
-        ConnectivityProviderResult.none)
-      Future.delayed(Duration.zero, () => _showConnectivityAlert());
+    _showConnectivityAlert();
 
     return Scaffold(
+      key: _scaffoldKey,
       body: SafeArea(
         top: false,
         child: Container(
@@ -270,53 +270,63 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _showConnectivityAlert() {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (_) => WillPopScope(
-        onWillPop: (){},
-        child: AlertDialog(
-          backgroundColor: Theme.of(context).canvasColor,
-          clipBehavior: Clip.antiAliasWithSaveLayer,
-          elevation: 2,
-          scrollable: true,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(24),
-          ),
-          title: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                LineAwesomeIcons.frown_o,
-                size: 64,
-                color: Theme.of(context).primaryColor,
+    if (Provider.of<ConnectivityProviderResult>(context) ==
+        ConnectivityProviderResult.none)
+      Future.delayed(Duration.zero, () {
+        _isConnectivityAlertOpen = true;
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (_) => WillPopScope(
+            onWillPop: () {},
+            child: AlertDialog(
+              backgroundColor: Theme.of(context).canvasColor,
+              clipBehavior: Clip.antiAliasWithSaveLayer,
+              elevation: 2,
+              scrollable: true,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(24),
               ),
-              SizedBox(height: 8),
-              Text(
-                'No Network',
-                style: Theme.of(context).textTheme.headline1,
+              title: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    LineAwesomeIcons.frown_o,
+                    size: 64,
+                    color: Theme.of(context).primaryColor,
+                  ),
+                  SizedBox(height: 8),
+                  Text(
+                    'No Network',
+                    style: Theme.of(context).textTheme.headline1,
+                  ),
+                ],
               ),
-            ],
-          ),
-          content: Center(
-            child: Text(
-              'Waiting for the Internet..',
-              style: Theme.of(context).textTheme.headline3,
-            ),
-          ),
-          actions: [
-            FlatButton(
-              onPressed: () => SystemNavigator.pop(),
-              child: Text(
-                'EXIT',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
+              content: Center(
+                child: Text(
+                  'Waiting for the Internet..',
+                  style: Theme.of(context).textTheme.headline3,
                 ),
               ),
+              actions: [
+                FlatButton(
+                  onPressed: () => SystemNavigator.pop(),
+                  child: Text(
+                    'EXIT',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
-      ),
-    );
+          ),
+        );
+      });
+      else {
+        if(_isConnectivityAlertOpen)
+          Navigator.of(context).pop();
+        _isConnectivityAlertOpen = false;
+      }
   }
 }
