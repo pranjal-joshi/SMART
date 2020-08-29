@@ -181,6 +181,9 @@ class SmartHelper {
     accentColor: Colors.red[400],
     scaffoldBackgroundColor: Colors.black,
     canvasColor: Colors.grey[900],
+    iconTheme: IconThemeData(
+      color: Colors.white70,
+    ),
     floatingActionButtonTheme: FloatingActionButtonThemeData(
       foregroundColor: Colors.black,
       backgroundColor: color_accent.withOpacity(1),
@@ -284,7 +287,8 @@ class SmartHelper {
 
   double map(double number, double fromLow, double fromHigh,
       {double toLow = 0.0, double toHigh = 1.0}) {
-    return (number - fromLow) * (toHigh - toLow) / (fromHigh - fromLow) + toLow * 1.0;
+    return (number - fromLow) * (toHigh - toLow) / (fromHigh - fromLow) +
+        toLow * 1.0;
   }
 }
 
