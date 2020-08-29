@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_sticky_header/flutter_sticky_header.dart';
-import 'package:line_awesome_icons/line_awesome_icons.dart';
+import 'package:line_icons/line_icons.dart';
 import 'package:provider/provider.dart';
 
 import '../helpers/SmartHelper.dart';
@@ -32,9 +32,9 @@ class _RoomPageState extends State<RoomPage> {
     bottomRight: Radius.circular(10),
   );
   final _menuList = [
-    SmartPopupMenu(title: 'Edit', icon: LineAwesomeIcons.edit),
-    SmartPopupMenu(title: 'Reset', icon: LineAwesomeIcons.refresh),
-    SmartPopupMenu(title: 'Emergency', icon: LineAwesomeIcons.power_off),
+    SmartPopupMenu(title: 'Edit', icon: LineIcons.edit),
+    SmartPopupMenu(title: 'Reset', icon: LineIcons.sync_solid),
+    SmartPopupMenu(title: 'Emergency', icon: LineIcons.power_off_solid),
   ];
 
   final _scaffoldKey = GlobalKey<ScaffoldState>();
@@ -357,7 +357,7 @@ class _RoomPageState extends State<RoomPage> {
       resetedList.add(
         SmartDeviceData(
           deviceName: 'Device Name',
-          iconData: LineAwesomeIcons.adjust,
+          iconData: LineIcons.adjust_solid,
           id: deviceList[i].id,
           smartId: deviceList[i].smartId,
           switchState: false,

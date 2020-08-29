@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
-import 'package:line_awesome_icons/line_awesome_icons.dart';
+import 'package:line_icons/line_icons.dart';
 
 import '../providers/JsonRoomStateProvider.dart';
 
@@ -104,7 +104,7 @@ class JsonNodeLabelProvider with ChangeNotifier {
               smartId: key,
               deviceName: e,
               id: valueIndex,
-              iconData: LineAwesomeIcons.lightbulb_o,
+              iconData: LineIcons.lightbulb,
               switchState: _roomStateProvider.getStateBySmartId(key)[valueIndex],
             ),
           );

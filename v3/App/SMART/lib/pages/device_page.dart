@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:line_awesome_icons/line_awesome_icons.dart';
 import 'package:provider/provider.dart';
+import 'package:line_icons/line_icons.dart';
 import 'dart:io' show Platform;
 
 import '../helpers/SmartHelper.dart';
@@ -105,7 +105,7 @@ class _DevicePageState extends State<DevicePage> {
                               child: IconButton(
                                 tooltip: 'Edit Device Name',
                                 icon: Icon(
-                                  LineAwesomeIcons.edit,
+                                  LineIcons.edit,
                                   color:
                                       Theme.of(context).primaryIconTheme.color,
                                 ),
@@ -166,7 +166,7 @@ class _DevicePageState extends State<DevicePage> {
                                 children: [
                                   if (deviceData.showTimerIcon)
                                     Icon(
-                                      LineAwesomeIcons.clock_o,
+                                      LineIcons.clock,
                                       color: Colors.white30,
                                       size: 28,
                                     ),
@@ -175,7 +175,7 @@ class _DevicePageState extends State<DevicePage> {
                                   ),
                                   if (deviceData.showMotionIcon)
                                     Icon(
-                                      Icons.directions_walk,
+                                      LineIcons.walking_solid,
                                       color: Colors.white30,
                                       size: 28,
                                     )
@@ -248,7 +248,7 @@ class _DevicePageState extends State<DevicePage> {
                       child: RotatedBox(
                         quarterTurns: 2,
                         child: Container(
-                          height: 48,
+                          height: 56,
                           width: double.infinity,
                           decoration: helper.isDarkModeActive
                               ? BoxDecoration(

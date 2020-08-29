@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:line_awesome_icons/line_awesome_icons.dart';
+import 'package:line_icons/line_icons.dart';
 import 'package:provider/provider.dart';
 
 import '../controllers/SmartMqtt.dart';
@@ -291,7 +291,7 @@ class _HomePageState extends State<HomePage> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(
-                    LineAwesomeIcons.frown_o,
+                    LineIcons.frown,
                     size: 64,
                     color: Theme.of(context).primaryColor,
                   ),

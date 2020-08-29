@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:line_awesome_icons/line_awesome_icons.dart';
+import 'package:line_icons/line_icons.dart';
 import 'package:provider/provider.dart';
 
 import '../controllers/SmartMqtt.dart';
@@ -106,7 +106,7 @@ class _SmartDeviceCardState extends State<SmartDeviceCard> {
               children: [
                 if (widget.deviceData.showTimerIcon)
                   Icon(
-                    LineAwesomeIcons.clock_o,
+                    LineIcons.clock,
                     color: widget.helper.isDarkModeActive
                         ? Colors.white30
                         : Colors.grey,
@@ -114,7 +114,8 @@ class _SmartDeviceCardState extends State<SmartDeviceCard> {
                   ),
                 if (widget.deviceData.showMotionIcon)
                   Icon(
-                    Icons.directions_walk,
+                    //Icons.directions_walk,
+                    LineIcons.walking_solid,
                     color: widget.helper.isDarkModeActive
                         ? Colors.white30
                         : Colors.grey,
@@ -127,7 +128,7 @@ class _SmartDeviceCardState extends State<SmartDeviceCard> {
             bottom: 8,
             right: 16,
             child: Icon(
-              LineAwesomeIcons.arrow_right,
+              LineIcons.arrow_right_solid,
               color:
                   widget.helper.isDarkModeActive ? Colors.white30 : Colors.grey,
               size: 28,
