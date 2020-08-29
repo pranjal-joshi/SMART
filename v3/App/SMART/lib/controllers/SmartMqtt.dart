@@ -4,10 +4,14 @@ import 'dart:io';
 import 'package:connectivity/connectivity.dart';
 import 'package:device_info/device_info.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:mqtt_client/mqtt_client.dart';
 import 'package:mqtt_client/mqtt_server_client.dart';
 
 import '../helpers/SmartHelper.dart';
+import '../providers/JsonRoomStateProvider.dart';
+import '../models/JsonModel.dart';
+import '../models/SmartDeviceData.dart';
 import '../controllers/SmartSharedPref.dart';
 import '../exceptions/SmartException.dart';
 
@@ -364,6 +368,35 @@ class SmartMqtt {
       return 'smart/$username/$smartId/deviceData';
     } else
       return 'smart/$username/gateway';
+  }
+
+  void toggleNodeSwitchState({
+    @required BuildContext context,
+    @required bool value,
+    @required SmartDeviceData deviceData,
+    String erroCausedBy = 'SmartMqtt',
+  }) {
+    List<int> _dataList =
+        Provider.of<JsonRoomStateProvider>(context, listen: false)
+            .getPublishableStateBySmartId(deviceData.smartId);
+    try {
+      value ? _dataList[deviceData.id] = 1 : _dataList[deviceData.id] = 0;
+      publish(
+        topic: getTopic(
+          username: TEST_USERNAME,
+          type: SmartMqttTopic.SwitchStateAppToNode,
+        ),
+        message: JsonAppToNodeSwitchState(
+          smartId: deviceData.smartId,
+          dataList: _dataList,
+        ).toJsonString(),
+      );
+    } on RangeError {
+      throw SmartException(
+        SmartException.appToNodeSwitchStateUpdateException,
+        errorCausedBy: erroCausedBy,
+      );
+    }
   }
 
   // Get Device UID to init MQTT connection

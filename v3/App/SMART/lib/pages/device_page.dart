@@ -1,17 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:line_icons/line_icons.dart';
 import 'dart:io' show Platform;
 
 import '../helpers/SmartHelper.dart';
-import '../exceptions/SmartException.dart';
 
 import '../controllers/SmartMqtt.dart';
 
 import '../models/SmartDeviceData.dart';
-import '../models/JsonModel.dart';
-
-import '../providers/JsonRoomStateProvider.dart';
 
 import '../widgets/SmartCard.dart';
 
@@ -23,15 +18,25 @@ class DevicePage extends StatefulWidget {
 class _DevicePageState extends State<DevicePage> {
   SmartHelper helper;
   SmartMqtt mqtt = SmartMqtt();
-  bool _switchState;
+  Map<String, dynamic> args = {};
+  SmartDeviceData deviceData;
+  bool _switchState = false;
+  bool _firstTime = true;
+
+  @override
+  void didChangeDependencies() {
+    if (_firstTime) {
+      _firstTime = false;
+      args = ModalRoute.of(context).settings.arguments as Map<String, dynamic>;
+      deviceData = args['deviceData'];
+      _switchState = deviceData.switchState;
+    }
+    super.didChangeDependencies();
+  }
 
   @override
   Widget build(BuildContext context) {
     helper = SmartHelper(context: context);
-    final Map<String, dynamic> args =
-        ModalRoute.of(context).settings.arguments as Map<String, dynamic>;
-    final SmartDeviceData deviceData = args['deviceData'];
-    _switchState = deviceData.switchState;
 
     return Scaffold(
       body: SafeArea(
@@ -41,6 +46,47 @@ class _DevicePageState extends State<DevicePage> {
             return Stack(
               clipBehavior: Clip.antiAlias,
               children: [
+                Align(
+                  alignment: Alignment.topCenter,
+                  child: Padding(
+                    padding: EdgeInsets.only(
+                      top: constraints.maxHeight / 3.1,
+                      bottom: 52,
+                    ),
+                    child: ListView(
+                      children: [
+                        SwitchListTile(
+                          secondary: Icon(
+                            LineIcons.power_off_solid,
+                            color: Theme.of(context).iconTheme.color,
+                            size: 28,
+                          ),
+                          title: Text(
+                            'Control Power',
+                            style:
+                                Theme.of(context).textTheme.headline3.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                          ),
+                          subtitle: Text(
+                            _switchState ? 'Powered ON' : 'Powered OFF',
+                            style: Theme.of(context).textTheme.subtitle1,
+                          ),
+                          value: _switchState,
+                          onChanged: (val) {
+                            setState(() => _switchState = val);
+                            mqtt.toggleNodeSwitchState(
+                              context: context,
+                              value: val,
+                              deviceData: deviceData,
+                              erroCausedBy: 'DevicePage',
+                            );
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
                 Align(
                   alignment: Alignment.topCenter,
                   child: SmartCard(
@@ -125,7 +171,7 @@ class _DevicePageState extends State<DevicePage> {
                               alignment: Alignment.centerLeft,
                               child: Padding(
                                 padding: EdgeInsets.only(
-                                  right: constraints.maxWidth/2,
+                                  right: constraints.maxWidth / 2,
                                   left: 16,
                                 ),
                                 child: Column(
@@ -180,53 +226,6 @@ class _DevicePageState extends State<DevicePage> {
                                       size: 28,
                                     )
                                 ],
-                              ),
-                            ),
-                            Positioned(
-                              bottom: 16,
-                              right: 16,
-                              child: SizedBox(
-                                child: Switch.adaptive(
-                                  inactiveTrackColor: helper.isDarkModeActive
-                                      ? Colors.white24
-                                      : null,
-                                  materialTapTargetSize:
-                                      MaterialTapTargetSize.padded,
-                                  value: _switchState,
-                                  onChanged: (val) {
-                                    setState(
-                                        () => _switchState = !_switchState);
-                                    // Publish state packet to gateway node
-                                    List<int> _dataList =
-                                        Provider.of<JsonRoomStateProvider>(
-                                                context,
-                                                listen: false)
-                                            .getPublishableStateBySmartId(
-                                                deviceData.smartId);
-                                    try {
-                                      val
-                                          ? _dataList[deviceData.id] = 1
-                                          : _dataList[deviceData.id] = 0;
-                                      mqtt.publish(
-                                        topic: mqtt.getTopic(
-                                          username: TEST_USERNAME,
-                                          type: SmartMqttTopic
-                                              .SwitchStateAppToNode,
-                                        ),
-                                        message: JsonAppToNodeSwitchState(
-                                          smartId: deviceData.smartId,
-                                          dataList: _dataList,
-                                        ).toJsonString(),
-                                      );
-                                    } on RangeError {
-                                      throw SmartException(
-                                        SmartException
-                                            .appToNodeSwitchStateUpdateException,
-                                        errorCausedBy: 'SmartDevicePage',
-                                      );
-                                    }
-                                  },
-                                ),
                               ),
                             ),
                           ],
