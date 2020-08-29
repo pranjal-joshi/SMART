@@ -104,7 +104,7 @@ class JsonNodeLabelProvider with ChangeNotifier {
               smartId: key,
               deviceName: e,
               id: valueIndex,
-              iconData: LineIcons.lightbulb,
+              iconData: LineIcons.atom_solid,
               switchState: _roomStateProvider.getStateBySmartId(key)[valueIndex],
             ),
           );

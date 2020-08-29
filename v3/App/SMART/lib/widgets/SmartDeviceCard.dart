@@ -66,7 +66,9 @@ class _SmartDeviceCardState extends State<SmartDeviceCard> {
       helper: widget.helper,
       cornerRadius: widget.helper.screenWidth * 0.07,
       elevation: _elevation,
-      blurRadius: _elevation > 0 ? SmartCardBlurRadius.Subtle : SmartCardBlurRadius.Flat,
+      blurRadius: _elevation > 0
+          ? SmartCardBlurRadius.Subtle
+          : SmartCardBlurRadius.Flat,
       child: Stack(
         children: [
           Positioned(
@@ -139,8 +141,8 @@ class _SmartDeviceCardState extends State<SmartDeviceCard> {
               color: Colors.transparent,
               child: InkWell(
                 onTap: widget.onTap,
-                onHighlightChanged: (val){
-                  if(val)
+                onHighlightChanged: (val) {
+                  if (val)
                     setState(() => _elevation = 0);
                   else
                     setState(() => _elevation = 10);
@@ -156,41 +158,19 @@ class _SmartDeviceCardState extends State<SmartDeviceCard> {
             alignment: Alignment.centerRight,
             child: RotatedBox(
               quarterTurns: 3,
-              child: Switch.adaptive(
+              child: Switch(
                 inactiveTrackColor:
                     widget.helper.isDarkModeActive ? Colors.white24 : null,
                 materialTapTargetSize: MaterialTapTargetSize.padded,
                 value: _switchState,
                 onChanged: (val) {
                   setState(() => _switchState = !_switchState);
-                  // Publish state packet to gateway node 
-                  if (widget.mqtt != null) {
-                    List<int> _dataList = Provider.of<JsonRoomStateProvider>(
-                            context,
-                            listen: false)
-                        .getPublishableStateBySmartId(
-                            widget.deviceData.smartId);
-                    try {
-                      val
-                          ? _dataList[widget.deviceData.id] = 1
-                          : _dataList[widget.deviceData.id] = 0;
-                      widget.mqtt.publish(
-                        topic: widget.mqtt.getTopic(
-                          username: TEST_USERNAME,
-                          type: SmartMqttTopic.SwitchStateAppToNode,
-                        ),
-                        message: JsonAppToNodeSwitchState(
-                          smartId: widget.deviceData.smartId,
-                          dataList: _dataList,
-                        ).toJsonString(),
-                      );
-                    } on RangeError {
-                      throw SmartException(
-                        SmartException.appToNodeSwitchStateUpdateException,
-                        errorCausedBy: 'SmartDeviceCard',
-                      );
-                    }
-                  }
+                  widget.mqtt.toggleNodeSwitchState(
+                    context: context,
+                    value: val,
+                    deviceData: widget.deviceData,
+                    erroCausedBy: 'SmartDeviceCard',
+                  );
                   if (widget.onToggle != null) widget.onToggle(val);
                 },
               ),
