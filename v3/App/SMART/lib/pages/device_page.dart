@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_iconpicker/flutter_iconpicker.dart';
 import 'package:line_icons/line_icons.dart';
 import 'dart:io' show Platform;
 
@@ -21,7 +22,12 @@ class _DevicePageState extends State<DevicePage> {
   Map<String, dynamic> args = {};
   SmartDeviceData deviceData;
   bool _switchState = false;
+  bool _scheduleEnabled = false;
+  bool _motionEnabled = false;
   bool _firstTime = true;
+  Icon _editDeviceIcon;
+  IconData _iconToDisplay;
+  final _editingController = TextEditingController();
 
   @override
   void didChangeDependencies() {
@@ -30,8 +36,18 @@ class _DevicePageState extends State<DevicePage> {
       args = ModalRoute.of(context).settings.arguments as Map<String, dynamic>;
       deviceData = args['deviceData'];
       _switchState = deviceData.switchState;
+      _scheduleEnabled = deviceData.showTimerIcon;
+      _motionEnabled = deviceData.showMotionIcon;
+      _editingController.text = deviceData.deviceName;
+      _iconToDisplay = deviceData.iconData;
     }
     super.didChangeDependencies();
+  }
+
+  @override
+  void dispose() {
+    _editingController.dispose();
+    super.dispose();
   }
 
   @override
@@ -46,47 +62,7 @@ class _DevicePageState extends State<DevicePage> {
             return Stack(
               clipBehavior: Clip.antiAlias,
               children: [
-                Align(
-                  alignment: Alignment.topCenter,
-                  child: Padding(
-                    padding: EdgeInsets.only(
-                      top: constraints.maxHeight / 3.1,
-                      bottom: 52,
-                    ),
-                    child: ListView(
-                      children: [
-                        SwitchListTile(
-                          secondary: Icon(
-                            LineIcons.power_off_solid,
-                            color: Theme.of(context).iconTheme.color,
-                            size: 28,
-                          ),
-                          title: Text(
-                            'Control Power',
-                            style:
-                                Theme.of(context).textTheme.headline3.copyWith(
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                          ),
-                          subtitle: Text(
-                            _switchState ? 'Powered ON' : 'Powered OFF',
-                            style: Theme.of(context).textTheme.subtitle1,
-                          ),
-                          value: _switchState,
-                          onChanged: (val) {
-                            setState(() => _switchState = val);
-                            mqtt.toggleNodeSwitchState(
-                              context: context,
-                              value: val,
-                              deviceData: deviceData,
-                              erroCausedBy: 'DevicePage',
-                            );
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
+                _getControlArea(constraints),
                 Align(
                   alignment: Alignment.topCenter,
                   child: SmartCard(
@@ -97,7 +73,7 @@ class _DevicePageState extends State<DevicePage> {
                     cornerRadius: 10,
                     child: Container(
                       width: constraints.maxWidth,
-                      height: constraints.maxHeight / 2.7 -
+                      height: constraints.maxHeight / 3 -
                           MediaQuery.of(context).padding.top,
                       decoration: helper.isDarkModeActive
                           ? BoxDecoration(
@@ -142,29 +118,33 @@ class _DevicePageState extends State<DevicePage> {
                                 onPressed: () => ModalRoute.of(context).canPop
                                     ? Navigator.of(context).pop()
                                     : null,
-                                tooltip: 'Go Back',
+                                tooltip: 'Back',
+                              ),
+                            ),
+                            Align(
+                              alignment: Alignment.centerRight,
+                              child: Padding(
+                                padding: const EdgeInsets.only(right: 16),
+                                child: Icon(
+                                  _iconToDisplay,
+                                  size: constraints.maxWidth / 2.5,
+                                  color: Colors.white30,
+                                ),
                               ),
                             ),
                             Positioned(
                               top: 6,
                               right: 6,
                               child: IconButton(
-                                tooltip: 'Edit Device Name',
+                                tooltip: 'Edit Device',
+                                iconSize: 26,
                                 icon: Icon(
                                   LineIcons.edit,
                                   color:
                                       Theme.of(context).primaryIconTheme.color,
                                 ),
-                                onPressed: () => print('Edit Device Name'),
-                              ),
-                            ),
-                            Positioned(
-                              right: 16,
-                              top: 32,
-                              child: Icon(
-                                deviceData.iconData,
-                                size: 156,
-                                color: Colors.white30,
+                                onPressed: () =>
+                                    _editDeviceDialog(context: context),
                               ),
                             ),
                             Align(
@@ -190,15 +170,6 @@ class _DevicePageState extends State<DevicePage> {
                                           color: Colors.white,
                                           letterSpacing: 1,
                                         ),
-                                      ),
-                                    ),
-                                    Text(
-                                      'Switched ON/OFF',
-                                      style: const TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 16,
-                                        color: Colors.white70,
-                                        height: 1.7,
                                       ),
                                     ),
                                   ],
@@ -305,6 +276,275 @@ class _DevicePageState extends State<DevicePage> {
           },
         ),
       ),
+    );
+  }
+
+  Widget _getSwitchTile({
+    @required final Icon icon,
+    @required final String title,
+    final String subtitle,
+    @required final bool value,
+    @required final void Function(bool) onChanged,
+  }) {
+    return SwitchListTile(
+      dense: true,
+      inactiveTrackColor: helper.isDarkModeActive ? Colors.white24 : null,
+      secondary: icon,
+      title: Text(
+        title,
+        style: Theme.of(context).textTheme.headline3.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
+      ),
+      subtitle: subtitle != null
+          ? Text(
+              subtitle,
+              style: Theme.of(context).textTheme.subtitle1,
+            )
+          : null,
+      value: value,
+      onChanged: (val) => onChanged(val),
+    );
+  }
+
+  Widget _getAnimatedExpander({
+    final int millliseconds = 300,
+    @required final bool controller,
+    @required final Widget child,
+  }) {
+    return AnimatedOpacity(
+      duration: Duration(milliseconds: millliseconds),
+      opacity: controller ? 1 : 0,
+      child: AnimatedContainer(
+        duration: Duration(milliseconds: millliseconds),
+        width: double.infinity,
+        height: controller ? 200 : 0,
+        child: child,
+      ),
+    );
+  }
+
+  Widget _getDivider() {
+    return Divider(
+      color: Colors.grey.withOpacity(0.7),
+      indent: 8,
+      endIndent: 8,
+    );
+  }
+
+  Widget _getControlArea(final BoxConstraints constraints) {
+    return Align(
+      alignment: Alignment.topCenter,
+      child: Padding(
+        padding: EdgeInsets.only(
+          top: constraints.maxHeight / 4,
+          bottom: 52,
+        ),
+        child: ListView(
+          children: [
+            // Power Switch Tile
+            const SizedBox(height: 24),
+            _getSwitchTile(
+              icon: Icon(
+                LineIcons.power_off_solid,
+                color: _switchState
+                    ? Theme.of(context).primaryColorDark
+                    : Theme.of(context).iconTheme.color,
+                size: 28,
+              ),
+              title: 'Control Power',
+              subtitle: _switchState ? 'Switched ON' : 'Switched OFF',
+              value: _switchState,
+              onChanged: (val) {
+                setState(() => _switchState = val);
+                mqtt.toggleNodeSwitchState(
+                  context: context,
+                  value: val,
+                  deviceData: deviceData,
+                  erroCausedBy: 'DevicePage',
+                );
+              },
+            ),
+            _getDivider(),
+            // Schedule control switch tile
+            _getSwitchTile(
+              icon: Icon(
+                LineIcons.clock,
+                color: _scheduleEnabled
+                    ? Theme.of(context).primaryColorDark
+                    : Theme.of(context).iconTheme.color,
+                size: 28,
+              ),
+              title: 'Schedule',
+              subtitle: _scheduleEnabled ? 'Manage Schedule Time' : 'Disabled',
+              value: _scheduleEnabled,
+              onChanged: (val) {
+                setState(() => _scheduleEnabled = val);
+              },
+            ),
+            _getAnimatedExpander(
+              controller: _scheduleEnabled,
+              child: Placeholder(),
+            ),
+            _getDivider(),
+            _getSwitchTile(
+              icon: Icon(
+                LineIcons.walking_solid,
+                color: _motionEnabled
+                    ? Theme.of(context).primaryColorDark
+                    : Theme.of(context).iconTheme.color,
+                size: 28,
+              ),
+              title: 'MotionSense',
+              subtitle: _motionEnabled ? 'Active' : 'Disabled',
+              value: _motionEnabled,
+              onChanged: (val) {
+                setState(() => _motionEnabled = val);
+              },
+            ),
+            _getAnimatedExpander(
+              controller: _motionEnabled,
+              child: Placeholder(),
+            ),
+            const SizedBox(height: 32),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _editDeviceDialog({@required BuildContext context}) {
+    final OutlineInputBorder outlineInputBorder_2 = OutlineInputBorder(
+      borderRadius: BorderRadius.circular(16),
+      borderSide: BorderSide(
+        color: Theme.of(context).primaryColorDark,
+        width: 2,
+      ),
+    );
+    final OutlineInputBorder outlineInputBorder_3 = OutlineInputBorder(
+      borderRadius: BorderRadius.circular(16),
+      borderSide: BorderSide(
+        color: Theme.of(context).primaryColorDark,
+        width: 3,
+      ),
+    );
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          backgroundColor: Theme.of(context).canvasColor,
+          clipBehavior: Clip.antiAlias,
+          elevation: 2,
+          scrollable: true,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(24),
+          ),
+          title: Text(
+            "Edit Device",
+            textAlign: TextAlign.start,
+          ),
+          titleTextStyle: Theme.of(context).textTheme.headline1,
+          content: TextFormField(
+            cursorColor: Theme.of(context).primaryColorDark,
+            textInputAction: TextInputAction.done,
+            style: Theme.of(context).textTheme.headline3,
+            controller: _editingController,
+            validator: (msg) {
+              if (msg == null) {
+                return 'Can\'t be left blank!';
+              }
+              return null;
+            },
+            decoration: InputDecoration(
+              isDense: true,
+              labelText: 'Device Name',
+              hintText: 'E.g. Lamp or TV',
+              hintMaxLines: 2,
+              hintStyle: TextStyle(
+                color: Theme.of(context).textTheme.subtitle1.color,
+                fontSize: Theme.of(context).textTheme.headline3.fontSize,
+              ),
+              labelStyle: TextStyle(
+                color: Theme.of(context).primaryColorDark,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 0.5,
+              ),
+              border: outlineInputBorder_2,
+              enabledBorder: outlineInputBorder_2,
+              focusedBorder: outlineInputBorder_3,
+              errorBorder: outlineInputBorder_2,
+              errorMaxLines: 2,
+              errorStyle: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 13,
+                color: helper.isDarkModeActive
+                    ? Colors.blue[400]
+                    : Colors.blue[700],
+              ),
+              prefixIcon: IconButton(
+                icon: _editDeviceIcon == null
+                    ? Icon(
+                        LineIcons.lightbulb,
+                        color: Theme.of(context).primaryColorDark,
+                        size: 32,
+                      )
+                    : _editDeviceIcon,
+                onPressed: () async {
+                  IconData iconData = await FlutterIconPicker.showIconPicker(
+                    context,
+                    iconPackMode: IconPack.lineAwesomeIcons,
+                    backgroundColor: Theme.of(context).canvasColor,
+                    iconColor: Theme.of(context).accentColor,
+                    iconPickerShape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    title: Text(
+                      'Select Icon',
+                      style: Theme.of(context).textTheme.headline1,
+                    ),
+                  );
+                  if (iconData != null) _iconToDisplay = iconData;
+                  _editDeviceIcon = Icon(
+                    iconData != null ? iconData : LineIcons.lightbulb,
+                    color: Theme.of(context).primaryColorDark,
+                    size: 32,
+                  );
+                  setState(() {
+                    Navigator.of(context).pop();
+                    _editDeviceDialog(context: context);
+                  });
+                },
+              ),
+            ),
+          ),
+          actions: <Widget>[
+            FlatButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                setState(() {});
+              },
+              child: Text(
+                'CANCEL',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            FlatButton(
+              onPressed: () async {
+                //TODO - Implement Rename Device Logic
+                setState(() => Navigator.of(context).pop());
+              },
+              child: Text(
+                'SAVE',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }
