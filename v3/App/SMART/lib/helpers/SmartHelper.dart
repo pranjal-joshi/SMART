@@ -87,6 +87,11 @@ class SmartHelper {
     return color_accent;
   }
 
+  Color get indigoColor {
+    if (isDarkModeActive) return Colors.indigo[300];
+    return Colors.indigo;
+  }
+
   double get screenWidth {
     return MediaQuery.of(_context).size.width;
   }
@@ -172,6 +177,34 @@ class SmartHelper {
       elevation: 8,
       color: color_accent,
     ),
+    timePickerTheme: TimePickerThemeData(
+      dayPeriodColor: Colors.grey[300],
+      dayPeriodTextStyle: TextStyle(
+        fontWeight: FontWeight.bold,
+      ),
+      dayPeriodShape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(48),
+      ),
+      dialBackgroundColor: Colors.grey[300],
+      dialTextColor: Colors.black,
+      entryModeIconColor: Colors.black45,
+      helpTextStyle: TextStyle(
+        color: Colors.black54,
+        fontWeight: FontWeight.bold,
+      ),
+      hourMinuteColor: Colors.grey[300],
+      hourMinuteTextColor: Colors.black87,
+      hourMinuteTextStyle: TextStyle(
+        fontSize: 36,
+        fontWeight: FontWeight.bold,
+      ),
+      hourMinuteShape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(24),
+      ),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(24),
+      ),
+    ),
   );
 
   final ThemeData themeDark = ThemeData(
@@ -226,6 +259,35 @@ class SmartHelper {
       brightness: Brightness.dark,
       elevation: 8,
       color: color_material_dark,
+    ),
+    timePickerTheme: TimePickerThemeData(
+      backgroundColor: Colors.grey[850],
+      dayPeriodTextColor: color_white_dark,
+      dayPeriodTextStyle: TextStyle(
+        fontWeight: FontWeight.bold,
+      ),
+      dayPeriodShape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(48),
+      ),
+      dialBackgroundColor: Colors.grey[800],
+      dialTextColor: color_white_dark,
+      entryModeIconColor: Colors.transparent,
+      helpTextStyle: TextStyle(
+        color: color_white_dark,
+        fontWeight: FontWeight.bold,
+      ),
+      hourMinuteColor: Colors.grey[800],
+      hourMinuteTextColor: color_white_dark,
+      hourMinuteTextStyle: TextStyle(
+        fontSize: 36,
+        fontWeight: FontWeight.bold,
+      ),
+      hourMinuteShape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(24),
+      ),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(24),
+      ),
     ),
   );
 
