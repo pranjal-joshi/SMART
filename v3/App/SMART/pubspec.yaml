@@ -32,6 +32,7 @@ dependencies:
   cloud_firestore: ^0.13.7
   provider: ^4.3.2
   flutter_sticky_header: ^0.4.5
+  weekday_selector: ^0.4.0
   line_icons:
     git:
       url: https://github.com/galonsos/line_icons.git

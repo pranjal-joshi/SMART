@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_iconpicker/flutter_iconpicker.dart';
 import 'package:line_icons/line_icons.dart';
+import 'package:weekday_selector/weekday_selector.dart';
 import 'dart:io' show Platform;
 
 import '../helpers/SmartHelper.dart';
@@ -27,6 +28,11 @@ class _DevicePageState extends State<DevicePage> {
   bool _firstTime = true;
   Icon _editDeviceIcon;
   IconData _iconToDisplay;
+  TimeOfDay _pickedOnTime;
+  TimeOfDay _pickedOffTime;
+  String _pickedOnLabel;
+  String _pickedOffLabel;
+  List<bool> _weekdayList = List.filled(7, true, growable: false);
   final _editingController = TextEditingController();
 
   @override
@@ -164,10 +170,14 @@ class _DevicePageState extends State<DevicePage> {
                                         maxLines: 2,
                                         softWrap: true,
                                         overflow: TextOverflow.ellipsis,
-                                        style: const TextStyle(
+                                        style: TextStyle(
                                           fontSize: 32,
                                           fontWeight: FontWeight.bold,
-                                          color: Colors.white,
+                                          color: helper.isDarkModeActive
+                                              ? Theme.of(context)
+                                                  .primaryColor
+                                                  .withOpacity(0.9)
+                                              : Colors.white,
                                           letterSpacing: 1,
                                         ),
                                       ),
@@ -181,19 +191,19 @@ class _DevicePageState extends State<DevicePage> {
                               bottom: 16,
                               child: Row(
                                 children: [
-                                  if (deviceData.showTimerIcon)
+                                  if (_scheduleEnabled)
                                     Icon(
                                       LineIcons.clock,
-                                      color: Colors.white30,
+                                      color: Colors.white54,
                                       size: 28,
                                     ),
                                   SizedBox(
                                     width: 6,
                                   ),
-                                  if (deviceData.showMotionIcon)
+                                  if (_motionEnabled)
                                     Icon(
                                       LineIcons.walking_solid,
-                                      color: Colors.white30,
+                                      color: Colors.white54,
                                       size: 28,
                                     )
                                 ],
@@ -254,14 +264,33 @@ class _DevicePageState extends State<DevicePage> {
                                       .withOpacity(0.25)
                                   : Colors.white24,
                               child: Center(
-                                child: Text(
-                                  'SAVE',
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .headline2
-                                      .copyWith(
-                                        color: Colors.white,
-                                      ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      LineIcons.cloud_upload_alt_solid,
+                                      size: 30,
+                                      color: helper.isDarkModeActive
+                                          ? Theme.of(context).accentColor
+                                          : Colors.white,
+                                    ),
+                                    const SizedBox(
+                                      width: 8,
+                                    ),
+                                    Text(
+                                      'SAVE',
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .headline2
+                                          .copyWith(
+                                            letterSpacing: 1.5,
+                                            fontSize: 20,
+                                            color: helper.isDarkModeActive
+                                                ? Theme.of(context).accentColor
+                                                : Colors.white,
+                                          ),
+                                    ),
+                                  ],
                                 ),
                               ),
                             ),
@@ -315,11 +344,13 @@ class _DevicePageState extends State<DevicePage> {
     return AnimatedOpacity(
       duration: Duration(milliseconds: millliseconds),
       opacity: controller ? 1 : 0,
+      curve: Curves.easeIn,
       child: AnimatedContainer(
         duration: Duration(milliseconds: millliseconds),
         width: double.infinity,
         height: controller ? 200 : 0,
-        child: child,
+        curve: Curves.easeIn,
+        child: SingleChildScrollView(child: child),
       ),
     );
   }
@@ -347,9 +378,7 @@ class _DevicePageState extends State<DevicePage> {
             _getSwitchTile(
               icon: Icon(
                 LineIcons.power_off_solid,
-                color: _switchState
-                    ? Theme.of(context).primaryColorDark
-                    : Theme.of(context).iconTheme.color,
+                color: _getColorForIcon(_switchState),
                 size: 28,
               ),
               title: 'Control Power',
@@ -370,9 +399,7 @@ class _DevicePageState extends State<DevicePage> {
             _getSwitchTile(
               icon: Icon(
                 LineIcons.clock,
-                color: _scheduleEnabled
-                    ? Theme.of(context).primaryColorDark
-                    : Theme.of(context).iconTheme.color,
+                color: _getColorForIcon(_scheduleEnabled),
                 size: 28,
               ),
               title: 'Schedule',
@@ -384,15 +411,176 @@ class _DevicePageState extends State<DevicePage> {
             ),
             _getAnimatedExpander(
               controller: _scheduleEnabled,
-              child: Placeholder(),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 8),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      const SizedBox(width: 24),
+                      Expanded(
+                        flex: 5,
+                        child: Text(
+                          'Switch ON Time',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: _getBodyTextColor,
+                          ),
+                          textAlign: TextAlign.start,
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 2,
+                        ),
+                      ),
+                      Expanded(
+                        flex: 6,
+                        child: FlatButton(
+                          onPressed: () async {
+                            _pickedOnTime = await showTimePicker(
+                              context: context,
+                              initialTime: TimeOfDay.now(),
+                              helpText: 'Select Time to Switch ON',
+                            );
+                            if (_pickedOnTime != null) {
+                              setState(() => _pickedOnLabel =
+                                  _pickedOnTime.format(context));
+                            }
+                          },
+                          child: Text(
+                            _pickedOnLabel == null ? 'SELECT' : _pickedOnLabel,
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            textAlign: TextAlign.center,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          textColor: helper.indigoColor,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(24),
+                            side: BorderSide(
+                              color: helper.indigoColor,
+                              width: 2,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      const SizedBox(width: 24),
+                      Expanded(
+                        flex: 5,
+                        child: Text(
+                          'Switch OFF Time',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: _getBodyTextColor,
+                          ),
+                          textAlign: TextAlign.start,
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 2,
+                        ),
+                      ),
+                      Expanded(
+                        flex: 6,
+                        child: FlatButton(
+                          onPressed: () async {
+                            _pickedOffTime = await showTimePicker(
+                                context: context,
+                                initialTime: TimeOfDay.now(),
+                                helpText: 'Select Time to Switch OFF');
+                            if (_pickedOffTime != null) {
+                              setState(() => _pickedOffLabel =
+                                  _pickedOffTime.format(context));
+                            }
+                          },
+                          child: Text(
+                            _pickedOffLabel == null
+                                ? 'SELECT'
+                                : _pickedOffLabel,
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            textAlign: TextAlign.center,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          textColor: helper.indigoColor,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(24),
+                            side: BorderSide(
+                              color: helper.indigoColor,
+                              width: 2,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                    ],
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(
+                      left: 24,
+                      right: 16,
+                      top: 12,
+                      bottom: 8,
+                    ),
+                    child: Text(
+                      'Select Weekdays',
+                      style: Theme.of(context).textTheme.headline3.copyWith(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18,
+                          color: _getBodyTextColor),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 4,
+                    ),
+                    child: WeekdaySelector(
+                      values: _weekdayList,
+                      onChanged: (dayIndex) {
+                        final index = dayIndex % 7;
+                        _weekdayList[index] = !_weekdayList[index];
+                        setState(() {});
+                      },
+                      fillColor: helper.isDarkModeActive == true
+                          ? Colors.grey[850]
+                          : null,
+                      selectedFillColor: helper.indigoColor,
+                      selectedTextStyle: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                        color: helper.isDarkModeActive
+                            ? Colors.black
+                            : Colors.white,
+                      ),
+                      textStyle: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: helper.isDarkModeActive
+                            ? _getBodyTextColor
+                            : helper.indigoColor,
+                        fontSize: 16,
+                      ),
+                      firstDayOfWeek: 7,
+                      elevation: 4,
+                    ),
+                  ),
+                ],
+              ),
             ),
             _getDivider(),
             _getSwitchTile(
               icon: Icon(
                 LineIcons.walking_solid,
-                color: _motionEnabled
-                    ? Theme.of(context).primaryColorDark
-                    : Theme.of(context).iconTheme.color,
+                color: _getColorForIcon(_motionEnabled),
                 size: 28,
               ),
               title: 'MotionSense',
@@ -546,5 +734,15 @@ class _DevicePageState extends State<DevicePage> {
         );
       },
     );
+  }
+
+  Color _getColorForIcon(bool isActive) {
+    if (isActive) return Theme.of(context).primaryColor;
+    return Colors.grey;
+  }
+
+  Color get _getBodyTextColor {
+    if (helper.isDarkModeActive) return Colors.white60;
+    return Colors.black87;
   }
 }
