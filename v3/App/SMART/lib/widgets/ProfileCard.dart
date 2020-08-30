@@ -71,8 +71,9 @@ class ProfileCard extends StatelessWidget {
                     Expanded(
                       flex: 3,
                       child: Padding(
-                        padding: const EdgeInsets.fromLTRB(0, 10, 4, 0),
+                        padding: const EdgeInsets.only(top: 5),
                         child: PopupMenuButton(
+                          icon: Icon(Icons.more_vert, color: Colors.black,),
                           onCanceled: () => print("Popup Dismissed!"),
                           onSelected: (val) => helper.showSnackbarText("Selected: ${val.title}"),
                           itemBuilder: (context) {
