@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:line_icons/line_icons.dart';
 
 import '../helpers/SmartHelper.dart';
 import '../models/SmartPopupMenu.dart';
@@ -15,8 +16,8 @@ class ProfileCard extends StatelessWidget {
   });
 
   final List<SmartPopupMenu> menuList = [
-    SmartPopupMenu(title: 'Edit', icon: Icons.edit),
-    SmartPopupMenu(title: 'Delete', icon: Icons.delete)
+    SmartPopupMenu(title: 'Edit', icon: LineIcons.edit),
+    SmartPopupMenu(title: 'Delete', icon: LineIcons.trash_solid)
   ];
 
   @override

@@ -348,7 +348,8 @@ class _DevicePageState extends State<DevicePage> {
       child: AnimatedContainer(
         duration: Duration(milliseconds: millliseconds),
         width: double.infinity,
-        height: controller ? 200 : 0,
+        // TODO - Fix this null error
+        height: controller ? null : 0,
         curve: Curves.easeIn,
         child: SingleChildScrollView(child: child),
       ),

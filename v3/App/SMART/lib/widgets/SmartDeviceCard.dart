@@ -5,14 +5,11 @@ import 'package:provider/provider.dart';
 import '../controllers/SmartMqtt.dart';
 
 import '../models/SmartDeviceData.dart';
-import '../models/JsonModel.dart';
 
 import '../providers/JsonRoomStateProvider.dart';
 
 import '../helpers/SmartHelper.dart';
 import '../widgets/SmartCard.dart';
-
-import '../exceptions/SmartException.dart';
 
 class SmartDeviceCard extends StatefulWidget {
   final SmartMqtt mqtt;

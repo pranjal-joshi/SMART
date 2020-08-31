@@ -33,7 +33,7 @@ class _RoomPageState extends State<RoomPage> {
   );
   final _menuList = [
     SmartPopupMenu(title: 'Edit', icon: LineIcons.edit),
-    SmartPopupMenu(title: 'Reset', icon: LineIcons.sync_solid),
+    SmartPopupMenu(title: 'Reset', icon: LineIcons.redo_alt_solid),
     SmartPopupMenu(title: 'Emergency', icon: LineIcons.power_off_solid),
   ];
 

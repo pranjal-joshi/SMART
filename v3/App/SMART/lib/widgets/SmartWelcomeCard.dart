@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:line_icons/line_icons.dart';
 
 import '../helpers/SmartHelper.dart';
 import '../widgets/SmartCard.dart';
@@ -40,7 +41,8 @@ class SmartWelcomeCard extends StatelessWidget {
             leading: Padding(
               padding: const EdgeInsets.all(8.0),
               child: Icon(
-                Icons.settings_remote,
+                // Icons.settings_remote,
+                LineIcons.share_alt_solid,
                 color: Theme.of(context).accentColor,
                 size: 42,
               ),
@@ -57,7 +59,7 @@ class SmartWelcomeCard extends StatelessWidget {
                 : null,
             trailing: IconButton(
               icon: Icon(
-                Icons.settings,
+                LineIcons.cog_solid,
                 size: 32,
                 color: Theme.of(context)
                     .textTheme
