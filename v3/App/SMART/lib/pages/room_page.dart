@@ -139,7 +139,7 @@ class _RoomPageState extends State<RoomPage> {
                         ),
                         Positioned(
                           bottom: 12,
-                          top: MediaQuery.of(context).padding.top * 5.2,
+                          top: MediaQuery.of(context).padding.top * 5.8,
                           left: 0,
                           right: 0,
                           child: Column(
