@@ -233,10 +233,6 @@ class _DevicePageState extends State<DevicePage> {
                           decoration: helper.isDarkModeActive
                               ? BoxDecoration(
                                   color: Color.fromRGBO(25, 25, 25, 1),
-                                  borderRadius: BorderRadius.only(
-                                    bottomLeft: Radius.circular(10),
-                                    bottomRight: Radius.circular(10),
-                                  ),
                                 )
                               : BoxDecoration(
                                   gradient: LinearGradient(
@@ -247,10 +243,6 @@ class _DevicePageState extends State<DevicePage> {
                                       Colors.indigo[800],
                                       Colors.indigo[400],
                                     ],
-                                  ),
-                                  borderRadius: BorderRadius.only(
-                                    bottomLeft: Radius.circular(10),
-                                    bottomRight: Radius.circular(10),
                                   ),
                                 ),
                           child: Material(
