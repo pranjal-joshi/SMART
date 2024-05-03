@@ -1,8 +1,6 @@
 /**
-   BasicHTTPClient.ino
-
-    Created on: 24.05.2015
-
+SMART v4 - With Alexa Webhook
+Author: Pranjal Joshi
 */
 
 #include <Arduino.h>
@@ -20,15 +18,16 @@
 
 #define DEBUG 1
 
-unsigned long off_timeout = int(1000 * 60 * 5);
+unsigned long off_timeout = int(1000 * 60 * 2);
 
 ESP8266WiFiMulti WiFiMulti;
 Timer timer(MILLIS);
 
 //  For NodeMCU
-// unsigned int sensor_pin = D2;
+unsigned int sensor_pin = D2;
+unsigned int led_pin = LED_BUILTIN;
 //  For ESP-01
-unsigned int sensor_pin = 2;
+// unsigned int sensor_pin = 2;
 
 byte state = LOW;
 unsigned int eeprom_addr = 10;
@@ -38,6 +37,8 @@ void sendGetRequest(const String);
 void setup() {
 
   pinMode(sensor_pin, INPUT);
+  pinMode(led_pin, OUTPUT);
+  digitalWrite(led_pin, HIGH);
 
   Serial.begin(115200);
   EEPROM.begin(512);
@@ -88,6 +89,7 @@ void readSensorValue() {
     if (state == LOW) {
       Serial.println("[SENSOR] Motion detected!"); 
       state = HIGH;       // update variable state to HIGH
+      digitalWrite(led_pin, !state);
       EEPROM.write(eeprom_addr, state);
       EEPROM.commit();
       sendGetRequest(invoke_endpoint_motion);
@@ -98,6 +100,7 @@ void readSensorValue() {
     if (state == HIGH){
       Serial.println("[SENSOR] Motion stopped!");
       state = LOW;       // update variable state to LOW
+      digitalWrite(led_pin, !state);
       EEPROM.write(eeprom_addr, state);
       EEPROM.commit(); 
       timer.start();
