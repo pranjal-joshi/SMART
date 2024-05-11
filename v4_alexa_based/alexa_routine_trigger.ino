@@ -4,12 +4,14 @@ Author: Pranjal Joshi
 */
 
 #include <Arduino.h>
+#include <ArduinoOTA.h>
 #include <EEPROM.h>
 
 #include <ESP8266WiFi.h>
 #include <ESP8266WiFiMulti.h>
 
 #include <ESP8266HTTPClient.h>
+#include "ConfigureWebServer.h"
 
 #include <WiFiClient.h>
 
@@ -22,15 +24,18 @@ unsigned long off_timeout = int(1000 * 60 * 2);
 
 ESP8266WiFiMulti WiFiMulti;
 Timer timer(MILLIS);
+ConfigureWebServer configServer;
 
 //  For NodeMCU
 unsigned int sensor_pin = D2;
 unsigned int led_pin = LED_BUILTIN;
+
 //  For ESP-01
 // unsigned int sensor_pin = 2;
 
 byte state = LOW;
 unsigned int eeprom_addr = 10;
+bool otaBegan = false;
 
 void sendGetRequest(const String);
 
@@ -59,9 +64,14 @@ void setup() {
 
   Serial.printf("[DEVICE] %s\n", device_id);
   Serial.printf("[DEVICE] Initial State: %d\n", state);
+
+  // Disabled for a web server test
   WiFi.mode(WIFI_STA);
   WiFiMulti.addAP(ssid1, pass1);
   WiFiMulti.addAP(ssid2, pass2);
+  // configServer.setDebug(true);
+  // configServer.begin(ssid_provision, pass_provision, false);
+  // configServer.showWifiNetworks();
 }
 
 void loop() {
@@ -76,6 +86,8 @@ void loop() {
       sendGetRequest(invoke_endpoint_no_motion);
       timer.stop();
     }
+    beginArduinoOTA();
+    ArduinoOTA.handle();
   }
   delay(500);
 }
@@ -136,5 +148,33 @@ void sendGetRequest(const String url) {
     http.end();
   } else {
     Serial.printf("[HTTP} Unable to connect\n");
+  }
+}
+
+void beginArduinoOTA(void) {
+  if(!otaBegan) {
+    #ifdef DEBUG
+      ArduinoOTA.onStart([]() {
+        Serial.println("[OTA] Start");
+      });
+      ArduinoOTA.onEnd([]() {
+        Serial.println("\n[OTA] End");
+      });
+      ArduinoOTA.onProgress([](unsigned int progress, unsigned int total) {
+        Serial.printf("[OTA] Progress: %u%%\r", (progress / (total / 100)));
+      });
+      ArduinoOTA.onError([](ota_error_t error) {
+        Serial.printf("[OTA] Error[%u]: ", error);
+        if (error == OTA_AUTH_ERROR) Serial.println("Auth Failed");
+        else if (error == OTA_BEGIN_ERROR) Serial.println("Begin Failed");
+        else if (error == OTA_CONNECT_ERROR) Serial.println("Connect Failed");
+        else if (error == OTA_RECEIVE_ERROR) Serial.println("Receive Failed");
+        else if (error == OTA_END_ERROR) Serial.println("End Failed");
+      });
+    #endif
+    ArduinoOTA.setHostname(device_id);
+    ArduinoOTA.setPort(device_port);
+    ArduinoOTA.begin();
+    otaBegan = true;
   }
 }
