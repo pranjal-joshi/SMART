@@ -1,7 +1,7 @@
 <!DOCTYPE HTML>
 <html>
 <head>
-  <title>SMART Configuration</title>
+  <title>SmartMotion Config</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
@@ -11,43 +11,91 @@
       display: inline-block;
       margin: 0px auto;
       text-align: center;
-      font-family: sans-serif;
+      font-family: 'Segoe UI', sans-serif;
       text-decoration-color: black;
-      background-color: white; /* Changed to white */
+      background-color: white;
     }
     #tHead {
       font-size: 1.2rem;
       font-weight: bold;
       padding-top: 0.7rem; 
       padding-bottom: 0.5rem;
-      color: #f9256c; /* Changed to a green color */
+      color: #f9256c;
     }
     table {
-      color: black; /* Changed to black */
+      color: black;
       border-spacing: 0.4rem;
       font-weight: bold;
-    }
-    input {
-      color: black; /* Changed to black */
-      font-size: 1.05rem;
-      background-color: white; /* Changed to white */
-      border-color: black; /* Changed to black */
-      border-radius: 0.4rem;
-      font-weight: bold;
-      box-shadow: none;
+      margin-bottom: 10px;
     }
     ::placeholder{
-      color: black; /* Changed to black */
+      color: black;
       opacity: 0.55;
     }
-    #submit {
-      background-color: #f9256c; /* Changed to a green color */
+    #submit, #rescan, #factoryReset {
+      background-color: #f9256c;
       border: none;
       border-radius: 1rem;
       padding: 0.6rem;
       font-size: 1.2rem;
-      color: white; /* Changed to white */
+      color: white;
       cursor: pointer;
+      margin-right: 10px;
+    }
+    #rescan, #factoryReset {
+      background-color: white;
+      color: #f9256c;
+      border: 2px solid #f9256c;
+      font-size: 1rem;
+    }
+    #rescan:hover, #factoryReset:hover {
+      background-color: #f9256c;
+      color: white;
+      transition: background-color 0.3s;
+    }
+    #selectButton {
+      background-color: #f9256cd4;
+      border: none;
+      border-radius: 1rem;
+      padding: 0.4rem;
+      color: white;
+      cursor: pointer;
+    }
+    @media screen and (max-width: 600px) {
+      #submit, #rescan, #factoryReset {
+        display: block;
+        width: 100%;
+        margin: 5px 0;
+      }
+    }
+    input[type="text"],
+    input[type="password"],
+    input[type="number"],
+    input[type="url"] {
+      color: black;
+      font-size: 1.05rem;
+      background-color: #F4F4F4;
+      border: 1px solid #D1D1D1;
+      border-radius: 0.5rem;
+      padding: 0.5rem;
+      width: calc(100% - 12px);
+      transition: border-color 0.3s, box-shadow 0.3s;
+      font-weight: bold;
+    }
+    input[type="text"]::placeholder,
+    input[type="password"]::placeholder,
+    input[type="number"]::placeholder,
+    input[type="url"]::placeholder {
+      color: #A0A0A0;
+      opacity: 0.8;
+    }
+    input[type="text"]:focus,
+    input[type="password"]:focus,
+    input[type="number"]:focus,
+    input[type="url"]:focus {
+      outline: none;
+      border-color: #f9256cd4;
+      box-shadow: 0 0 0 2px rgba(108, 99, 255, 0.2);
     }
   </style>
 </head>
@@ -62,7 +110,8 @@
         </tr>
         <tr>
           <td style="font-size: 1.2rem; text-align: left;">Network SSID</td>
-          <td style="font-size: 1.2rem; text-align: right;">Signal Strength</td>
+          <td style="font-size: 1.2rem; text-align: center;">Signal Strength</td>
+          <td style="font-size: 1.2rem; text-align: center;">Use</td>
         </tr>
           %SCANNED_NETWORKS%
       </table>
@@ -89,12 +138,13 @@
             <td colspan="2" id="tHead">Device Configuration</td>
           </tr>
         <tr>
-          <td>Device Name:</td>
-          <td><input type="text" name="nodename" placeholder="E.g. Living Room" required></td>
+          <td>Device Location:</td>
+          <td><input type="text" name="location" placeholder="E.g. Living Room" required></td>
         </tr>
         <tr>
-          <td>Switch OFF Timeout:</td>
-          <td><input type="number" name="timeout" min="1" max="60" required>  Minutes</td>
+          <td>Switch OFF Timeout:
+          </td>
+          <td><input type="number" name="timeout" min="1" max="60" style="width: 65%;"> Minutes</td>
         </tr>
         <tr>
           <td>Switch ON URL:</td>
@@ -106,15 +156,17 @@
         </tr>
       </table>
       <br>
+      <input type="button" name="rescan" id="rescan" value="Re-scan Nearby Networks">
+      <input type="button" name="factory_reset" id="factoryReset" value="Factory Reset">
       <input type='submit' name='Submit' id="submit">
     </center>
   </form>
 </body>
 <script>
   function copyText(button) {
-    var row = button.parentNode.parentNode;               // Get the parent row
-    var text = row.cells[0].innerText;                    // Get the text from the first column
-    document.getElementById("ssidBox").value = text;      // Copy the text to the textbox
+    var row = button.parentNode.parentNode;
+    var text = row.cells[0].innerText;
+    document.getElementById("ssidBox").value = text;
     document.getElementById("passBox").focus();
   }
 </script>
