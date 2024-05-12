@@ -13,8 +13,9 @@ class ConfigureWebServer {
   public:
     ConfigureWebServer(void);
     void setDebug(bool);
-    void begin(const char* ssid, const char* pass, bool async_scan);
+    void begin(const char* ssid, const char* pass,  String hostname, bool async_scan);
     void showWifiNetworks(void);
+    void loop(void);
   private:
 };
 

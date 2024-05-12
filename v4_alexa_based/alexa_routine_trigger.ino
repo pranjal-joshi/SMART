@@ -12,6 +12,7 @@ Author: Pranjal Joshi
 
 #include <ESP8266HTTPClient.h>
 #include "ConfigureWebServer.h"
+#include "ConfigLoader.h"
 
 #include <WiFiClient.h>
 
@@ -25,6 +26,8 @@ unsigned long off_timeout = int(1000 * 60 * 2);
 ESP8266WiFiMulti WiFiMulti;
 Timer timer(MILLIS);
 ConfigureWebServer configServer;
+ConfigLoader configLoader;
+ConfigLoader::configData deviceConfigData;
 
 //  For NodeMCU
 unsigned int sensor_pin = D2;
@@ -34,7 +37,6 @@ unsigned int led_pin = LED_BUILTIN;
 // unsigned int sensor_pin = 2;
 
 byte state = LOW;
-unsigned int eeprom_addr = 10;
 bool otaBegan = false;
 
 void sendGetRequest(const String);
@@ -46,11 +48,10 @@ void setup() {
   digitalWrite(led_pin, HIGH);
 
   Serial.begin(115200);
-  EEPROM.begin(512);
-  state = EEPROM.read(eeprom_addr);
-  if(state > LOW) {
-    state = HIGH;
-  }
+
+  configLoader.setDebug(true);
+  configLoader.begin();
+  state = configLoader.getLastMotionState();
 
   Serial.println();
   Serial.println();
@@ -62,16 +63,28 @@ void setup() {
     delay(1000);
   }
 
-  Serial.printf("[DEVICE] %s\n", device_id);
+  // configLoader.getConfig(&deviceConfigData);
+  deviceConfigData.ssid = configLoader.getConfig(FILE_SSID);
+  deviceConfigData.pass = configLoader.getConfig(FILE_PASS);
+  deviceConfigData.device_location = configLoader.getConfig(FILE_LOCATION);
+  deviceConfigData.timeout = String(configLoader.getConfig(FILE_TIMEOUT)).toInt();
+  deviceConfigData.url_on = configLoader.getConfig(FILE_URL_ON);
+  deviceConfigData.url_off = configLoader.getConfig(FILE_URL_OFF);
+
+  Serial.printf("[DEVICE] ID: %ul\n", ESP.getChipId());
+  Serial.printf("[DEVICE] Location: %s\n", deviceConfigData.device_location);
   Serial.printf("[DEVICE] Initial State: %d\n", state);
 
-  // Disabled for a web server test
-  WiFi.mode(WIFI_STA);
-  WiFiMulti.addAP(ssid1, pass1);
-  WiFiMulti.addAP(ssid2, pass2);
-  // configServer.setDebug(true);
-  // configServer.begin(ssid_provision, pass_provision, false);
-  // configServer.showWifiNetworks();
+  if(deviceConfigData.fs_error_read) {
+    configServer.setDebug(true);
+    configServer.begin(ssid_provision, pass_provision, "smartmotion", false);
+    configServer.showWifiNetworks();
+  }
+  else {
+    WiFi.mode(WIFI_STA);
+    WiFiMulti.addAP(deviceConfigData.ssid, deviceConfigData.pass);
+  }
+
 }
 
 void loop() {
@@ -88,6 +101,7 @@ void loop() {
     }
     beginArduinoOTA();
     ArduinoOTA.handle();
+    configServer.loop();
   }
   delay(500);
 }
@@ -102,8 +116,9 @@ void readSensorValue() {
       Serial.println("[SENSOR] Motion detected!"); 
       state = HIGH;       // update variable state to HIGH
       digitalWrite(led_pin, !state);
-      EEPROM.write(eeprom_addr, state);
-      EEPROM.commit();
+      configLoader.setLastMotionState(state);
+      // EEPROM.write(eeprom_addr, state);
+      // EEPROM.commit();
       sendGetRequest(invoke_endpoint_motion);
       timer.stop();
     }
@@ -113,8 +128,9 @@ void readSensorValue() {
       Serial.println("[SENSOR] Motion stopped!");
       state = LOW;       // update variable state to LOW
       digitalWrite(led_pin, !state);
-      EEPROM.write(eeprom_addr, state);
-      EEPROM.commit(); 
+      configLoader.setLastMotionState(state);
+      // EEPROM.write(eeprom_addr, state);
+      // EEPROM.commit(); 
       timer.start();
     }
   }

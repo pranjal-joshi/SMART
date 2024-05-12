@@ -1,17 +1,20 @@
+// Code to handle Web server to manage Provisioning and Configuration
+
 #include "ConfigureWebServer.h"
+#include "ConfigLoader.h"
 
 AsyncWebServer server(80);
+ConfigLoader provisioningConfigLoader;
+
 bool WS_DEBUG = false;
 
 String scanned_networks_html = "";
-
-String paramUsername,paramNodename,paramChannel,paramSsid,paramPass,paramMqttIp,paramMqttPort,paramMeshSsid, paramMeshPass;
 
 const char index_html[] PROGMEM = R"rawliteral(
   <!DOCTYPE HTML>
   <html>
   <head>
-    <title>SMART Configuration</title>
+    <title>SmartMotion Config</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
     <meta http-equiv="Pragma" content="no-cache" />
@@ -59,6 +62,14 @@ const char index_html[] PROGMEM = R"rawliteral(
         color: white; /* Changed to white */
         cursor: pointer;
       }
+      #selectButton {
+        background-color: #f9256cd4; /* Changed to a green color */
+        border: none;
+        border-radius: 1rem;
+        padding: 0.4rem;
+        color: white; /* Changed to white */
+        cursor: pointer;
+      }
     </style>
   </head>
   <body>
@@ -72,7 +83,8 @@ const char index_html[] PROGMEM = R"rawliteral(
           </tr>
           <tr>
             <td style="font-size: 1.2rem; text-align: left;">Network SSID</td>
-            <td style="font-size: 1.2rem; text-align: right;">Signal Strength</td>
+            <td style="font-size: 1.2rem; text-align: center;">Signal Strength</td>
+            <td style="font-size: 1.2rem; text-align: center;">Use</td>
           </tr>
             %SCANNED_NETWORKS%
         </table>
@@ -99,8 +111,8 @@ const char index_html[] PROGMEM = R"rawliteral(
               <td colspan="2" id="tHead">Device Configuration</td>
             </tr>
           <tr>
-            <td>Device Name:</td>
-            <td><input type="text" name="nodename" placeholder="E.g. Living Room" required></td>
+            <td>Device Location:</td>
+            <td><input type="text" name="location" placeholder="E.g. Living Room" required></td>
           </tr>
           <tr>
             <td>Switch OFF Timeout:</td>
@@ -143,12 +155,16 @@ void ConfigureWebServer::showWifiNetworks(void) {
     if(WS_DEBUG)
       Serial.println(F("[PROVISION] WiFi Scanning completed."));
     for(int i=0;i<WiFi.scanComplete();i++) {
-      scanned_networks_html += "<tr onclick='setSSID(this.id, "+String(WiFi.channel(i))+")' id='"+WiFi.SSID(i)+"'><td style='text-align: left;'>";
-      scanned_networks_html += String(i+1) + ". " + WiFi.SSID(i) + "</td><td style='text-align: right;'>";
+      
+      scanned_networks_html += "<tr><td>" + WiFi.SSID(i) + "</td>";
+      
       if(i>-1)      // To fix the bug of % loss due to PROCESSOR_TEMPLATE on alternate iterations.
-        scanned_networks_html += String(map(WiFi.RSSI(i),-90,-20,0, 100)) + " %% (Ch: "+WiFi.channel(i)+") </td></tr>";
+        scanned_networks_html += "<td><center>" + String(map(WiFi.RSSI(i),-90,-20,0, 100)) + " %%</center></td>";
       else
-        scanned_networks_html += String(map(WiFi.RSSI(i),-90,-20,0, 100)) + " % (Ch: "+WiFi.channel(i)+") </td></tr>";
+        scanned_networks_html += "<td><center>" + String(map(WiFi.RSSI(i),-90,-20,0, 100)) + " %</center></td>";
+
+      scanned_networks_html += "<td><input type='button' name='selectButton' id='selectButton' onclick='copyText(this)' value='Select'></td>";
+
       Serial.print(F("[PROVISION] SSID ->"));
       Serial.print(WiFi.SSID(i));
       Serial.print(F("\t RSSI-> "));
@@ -173,7 +189,7 @@ String processor(const String& var) {
   return String();
 }
 
-void ConfigureWebServer::begin(const char* ssid_provision, const char* pass_provision, bool async_scan) {
+void ConfigureWebServer::begin(const char* ssid_provision, const char* pass_provision, String hostname, bool async_scan) {
   WiFi.softAP(ssid_provision, pass_provision);
   if (async_scan) {
     WiFi.scanNetworks(true);     // for wifi scanning in background
@@ -198,5 +214,36 @@ void ConfigureWebServer::begin(const char* ssid_provision, const char* pass_prov
     request->send_P(200, "text/html", index_html, processor);
   });
 
+  server.on("/get", HTTP_GET, [] (AsyncWebServerRequest *request) {
+    provisioningConfigLoader.addConfig(FILE_SSID, request->getParam("ssid")->value().c_str());
+    provisioningConfigLoader.addConfig(FILE_PASS, request->getParam("pass")->value().c_str());
+    provisioningConfigLoader.addConfig(FILE_LOCATION, request->getParam("location")->value().c_str());
+    provisioningConfigLoader.addConfig(FILE_TIMEOUT, request->getParam("timeout")->value().toInt());
+    provisioningConfigLoader.addConfig(FILE_URL_ON, request->getParam("url_on")->value().c_str());
+    provisioningConfigLoader.addConfig(FILE_URL_OFF, request->getParam("url_off")->value().c_str());
+    request->send_P(200, "text/html", "Configuration Saved!");
+    // if(WS_DEBUG) {
+    //   Serial.printf("[PROVISION] PARAM: %s\n", request->getParam("ssid")->value().c_str());
+    //   Serial.printf("[PROVISION] PARAM: %s\n", request->getParam("pass")->value().c_str());
+    //   Serial.printf("[PROVISION] PARAM: %s\n", request->getParam("location")->value().c_str());
+    //   Serial.printf("[PROVISION] PARAM: %d\n", request->getParam("timeout")->value().toInt());
+    //   Serial.printf("[PROVISION] PARAM: %s\n", request->getParam("url_on")->value().c_str());
+    //   Serial.printf("[PROVISION] PARAM: %s\n", request->getParam("url_off")->value().c_str());
+    //   Serial.flush();
+    //   delay(500);
+    // }
+  });
+
+  if (!MDNS.begin(hostname)) {
+    Serial.println("[PROVISION] Error setting up MDNS responder!");
+  }
+
   server.begin();
+  if (MDNS.isRunning()){
+    MDNS.addService("http", "tcp", 80);
+  }
+}
+
+void ConfigureWebServer::loop(void) {
+  MDNS.update();
 }
