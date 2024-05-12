@@ -8,12 +8,13 @@
 #include <ESP8266WiFi.h>
 #include <ESPAsyncTCP.h>
 #include <ESPAsyncWebServer.h>
+#include <AsyncElegantOTA.h>
 
 class ConfigureWebServer {
   public:
     ConfigureWebServer(void);
     void setDebug(bool);
-    void begin(const char* ssid, const char* pass,  String hostname, bool async_scan);
+    void begin(const char* ssid, const char* pass,  String hostname, bool async_scan, bool provision = true);
     void showWifiNetworks(void);
     void loop(void);
   private:

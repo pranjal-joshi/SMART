@@ -4,7 +4,6 @@ Author: Pranjal Joshi
 */
 
 #include <Arduino.h>
-#include <ArduinoOTA.h>
 #include <EEPROM.h>
 
 #include <ESP8266WiFi.h>
@@ -21,27 +20,37 @@ Author: Pranjal Joshi
 
 #define DEBUG 1
 
+#define NODEMCU
+
+#ifdef NODEMCU
+  #undef ESP01
+#else
+  #define ESP01
+#endif
+
 unsigned long off_timeout = int(1000 * 60 * 2);
+Timer timer(MILLIS);
 
 ESP8266WiFiMulti WiFiMulti;
-Timer timer(MILLIS);
 ConfigureWebServer configServer;
 ConfigLoader configLoader;
 
 //  For NodeMCU
-unsigned int sensor_pin = D2;
-unsigned int led_pin = LED_BUILTIN;
-
-//  For ESP-01
-// unsigned int sensor_pin = 2;
+#ifdef NODEMCU
+  unsigned int sensor_pin = D2;
+  unsigned int led_pin = LED_BUILTIN;
+#endif
+#ifdef ESP01
+  unsigned int sensor_pin = 2;
+#endif
 
 byte state = LOW;
-bool otaBegan = false;
 
 String config_ssid, config_pass, config_location, config_url_on, config_url_off;
 int config_timeout;
 bool config_fs_err_read = false;
 bool config_fs_err_write = false;
+String hostname = "smartmotion";
 
 void sendGetRequest(const String);
 
@@ -72,16 +81,26 @@ void setup() {
 
   Serial.printf("[DEVICE] ID: %ul\n", ESP.getChipId());
   Serial.printf("[DEVICE] Location: %s\n", config_location);
+  Serial.printf("[DEVICE] Hostname: %s\n", hostname);
   Serial.printf("[DEVICE] Initial State: %d\n", state);
 
   if(config_fs_err_read) {
+    Serial.println("[DEVICE] Mode: Provisioning & Configuration");
     configServer.setDebug(true);
-    configServer.begin(ssid_provision, pass_provision, "smartmotion", false);
+    configServer.begin(ssid_provision, pass_provision, hostname, false, true);
     configServer.showWifiNetworks();
   }
   else {
+    Serial.println("[DEVICE] Mode: Motion Sensing");
     WiFi.mode(WIFI_STA);
     WiFiMulti.addAP(config_ssid.c_str(), config_pass.c_str());
+    #ifdef DEBUG
+      Serial.print("[DEVICE] IP address: ");
+      while(WiFiMulti.run() != WL_CONNECTED);
+      Serial.println(WiFi.localIP());
+    #endif
+    configServer.begin(ssid_provision, pass_provision, hostname, false, false);
+    configServer.showWifiNetworks();
   }
 
 }
@@ -95,11 +114,9 @@ void loop() {
     #endif
     readSensorValue();
     if (timer.state() == RUNNING && timer.read() >= off_timeout) {
-      sendGetRequest(invoke_endpoint_no_motion);
+      sendGetRequest(config_url_off);
       timer.stop();
     }
-    beginArduinoOTA();
-    ArduinoOTA.handle();
     configServer.loop();
   }
   delay(500);
@@ -114,11 +131,11 @@ void readSensorValue() {
     if (state == LOW) {
       Serial.println("[SENSOR] Motion detected!"); 
       state = HIGH;       // update variable state to HIGH
-      digitalWrite(led_pin, !state);
+      #ifdef NODEMCU
+        digitalWrite(led_pin, !state);
+      #endif
       configLoader.setLastMotionState(state);
-      // EEPROM.write(eeprom_addr, state);
-      // EEPROM.commit();
-      sendGetRequest(invoke_endpoint_motion);
+      sendGetRequest(config_url_on);
       timer.stop();
     }
   } 
@@ -126,10 +143,10 @@ void readSensorValue() {
     if (state == HIGH){
       Serial.println("[SENSOR] Motion stopped!");
       state = LOW;       // update variable state to LOW
-      digitalWrite(led_pin, !state);
+      #ifdef NODEMCU
+        digitalWrite(led_pin, !state);
+      #endif
       configLoader.setLastMotionState(state);
-      // EEPROM.write(eeprom_addr, state);
-      // EEPROM.commit(); 
       timer.start();
     }
   }
@@ -163,34 +180,6 @@ void sendGetRequest(const String url) {
     http.end();
   } else {
     Serial.printf("[HTTP} Unable to connect\n");
-  }
-}
-
-void beginArduinoOTA(void) {
-  if(!otaBegan) {
-    #ifdef DEBUG
-      ArduinoOTA.onStart([]() {
-        Serial.println("[OTA] Start");
-      });
-      ArduinoOTA.onEnd([]() {
-        Serial.println("\n[OTA] End");
-      });
-      ArduinoOTA.onProgress([](unsigned int progress, unsigned int total) {
-        Serial.printf("[OTA] Progress: %u%%\r", (progress / (total / 100)));
-      });
-      ArduinoOTA.onError([](ota_error_t error) {
-        Serial.printf("[OTA] Error[%u]: ", error);
-        if (error == OTA_AUTH_ERROR) Serial.println("Auth Failed");
-        else if (error == OTA_BEGIN_ERROR) Serial.println("Begin Failed");
-        else if (error == OTA_CONNECT_ERROR) Serial.println("Connect Failed");
-        else if (error == OTA_RECEIVE_ERROR) Serial.println("Receive Failed");
-        else if (error == OTA_END_ERROR) Serial.println("End Failed");
-      });
-    #endif
-    ArduinoOTA.setHostname(device_id);
-    ArduinoOTA.setPort(device_port);
-    ArduinoOTA.begin();
-    otaBegan = true;
   }
 }
 
@@ -230,8 +219,10 @@ void loadConfigData(void) {
     #endif
   }
 
+  hostname = config_location;
+
   #ifdef DEBUG
-    Serial.printf("[CONFIG] Filename: %s\t\t->\t%s\n", "fs_error_read", btoa(config_fs_err_read));
-    Serial.printf("[CONFIG] Filename: %s\t\t->\t%s\n", "fs_error_write", btoa(config_fs_err_write));
+    Serial.printf("[CONFIG] Filename: %s\t->\t%s\n", "fs_error_read", btoa(config_fs_err_read));
+    Serial.printf("[CONFIG] Filename: %s\t->\t%s\n", "fs_error_write", btoa(config_fs_err_write));
   #endif
 }

@@ -17,20 +17,8 @@
 
 class ConfigLoader {
   public:
-    struct configData {
-      const char* ssid;
-      const char* pass;
-      const char* device_location;
-      unsigned int timeout;
-      const char* url_on;
-      const char* url_off;
-      bool fs_error_read;
-      bool fs_error_write;
-    };
     ConfigLoader(void);
-    void getConfig(configData*);
     String getConfig(const char*);
-    void setConfig(configData*);
     uint8_t getLastMotionState(void);
     void setLastMotionState(uint8_t);
     void addConfig(const char*, const char*);
