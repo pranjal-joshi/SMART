@@ -29,7 +29,7 @@ class ConfigLoader {
     };
     ConfigLoader(void);
     void getConfig(configData*);
-    const char* getConfig(const char*);
+    String getConfig(const char*);
     void setConfig(configData*);
     uint8_t getLastMotionState(void);
     void setLastMotionState(uint8_t);

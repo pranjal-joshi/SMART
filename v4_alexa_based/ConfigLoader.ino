@@ -23,10 +23,10 @@ void ConfigLoader::begin(void) {
   }
 }
 
-const char* ConfigLoader::getConfig(const char* filename) {
+String ConfigLoader::getConfig(const char* filename) {
   String data;
   fileSystem.openFromFile(filename, data);
-  return data.c_str();
+  return data;
 }
 
 void ConfigLoader::getConfig(ConfigLoader::configData* structLoaded) {
@@ -74,15 +74,15 @@ void ConfigLoader::setConfig(ConfigLoader::configData* structLoaded) {
 }
 
 void ConfigLoader::addConfig(const char* filepath, const char* data) {
-  fileSystem.saveToFile(filepath, data);
   if(FS_DEBUG) {
     Serial.printf("[CONFIG] addConfig : %s\t\t->\t%s\n", filepath, data);
   }
+  fileSystem.saveToFile(filepath, data);
 }
 
 void ConfigLoader::addConfig(const char* filepath, long data) {
   if(FS_DEBUG) {
-    Serial.printf("[CONFIG] addConfig : %s\t\t->\t%l\n", filepath, data);
+    Serial.printf("[CONFIG] addConfig : %s\t\t->\t%ld\n", filepath, data);
   }
   fileSystem.saveToFile(filepath, data);
 }

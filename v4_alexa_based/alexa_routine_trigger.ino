@@ -27,7 +27,6 @@ ESP8266WiFiMulti WiFiMulti;
 Timer timer(MILLIS);
 ConfigureWebServer configServer;
 ConfigLoader configLoader;
-ConfigLoader::configData deviceConfigData;
 
 //  For NodeMCU
 unsigned int sensor_pin = D2;
@@ -38,6 +37,11 @@ unsigned int led_pin = LED_BUILTIN;
 
 byte state = LOW;
 bool otaBegan = false;
+
+String config_ssid, config_pass, config_location, config_url_on, config_url_off;
+int config_timeout;
+bool config_fs_err_read = false;
+bool config_fs_err_write = false;
 
 void sendGetRequest(const String);
 
@@ -64,25 +68,20 @@ void setup() {
   }
 
   // configLoader.getConfig(&deviceConfigData);
-  deviceConfigData.ssid = configLoader.getConfig(FILE_SSID);
-  deviceConfigData.pass = configLoader.getConfig(FILE_PASS);
-  deviceConfigData.device_location = configLoader.getConfig(FILE_LOCATION);
-  deviceConfigData.timeout = String(configLoader.getConfig(FILE_TIMEOUT)).toInt();
-  deviceConfigData.url_on = configLoader.getConfig(FILE_URL_ON);
-  deviceConfigData.url_off = configLoader.getConfig(FILE_URL_OFF);
+  loadConfigData();
 
   Serial.printf("[DEVICE] ID: %ul\n", ESP.getChipId());
-  Serial.printf("[DEVICE] Location: %s\n", deviceConfigData.device_location);
+  Serial.printf("[DEVICE] Location: %s\n", config_location);
   Serial.printf("[DEVICE] Initial State: %d\n", state);
 
-  if(deviceConfigData.fs_error_read) {
+  if(config_fs_err_read) {
     configServer.setDebug(true);
     configServer.begin(ssid_provision, pass_provision, "smartmotion", false);
     configServer.showWifiNetworks();
   }
   else {
     WiFi.mode(WIFI_STA);
-    WiFiMulti.addAP(deviceConfigData.ssid, deviceConfigData.pass);
+    WiFiMulti.addAP(config_ssid.c_str(), config_pass.c_str());
   }
 
 }
@@ -193,4 +192,46 @@ void beginArduinoOTA(void) {
     ArduinoOTA.begin();
     otaBegan = true;
   }
+}
+
+void loadConfigData(void) {
+  config_ssid = configLoader.getConfig(FILE_SSID);
+  config_pass = configLoader.getConfig(FILE_PASS);
+  config_location = configLoader.getConfig(FILE_LOCATION);
+  config_timeout = String(configLoader.getConfig(FILE_TIMEOUT)).toInt();
+  config_url_on = configLoader.getConfig(FILE_URL_ON);
+  config_url_off = configLoader.getConfig(FILE_URL_OFF);
+
+  #ifdef DEBUG 
+    Serial.printf("[CONFIG] Filename: %s\t\t->\t", FILE_SSID);
+    Serial.println(config_ssid);
+    Serial.printf("[CONFIG] Filename: %s\t\t->\t", FILE_PASS);
+    Serial.println(config_pass);
+    Serial.printf("[CONFIG] Filename: %s\t\t->\t", FILE_LOCATION);
+    Serial.println(config_location);
+    Serial.printf("[CONFIG] Filename: %s\t\t->\t", FILE_TIMEOUT);
+    Serial.println(config_timeout);
+    Serial.printf("[CONFIG] Filename: %s\t\t->\t", FILE_URL_ON);
+    Serial.println(config_url_on);
+    Serial.printf("[CONFIG] Filename: %s\t\t->\t", FILE_URL_OFF);
+    Serial.println(config_url_off);
+  #endif
+  
+  if (config_ssid == "" || config_pass == "" || config_location == "" || config_timeout < 1 || config_timeout > 60 || config_url_on == "" || config_url_off == "") {
+    config_fs_err_read = true;
+    // terminate strings with null-char to avoid printf crashing everywhere!
+    config_ssid = "";
+    config_pass = "";
+    config_location = "SmartMotion";
+    config_url_on = "";
+    config_url_off = "";
+    #ifdef DEBUG
+      Serial.println("[CONFIG] Validation Error in getConfig!");
+    #endif
+  }
+
+  #ifdef DEBUG
+    Serial.printf("[CONFIG] Filename: %s\t\t->\t%s\n", "fs_error_read", btoa(config_fs_err_read));
+    Serial.printf("[CONFIG] Filename: %s\t\t->\t%s\n", "fs_error_write", btoa(config_fs_err_write));
+  #endif
 }
