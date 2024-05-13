@@ -8,6 +8,7 @@ ConfigLoader provisioningConfigLoader;
 
 bool WS_DEBUG = false;
 bool mdnsEnabled = false;
+bool task_reset = false;
 unsigned long ota_progress_millis = 0;
 
 String scanned_networks_html = "";
@@ -17,7 +18,7 @@ const char index_html[] PROGMEM = R"(
   <!DOCTYPE HTML>
   <html>
   <head>
-    <title>SmartMotion Config</title>
+    <title>Configure</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
     <meta http-equiv="Pragma" content="no-cache" />
@@ -162,6 +163,14 @@ const char index_html[] PROGMEM = R"(
               <td>%GET_SMART_SSID%</td>
             </tr>
             <tr>
+              <td>Device Location</td>
+              <td>%GET_SMART_LOCATION%</td>
+            </tr>
+            <tr>
+              <td>Firmware Version</td>
+              <td>%GET_VERSION%</td>
+            </tr>
+            <tr>
               <td colspan="2" id="tHead">Wi-Fi Setup</td>
             </tr>
             <tr>
@@ -182,7 +191,7 @@ const char index_html[] PROGMEM = R"(
             <tr>
               <td>Switch OFF Timeout:
               </td>
-              <td><input type="number" name="timeout" min="1" max="60" placeholder="2" style="width: 40%%;"> Minutes</td>
+              <td><input type="number" name="timeout" min="1" max="60" placeholder="2" style="width: 40%%;" required> Minutes</td>
             </tr>
             <tr>
               <td>Switch ON URL:</td>
@@ -194,9 +203,11 @@ const char index_html[] PROGMEM = R"(
             </tr>
           </table>
           <br>
-          <input type="button" name="rescan" id="rescan" value="Re-scan Nearby Networks">
+          <!-- <input type="button" name="rescan" id="rescan" value="Re-scan Nearby Networks"> -->
           <input type="button" name="factory_reset" id="factoryReset" value="Factory Reset">
           <input type='submit' name='Submit' id="submit">
+          <br>
+          <p style="font-weight: 500;">Click <a href="#" target="_blank">here</a> for more help</p>
         </center>
       </form>
     </div>
@@ -267,8 +278,8 @@ const char config_saved_html[] PROGMEM = R"(
     <div class="container">
       <br>
       <h3 style="font-weight: bold; font-size: 1.6rem; color: var(--accent-color); margin-top: 0.2rem;">Configuration Saved Successfully</h3>
-      <h4 style="font-weight: 600; font-size: 1.2rem;">The device will Restart automatically and Connect to the Configured WiFi Network</h4>
-      <h5 style="font-weight: 600; font-size: 1rem;">Visit <a href="#">http://%HOSTNAME%.local</a> to Reconfigure anytime</h5>
+      <h4 style="font-weight: 600; font-size: 1.2rem;">Please Restart the device. It will automatically Connect to the Configured WiFi Network on Restart.</h4>
+      <h5 style="font-weight: 600; font-size: 1rem;">Visit <a href="http://%HOSTNAME%.local">http://%HOSTNAME%.local</a> to Reconfigure anytime</h5>
     </div>
   </body>
   </html>
@@ -318,7 +329,7 @@ const char config_reset_html[] PROGMEM = R"(
     <div class="container">
       <br>
       <h3 style="font-weight: bold; font-size: 1.6rem; color: var(--accent-color); margin-top: 0.2rem;">Factory Reset Successful</h3>
-      <h4 style="font-weight: 600; font-size: 1.2rem;">The device will Reset and should be Configured again for further use</h4>
+      <h4 style="font-weight: 600; font-size: 1.2rem;">Please Restart the device after ~10 seconds. It should be Configured again for further use.</h4>
     </div>
   </body>
   </html>
@@ -367,9 +378,16 @@ void ConfigureWebServer::showWifiNetworks(void) {
 
 String processor(const String& var) {
   if(var == "GET_SMART_SSID") {
-    return String("SmartMotion-") + current_hostname;
+    return (String)ssid_provision;
+  }
+  else if(var == "GET_SMART_LOCATION") {
+    return (String)current_hostname;
+  }
+  else if(var == "GET_VERSION") {
+    return (String)VERSION;
   }
   else if(var == "SCANNED_NETWORKS") {
+    _showWifiNetworks();
     return (String)scanned_networks_html;
   }
   else if(var == "HOSTNAME") {
@@ -388,6 +406,7 @@ void ConfigureWebServer::begin(const char* ssid_provision, const char* pass_prov
   if (provision) {
     WiFi.softAP(ssid_provision, pass_provision);
   }
+
   if (async_scan) {
     WiFi.scanNetworks(true);     // for wifi scanning in background
   }
@@ -419,22 +438,16 @@ void ConfigureWebServer::begin(const char* ssid_provision, const char* pass_prov
     provisioningConfigLoader.addConfig(FILE_URL_ON, request->getParam("url_on")->value().c_str());
     provisioningConfigLoader.addConfig(FILE_URL_OFF, request->getParam("url_off")->value().c_str());
     request->send_P(200, "text/html", config_saved_html, processor);
-    delayMicroseconds(1000*1000);
-    ESP.restart();
   });
 
   server.on("/reset", HTTP_GET, [](AsyncWebServerRequest *request){
-    provisioningConfigLoader.erase();
+    task_reset = true;
     request->send_P(200, "text/html", config_reset_html, processor);
   });
 
   server.on("/rescan", HTTP_GET, [](AsyncWebServerRequest *request){
     WiFi.scanDelete();
-    WiFi.scanNetworks();
-    while(WiFi.scanComplete() < 1) {
-      delay(10);
-    };
-    _showWifiNetworks();
+    WiFi.scanNetworks(true);
     request->send_P(200, "text/html", index_html, processor);
   });
 
@@ -454,6 +467,10 @@ void ConfigureWebServer::loop(void) {
     }
     MDNS.addService("http", "tcp", 80);
     mdnsEnabled = true;
+  }
+  if(task_reset) {
+    provisioningConfigLoader.erase();
+    task_reset = false;
   }
   MDNS.update();
 }

@@ -46,10 +46,15 @@ void ConfigLoader::addConfig(const char* filepath, long data) {
 
 void ConfigLoader::erase(void) {
   if(FS_DEBUG) {
-    Serial.println("[CONFIG] Formatting SPIFFS!");
+    Serial.println("[CONFIG] Clearing Config files...");
   }
   SPIFFS.begin();
-  SPIFFS.format();
+  SPIFFS.remove(FILE_SSID);
+  SPIFFS.remove(FILE_PASS);
+  SPIFFS.remove(FILE_LOCATION);
+  SPIFFS.remove(FILE_TIMEOUT);
+  SPIFFS.remove(FILE_URL_ON);
+  SPIFFS.remove(FILE_URL_OFF);
 }
 
 
