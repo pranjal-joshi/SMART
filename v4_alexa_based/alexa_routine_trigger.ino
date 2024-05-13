@@ -18,16 +18,6 @@ Author: Pranjal Joshi
 #include "creds.h"
 #include "Timer.h"
 
-#define DEBUG 1
-
-#define NODEMCU
-
-#ifdef NODEMCU
-  #undef ESP01
-#else
-  #define ESP01
-#endif
-
 unsigned long off_timeout = int(1000 * 60 * 2);
 Timer timer(MILLIS);
 
@@ -57,8 +47,10 @@ void sendGetRequest(const String);
 void setup() {
 
   pinMode(sensor_pin, INPUT);
-  pinMode(led_pin, OUTPUT);
-  digitalWrite(led_pin, HIGH);
+  #ifdef NODEMCU
+    pinMode(led_pin, OUTPUT);
+    digitalWrite(led_pin, HIGH);
+  #endif
 
   #ifdef DEBUG
     Serial.begin(115200);
