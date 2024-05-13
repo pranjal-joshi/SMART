@@ -3,6 +3,7 @@
 
 #include <Effortless_SPIFFS.h>
 #include <EEPROM.h>
+#include <FS.h>
 
 #define FILE_SSID "/ssid.txt"
 #define FILE_PASS "/pass.txt"
@@ -25,6 +26,7 @@ class ConfigLoader {
     void addConfig(const char*, long);
     void setDebug(bool);
     void begin(void);
+    void erase(void);
   private:
 };
 

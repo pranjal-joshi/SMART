@@ -60,9 +60,12 @@ void setup() {
   pinMode(led_pin, OUTPUT);
   digitalWrite(led_pin, HIGH);
 
-  Serial.begin(115200);
+  #ifdef DEBUG
+    Serial.begin(115200);
+    configServer.setDebug(true);
+    configLoader.setDebug(true);
+  #endif
 
-  configLoader.setDebug(true);
   configLoader.begin();
   state = configLoader.getLastMotionState();
 
@@ -86,7 +89,6 @@ void setup() {
 
   if(config_fs_err_read) {
     Serial.println("[DEVICE] Mode: Provisioning & Configuration");
-    configServer.setDebug(true);
     configServer.begin(ssid_provision, pass_provision, hostname, false, true);
     configServer.showWifiNetworks();
   }
@@ -220,6 +222,10 @@ void loadConfigData(void) {
   }
 
   hostname = config_location;
+  hostname.toLowerCase();
+  hostname.replace(" ","");
+  hostname.replace("-","");
+  hostname.replace("_","");
 
   #ifdef DEBUG
     Serial.printf("[CONFIG] Filename: %s\t->\t%s\n", "fs_error_read", btoa(config_fs_err_read));

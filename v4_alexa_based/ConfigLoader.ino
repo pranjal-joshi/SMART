@@ -44,6 +44,15 @@ void ConfigLoader::addConfig(const char* filepath, long data) {
   fileSystem.saveToFile(filepath, data);
 }
 
+void ConfigLoader::erase(void) {
+  if(FS_DEBUG) {
+    Serial.println("[CONFIG] Formatting SPIFFS!");
+  }
+  SPIFFS.begin();
+  SPIFFS.format();
+}
+
+
 void ConfigLoader::setLastMotionState(uint8_t val) {
   EEPROM.write(EEPROM_ADDR, val);
   EEPROM.commit();
