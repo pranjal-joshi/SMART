@@ -228,6 +228,7 @@ const char index_html[] PROGMEM = R"(
         max-width: 100%%;
         max-height: 100px;
         object-fit: contain;
+        pointer-events: none;
       }
     </style>
   </head>
@@ -239,7 +240,7 @@ const char index_html[] PROGMEM = R"(
         <center>
           <table>
             <tr>
-              <td colspan="2" id="tHead">Available Networks</td>
+              <td colspan="2" id="tHead">Select Preferred WiFi Network</td>
             </tr>
             <tr>
               <td style="font-size: 1.1rem; text-align: left;">Network SSID</td>
