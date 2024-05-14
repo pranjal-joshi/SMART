@@ -9,6 +9,7 @@
 #include <ESPAsyncTCP.h>
 #include <ESPAsyncWebServer.h>
 #include <AsyncElegantOTA.h>
+#include "Webpages.h"
 
 class ConfigureWebServer {
   public:
