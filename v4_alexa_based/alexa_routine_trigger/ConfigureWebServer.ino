@@ -5,11 +5,15 @@
 
 AsyncWebServer server(80);
 ConfigLoader provisioningConfigLoader;
+fauxmoESP alexaListener;
 
 bool WS_DEBUG = false;
 bool mdnsEnabled = false;
+bool alexaListenerEnabled = false;
 bool task_reset = false;
+bool alexaSensingEnabled = true;
 unsigned long ota_progress_millis = 0;
+unsigned char wifi_channel = 6;
 
 String scanned_networks_html = "";
 String current_hostname = "SmartMotion-Device";
@@ -83,7 +87,9 @@ String processor(const String& var) {
 void ConfigureWebServer::begin(const char* ssid_provision, const char* pass_provision, String hostname, bool async_scan, bool provision) {
   current_hostname = hostname;
   if (provision) {
-    WiFi.softAP(ssid_provision, pass_provision);
+    randomSeed(analogRead(A0));
+    wifi_channel = random(1,15);
+    WiFi.softAP(ssid_provision, pass_provision, wifi_channel);
   }
 
   if (async_scan) {
@@ -99,11 +105,9 @@ void ConfigureWebServer::begin(const char* ssid_provision, const char* pass_prov
     Serial.println(ssid_provision);
     Serial.print(F("[PROVISION] IP: "));
     Serial.println(WiFi.softAPIP());
+    Serial.print(F("[PROVISION] Channel: "));
+    Serial.println(wifi_channel);
   }
-
-  server.onNotFound( [](AsyncWebServerRequest *request){
-    request->send_P(200, "text/html", index_html, processor);
-  });
   
   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
     request->send_P(200, "text/html", index_html, processor);
@@ -130,6 +134,19 @@ void ConfigureWebServer::begin(const char* ssid_provision, const char* pass_prov
     request->send_P(200, "text/html", index_html, processor);
   });
 
+  // These two callbacks are required for gen1 and gen3 compatibility
+  server.onRequestBody([](AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total) {
+      if (alexaListener.process(request->client(), request->method() == HTTP_GET, request->url(), String((char *)data))) return;
+      // Handle any other body request here...
+  });
+
+  server.onNotFound([](AsyncWebServerRequest *request) {
+      String body = (request->hasParam("body", true)) ? request->getParam("body", true)->value() : String();
+      if (alexaListener.process(request->client(), request->method() == HTTP_GET, request->url(), body)) return;
+      // Handle not found request here...
+      request->send_P(200, "text/html", index_html, processor);
+  });
+
   server.begin();
   AsyncElegantOTA.begin(&server);
 }
@@ -147,6 +164,19 @@ void ConfigureWebServer::loop(void) {
     MDNS.addService("http", "tcp", 80);
     mdnsEnabled = true;
   }
+  if(!alexaListenerEnabled) {
+    alexaListener.createServer(false);
+    alexaListener.setPort(80); // This is required for gen3 devices
+    alexaListener.enable(true);
+    alexaListener.addDevice((current_hostname + " motion sensor").c_str());
+    alexaListener.onSetState([](unsigned char device_id, const char * device_name, bool state, unsigned char value) {
+        if(WS_DEBUG) {
+          Serial.printf("[ALEXA] Device ID: %d\tDevice name: %s\tState: %d\n", device_id, device_name, state);
+        }
+        alexaSensingEnabled = state;
+    });
+    alexaListenerEnabled = true;
+  }
   if(task_reset) {
     provisioningConfigLoader.erase();
     task_reset = false;
@@ -154,4 +184,5 @@ void ConfigureWebServer::loop(void) {
     ESP.restart();
   }
   MDNS.update();
+  alexaListener.handle();
 }

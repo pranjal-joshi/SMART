@@ -41,7 +41,7 @@ bool config_fs_err_read = false;
 bool config_fs_err_write = false;
 String hostname = "smartmotion";
 
-void sendGetRequest(const String);
+void sendGetRequest(const String, bool isEnabled);
 
 void setup() {
 
@@ -101,18 +101,21 @@ void setup() {
 void loop() {
   // wait for WiFi connection
   if ((WiFiMulti.run() == WL_CONNECTED)) {
-    #ifdef DEBUG
-      if (timer.state() == RUNNING)
-        Serial.printf("[TIMER] Elapsed millis = %lu\n", timer.read());
-    #endif
-    readSensorValue();
-    if (timer.state() == RUNNING && timer.read() >= off_timeout) {
-      sendGetRequest(config_url_off);
-      timer.stop();
+    static unsigned long last = millis();
+    if (millis() - last > 500) {
+        last = millis();
+        #ifdef DEBUG
+        if (timer.state() == RUNNING)
+          Serial.printf("[TIMER] Elapsed millis = %lu\n", timer.read());
+      #endif
+      readSensorValue();
+      if (timer.state() == RUNNING && timer.read() >= off_timeout) {
+        sendGetRequest(config_url_off, alexaSensingEnabled);
+        timer.stop();
+      }
     }
     configServer.loop();
   }
-  delay(500);
 }
 
 void readSensorValue() {
@@ -128,7 +131,7 @@ void readSensorValue() {
         digitalWrite(led_pin, !state);
       #endif
       configLoader.setLastMotionState(state);
-      sendGetRequest(config_url_on);
+      sendGetRequest(config_url_on, alexaSensingEnabled);
       timer.stop();
     }
   } 
@@ -145,9 +148,16 @@ void readSensorValue() {
   }
 }
 
-void sendGetRequest(const String url) {
+void sendGetRequest(const String url, bool isEnabled) {
   WiFiClient client;
   HTTPClient http;
+
+  if(!isEnabled) {
+    #ifdef DEBUG
+      Serial.println("[HTTP] GET Call disabled by Alexa!");
+    #endif
+    return;
+  }
 
   Serial.print("[HTTP] begin...\n");
   if (http.begin(client, url)) {  // HTTP

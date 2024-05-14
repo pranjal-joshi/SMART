@@ -9,7 +9,10 @@
 #include <ESPAsyncTCP.h>
 #include <ESPAsyncWebServer.h>
 #include <AsyncElegantOTA.h>
+#include "fauxmoESP.h"
 #include "Webpages.h"
+
+extern bool alexaSensingEnabled;
 
 class ConfigureWebServer {
   public:
