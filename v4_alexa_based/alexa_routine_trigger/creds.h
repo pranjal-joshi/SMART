@@ -2,7 +2,7 @@
 
 #define DEBUG 1
 
-// #define NODEMCU
+#define NODEMCU
 
 #ifdef NODEMCU
   #undef ESP01
