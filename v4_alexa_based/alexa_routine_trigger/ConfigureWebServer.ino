@@ -81,6 +81,27 @@ String processor(const String& var) {
     hostname.replace("_","");
     return (String)hostname;
   }
+  else if(var == "FETCH_SSID") {
+    return provisioningConfigLoader.getConfig(FILE_SSID);
+  }
+  else if(var == "FETCH_PASS") {
+    return provisioningConfigLoader.getConfig(FILE_PASS);
+  }
+  else if(var == "FETCH_LOCATION") {
+    return provisioningConfigLoader.getConfig(FILE_LOCATION);
+  }
+  else if(var == "FETCH_TIMEOUT") {
+    return provisioningConfigLoader.getConfig(FILE_TIMEOUT);
+  }
+  else if(var == "FETCH_URL_ON") {
+    return provisioningConfigLoader.getConfig(FILE_URL_ON);
+  }
+  else if(var == "FETCH_URL_OFF") {
+    return provisioningConfigLoader.getConfig(FILE_URL_OFF);
+  }
+  else if(var == "FETCH_SENSOR_STATE") {
+    return provisioningConfigLoader.getConfig(FILE_URL_OFF);
+  }
   return String();
 }
 

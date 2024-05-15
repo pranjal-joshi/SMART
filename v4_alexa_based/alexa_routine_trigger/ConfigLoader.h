@@ -11,6 +11,7 @@
 #define FILE_TIMEOUT "/timeout.txt"
 #define FILE_URL_ON "/url_on.txt"
 #define FILE_URL_OFF "/url_off.txt"
+#define FILE_SENSOR_STATE "/sensor_state.txt"
 
 #define EEPROM_ADDR 10
 

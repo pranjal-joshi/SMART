@@ -17,7 +17,7 @@ Author: Pranjal Joshi
 #include "creds.h"
 #include "Timer.h"
 
-unsigned long off_timeout = int(1000 * 60 * 2);
+unsigned long off_timeout = (unsigned long)(1000 * 60 * 2);
 Timer timer(MILLIS);
 
 ESP8266WiFiMulti WiFiMulti;
@@ -36,7 +36,7 @@ ConfigLoader configLoader;
 byte state = LOW;
 
 String config_ssid, config_pass, config_location, config_url_on, config_url_off;
-int config_timeout;
+unsigned long config_timeout;
 bool config_fs_err_read = false;
 bool config_fs_err_write = false;
 String hostname = "smartmotion";
@@ -106,7 +106,7 @@ void loop() {
         last = millis();
         #ifdef DEBUG
         if (timer.state() == RUNNING)
-          Serial.printf("[TIMER] Elapsed millis = %lu\n", timer.read());
+          Serial.printf("[TIMER] Elapsed millis = %ul\n", timer.read());
       #endif
       readSensorValue();
       if (timer.state() == RUNNING && timer.read() >= off_timeout) {
@@ -190,7 +190,7 @@ void loadConfigData(void) {
   config_ssid = configLoader.getConfig(FILE_SSID);
   config_pass = configLoader.getConfig(FILE_PASS);
   config_location = configLoader.getConfig(FILE_LOCATION);
-  config_timeout = String(configLoader.getConfig(FILE_TIMEOUT)).toInt();
+  config_timeout = configLoader.getConfig(FILE_TIMEOUT).toInt();
   config_url_on = configLoader.getConfig(FILE_URL_ON);
   config_url_off = configLoader.getConfig(FILE_URL_OFF);
 
@@ -222,7 +222,7 @@ void loadConfigData(void) {
     #endif
   }
   else {
-    off_timeout = uint16_t(1000 * 60 * config_timeout);
+    off_timeout = (unsigned long)(1000 * 60 * config_timeout);
   }
 
   hostname = config_location;

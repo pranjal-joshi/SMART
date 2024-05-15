@@ -270,31 +270,31 @@ const char index_html[] PROGMEM = R"(
             </tr>
             <tr>
               <td>WiFi SSID:</td>
-              <td><input type="text" name="ssid" id="ssidBox" maxlength="64" placeholder="Network Name" required></td>
+              <td><input type="text" name="ssid" id="ssidBox" maxlength="64" placeholder="Network Name" value="%FETCH_SSID%"></td>
             </tr>
             <tr>
               <td>WiFi Password:</td>
-              <td><input type="password" name="pass" id="passBox" maxlength="64" required></td>
+              <td><input type="password" name="pass" id="passBox" maxlength="64" value="%FETCH_PASS%" required></td>
             </tr> 
             <tr>
                 <td colspan="2" id="tHead">Device Configuration</td>
               </tr>
             <tr>
               <td>Device Location:</td>
-              <td><input type="text" name="location" maxlength="64" placeholder="E.g. Living Room" required></td>
+              <td><input type="text" name="location" maxlength="64" placeholder="E.g. Living Room" value="%FETCH_LOCATION%" required></td>
             </tr>
             <tr>
               <td>Switch OFF Timeout:
               </td>
-              <td><input type="number" name="timeout" min="1" max="60" placeholder="2" style="width: 40%%;" required> Minutes</td>
+              <td><input type="number" name="timeout" min="1" max="60" placeholder="2" style="width: 40%%;" value="%FETCH_TIMEOUT%" required> Minutes</td>
             </tr>
             <tr>
               <td>Switch ON URL:</td>
-              <td><input type="url" name="url_on" maxlength="1024" placeholder="http://www.virtualsmarthome.xyz/YOUR-ON-URL" required></td>
+              <td><input type="url" name="url_on" maxlength="1024" placeholder="http://www.virtualsmarthome.xyz/YOUR-ON-URL" value="%FETCH_URL_ON%" required></td>
             </tr>
             <tr>
               <td>Switch OFF URL:</td>
-              <td><input type="url" name="url_off" maxlength="1024" placeholder="http://www.virtualsmarthome.xyz/YOUR-OFF-URL" required></td>
+              <td><input type="url" name="url_off" maxlength="1024" placeholder="http://www.virtualsmarthome.xyz/YOUR-OFF-URL" value="%FETCH_URL_OFF%" required></td>
             </tr>
           </table>
           <br>

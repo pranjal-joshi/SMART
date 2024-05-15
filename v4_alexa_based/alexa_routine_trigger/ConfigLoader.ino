@@ -56,6 +56,7 @@ void ConfigLoader::erase(void) {
   SPIFFS.remove(FILE_TIMEOUT);
   SPIFFS.remove(FILE_URL_ON);
   SPIFFS.remove(FILE_URL_OFF);
+  SPIFFS.remove(FILE_SENSOR_STATE);
 }
 
 
