@@ -100,7 +100,7 @@ String processor(const String& var) {
     return provisioningConfigLoader.getConfig(FILE_URL_OFF);
   }
   else if(var == "FETCH_SENSOR_STATE") {
-    return provisioningConfigLoader.getConfig(FILE_URL_OFF);
+    return (String)(alexaSensingEnabled ? "checked" : "");
   }
   return String();
 }
@@ -132,6 +132,19 @@ void ConfigureWebServer::begin(const char* ssid_provision, const char* pass_prov
   
   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
     request->send_P(200, "text/html", index_html, processor);
+  });
+
+  server.on("/state", HTTP_GET, [] (AsyncWebServerRequest *request) {
+    request->send_P(200, "text/html", config_saved_html, processor);
+    const char* sensor_state = request->getParam("sensor_state")->value().c_str();
+    provisioningConfigLoader.addConfig(FILE_SENSOR_STATE, sensor_state);
+    if (sensor_state == "true") {
+      alexaSensingEnabled = true;
+    }
+    else {
+      alexaSensingEnabled = false;
+    }
+    alexaListener.setState((current_hostname + " motion sensor").c_str(), alexaSensingEnabled, alexaSensingEnabled? 100 : 0);
   });
 
   server.on("/get", HTTP_GET, [] (AsyncWebServerRequest *request) {
@@ -195,6 +208,12 @@ void ConfigureWebServer::loop(void) {
           Serial.printf("[ALEXA] Device ID: %d\tDevice name: %s\tState: %d\n", device_id, device_name, state);
         }
         alexaSensingEnabled = state;
+        if(alexaSensingEnabled) {
+          provisioningConfigLoader.addConfig(FILE_SENSOR_STATE, "true");
+        }
+        else {
+          provisioningConfigLoader.addConfig(FILE_SENSOR_STATE, "false");
+        }
     });
     alexaListenerEnabled = true;
   }

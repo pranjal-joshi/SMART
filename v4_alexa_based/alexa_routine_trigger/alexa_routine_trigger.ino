@@ -36,6 +36,7 @@ ConfigLoader configLoader;
 byte state = LOW;
 
 String config_ssid, config_pass, config_location, config_url_on, config_url_off;
+String config_sensor_state = "true";
 unsigned long config_timeout;
 bool config_fs_err_read = false;
 bool config_fs_err_write = false;
@@ -193,6 +194,7 @@ void loadConfigData(void) {
   config_timeout = configLoader.getConfig(FILE_TIMEOUT).toInt();
   config_url_on = configLoader.getConfig(FILE_URL_ON);
   config_url_off = configLoader.getConfig(FILE_URL_OFF);
+  config_sensor_state = configLoader.getConfig(FILE_SENSOR_STATE);
 
   #ifdef DEBUG 
     Serial.printf("[CONFIG] Filename: %s\t\t->\t", FILE_SSID);
@@ -207,6 +209,8 @@ void loadConfigData(void) {
     Serial.println(config_url_on);
     Serial.printf("[CONFIG] Filename: %s\t\t->\t", FILE_URL_OFF);
     Serial.println(config_url_off);
+    Serial.printf("[CONFIG] Filename: %s\t->\t", FILE_SENSOR_STATE);
+    Serial.println(config_sensor_state);
   #endif
   
   if (config_ssid == "" || config_pass == "" || config_location == "" || config_timeout < 1 || config_timeout > 60 || config_url_on == "" || config_url_off == "") {
@@ -217,6 +221,7 @@ void loadConfigData(void) {
     config_location = "SmartMotion";
     config_url_on = "";
     config_url_off = "";
+    config_sensor_state = "true";
     #ifdef DEBUG
       Serial.println("[CONFIG] Validation Error in getConfig!");
     #endif
