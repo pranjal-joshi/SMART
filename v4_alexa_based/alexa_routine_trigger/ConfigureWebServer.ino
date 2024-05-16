@@ -138,7 +138,8 @@ void ConfigureWebServer::begin(const char* ssid_provision, const char* pass_prov
     request->send_P(200, "text/html", config_saved_html, processor);
     const char* sensor_state = request->getParam("sensor_state")->value().c_str();
     provisioningConfigLoader.addConfig(FILE_SENSOR_STATE, sensor_state);
-    if (sensor_state == "true") {
+    Serial.printf("sensor_state = %s, sensor_state == true ? %d, sensor_state == false ? %d\n", sensor_state, ((String(sensor_state) == "true") ? 1 : 0), ((String(sensor_state) == "false") ? 1 : 0));
+    if (String(sensor_state) == "true") {
       alexaSensingEnabled = true;
     }
     else {
