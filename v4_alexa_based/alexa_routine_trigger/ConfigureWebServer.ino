@@ -25,7 +25,9 @@ void ConfigureWebServer::setDebug(bool flag) {
 }
 
 void _showWifiNetworks(void) {
-  scanned_networks_html = "";
+  if(mdnsEnabled)                   // mdns is only enabled when in STA and never during AP mode - So can use it as a flag!
+    scanned_networks_html = "";
+
   if(WiFi.scanComplete() > -1) {
     if(WS_DEBUG)
       Serial.println(F("[PROVISION] WiFi Scanning completed."));
