@@ -8,11 +8,14 @@
 #include <ESP8266WiFi.h>
 #include <ESPAsyncTCP.h>
 #include <ESPAsyncWebServer.h>
+#include <ESP8266HTTPClient.h>
 #include <AsyncElegantOTA.h>
 #include "fauxmoESP.h"
 #include "Webpages.h"
 
 extern bool alexaSensingEnabled;
+extern fauxmoESP alexaListener;
+extern bool task_reset;
 
 class ConfigureWebServer {
   public:

@@ -12,7 +12,6 @@ bool mdnsEnabled = false;
 bool alexaListenerEnabled = false;
 bool task_reset = false;
 bool alexaSensingEnabled = true;
-unsigned long ota_progress_millis = 0;
 unsigned char wifi_channel = 6;
 
 String scanned_networks_html = "";
@@ -215,6 +214,7 @@ void ConfigureWebServer::loop(void) {
           provisioningConfigLoader.addConfig(FILE_SENSOR_STATE, "false");
         }
     });
+    alexaListener.setState((current_hostname + " motion sensor").c_str(), alexaSensingEnabled, alexaSensingEnabled? 100 : 0);
     alexaListenerEnabled = true;
   }
   if(task_reset) {

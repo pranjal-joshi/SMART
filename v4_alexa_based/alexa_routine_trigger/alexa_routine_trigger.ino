@@ -17,7 +17,7 @@ Author: Pranjal Joshi
 #include "creds.h"
 #include "Timer.h"
 
-unsigned long off_timeout = (unsigned long)(1000 * 60 * 2);
+unsigned long off_timeout = (unsigned long)(1000 * 60 * 5);
 Timer timer(MILLIS);
 
 ESP8266WiFiMulti WiFiMulti;
@@ -26,10 +26,12 @@ ConfigLoader configLoader;
 
 //  For NodeMCU
 #ifdef NODEMCU
+  unsigned int btn_pin = D1;
   unsigned int sensor_pin = D2;
   unsigned int led_pin = LED_BUILTIN;
 #endif
 #ifdef ESP01
+  unsigned int btn_pin = 0;
   unsigned int sensor_pin = 2;
 #endif
 
@@ -97,6 +99,9 @@ void setup() {
     configServer.showWifiNetworks();
   }
 
+  // Setup reset button
+  buttonSetup();
+
 }
 
 void loop() {
@@ -117,6 +122,10 @@ void loop() {
     }
     configServer.loop();
   }
+  else {
+    delay(10);
+  }
+  buttonLoop();
 }
 
 void readSensorValue() {
