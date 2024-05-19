@@ -7,22 +7,13 @@ Author: Pranjal Joshi
 
 #include <ESP8266WiFi.h>
 #include <ESP8266WiFiMulti.h>
+#include <WiFiClient.h>
 
-#include <ESP8266HTTPClient.h>
 #include "ConfigureWebServer.h"
 #include "ConfigLoader.h"
 
-#include <WiFiClient.h>
-
 #include "creds.h"
 #include "Timer.h"
-
-unsigned long off_timeout = (unsigned long)(1000 * 60 * 5);
-Timer timer(MILLIS);
-
-ESP8266WiFiMulti WiFiMulti;
-ConfigureWebServer configServer;
-ConfigLoader configLoader;
 
 //  For NodeMCU
 #ifdef NODEMCU
@@ -35,7 +26,15 @@ ConfigLoader configLoader;
   unsigned int sensor_pin = 2;
 #endif
 
+unsigned long off_timeout = (unsigned long)(1000 * 60 * 5);
+Timer timer(MILLIS);
+ezLED led(led_pin, LED_MODE_OFF);
+ESP8266WiFiMulti WiFiMulti;
+ConfigureWebServer configServer;
+ConfigLoader configLoader;
+
 byte state = LOW;
+bool isFadedIn = false;
 
 String config_ssid, config_pass, config_location, config_url_on, config_url_off;
 String config_sensor_state = "true";
@@ -50,8 +49,8 @@ void setup() {
 
   pinMode(sensor_pin, INPUT);
   #ifdef NODEMCU
-    pinMode(led_pin, OUTPUT);
-    digitalWrite(led_pin, HIGH);
+    // pinMode(led_pin, OUTPUT);
+    // digitalWrite(led_pin, HIGH);
   #endif
 
   #ifdef DEBUG
@@ -114,7 +113,9 @@ void loop() {
         if (timer.state() == RUNNING)
           Serial.printf("[TIMER] Elapsed millis = %ul\n", timer.read());
       #endif
-      readSensorValue();
+      if(alexaSensingEnabled) {
+        readSensorValue();
+      }
       if (timer.state() == RUNNING && timer.read() >= off_timeout) {
         sendGetRequest(config_url_off, alexaSensingEnabled);
         timer.stop();
@@ -126,6 +127,19 @@ void loop() {
     delay(10);
   }
   buttonLoop();
+
+  if(!alexaSensingEnabled) {
+    if (led.getState() == LED_IDLE) {
+      if (isFadedIn == false) {
+        led.fade(100, 255, 1000);         // fade in from 0 to 255 in 3000ms, fade immediately
+        isFadedIn = true;
+      } else {
+        led.fade(255, 100, 1000);          // fade out from 255 to 0 in 3000ms, fade immediately
+        isFadedIn = false;
+      }
+    }
+  }
+  led.loop();
 }
 
 void readSensorValue() {
@@ -138,7 +152,8 @@ void readSensorValue() {
       Serial.println("[SENSOR] Motion detected!"); 
       state = HIGH;       // update variable state to HIGH
       #ifdef NODEMCU
-        digitalWrite(led_pin, !state);
+        // digitalWrite(led_pin, !state);
+        led.turnOFF();
       #endif
       configLoader.setLastMotionState(state);
       sendGetRequest(config_url_on, alexaSensingEnabled);
@@ -150,7 +165,8 @@ void readSensorValue() {
       Serial.println("[SENSOR] Motion stopped!");
       state = LOW;       // update variable state to LOW
       #ifdef NODEMCU
-        digitalWrite(led_pin, !state);
+        // digitalWrite(led_pin, !state);
+        led.turnON();
       #endif
       configLoader.setLastMotionState(state);
       timer.start();

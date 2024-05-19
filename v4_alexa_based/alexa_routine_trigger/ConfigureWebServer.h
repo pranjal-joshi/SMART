@@ -10,12 +10,14 @@
 #include <ESPAsyncWebServer.h>
 #include <ESP8266HTTPClient.h>
 #include <AsyncElegantOTA.h>
+#include <ezLED.h>
 #include "fauxmoESP.h"
 #include "Webpages.h"
 
 extern bool alexaSensingEnabled;
 extern fauxmoESP alexaListener;
 extern bool task_reset;
+extern ezLED led;
 
 class ConfigureWebServer {
   public:

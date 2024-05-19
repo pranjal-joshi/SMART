@@ -112,6 +112,7 @@ void ConfigureWebServer::begin(const char* ssid_provision, const char* pass_prov
     randomSeed(analogRead(A0));
     wifi_channel = random(1,15);
     WiFi.softAP(ssid_provision, pass_provision, wifi_channel);
+    led.blink(500, 500);
   }
 
   if (async_scan) {
