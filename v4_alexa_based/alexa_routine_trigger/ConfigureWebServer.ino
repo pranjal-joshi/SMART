@@ -41,17 +41,20 @@ void _showWifiNetworks(void) {
 
       scanned_networks_html += "<td><input type='button' name='selectButton' id='selectButton' onclick='copyText(this)' value='Select'></td>";
 
-      Serial.print(F("[PROVISION] SSID ->"));
-      Serial.print(WiFi.SSID(i));
-      Serial.print(F("\t RSSI-> "));
-      Serial.print(String(map(WiFi.RSSI(i),-90,-20,0, 100))+"%\tChannel -> ");
-      Serial.println(WiFi.channel());
-      Serial.flush();
+      if(WS_DEBUG) {
+        Serial.print(F("[PROVISION] SSID ->"));
+        Serial.print(WiFi.SSID(i));
+        Serial.print(F("\t RSSI-> "));
+        Serial.print(String(map(WiFi.RSSI(i),-90,-20,0, 100))+"%\tChannel -> ");
+        Serial.println(WiFi.channel());
+        Serial.flush();
+      }
     }
     //WiFi.scanDelete();
   }
   else {
-    Serial.println(F("[PROVISION] WiFi Scanning not completed."));
+    if(WS_DEBUG)
+      Serial.println(F("[PROVISION] WiFi Scanning not completed."));
   }
 }
 
@@ -139,7 +142,6 @@ void ConfigureWebServer::begin(const char* ssid_provision, const char* pass_prov
     request->send_P(200, "text/html", config_saved_html, processor);
     const char* sensor_state = request->getParam("sensor_state")->value().c_str();
     provisioningConfigLoader.addConfig(FILE_SENSOR_STATE, sensor_state);
-    Serial.printf("sensor_state = %s, sensor_state == true ? %d, sensor_state == false ? %d\n", sensor_state, ((String(sensor_state) == "true") ? 1 : 0), ((String(sensor_state) == "false") ? 1 : 0));
     if (String(sensor_state) == "true") {
       alexaSensingEnabled = true;
     }

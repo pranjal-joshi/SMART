@@ -58,30 +58,38 @@ void setup() {
   configLoader.begin();
   state = configLoader.getLastMotionState();
 
-  Serial.println();
-  Serial.println();
-  Serial.println();
+  #ifdef DEBUG
+    Serial.println();
+    Serial.println();
+    Serial.println();
 
-  for (uint8_t t = 4; t > 0; t--) {
-    Serial.printf("[SETUP] WAIT %d...\n", t);
-    Serial.flush();
-    delay(1000);
-  }
+    for (uint8_t t = 4; t > 0; t--) {
+      Serial.printf("[SETUP] WAIT %d...\n", t);
+      Serial.flush();
+      delay(1000);
+    }
+  #endif
 
   loadConfigData();
 
-  Serial.printf("[DEVICE] ID: %ul\n", ESP.getChipId());
-  Serial.printf("[DEVICE] Location: %s\n", config_location);
-  Serial.printf("[DEVICE] Hostname: %s\n", hostname);
-  Serial.printf("[DEVICE] Initial State: %d\n", state);
+  #ifdef DEBUG
+    Serial.printf("[DEVICE] ID: %ul\n", ESP.getChipId());
+    Serial.printf("[DEVICE] Location: %s\n", config_location);
+    Serial.printf("[DEVICE] Hostname: %s\n", hostname);
+    Serial.printf("[DEVICE] Initial State: %d\n", state);
+  #endif
 
   if(config_fs_err_read) {
-    Serial.println("[DEVICE] Mode: Provisioning & Configuration");
+    #ifdef DEBUG
+      Serial.println("[DEVICE] Mode: Provisioning & Configuration");
+    #endif
     configServer.begin(ssid_provision, pass_provision, hostname, false, true);
     configServer.showWifiNetworks();
   }
   else {
-    Serial.println("[DEVICE] Mode: Motion Sensing");
+    #ifdef DEBUG
+      Serial.println("[DEVICE] Mode: Motion Sensing");
+    #endif
     WiFi.mode(WIFI_STA);
     WiFi.begin(config_ssid.c_str(), config_pass.c_str());
     #ifdef DEBUG
@@ -107,9 +115,9 @@ void loop() {
     if (millis() - last > 500) {
         last = millis();
         #ifdef DEBUG
-        if (timer.state() == RUNNING)
-          Serial.printf("[TIMER] Elapsed millis = %ul\n", timer.read());
-      #endif
+          if (timer.state() == RUNNING)
+            Serial.printf("[TIMER] Elapsed millis = %ul\n", timer.read());
+        #endif
       if(alexaSensingEnabled) {
         readSensorValue();
       }
@@ -134,7 +142,9 @@ void readSensorValue() {
   #endif
   if (val == HIGH) {           // check if the sensor is HIGH    
     if (state == LOW) {
-      Serial.println("[SENSOR] Motion detected!"); 
+      #ifdef DEBUG
+        Serial.println("[SENSOR] Motion detected!"); 
+      #endif
       state = HIGH;       // update variable state to HIGH
       #ifdef NODEMCU
         led.turnON();
@@ -146,7 +156,9 @@ void readSensorValue() {
   } 
   else {      
     if (state == HIGH){
-      Serial.println("[SENSOR] Motion stopped!");
+      #ifdef DEBUG
+        Serial.println("[SENSOR] Motion stopped!");
+      #endif
       state = LOW;       // update variable state to LOW
       #ifdef NODEMCU
         led.turnOFF();
@@ -168,30 +180,32 @@ void sendGetRequest(const String url, bool isEnabled) {
     return;
   }
 
-  Serial.print("[HTTP] begin...\n");
   if (http.begin(client, url)) {  // HTTP
 
-    Serial.print("[HTTP] GET...\n");
     // start connection and send HTTP header
     int httpCode = http.GET();
 
-    // httpCode will be negative on error
-    if (httpCode > 0) {
-      // HTTP header has been send and Server response header has been handled
-      Serial.printf("[HTTP] GET... code: %d\n", httpCode);
-
-      // file found at server
-      if (httpCode == HTTP_CODE_OK || httpCode == HTTP_CODE_MOVED_PERMANENTLY) {
-        String payload = http.getString();
-        Serial.println(payload);
+    #ifdef DEBUG
+      // httpCode will be negative on error
+      if (httpCode > 0) {
+        // HTTP header has been send and Server response header has been handled
+        Serial.printf("[HTTP] GET... code: %d\n", httpCode);
+        // file found at server
+        if (httpCode == HTTP_CODE_OK || httpCode == HTTP_CODE_MOVED_PERMANENTLY) {
+          String payload = http.getString();
+          Serial.println(payload);
+        }
       }
-    } else {
-      Serial.printf("[HTTP] GET... failed, error: %s\n", http.errorToString(httpCode).c_str());
-    }
-
+      else {
+        Serial.printf("[HTTP] GET... failed, error: %s\n", http.errorToString(httpCode).c_str());
+      }
+    #endif
     http.end();
-  } else {
-    Serial.printf("[HTTP} Unable to connect\n");
+  }
+  else {
+    #ifdef DEBUG
+      Serial.printf("[HTTP} Unable to connect\n");
+    #endif
   }
 }
 

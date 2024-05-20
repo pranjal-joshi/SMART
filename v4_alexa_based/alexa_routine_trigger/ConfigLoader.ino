@@ -3,7 +3,8 @@
 #include "ConfigLoader.h"
 
 bool FS_DEBUG = false;
-eSPIFFS fileSystem(&Serial);
+// eSPIFFS fileSystem(&Serial);
+eSPIFFS fileSystem;
 
 ConfigLoader::ConfigLoader(void) {
 }
