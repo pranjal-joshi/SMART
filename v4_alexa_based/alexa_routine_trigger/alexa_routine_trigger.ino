@@ -72,6 +72,8 @@ void setup() {
 
   loadConfigData();
 
+  buttonSetup();
+
   #ifdef DEBUG
     Serial.printf("[DEVICE] ID: %ul\n", ESP.getChipId());
     Serial.printf("[DEVICE] Location: %s\n", config_location);
@@ -92,19 +94,18 @@ void setup() {
     #endif
     WiFi.mode(WIFI_STA);
     WiFi.begin(config_ssid.c_str(), config_pass.c_str());
+    while(WiFi.status() != WL_CONNECTED) {
+      delay(10);
+      buttonLoop();
+      led.loop();
+    };
     #ifdef DEBUG
       Serial.print("[DEVICE] IP address: ");
-      while(WiFi.status() != WL_CONNECTED) {
-        delay(10);
-      };
       Serial.println(WiFi.localIP());
     #endif
     configServer.begin(ssid_provision, pass_provision, hostname, false, false);
     configServer.showWifiNetworks();
   }
-
-  // Setup reset button
-  buttonSetup();
 
 }
 
