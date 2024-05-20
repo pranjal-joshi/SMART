@@ -111,7 +111,7 @@ void ConfigureWebServer::begin(const char* ssid_provision, const char* pass_prov
     randomSeed(analogRead(A0));
     wifi_channel = random(1,15);
     WiFi.softAP(ssid_provision, pass_provision, wifi_channel);
-    led.blink(200, 100);
+    led.blink(100, 250);
   }
 
   if (async_scan) {
@@ -221,6 +221,12 @@ void ConfigureWebServer::loop(void) {
     alexaListenerEnabled = true;
   }
   if(task_reset) {
+    led.blinkNumberOfTimes(100, 250, 3);
+    led.loop();
+    while(led.getState() == LED_BLINKING) {
+      led.loop();
+      delay(1);
+    }
     provisioningConfigLoader.erase();
     task_reset = false;
     delay(1000);
@@ -229,10 +235,10 @@ void ConfigureWebServer::loop(void) {
   if(!alexaSensingEnabled) {
     if (led.getState() == LED_IDLE) {
       if (isFadedIn == false) {
-        led.fade(150, 255, 1000);
+        led.fade(0, 127, 1000);
         isFadedIn = true;
       } else {
-        led.fade(255, 150, 1000);
+        led.fade(127, 0, 1000);
         isFadedIn = false;
       }
     }

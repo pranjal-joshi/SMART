@@ -23,11 +23,12 @@ Author: Pranjal Joshi
 #ifdef ESP01
   unsigned int btn_pin = 0;
   unsigned int sensor_pin = 2;
+  unsigned int led_pin = LED_BUILTIN;
 #endif
 
 unsigned long off_timeout = (unsigned long)(1000 * 60 * 5);
 Timer timer(MILLIS);
-ezLED led(led_pin, LED_MODE_ON);
+ezLED led(led_pin, CTRL_CATHODE);
 ConfigureWebServer configServer;
 ConfigLoader configLoader;
 
@@ -45,6 +46,7 @@ void sendGetRequest(const String, bool isEnabled);
 
 void setup() {
 
+  led.turnOFF();
   pinMode(sensor_pin, INPUT);
 
   #ifdef DEBUG
@@ -135,7 +137,7 @@ void readSensorValue() {
       Serial.println("[SENSOR] Motion detected!"); 
       state = HIGH;       // update variable state to HIGH
       #ifdef NODEMCU
-        led.turnOFF();
+        led.turnON();
       #endif
       configLoader.setLastMotionState(state);
       sendGetRequest(config_url_on, alexaSensingEnabled);
@@ -147,7 +149,7 @@ void readSensorValue() {
       Serial.println("[SENSOR] Motion stopped!");
       state = LOW;       // update variable state to LOW
       #ifdef NODEMCU
-        led.turnON();
+        led.turnOFF();
       #endif
       configLoader.setLastMotionState(state);
       timer.start();
