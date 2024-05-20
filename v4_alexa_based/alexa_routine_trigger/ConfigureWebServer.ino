@@ -25,8 +25,7 @@ void ConfigureWebServer::setDebug(bool flag) {
 }
 
 void _showWifiNetworks(void) {
-  if(mdnsEnabled)                   // mdns is only enabled when in STA and never during AP mode - So can use it as a flag!
-    scanned_networks_html = "";
+  scanned_networks_html = "";
 
   if(WiFi.scanComplete() > -1) {
     if(WS_DEBUG)
@@ -112,7 +111,7 @@ void ConfigureWebServer::begin(const char* ssid_provision, const char* pass_prov
     randomSeed(analogRead(A0));
     wifi_channel = random(1,15);
     WiFi.softAP(ssid_provision, pass_provision, wifi_channel);
-    led.blink(500, 500);
+    led.blink(200, 100);
   }
 
   if (async_scan) {
@@ -226,6 +225,17 @@ void ConfigureWebServer::loop(void) {
     task_reset = false;
     delay(1000);
     ESP.restart();
+  }
+  if(!alexaSensingEnabled) {
+    if (led.getState() == LED_IDLE) {
+      if (isFadedIn == false) {
+        led.fade(150, 255, 1000);
+        isFadedIn = true;
+      } else {
+        led.fade(255, 150, 1000);
+        isFadedIn = false;
+      }
+    }
   }
   MDNS.update();
   alexaListener.handle();

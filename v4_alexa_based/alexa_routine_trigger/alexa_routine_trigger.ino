@@ -6,7 +6,6 @@ Author: Pranjal Joshi
 #include <Arduino.h>
 
 #include <ESP8266WiFi.h>
-#include <ESP8266WiFiMulti.h>
 #include <WiFiClient.h>
 
 #include "ConfigureWebServer.h"
@@ -28,8 +27,7 @@ Author: Pranjal Joshi
 
 unsigned long off_timeout = (unsigned long)(1000 * 60 * 5);
 Timer timer(MILLIS);
-ezLED led(led_pin, LED_MODE_OFF);
-ESP8266WiFiMulti WiFiMulti;
+ezLED led(led_pin, LED_MODE_ON);
 ConfigureWebServer configServer;
 ConfigLoader configLoader;
 
@@ -48,10 +46,6 @@ void sendGetRequest(const String, bool isEnabled);
 void setup() {
 
   pinMode(sensor_pin, INPUT);
-  #ifdef NODEMCU
-    // pinMode(led_pin, OUTPUT);
-    // digitalWrite(led_pin, HIGH);
-  #endif
 
   #ifdef DEBUG
     Serial.begin(115200);
@@ -72,7 +66,6 @@ void setup() {
     delay(1000);
   }
 
-  // configLoader.getConfig(&deviceConfigData);
   loadConfigData();
 
   Serial.printf("[DEVICE] ID: %ul\n", ESP.getChipId());
@@ -88,10 +81,12 @@ void setup() {
   else {
     Serial.println("[DEVICE] Mode: Motion Sensing");
     WiFi.mode(WIFI_STA);
-    WiFiMulti.addAP(config_ssid.c_str(), config_pass.c_str());
+    WiFi.begin(config_ssid.c_str(), config_pass.c_str());
     #ifdef DEBUG
       Serial.print("[DEVICE] IP address: ");
-      while(WiFiMulti.run() != WL_CONNECTED);
+      while(WiFi.status() != WL_CONNECTED) {
+        delay(10);
+      };
       Serial.println(WiFi.localIP());
     #endif
     configServer.begin(ssid_provision, pass_provision, hostname, false, false);
@@ -105,7 +100,7 @@ void setup() {
 
 void loop() {
   // wait for WiFi connection
-  if ((WiFiMulti.run() == WL_CONNECTED)) {
+  if ((WiFi.status() == WL_CONNECTED)) {
     static unsigned long last = millis();
     if (millis() - last > 500) {
         last = millis();
@@ -127,18 +122,6 @@ void loop() {
     delay(10);
   }
   buttonLoop();
-
-  if(!alexaSensingEnabled) {
-    if (led.getState() == LED_IDLE) {
-      if (isFadedIn == false) {
-        led.fade(100, 255, 1000);         // fade in from 0 to 255 in 3000ms, fade immediately
-        isFadedIn = true;
-      } else {
-        led.fade(255, 100, 1000);          // fade out from 255 to 0 in 3000ms, fade immediately
-        isFadedIn = false;
-      }
-    }
-  }
   led.loop();
 }
 
@@ -152,7 +135,6 @@ void readSensorValue() {
       Serial.println("[SENSOR] Motion detected!"); 
       state = HIGH;       // update variable state to HIGH
       #ifdef NODEMCU
-        // digitalWrite(led_pin, !state);
         led.turnOFF();
       #endif
       configLoader.setLastMotionState(state);
@@ -165,7 +147,6 @@ void readSensorValue() {
       Serial.println("[SENSOR] Motion stopped!");
       state = LOW;       // update variable state to LOW
       #ifdef NODEMCU
-        // digitalWrite(led_pin, !state);
         led.turnON();
       #endif
       configLoader.setLastMotionState(state);
