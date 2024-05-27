@@ -21,9 +21,10 @@ Author: Pranjal Joshi
   unsigned int led_pin = LED_BUILTIN;
 #endif
 #ifdef ESP01
+  #undef DEBUG                // No debug on ESP01 as LED pin is same as Debug Tx!
   unsigned int btn_pin = 0;
   unsigned int sensor_pin = 2;
-  unsigned int led_pin = LED_BUILTIN;
+  unsigned int led_pin = 1;
 #endif
 
 unsigned long off_timeout = (unsigned long)(1000 * 60 * 5);
