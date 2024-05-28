@@ -21,10 +21,14 @@ Author: Pranjal Joshi
   unsigned int led_pin = LED_BUILTIN;
 #endif
 #ifdef ESP01
-  #undef DEBUG                // No debug on ESP01 as LED pin is same as Debug Tx!
   unsigned int btn_pin = 0;
-  unsigned int sensor_pin = 2;
-  unsigned int led_pin = 1;
+  unsigned int sensor_pin = 3;
+  #ifdef ESP01_S
+    unsigned int led_pin = 2;
+  #else
+    #undef DEBUG                // No debug on ESP01 as LED pin is same as Debug Tx!
+    unsigned int led_pin = 1;
+  #endif
 #endif
 
 unsigned long off_timeout = (unsigned long)(1000 * 60 * 5);
@@ -48,12 +52,15 @@ void sendGetRequest(const String, bool isEnabled);
 void setup() {
 
   led.turnOFF();
-  pinMode(sensor_pin, INPUT);
+  pinMode(sensor_pin, INPUT_PULLUP);
 
   #ifdef DEBUG
     Serial.begin(115200);
     configServer.setDebug(true);
     configLoader.setDebug(true);
+  #else
+    configServer.setDebug(false);
+    configLoader.setDebug(false);
   #endif
 
   configLoader.begin();
