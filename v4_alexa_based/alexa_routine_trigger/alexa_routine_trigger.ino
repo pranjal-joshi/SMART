@@ -55,7 +55,11 @@ void setup() {
   pinMode(sensor_pin, INPUT_PULLUP);
 
   #ifdef DEBUG
-    Serial.begin(115200);
+    #ifdef NODEMCU
+      Serial.begin(115200);
+    #else
+      Serial.begin(115200, SERIAL_8N1, SERIAL_TX_ONLY);
+    #endif
     configServer.setDebug(true);
     configLoader.setDebug(true);
   #else
