@@ -1,8 +1,8 @@
 // Creds or Constants
 
-#define DEBUG 0
+#define DEBUG 1
 #define NODEMCU 0
-#define ESP01_S 1
+#define ESP01_S 0
 
 #if NODEMCU == 1
   #undef ESP01

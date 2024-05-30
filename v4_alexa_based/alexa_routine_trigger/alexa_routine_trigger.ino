@@ -159,9 +159,7 @@ void readSensorValue() {
         Serial.println("[SENSOR] Motion detected!"); 
       #endif
       state = HIGH;       // update variable state to HIGH
-      #ifdef NODEMCU
-        led.turnON();
-      #endif
+      led.turnON();
       configLoader.setLastMotionState(state);
       sendGetRequest(config_url_on, alexaSensingEnabled);
       timer.stop();
@@ -173,9 +171,7 @@ void readSensorValue() {
         Serial.println("[SENSOR] Motion stopped!");
       #endif
       state = LOW;       // update variable state to LOW
-      #ifdef NODEMCU
-        led.turnOFF();
-      #endif
+      led.turnOFF();
       configLoader.setLastMotionState(state);
       timer.start();
     }
