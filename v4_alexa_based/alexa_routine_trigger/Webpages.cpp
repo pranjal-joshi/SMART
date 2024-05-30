@@ -366,7 +366,7 @@ const char index_html[] PROGMEM = R"(
           <input type='button' name='factory_reset' id='factoryReset' value='Factory Reset'>
           <input type='submit' name='Submit' id='submit'>
           <br>
-          <p style='font-weight: 500;'>Click <a href='#' target='_blank'>here</a> for more help</p>
+          <p style='font-weight: 500;'>Click <a href='https://pranjal-joshi.github.io/SmartMotion/' target='_blank'>here</a> for more help</p>
         </center>
       </form>
     </div>
