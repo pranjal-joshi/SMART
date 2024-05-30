@@ -185,8 +185,10 @@ void ConfigureWebServer::begin(const char* ssid_provision, const char* pass_prov
       request->send_P(200, "text/html", index_html, processor);
   });
 
+  ElegantOTA.begin(&server);
+  ElegantOTA.setAutoReboot(true);
   server.begin();
-  AsyncElegantOTA.begin(&server);
+  // AsyncElegantOTA.begin(&server);
 }
 
 void ConfigureWebServer::loop(void) {

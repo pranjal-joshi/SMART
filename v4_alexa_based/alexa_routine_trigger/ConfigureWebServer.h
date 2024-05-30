@@ -9,7 +9,8 @@
 #include <ESPAsyncTCP.h>
 #include <ESPAsyncWebServer.h>
 #include <ESP8266HTTPClient.h>
-#include <AsyncElegantOTA.h>
+// #include <AsyncElegantOTA.h>
+#include <ElegantOTA.h>
 #include <ezLED.h>
 #include "fauxmoESP.h"
 #include "Webpages.h"
