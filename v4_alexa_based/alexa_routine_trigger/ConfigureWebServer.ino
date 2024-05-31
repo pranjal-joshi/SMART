@@ -70,7 +70,7 @@ String processor(const String& var) {
     return (String)current_hostname;
   }
   else if(var == "GET_VERSION") {
-    return (String)VERSION;
+    return (String)FIRMWARE_VERSION;
   }
   else if(var == "SCANNED_NETWORKS") {
     _showWifiNetworks();
@@ -185,10 +185,10 @@ void ConfigureWebServer::begin(const char* ssid_provision, const char* pass_prov
       request->send_P(200, "text/html", index_html, processor);
   });
 
-  ElegantOTA.begin(&server);
-  ElegantOTA.setAutoReboot(true);
+  // ElegantOTA.begin(&server);
+  // ElegantOTA.setAutoReboot(true);
   server.begin();
-  // AsyncElegantOTA.begin(&server);
+  AsyncElegantOTA.begin(&server);
 }
 
 void ConfigureWebServer::loop(void) {
