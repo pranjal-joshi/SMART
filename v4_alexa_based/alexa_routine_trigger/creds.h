@@ -20,9 +20,11 @@
 #endif
 
 #if ESP01_S == 1
-  String VERSION = "1.0.1s";
+  String FIRMWARE_VERSION = "1.0.0s";
+#elif NODEMCU == 1
+  String FIRMWARE_VERSION = "1.0.0n";
 #else
-  String VERSION = "1.0.1";
+  String FIRMWARE_VERSION = "1.0.0";
 #endif
 
 String calculate_ssid = "SmartMotion-" + String(ESP.getChipId());
