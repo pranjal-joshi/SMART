@@ -18,7 +18,7 @@ Author: Pranjal Joshi
 #ifdef NODEMCU
   unsigned int btn_pin = D1;
   unsigned int sensor_pin = D2;
-  unsigned int led_pin = LED_BUILTIN;
+  unsigned int led_pin = 16;
 #endif
 #ifdef ESP01
   unsigned int btn_pin = 0;
