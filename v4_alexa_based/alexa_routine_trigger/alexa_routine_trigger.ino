@@ -149,6 +149,10 @@ void loop() {
 }
 
 void readSensorValue() {
+  if (timer_ignore_sensor.state() == RUNNING && timer_ignore_sensor.read() < ignore_sensor_timeout) {
+    return;
+  }
+  timer_ignore_sensor.stop();
   byte val = digitalRead(sensor_pin);   // read sensor value
   #ifdef DEBUG
     Serial.printf("[SENSOR] Value = %d\n", val);
@@ -189,8 +193,10 @@ void sendGetRequest(const String url, bool isEnabled) {
     return;
   }
 
+  timer_ignore_sensor.start();
+  
   if (http.begin(client, url)) {  // HTTP
-
+    
     // start connection and send HTTP header
     int httpCode = http.GET();
 

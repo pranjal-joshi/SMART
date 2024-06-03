@@ -33,3 +33,4 @@ const char* pass_provision = "";
 // const char* pass_provision = "12345678";
 
 unsigned long button_reset_timeout = 10000;
+unsigned long ignore_sensor_timeout = 4000;

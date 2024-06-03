@@ -13,12 +13,14 @@
 // #include <ElegantOTA.h>
 #include <ezLED.h>
 #include "fauxmoESP.h"
+#include "Timer.h"
 #include "Webpages.h"
 
 extern bool alexaSensingEnabled;
 extern fauxmoESP alexaListener;
 extern bool task_reset;
 extern ezLED led;
+extern Timer timer_ignore_sensor(MILLIS);
 
 class ConfigureWebServer {
   public:

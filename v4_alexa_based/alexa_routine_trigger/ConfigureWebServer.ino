@@ -135,10 +135,12 @@ void ConfigureWebServer::begin(const char* ssid_provision, const char* pass_prov
   }
   
   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
+    timer_ignore_sensor.start();
     request->send_P(200, "text/html", index_html, processor);
   });
 
   server.on("/state", HTTP_GET, [] (AsyncWebServerRequest *request) {
+    timer_ignore_sensor.start();
     request->send_P(200, "text/html", config_saved_html, processor);
     const char* sensor_state = request->getParam("sensor_state")->value().c_str();
     provisioningConfigLoader.addConfig(FILE_SENSOR_STATE, sensor_state);
@@ -152,6 +154,7 @@ void ConfigureWebServer::begin(const char* ssid_provision, const char* pass_prov
   });
 
   server.on("/get", HTTP_GET, [] (AsyncWebServerRequest *request) {
+    timer_ignore_sensor.start();
     request->send_P(200, "text/html", config_saved_html, processor);
     provisioningConfigLoader.addConfig(FILE_SSID, request->getParam("ssid")->value().c_str());
     provisioningConfigLoader.addConfig(FILE_PASS, request->getParam("pass")->value().c_str());
@@ -162,11 +165,13 @@ void ConfigureWebServer::begin(const char* ssid_provision, const char* pass_prov
   });
 
   server.on("/reset", HTTP_GET, [](AsyncWebServerRequest *request){
+    timer_ignore_sensor.start();
     task_reset = true;
     request->send_P(200, "text/html", config_reset_html, processor);
   });
 
   server.on("/rescan", HTTP_GET, [](AsyncWebServerRequest *request){
+    timer_ignore_sensor.start();
     WiFi.scanDelete();
     WiFi.scanNetworks(true);
     request->send_P(200, "text/html", index_html, processor);
@@ -174,15 +179,17 @@ void ConfigureWebServer::begin(const char* ssid_provision, const char* pass_prov
 
   // These two callbacks are required for gen1 and gen3 compatibility
   server.onRequestBody([](AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total) {
-      if (alexaListener.process(request->client(), request->method() == HTTP_GET, request->url(), String((char *)data))) return;
-      // Handle any other body request here...
+    timer_ignore_sensor.start();
+    if (alexaListener.process(request->client(), request->method() == HTTP_GET, request->url(), String((char *)data))) return;
+    // Handle any other body request here...
   });
 
   server.onNotFound([](AsyncWebServerRequest *request) {
-      String body = (request->hasParam("body", true)) ? request->getParam("body", true)->value() : String();
-      if (alexaListener.process(request->client(), request->method() == HTTP_GET, request->url(), body)) return;
-      // Handle not found request here...
-      request->send_P(200, "text/html", index_html, processor);
+    timer_ignore_sensor.start();
+    String body = (request->hasParam("body", true)) ? request->getParam("body", true)->value() : String();
+    if (alexaListener.process(request->client(), request->method() == HTTP_GET, request->url(), body)) return;
+    // Handle not found request here...
+    request->send_P(200, "text/html", index_html, processor);
   });
 
   // ElegantOTA.begin(&server);
