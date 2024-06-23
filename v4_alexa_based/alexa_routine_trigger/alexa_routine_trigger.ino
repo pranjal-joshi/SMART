@@ -125,7 +125,7 @@ void loop() {
   // wait for WiFi connection
   if ((WiFi.status() == WL_CONNECTED)) {
     static unsigned long last = millis();
-    if (millis() - last > 500) {
+    if (millis() - last > 250) {
         last = millis();
         #ifdef DEBUG
           if (timer.state() == RUNNING)
