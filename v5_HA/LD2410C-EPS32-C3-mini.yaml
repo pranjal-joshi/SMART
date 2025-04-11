@@ -1,5 +1,5 @@
 esphome:
-  name: presence-esp32
+  name: presence-bedroom
 
 esp32:
   board: esp32-c3-devkitm-1
@@ -44,24 +44,24 @@ binary_sensor:
     has_target:
       name: Presence
     has_moving_target:
-      name: Moving Target
+      name: Target Moving
     has_still_target:
-      name: Still Target
+      name: Target Still
 
 sensor:
   - platform: ld2410
     light:
-      name: light
+      name: Light
     moving_distance:
-      name : Moving Distance
+      name : Distance Moving
     still_distance:
-      name: Still Distance
+      name: Distance Still
     moving_energy:
-      name: Move Energy
+      name: Energy Move
     still_energy:
-      name: Still Energy
+      name: Energy Still
     detection_distance:
-      name: Detection Distance
+      name: Distance Detection 
     # g0:
     #   move_energy:
     #     name: g0 move energy
@@ -111,20 +111,20 @@ sensor:
 switch:
   - platform: ld2410
     engineering_mode:
-      name: "engineering mode"
+      name: "Engineering Mode"
     bluetooth:
-      name: "control bluetooth"
+      name: "Bluetooth"
 
 number:
   - platform: ld2410
     timeout:
-      name: timeout
+      name: Timeout
     # light_threshold:
     #   name: light threshold
     max_move_distance_gate:
-      name: max move distance gate
+      name: Max Gate Motion
     max_still_distance_gate:
-      name: max still distance gate
+      name: Max Gate Still
     # g0:
     #   move_threshold:
     #     name: g0 move threshold
@@ -173,10 +173,10 @@ number:
 
 button:
   - platform: ld2410
-    factory_reset:
-      name: "factory reset"
+    # factory_reset:
+    #   name: "Factory Reset"
     restart:
-      name: "restart"
+      name: "Restart"
 
 text_sensor:
   - platform: ld2410
@@ -188,7 +188,7 @@ text_sensor:
 select:
   - platform: ld2410
     distance_resolution:
-      name: "distance resolution"
+      name: "Distance Resolution"
     # baud_rate:
     #   name: "baud rate"
     # light_function:
