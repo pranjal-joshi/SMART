@@ -176,7 +176,9 @@ button:
     # factory_reset:
     #   name: "Factory Reset"
     restart:
-      name: "Restart"
+      name: "Restart Sensor"
+  - platform: restart
+    name: "Restart Module"
 
 text_sensor:
   - platform: ld2410
@@ -195,5 +197,3 @@ select:
     #   name: light function
     # out_pin_level:
     #   name: out pin level
-
-    
