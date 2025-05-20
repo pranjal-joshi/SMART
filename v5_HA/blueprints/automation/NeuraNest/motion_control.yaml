@@ -1,0 +1,206 @@
+blueprint:
+  name: Occupancy Based Control
+  description: >
+    Controls devices in the room based on occupancy and motion detection,
+    considering sleep thresholds and time-based conditions.
+  domain: automation
+  input:
+    occupancy_sensor:
+      name: Occupancy Sensor
+      description: The sensor indicating room occupancy.
+      selector:
+        entity:
+          filter:
+            - domain: binary_sensor
+              device_class: occupancy
+    devices:
+      name: Devices to Control
+      description: These devices will turned On/Off based on Occupancy.
+      selector:
+        target:
+          entity:
+            domain:
+              - light
+              - fan
+              - switch
+              - climate
+    dim_brightness:
+      name: Dim Brightness
+      description: Brightness level to set when dimming the light.
+      default: 30
+      selector:
+        number:
+          min: 0
+          max: 100
+          step: 1
+          unit_of_measurement: "%"
+          mode: slider
+    scene_state:
+      name: Scene to Apply
+      description: The scene to activate when occupancy is detected.
+      selector:
+        entity:
+          filter:
+            - domain: scene
+    timer_occupancy_cleared:
+      name: Occupancy Timer
+      description: Timer to track when the room becomes unoccupied.
+      selector:
+        entity:
+          filter:
+            - domain: timer
+    automation_enabled:
+      name: Automation Enabled Flag
+      description: Input boolean to enable or disable this automation.
+      selector:
+        entity:
+          filter:
+            - domain: input_boolean
+    motion_enabled:
+      name: Motion Enabled Flag
+      description: Input boolean to enable or disable motion detection.
+      selector:
+        entity:
+          filter:
+            - domain: input_boolean
+    input_datetime_lights_after:
+      name: Lights After Time
+      description: Time after which lights can be turned on.
+      selector:
+        entity:
+          filter:
+            - domain: input_datetime
+    lights_timeout:
+      name: Lights Timeout Duration
+      description: Duration in seconds before turning off lights after no occupancy.
+      selector:
+        entity:
+          filter:
+            - domain: input_number
+    sleep_threshold:
+      name: Sleep Threshold Sensor
+      description: Sensor indicating if sleep threshold has been reached.
+      selector:
+        entity:
+          filter:
+            - domain: binary_sensor
+    automation_when_state_changes:
+      name: Scene State Change Automation
+      description: Automation to manage state changes.
+      selector:
+        entity:
+          filter:
+            - domain: automation
+
+triggers:
+  - trigger: state
+    entity_id: !input occupancy_sensor
+    to: "on"
+    id: occupied
+  - trigger: state
+    entity_id: !input occupancy_sensor
+    to: "off"
+    id: not_occupied
+  - trigger: state
+    entity_id: !input timer_occupancy_cleared
+    from: "active"
+    to: "idle"
+    id: timer_cleared
+
+condition:
+  - condition: state
+    entity_id: !input automation_enabled
+    state: "on"
+  - condition: state
+    entity_id: !input motion_enabled
+    state: "on"
+
+action:
+  - variables:
+      device_list: !input devices
+      on_devices: >-
+        {{ expand(device_list.entity_id)
+          | selectattr('state', 'equalto', 'on')
+          | map(attribute='entity_id')
+          | list }}
+      light_entities: >-
+        {{ expand(on_devices)
+          | selectattr('domain', 'equalto', 'light')
+          | map(attribute='entity_id') | list }}
+
+  - choose:
+      - conditions:
+          - condition: trigger
+            id:
+              - occupied
+          - condition: state
+            entity_id: !input sleep_threshold
+            state: "off"
+          - condition: or
+            conditions:
+              - condition: time
+                after: !input input_datetime_lights_after
+              - condition: sun
+                before: sunrise
+        sequence:
+          - action: scene.turn_on
+            target:
+              entity_id: !input scene_state
+          - action: timer.pause
+            target:
+              entity_id: !input timer_occupancy_cleared
+
+      - conditions:
+          - condition: trigger
+            id:
+              - not_occupied
+          - condition: template
+            value_template: >
+              {{ on_devices | count > 0 }}
+        sequence:
+          - sequence:
+              - action: timer.start
+                data:
+                  duration: "{{ states('input_number.lights_timeout') }}"
+                target:
+                  entity_id: !input timer_occupancy_cleared
+              - action: automation.turn_off
+                data:
+                  stop_actions: true
+                target:
+                  entity_id: !input automation_when_state_changes
+              - if:
+                  - condition: template
+                    value_template: >
+                      {{ on_devices | count > 0 }}
+                then:
+                  - action: light.turn_on
+                    data:
+                      brightness_pct: !input dim_brightness
+                    target:
+                      entity_id: "{{ light_entities }}"
+              - delay: "00:00:03"
+              - action: automation.turn_on
+                target:
+                  entity_id: !input automation_when_state_changes
+
+      - conditions:
+          - condition: trigger
+            id:
+              - timer_cleared
+        sequence:
+          - sequence:
+              - action: automation.turn_off
+                target:
+                  entity_id: !input automation_when_state_changes
+              - action: light.turn_off
+                target:
+                  entity_id: "{{ light_entities }}"
+              - action: homeassistant.turn_off
+                target: !input devices
+              - delay: "00:00:03"
+              - action: automation.turn_on
+                target:
+                  entity_id: !input automation_when_state_changes
+
+mode: single
