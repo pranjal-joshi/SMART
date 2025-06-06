@@ -1,0 +1,42 @@
+blueprint:
+  name: Update Room State on Manual/User Change
+  description: |
+    Creates a scene with a snapshot of each entity when any of the selected entities change state manually (ignoring automation-caused changes).
+    The scene will be saved with the ID: scene.area_entityname (all lowercase).
+  domain: automation
+  input:
+    trigger_entities:
+      name: Entities to Trigger On
+      description: Entities to monitor for any state change (on/off or other)
+      selector:
+        entity:
+          multiple: true
+
+trigger:
+  - trigger: state
+    entity_id: !input trigger_entities
+
+condition:
+  - condition: template
+    value_template: >
+      {{ trigger.to_state is not none and trigger.from_state is not none and trigger.to_state.state != 'unavailable' and trigger.from_state.state != 'unavailable' }}
+
+  - condition: template
+    value_template: >
+      {{ trigger.to_state.context.parent_id is none }}
+
+action:
+  - variables:
+      area: >
+        {{ area_name(trigger.entity_id) | default('unknown') | lower | replace(' ', '_') }}
+      entity_base: >
+        {{ trigger.entity_id.split('.')[-1] | lower }}
+      generated_scene_id: >
+        {{ area ~ '_state_' ~ entity_base }}
+  - action: scene.create
+    data:
+      scene_id: "{{ generated_scene_id }}"
+      snapshot_entities:
+        - "{{ trigger.entity_id }}"
+
+mode: restart
