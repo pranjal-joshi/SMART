@@ -1,0 +1,55 @@
+sequence:
+  - variables:
+      area_prefix: "{{ area_prefix }}"
+      device_type: "{{ device_type }}"
+      light_scenes: |
+        {{ states.scene
+           | selectattr('entity_id', 'search', 'scene.' ~ area_prefix)
+           | selectattr('entity_id', 'search', 'light')
+           | map(attribute='entity_id')
+           | list }}
+      device_scenes: |
+        {{ states.scene
+           | selectattr('entity_id', 'search', 'scene.' ~ area_prefix)
+           | rejectattr('entity_id', 'search', 'light')
+           | map(attribute='entity_id')
+           | list }}
+  - choose:
+      - conditions:
+          - condition: template
+            value_template: "{{ device_type == 'light' }}"
+        sequence:
+          - repeat:
+              sequence:
+                - action: scene.turn_on
+                  target:
+                    entity_id: "{{ repeat.item }}"
+              for_each: "{{ light_scenes }}"
+      - conditions:
+          - condition: template
+            value_template: "{{ device_type == 'device' }}"
+        sequence:
+          - repeat:
+              sequence:
+                - action: scene.turn_on
+                  target:
+                    entity_id: "{{ repeat.item }}"
+              for_each: "{{ device_scenes }}"
+fields:
+  area_prefix:
+    selector:
+      text: null
+    name: area_prefix
+    description: Prefix for scene name (typically area)
+    required: true
+  device_type:
+    selector:
+      select:
+        options:
+          - light
+          - device
+    name: device_type
+    required: true
+alias: Scene Loader
+description: Load all scenes by device category for given area
+icon: mdi:progress-download
