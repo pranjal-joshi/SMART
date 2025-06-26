@@ -4,7 +4,8 @@ esphome:
 esp32:
   board: esp32-c3-devkitm-1
   framework:
-    type: arduino
+    # type: arduino
+    type: esp-idf
 
 # Enable logging
 logger:
@@ -16,6 +17,16 @@ api:
 ota:
   platform: "esphome"
   password: ""
+
+esp32_ble_tracker:
+  scan_parameters:
+    active: true
+    interval: 1100ms
+    window: 1100ms
+
+bluetooth_proxy:
+  active: true
+  connection_slots: 3
 
 wifi:
   ssid: "Airtel_CyberSync"
