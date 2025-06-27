@@ -48,6 +48,7 @@ blueprint:
             - domain: input_boolean
     fan_cooldown:
       name: Fan Cooldown Flag
+      default: null
       selector:
         entity:
           filter:
@@ -72,12 +73,14 @@ blueprint:
             - domain: input_boolean
     adaptive_lighting_entity:
       name: Adaptive Lighting Switch
+      default: null
       selector:
         entity:
           filter:
             - domain: switch
     light_entities:
       name: Lights to Control
+      default: []
       selector:
         target:
           entity:
@@ -94,6 +97,7 @@ blueprint:
           mode: slider
     fan_entities:
       name: Fans to Control
+      default: []
       selector:
         target:
           entity:
@@ -106,6 +110,7 @@ blueprint:
             - domain: script
     input_select_preset:
       name: Preset Selector
+      default: null
       selector:
         entity:
           filter:
@@ -133,9 +138,6 @@ condition:
   - condition: state
     entity_id: !input motion_enabled
     state: "on"
-  - condition: state
-    entity_id: !input fan_cooldown
-    state: "off"
 
 action:
   - variables:
@@ -145,23 +147,29 @@ action:
       adaptive_lighting_entity: !input adaptive_lighting_entity
       lights_timeout: !input lights_timeout
       light_entities_on: >-
-        {{ expand(light_entities.entity_id)
+        {{ expand(light_entities.entity_id | default([]))
           | selectattr('domain', 'equalto', 'light')
           | selectattr('state', 'equalto', 'on')
           | map(attribute='entity_id')
           | list }}
       fan_entities_on: >-
-        {{ expand(fan_entities.entity_id)
+        {{ expand(fan_entities.entity_id | default([]))
           | selectattr('domain', 'equalto', 'fan')
           | selectattr('state', 'equalto', 'on')
           | map(attribute='entity_id')
           | list }}
       dimming_brightness: !input dimming_brightness
+      fan_cooldown: !input fan_cooldown
+      input_select_preset: !input input_select_preset
+
   - choose:
       - conditions:
           - condition: trigger
             id: occupied
         sequence:
+          - condition: template
+            value_template: >
+              {{ fan_cooldown is none or is_state(fan_cooldown, 'off') }}
           - action: timer.pause
             target:
               entity_id: !input timer_occupancy_cleared
@@ -215,13 +223,25 @@ action:
             value_template: >
               {% set lights = expand(light_entities.entity_id) %}
               {{ lights | selectattr('state', 'equalto', 'on') | list | count > 0 }}
-          - action: light.turn_on
-            target: "{{ light_entities }}"
-            data:
-              color_temp_kelvin: >-
-                {{ state_attr(adaptive_lighting_entity, 'color_temp_kelvin') }}
-              brightness_pct: >-
-                {{ state_attr(adaptive_lighting_entity, 'brightness_pct') }}
+
+          - choose:
+              - conditions:
+                  - condition: template
+                    value_template: "{{ adaptive_lighting_entity is not none }}"
+                sequence:
+                  - action: light.turn_on
+                    target: "{{ light_entities }}"
+                    data:
+                      color_temp_kelvin: >-
+                        {{ state_attr(adaptive_lighting_entity, 'color_temp_kelvin') }}
+                      brightness_pct: >-
+                        {{ state_attr(adaptive_lighting_entity, 'brightness_pct') }}
+              - conditions:
+                  - condition: template
+                    value_template: "{{ adaptive_lighting_entity is none }}"
+                sequence:
+                  - action: light.turn_on
+                    target: "{{ light_entities }}"
 
       - conditions:
           - condition: trigger
@@ -236,11 +256,9 @@ action:
           - condition: template
             value_template: >
               {{ light_entities_on | count > 0 }}
-          - condition: not
-            conditions:
-              - condition: state
-                entity_id: !input input_select_preset
-                state: Prayer
+          - condition: template
+            value_template: >
+              {{ input_select_preset is none or states(input_select_preset) != 'Prayer' }}
           - action: light.turn_on
             target:
               entity_id: "{{ light_entities_on }}"
@@ -251,13 +269,17 @@ action:
           - condition: trigger
             id: timer_cleared
         sequence:
-          - condition: not
-            conditions:
-              - condition: state
-                entity_id: !input input_select_preset
-                state: Prayer
+          - if:
+              - condition: template
+                value_template: "{{ fan_entities_on | count > 0 }}"
+            then:
+              - action: homeassistant.turn_off
+                target:
+                  entity_id: "{{ fan_entities_on }}"
+          - condition: template
+            value_template: >
+              {{ input_select_preset is none or states(input_select_preset) != 'Prayer' }}
           - action: homeassistant.turn_off
-            target: "{{ light_entities }}"
-          - action: homeassistant.turn_off
-            target: "{{ fan_entities }}"
+            target:
+              entity_id: "{{ light_entities_on }}"
 mode: single
