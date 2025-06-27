@@ -1,98 +1,117 @@
 blueprint:
-  name: Occupancy Based Control
+  name: Occupancy-Based Control (Advanced)
   description: >
-    Controls devices in the room based on occupancy and motion detection,
-    considering sleep thresholds and time-based conditions.
+    Controls devices based on occupancy, sleep state, and advanced user conditions like presets, adaptive lighting, and fan cooldown.
   domain: automation
   input:
+    area_prefix:
+      name: Area Prefix
+      description: Used to load context-specific scenes (e.g., bedroom, kitchen).
+      selector:
+        text:
     occupancy_sensor:
       name: Occupancy Sensor
-      description: The sensor indicating room occupancy.
       selector:
         entity:
           filter:
             - domain: binary_sensor
               device_class: occupancy
-    devices:
-      name: Devices to Control
-      description: These devices will turned On/Off based on Occupancy.
-      selector:
-        target:
-          entity:
-            domain:
-              - light
-              - fan
-              - switch
-              - climate
-    dim_brightness:
-      name: Dim Brightness
-      description: Brightness level to set when dimming the light.
-      default: 30
-      selector:
-        number:
-          min: 0
-          max: 100
-          step: 1
-          unit_of_measurement: "%"
-          mode: slider
-    scene_state:
-      name: Scene to Apply
-      description: The scene to activate when occupancy is detected.
-      selector:
-        entity:
-          filter:
-            - domain: scene
     timer_occupancy_cleared:
       name: Occupancy Timer
-      description: Timer to track when the room becomes unoccupied.
       selector:
         entity:
           filter:
             - domain: timer
-    automation_enabled:
-      name: Automation Enabled Flag
-      description: Input boolean to enable or disable this automation.
-      selector:
-        entity:
-          filter:
-            - domain: input_boolean
-    motion_enabled:
-      name: Motion Enabled Flag
-      description: Input boolean to enable or disable motion detection.
-      selector:
-        entity:
-          filter:
-            - domain: input_boolean
-    input_datetime_lights_after:
-      name: Lights After Time
-      description: Time after which lights can be turned on.
-      selector:
-        entity:
-          filter:
-            - domain: input_datetime
     lights_timeout:
-      name: Lights Timeout Duration
-      description: Duration in seconds before turning off lights after no occupancy.
+      name: Lights Timeout (in minutes)
       selector:
         entity:
           filter:
             - domain: input_number
     sleep_threshold:
       name: Sleep Threshold Sensor
-      description: Sensor indicating if sleep threshold has been reached.
       selector:
         entity:
           filter:
             - domain: binary_sensor
-    automation_when_state_changes:
-      name: Scene State Change Automation
-      description: Automation to manage state changes.
+    automation_enabled:
+      name: Automation Enabled
       selector:
         entity:
           filter:
-            - domain: automation
+            - domain: input_boolean
+    motion_enabled:
+      name: Motion Enabled
+      selector:
+        entity:
+          filter:
+            - domain: input_boolean
+    fan_cooldown:
+      name: Fan Cooldown Flag
+      selector:
+        entity:
+          filter:
+            - domain: input_boolean
+    input_datetime_lights_after:
+      name: Lights After Time
+      selector:
+        entity:
+          filter:
+            - domain: input_datetime
+    early_darkening:
+      name: Early Darkening Override
+      selector:
+        entity:
+          filter:
+            - domain: input_boolean
+    feature_auto_fan_on:
+      name: Feature Toggle - Auto Fan On
+      selector:
+        entity:
+          filter:
+            - domain: input_boolean
+    adaptive_lighting_entity:
+      name: Adaptive Lighting Switch
+      selector:
+        entity:
+          filter:
+            - domain: switch
+    light_entities:
+      name: Lights to Control
+      selector:
+        target:
+          entity:
+            domain: light
+    dimming_brightness:
+      name: Dimming Brightness %
+      description: Brightness to use when dimming lights (e.g., after timeout).
+      default: 30
+      selector:
+        number:
+          min: 1
+          max: 100
+          unit_of_measurement: "%"
+          mode: slider
+    fan_entities:
+      name: Fans to Control
+      selector:
+        target:
+          entity:
+            domain: fan
+    scene_loader_script:
+      name: Scene Loader Script
+      selector:
+        entity:
+          filter:
+            - domain: script
+    input_select_preset:
+      name: Preset Selector
+      selector:
+        entity:
+          filter:
+            - domain: input_select
 
-triggers:
+trigger:
   - trigger: state
     entity_id: !input occupancy_sensor
     to: "on"
@@ -114,25 +133,38 @@ condition:
   - condition: state
     entity_id: !input motion_enabled
     state: "on"
+  - condition: state
+    entity_id: !input fan_cooldown
+    state: "off"
 
 action:
   - variables:
-      device_list: !input devices
-      on_devices: >-
-        {{ expand(device_list.entity_id)
+      area_prefix: !input area_prefix
+      light_entities: !input light_entities
+      fan_entities: !input fan_entities
+      adaptive_lighting_entity: !input adaptive_lighting_entity
+      lights_timeout: !input lights_timeout
+      light_entities_on: >-
+        {{ expand(light_entities.entity_id)
+          | selectattr('domain', 'equalto', 'light')
           | selectattr('state', 'equalto', 'on')
           | map(attribute='entity_id')
           | list }}
-      light_entities: >-
-        {{ expand(on_devices)
-          | selectattr('domain', 'equalto', 'light')
-          | map(attribute='entity_id') | list }}
-
+      fan_entities_on: >-
+        {{ expand(fan_entities.entity_id)
+          | selectattr('domain', 'equalto', 'fan')
+          | selectattr('state', 'equalto', 'on')
+          | map(attribute='entity_id')
+          | list }}
+      dimming_brightness: !input dimming_brightness
   - choose:
       - conditions:
           - condition: trigger
-            id:
-              - occupied
+            id: occupied
+        sequence:
+          - action: timer.pause
+            target:
+              entity_id: !input timer_occupancy_cleared
           - condition: state
             entity_id: !input sleep_threshold
             state: "off"
@@ -142,65 +174,90 @@ action:
                 after: !input input_datetime_lights_after
               - condition: sun
                 before: sunrise
-        sequence:
-          - action: scene.turn_on
+              - condition: state
+                entity_id: !input early_darkening
+                state: "on"
+          - if:
+              - condition: template
+                value_template: >
+                  {{ light_entities_on | count == 0 }}
+            then:
+              - action: script.turn_on
+                target:
+                  entity_id: !input scene_loader_script
+                data:
+                  variables:
+                    device_type: light
+                    area_prefix: "{{ area_prefix }}"
+          - if:
+              - condition: state
+                entity_id: !input feature_auto_fan_on
+                state: "on"
+              - condition: template
+                value_template: >
+                  {{ fan_entities_on | count == 0 }}
+            then:
+              - action: script.turn_on
+                target:
+                  entity_id: !input scene_loader_script
+                data:
+                  variables:
+                    device_type: fan
+                    area_prefix: "{{ area_prefix }}"
+          - action: script.turn_on
             target:
-              entity_id: !input scene_state
-          - action: timer.pause
-            target:
-              entity_id: !input timer_occupancy_cleared
-
-      - conditions:
-          - condition: trigger
-            id:
-              - not_occupied
+              entity_id: !input scene_loader_script
+            data:
+              variables:
+                device_type: device
+                area_prefix: "{{ area_prefix }}"
           - condition: template
             value_template: >
-              {{ on_devices | count > 0 }}
-        sequence:
-          - sequence:
-              - action: timer.start
-                data:
-                  duration: "{{ states('input_number.lights_timeout') }}"
-                target:
-                  entity_id: !input timer_occupancy_cleared
-              - action: automation.turn_off
-                data:
-                  stop_actions: true
-                target:
-                  entity_id: !input automation_when_state_changes
-              - if:
-                  - condition: template
-                    value_template: >
-                      {{ on_devices | count > 0 }}
-                then:
-                  - action: light.turn_on
-                    data:
-                      brightness_pct: !input dim_brightness
-                    target:
-                      entity_id: "{{ light_entities }}"
-              - delay: "00:00:03"
-              - action: automation.turn_on
-                target:
-                  entity_id: !input automation_when_state_changes
+              {% set lights = expand(light_entities.entity_id) %}
+              {{ lights | selectattr('state', 'equalto', 'on') | list | count > 0 }}
+          - action: light.turn_on
+            target: "{{ light_entities }}"
+            data:
+              color_temp_kelvin: >-
+                {{ state_attr(adaptive_lighting_entity, 'color_temp_kelvin') }}
+              brightness_pct: >-
+                {{ state_attr(adaptive_lighting_entity, 'brightness_pct') }}
 
       - conditions:
           - condition: trigger
-            id:
-              - timer_cleared
+            id: not_occupied
         sequence:
-          - sequence:
-              - action: automation.turn_off
-                target:
-                  entity_id: !input automation_when_state_changes
-              - action: light.turn_off
-                target:
-                  entity_id: "{{ light_entities }}"
-              - action: homeassistant.turn_off
-                target: !input devices
-              - delay: "00:00:03"
-              - action: automation.turn_on
-                target:
-                  entity_id: !input automation_when_state_changes
+          - action: timer.start
+            target:
+              entity_id: !input timer_occupancy_cleared
+            data:
+              duration: >-
+                {{ (states(lights_timeout) | float * 60) | int }}
+          - condition: template
+            value_template: >
+              {{ light_entities_on | count > 0 }}
+          - condition: not
+            conditions:
+              - condition: state
+                entity_id: !input input_select_preset
+                state: Prayer
+          - action: light.turn_on
+            target:
+              entity_id: "{{ light_entities_on }}"
+            data:
+              brightness_pct: "{{ dimming_brightness }}"
 
+      - conditions:
+          - condition: trigger
+            id: timer_cleared
+        sequence:
+          - condition: not
+            conditions:
+              - condition: state
+                entity_id: !input input_select_preset
+                state: Prayer
+          - action: homeassistant.turn_off
+            target: "{{ light_entities }}"
+          - action: homeassistant.turn_off
+            target: "{{ fan_entities }}"
 mode: single
