@@ -1,0 +1,72 @@
+blueprint:
+  name: Fan Cooldown Handler (Single Fan)
+  description: >
+    Triggers a cooldown script when a specific fan turns off.
+    Passes the configured input_boolean to a timed toggle script with timeout.
+  domain: automation
+  input:
+    fan_entity:
+      name: Fan
+      description: The fan to monitor
+      selector:
+        entity:
+          filter:
+            - domain: fan
+
+    cooldown_boolean:
+      name: Cooldown Boolean
+      description: The input_boolean to toggle for cooldown
+      selector:
+        entity:
+          filter:
+            - domain: input_boolean
+
+    toggle_script:
+      name: Timed Toggle Script
+      description: The script to call when fan turns off
+      default: script.timed_toggle
+      selector:
+        entity:
+          filter:
+            - domain: script
+
+    timeout_seconds:
+      name: Timeout (in seconds)
+      description: How long to keep the cooldown boolean active
+      default: 60
+      selector:
+        number:
+          min: 1
+          max: 300
+          unit_of_measurement: seconds
+          mode: slider
+
+    enable_switch:
+      name: Enable Automation Switch
+      description: If this input_boolean is off, automation is disabled
+      default: input_boolean.automation_enabled
+      selector:
+        entity:
+          filter:
+            - domain: input_boolean
+
+trigger:
+  - trigger: state
+    entity_id: !input fan_entity
+    from: "on"
+    to: "off"
+
+condition:
+  - condition: state
+    entity_id: !input enable_switch
+    state: "on"
+
+action:
+  - service: !input toggle_script
+    data:
+      bool_entity: !input cooldown_boolean
+      initial_state: true
+      timeout: !input timeout_seconds
+
+mode: parallel
+max: 10
